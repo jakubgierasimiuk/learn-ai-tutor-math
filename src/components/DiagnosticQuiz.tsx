@@ -4,6 +4,9 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, Brain, ArrowLeft, ArrowRight } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 // Mock quiz data
 const quizQuestions = [
@@ -98,6 +101,7 @@ const quizQuestions = [
 ];
 
 export const DiagnosticQuiz = () => {
+  const { user } = useAuth();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const [isCompleted, setIsCompleted] = useState(false);
@@ -124,8 +128,44 @@ export const DiagnosticQuiz = () => {
     }
   };
 
-  const handleSubmit = () => {
-    setShowResults(true);
+  const handleSubmit = async () => {
+    if (!user) return;
+    
+    try {
+      const results = calculateResults();
+      
+      // Save results to database
+      for (const result of results) {
+        // Find topic by name
+        const { data: topics } = await supabase
+          .from('topics')
+          .select('id')
+          .eq('name', result.topic)
+          .single();
+          
+        if (topics) {
+          await supabase
+            .from('skill_mastery')
+            .upsert({
+              user_id: user.id,
+              topic_id: topics.id,
+              mastery_percentage: result.mastery
+            });
+        }
+      }
+      
+      // Mark diagnosis as completed
+      await supabase
+        .from('profiles')
+        .update({ diagnosis_completed: true })
+        .eq('user_id', user.id);
+        
+      toast.success("Wyniki diagnostyki zostały zapisane!");
+      setShowResults(true);
+    } catch (error) {
+      console.error('Error saving quiz results:', error);
+      toast.error("Błąd podczas zapisywania wyników");
+    }
   };
 
   const calculateResults = () => {
