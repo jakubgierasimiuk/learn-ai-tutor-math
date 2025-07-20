@@ -4,6 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Brain, Send, ThumbsUp, ThumbsDown, RotateCcw, User, Bot } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 interface Message {
   id: string;
@@ -37,6 +40,7 @@ Czy rozumiesz to wyjaśnienie?`,
 };
 
 export const AIChat = () => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([initialMessage]);
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -51,71 +55,59 @@ export const AIChat = () => {
     scrollToBottom();
   }, [messages]);
 
-  const simulateAIResponse = (userInput: string) => {
+  const sendMessageToAI = async (userInput: string) => {
+    if (!user) {
+      toast.error("Musisz być zalogowany, aby korzystać z czatu AI");
+      return;
+    }
+
     setIsTyping(true);
     
-    setTimeout(() => {
-      let response = "";
-      
-      if (userInput.toLowerCase().includes("nie rozumiem") || userInput.includes("wytłumacz ponownie")) {
-        // Reviewer AI response
-        response = `Rozumiem, że to może być trudne! 😊 Spróbujmy jeszcze raz, prostszymi słowami:
+    try {
+      const response = await supabase.functions.invoke('ai-chat', {
+        body: {
+          message: userInput,
+          topic: 'mathematics',
+          level: 'beginner'
+        }
+      });
 
-Wyobraź sobie, że masz prostokątny kawałek papieru. Jeśli zgibniesz go po przekątnej, otrzymasz trójkąt prostokątny.
-
-Twierdzenie Pitagorasa to jak "magiczna formula" dla takich trójkątów:
-- Weź długości dwóch krótszych boków
-- Podnieś każdą do kwadratu (pomnóż przez siebie)
-- Dodaj te kwadraty
-- Rezultat to kwadrat najdłuższego boku!
-
-**Prosty przykład:** Trójkąt o bokach 3, 4, ? 
-3×3 + 4×4 = 9 + 16 = 25
-√25 = 5 ← To jest długość najdłuższego boku!
-
-Czy teraz jest jaśniejsze?`;
-      } else if (userInput.toLowerCase().includes("tak") || userInput.toLowerCase().includes("rozumiem")) {
-        response = `Świetnie! 🎉 Teraz przejdźmy do praktyki!
-
-**Zadanie:** W trójkącie prostokątnym jedna przyprostokątna ma długość 6 cm, a druga 8 cm. Jaka jest długość przeciwprostokątnej?
-
-Spróbuj rozwiązać to samodzielnie! Pamiętaj o wzorze: a² + b² = c²
-
-Napisz swoje rozwiązanie, a ja je sprawdzę 😊`;
-        setShowUnderstanding(false);
-      } else if (userInput.includes("6") && userInput.includes("8") && userInput.includes("10")) {
-        response = `Doskonale! 🌟 Twoja odpowiedź jest poprawna!
-
-6² + 8² = 36 + 64 = 100
-√100 = 10 cm
-
-Świetnie rozwiązałeś to zadanie! Widzę, że rozumiesz Twierdzenie Pitagorasa.
-
-**Podsumowanie lekcji:**
-✅ Poznałeś wzór a² + b² = c²
-✅ Rozumiesz, co to są przyprostokątne i przeciwprostokątna
-✅ Potrafisz zastosować twierdzenie w praktyce
-
-Gratulacje! Ukończyłeś lekcję o Twierdzeniu Pitagorasa! 🎊`;
-      } else {
-        response = `Interesujące pytanie! Pozwól, że odpowiem na nie w kontekście Twierdzenia Pitagorasa.
-
-${userInput.length > 10 ? 'Twoje pytanie dotyczy ważnego aspektu geometrii.' : ''} 
-
-Czy chciałbyś, żebym wyjaśnił coś konkretnego odnośnie wzoru a² + b² = c²?`;
+      if (response.error) {
+        throw response.error;
       }
 
-      const aiMessage: Message = {
+      const aiResponse = response.data.response;
+      
+      const newAIMessage: Message = {
         id: Date.now().toString(),
-        role: userInput.toLowerCase().includes("nie rozumiem") ? 'assistant_review' : 'assistant',
-        content: response,
+        role: "assistant",
+        content: aiResponse,
         timestamp: new Date()
       };
-
-      setMessages(prev => [...prev, aiMessage]);
+      
+      setMessages(prev => [...prev, newAIMessage]);
+      
+      // Show understanding indicator for positive responses
+      if (userInput.toLowerCase().includes("rozumiem") || userInput.toLowerCase().includes("jasne")) {
+        setShowUnderstanding(true);
+        setTimeout(() => setShowUnderstanding(false), 3000);
+      }
+      
+    } catch (error) {
+      console.error('Error calling AI chat:', error);
+      toast.error("Wystąpił błąd podczas komunikacji z AI");
+      
+      // Fallback response
+      const fallbackMessage: Message = {
+        id: Date.now().toString(),
+        role: "assistant",
+        content: "Przepraszam, wystąpił problem z połączeniem. Spróbuj ponownie za chwilę.",
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, fallbackMessage]);
+    } finally {
       setIsTyping(false);
-      setShowUnderstanding(true);
-    }, 1500 + Math.random() * 1000); // Simulate typing delay
+    }
   };
 
   const handleSendMessage = () => {
@@ -129,7 +121,7 @@ Czy chciałbyś, żebym wyjaśnił coś konkretnego odnośnie wzoru a² + b² = 
     };
 
     setMessages(prev => [...prev, userMessage]);
-    simulateAIResponse(newMessage);
+    sendMessageToAI(newMessage);
     setNewMessage("");
     setShowUnderstanding(false);
   };
@@ -143,7 +135,7 @@ Czy chciałbyś, żebym wyjaśnił coś konkretnego odnośnie wzoru a² + b² = 
     };
 
     setMessages(prev => [...prev, userMessage]);
-    simulateAIResponse(response);
+    sendMessageToAI(response);
     setShowUnderstanding(false);
   };
 
