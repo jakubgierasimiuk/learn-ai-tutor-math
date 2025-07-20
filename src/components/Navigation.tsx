@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { Brain, BookOpen, BarChart3, Settings, User } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Brain, BookOpen, BarChart3, Settings, User, LogOut } from "lucide-react";
 import { useState } from "react";
 
 export const Navigation = () => {
+  const { user, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -33,10 +35,15 @@ export const Navigation = () => {
             </a>
           </div>
 
-          {/* Auth Buttons */}
+          {/* User Info & Logout */}
           <div className="hidden md:flex items-center gap-4">
-            <Button variant="outline">Zaloguj się</Button>
-            <Button>Zarejestruj się</Button>
+            <span className="text-sm text-muted-foreground">
+              {user?.email}
+            </span>
+            <Button variant="outline" onClick={signOut} className="flex items-center gap-2">
+              <LogOut className="w-4 h-4" />
+              Wyloguj
+            </Button>
           </div>
 
           {/* Mobile menu button */}
@@ -69,8 +76,13 @@ export const Navigation = () => {
                 Profil
               </a>
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
-                <Button variant="outline" className="w-full">Zaloguj się</Button>
-                <Button className="w-full">Zarejestruj się</Button>
+                <span className="text-sm text-muted-foreground px-2">
+                  {user?.email}
+                </span>
+                <Button variant="outline" onClick={signOut} className="w-full flex items-center gap-2">
+                  <LogOut className="w-4 h-4" />
+                  Wyloguj
+                </Button>
               </div>
             </div>
           </div>

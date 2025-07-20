@@ -14,13 +14,239 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      chat_logs: {
+        Row: {
+          id: number
+          message: string
+          role: string
+          session_id: number
+          timestamp: string
+        }
+        Insert: {
+          id?: number
+          message: string
+          role: string
+          session_id: number
+          timestamp?: string
+        }
+        Update: {
+          id?: number
+          message?: string
+          role?: string
+          session_id?: number
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_logs_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_sessions: {
+        Row: {
+          completed_at: string | null
+          had_confusion: boolean
+          id: number
+          points_earned: number | null
+          started_at: string
+          status: string
+          topic_id: number
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          had_confusion?: boolean
+          id?: number
+          points_earned?: number | null
+          started_at?: string
+          status?: string
+          topic_id: number
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          had_confusion?: boolean
+          id?: number
+          points_earned?: number | null
+          started_at?: string
+          status?: string
+          topic_id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_sessions_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      points_history: {
+        Row: {
+          id: number
+          points: number
+          reason: string
+          session_id: number | null
+          timestamp: string
+          user_id: string
+        }
+        Insert: {
+          id?: number
+          points: number
+          reason: string
+          session_id?: number | null
+          timestamp?: string
+          user_id: string
+        }
+        Update: {
+          id?: number
+          points?: number
+          reason?: string
+          session_id?: number | null
+          timestamp?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "points_history_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "points_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          diagnosis_completed: boolean
+          email: string
+          id: string
+          level: number
+          name: string | null
+          total_points: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          diagnosis_completed?: boolean
+          email: string
+          id?: string
+          level?: number
+          name?: string | null
+          total_points?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          diagnosis_completed?: boolean
+          email?: string
+          id?: string
+          level?: number
+          name?: string | null
+          total_points?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      skill_mastery: {
+        Row: {
+          created_at: string
+          id: number
+          mastery_percentage: number
+          topic_id: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          mastery_percentage?: number
+          topic_id: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          mastery_percentage?: number
+          topic_id?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_mastery_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skill_mastery_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      topics: {
+        Row: {
+          created_at: string
+          description: string | null
+          difficulty_level: number
+          id: number
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          difficulty_level?: number
+          id?: number
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          difficulty_level?: number
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_random_id: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

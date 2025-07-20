@@ -4,12 +4,27 @@ import { Features } from "@/components/Features";
 import { DiagnosticQuiz } from "@/components/DiagnosticQuiz";
 import { Dashboard } from "@/components/Dashboard";
 import { AIChat } from "@/components/AIChat";
+import { AuthPage } from "@/components/AuthPage";
+import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 
 type AppView = 'home' | 'quiz' | 'dashboard' | 'chat';
 
 const Index = () => {
+  const { user, loading } = useAuth();
   const [currentView, setCurrentView] = useState<AppView>('home');
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthPage />;
+  }
 
   const renderView = () => {
     switch (currentView) {

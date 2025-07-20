@@ -12,42 +12,123 @@ import {
   Award,
   Star
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
-// Mock data for dashboard
-const mockUserData = {
-  name: "Jan Kowalski",
-  level: 2,
-  totalPoints: 150,
-  pointsToNextLevel: 200,
-  completedLessons: 3,
-  lastActivity: "2 godziny temu",
-  streak: 5,
-  mastery: [
-    { topic: "Algebra", mastery: 85, color: "bg-primary" },
-    { topic: "Geometria", mastery: 92, color: "bg-success" },
-    { topic: "Trygonometria", mastery: 45, color: "bg-warning" },
-    { topic: "Analiza", mastery: 0, color: "bg-muted" },
-    { topic: "Statystyka", mastery: 78, color: "bg-accent" },
-    { topic: "Logarytmy", mastery: 100, color: "bg-success" },
-  ],
-  recentLessons: [
-    { id: 1, title: "Twierdzenie Pitagorasa", completed: true, points: 50, date: "Dzisiaj" },
-    { id: 2, title: "Równania kwadratowe", completed: true, points: 50, date: "Wczoraj" },
-    { id: 3, title: "Funkcje liniowe", completed: true, points: 50, date: "2 dni temu" },
-  ],
-  achievements: [
-    { id: 1, title: "Pierwszy krok", description: "Ukończ pierwszą lekcję", unlocked: true },
-    { id: 2, title: "Perfekcjonista", description: "Zdobądź 100% w lekcji", unlocked: true },
-    { id: 3, title: "Wytrwały", description: "Utrzymaj 5-dniową passę", unlocked: true },
-    { id: 4, title: "Ekspert", description: "Osiągnij poziom 5", unlocked: false },
-  ]
-};
+interface Profile {
+  user_id: string;
+  name: string | null;
+  email: string;
+  level: number;
+  total_points: number;
+  diagnosis_completed: boolean;
+}
+
+interface SkillMastery {
+  id: number;
+  mastery_percentage: number;
+  topics: {
+    name: string;
+  } | null;
+}
+
+interface LessonSession {
+  id: number;
+  completed_at: string | null;
+  points_earned: number | null;
+  topics: {
+    name: string;
+  } | null;
+}
 
 export const Dashboard = () => {
-  const [selectedTab, setSelectedTab] = useState("overview");
-  
-  const progressToNextLevel = (mockUserData.totalPoints / mockUserData.pointsToNextLevel) * 100;
+  const { user } = useAuth();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [skillMastery, setSkillMastery] = useState<SkillMastery[]>([]);
+  const [recentLessons, setRecentLessons] = useState<LessonSession[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [user]);
+
+  const fetchDashboardData = async () => {
+    try {
+      // Fetch user profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user?.id)
+        .single();
+
+      if (profileData) {
+        setProfile(profileData);
+      }
+
+      // Fetch skill mastery with topic names
+      const { data: masteryData } = await supabase
+        .from('skill_mastery')
+        .select(`
+          id,
+          mastery_percentage,
+          topics:topic_id (
+            name
+          )
+        `)
+        .eq('user_id', user?.id);
+
+      if (masteryData) {
+        setSkillMastery(masteryData);
+      }
+
+      // Fetch recent completed lessons
+      const { data: lessonsData } = await supabase
+        .from('lesson_sessions')
+        .select(`
+          id,
+          completed_at,
+          points_earned,
+          topics:topic_id (
+            name
+          )
+        `)
+        .eq('user_id', user?.id)
+        .eq('status', 'completed')
+        .order('completed_at', { ascending: false })
+        .limit(5);
+
+      if (lessonsData) {
+        setRecentLessons(lessonsData);
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-primary/5 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  const pointsToNextLevel = 50 * ((profile?.level || 1) + 1);
+  const progressToNextLevel = ((profile?.total_points || 0) % 50) / 50 * 100;
+  const completedLessonsCount = recentLessons.length;
+
+  // Mock achievements for now
+  const achievements = [
+    { id: 1, title: "Pierwszy krok", description: "Ukończ pierwszą lekcję", unlocked: completedLessonsCount > 0 },
+    { id: 2, title: "Perfekcjonista", description: "Zdobądź 100% w diagnozie", unlocked: skillMastery.some(s => s.mastery_percentage === 100) },
+    { id: 3, title: "Wytrwały", description: "Ukończ 3 lekcje", unlocked: completedLessonsCount >= 3 },
+    { id: 4, title: "Ekspert", description: "Osiągnij poziom 3", unlocked: (profile?.level || 1) >= 3 },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-primary/5">
@@ -55,10 +136,10 @@ export const Dashboard = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold mb-2">
-            Witaj z powrotem, {mockUserData.name}! 👋
+            Witaj z powrotem, {profile?.name || profile?.email || "Uczniu"}! 👋
           </h1>
           <p className="text-muted-foreground">
-            Ostatnia aktywność: {mockUserData.lastActivity}
+            Poziom {profile?.level || 1} • {profile?.total_points || 0} punktów
           </p>
         </div>
 
@@ -70,7 +151,7 @@ export const Dashboard = () => {
                 <Trophy className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-primary">{mockUserData.totalPoints}</div>
+                <div className="text-2xl font-bold text-primary">{profile?.total_points || 0}</div>
                 <div className="text-sm text-muted-foreground">Punktów</div>
               </div>
             </div>
@@ -82,8 +163,8 @@ export const Dashboard = () => {
                 <Star className="w-6 h-6 text-accent" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-accent">Poziom {mockUserData.level}</div>
-                <div className="text-sm text-muted-foreground">Nowicjusz</div>
+                <div className="text-2xl font-bold text-accent">Poziom {profile?.level || 1}</div>
+                <div className="text-sm text-muted-foreground">{profile?.level === 1 ? "Nowicjusz" : "Zaawansowany"}</div>
               </div>
             </div>
           </Card>
@@ -94,7 +175,7 @@ export const Dashboard = () => {
                 <BookOpen className="w-6 h-6 text-success" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-success">{mockUserData.completedLessons}</div>
+                <div className="text-2xl font-bold text-success">{completedLessonsCount}</div>
                 <div className="text-sm text-muted-foreground">Ukończone lekcje</div>
               </div>
             </div>
@@ -106,7 +187,7 @@ export const Dashboard = () => {
                 <Target className="w-6 h-6 text-warning" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-warning">{mockUserData.streak}</div>
+                <div className="text-2xl font-bold text-warning">0</div>
                 <div className="text-sm text-muted-foreground">Dni z rzędu</div>
               </div>
             </div>
@@ -117,11 +198,11 @@ export const Dashboard = () => {
         <Card className="p-6 mb-8 shadow-card">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Postęp do kolejnego poziomu</h3>
-            <Badge variant="outline">{mockUserData.totalPoints}/{mockUserData.pointsToNextLevel} pkt</Badge>
+            <Badge variant="outline">{profile?.total_points || 0}/{pointsToNextLevel} pkt</Badge>
           </div>
           <Progress value={progressToNextLevel} className="mb-2" />
           <p className="text-sm text-muted-foreground">
-            Zostało {mockUserData.pointsToNextLevel - mockUserData.totalPoints} punktów do poziomu {mockUserData.level + 1}
+            Zostało {pointsToNextLevel - (profile?.total_points || 0)} punktów do poziomu {(profile?.level || 1) + 1}
           </p>
         </Card>
 
@@ -135,15 +216,21 @@ export const Dashboard = () => {
               </div>
               
               <div className="space-y-4">
-                {mockUserData.mastery.map((skill, index) => (
-                  <div key={skill.topic} className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="font-medium">{skill.topic}</span>
-                      <span className="text-sm text-muted-foreground">{skill.mastery}%</span>
+                {skillMastery.length > 0 ? (
+                  skillMastery.map((skill) => (
+                    <div key={skill.id} className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="font-medium">{skill.topics?.name || "Nieznany temat"}</span>
+                        <span className="text-sm text-muted-foreground">{skill.mastery_percentage}%</span>
+                      </div>
+                      <Progress value={skill.mastery_percentage} className="h-2" />
                     </div>
-                    <Progress value={skill.mastery} className="h-2" />
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-muted-foreground text-center py-4">
+                    Ukończ test diagnostyczny, aby zobaczyć swoje umiejętności
+                  </p>
+                )}
               </div>
 
               <div className="mt-6 pt-6 border-t border-border">
@@ -165,19 +252,27 @@ export const Dashboard = () => {
               </div>
               
               <div className="space-y-3">
-                {mockUserData.recentLessons.map((lesson) => (
-                  <div key={lesson.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div className="flex-1">
-                      <div className="font-medium text-sm">{lesson.title}</div>
-                      <div className="text-xs text-muted-foreground">{lesson.date}</div>
+                {recentLessons.length > 0 ? (
+                  recentLessons.map((lesson) => (
+                    <div key={lesson.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <div className="flex-1">
+                        <div className="font-medium text-sm">{lesson.topics?.name || "Lekcja"}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {lesson.completed_at ? new Date(lesson.completed_at).toLocaleDateString('pl-PL') : "Brak daty"}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">
+                          +{lesson.points_earned || 0} pkt
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="text-xs">
-                        +{lesson.points} pkt
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-muted-foreground text-center py-4">
+                    Brak ukończonych lekcji
+                  </p>
+                )}
               </div>
             </Card>
 
@@ -189,7 +284,7 @@ export const Dashboard = () => {
               </div>
               
               <div className="space-y-3">
-                {mockUserData.achievements.map((achievement) => (
+                {achievements.map((achievement) => (
                   <div 
                     key={achievement.id} 
                     className={`p-3 rounded-lg border ${
