@@ -46,6 +46,81 @@ export type Database = {
           },
         ]
       }
+      daily_stats: {
+        Row: {
+          average_accuracy: number | null
+          created_at: string
+          date: string
+          id: number
+          lessons_completed: number | null
+          points_earned: number | null
+          topics_practiced: number | null
+          total_time_minutes: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          average_accuracy?: number | null
+          created_at?: string
+          date: string
+          id?: number
+          lessons_completed?: number | null
+          points_earned?: number | null
+          topics_practiced?: number | null
+          total_time_minutes?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          average_accuracy?: number | null
+          created_at?: string
+          date?: string
+          id?: number
+          lessons_completed?: number | null
+          points_earned?: number | null
+          topics_practiced?: number | null
+          total_time_minutes?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      learning_goals: {
+        Row: {
+          created_at: string
+          current_value: number | null
+          deadline: string | null
+          goal_type: string
+          id: number
+          status: string
+          target_value: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_value?: number | null
+          deadline?: string | null
+          goal_type: string
+          id?: number
+          status?: string
+          target_value: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_value?: number | null
+          deadline?: string | null
+          goal_type?: string
+          id?: number
+          status?: string
+          target_value?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       lesson_sessions: {
         Row: {
           completed_at: string | null
@@ -172,6 +247,51 @@ export type Database = {
         }
         Relationships: []
       }
+      session_analytics: {
+        Row: {
+          completion_rate: number | null
+          correct_answers: number | null
+          created_at: string
+          duration_minutes: number | null
+          engagement_score: number | null
+          hints_used: number | null
+          id: number
+          mistakes_made: number | null
+          questions_answered: number | null
+          session_id: number
+          topic_id: number
+          user_id: string
+        }
+        Insert: {
+          completion_rate?: number | null
+          correct_answers?: number | null
+          created_at?: string
+          duration_minutes?: number | null
+          engagement_score?: number | null
+          hints_used?: number | null
+          id?: number
+          mistakes_made?: number | null
+          questions_answered?: number | null
+          session_id: number
+          topic_id: number
+          user_id: string
+        }
+        Update: {
+          completion_rate?: number | null
+          correct_answers?: number | null
+          created_at?: string
+          duration_minutes?: number | null
+          engagement_score?: number | null
+          hints_used?: number | null
+          id?: number
+          mistakes_made?: number | null
+          questions_answered?: number | null
+          session_id?: number
+          topic_id?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       skill_mastery: {
         Row: {
           created_at: string
@@ -213,6 +333,33 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      topic_progress_history: {
+        Row: {
+          id: number
+          mastery_percentage: number
+          recorded_at: string
+          session_id: number | null
+          topic_id: number
+          user_id: string
+        }
+        Insert: {
+          id?: number
+          mastery_percentage: number
+          recorded_at?: string
+          session_id?: number | null
+          topic_id: number
+          user_id: string
+        }
+        Update: {
+          id?: number
+          mastery_percentage?: number
+          recorded_at?: string
+          session_id?: number | null
+          topic_id?: number
+          user_id?: string
+        }
+        Relationships: []
       }
       topics: {
         Row: {

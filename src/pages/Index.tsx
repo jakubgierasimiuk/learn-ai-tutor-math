@@ -4,11 +4,12 @@ import { Features } from "@/components/Features";
 import { DiagnosticQuiz } from "@/components/DiagnosticQuiz";
 import { Dashboard } from "@/components/Dashboard";
 import { AIChat } from "@/components/AIChat";
+import Analytics from "@/components/Analytics";
 import { AuthPage } from "@/components/AuthPage";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 
-type AppView = 'home' | 'quiz' | 'dashboard' | 'chat';
+type AppView = 'home' | 'quiz' | 'dashboard' | 'chat' | 'analytics';
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -34,6 +35,8 @@ const Index = () => {
         return <Dashboard />;
       case 'chat':
         return <AIChat />;
+      case 'analytics':
+        return <Analytics />;
       default:
         return (
           <>
@@ -68,6 +71,12 @@ const Index = () => {
             className="bg-success text-success-foreground px-4 py-2 rounded-lg shadow-card hover:scale-105 transition-all text-sm"
           >
             🤖 Demo: AI Chat
+          </button>
+          <button
+            onClick={() => setCurrentView('analytics')}
+            className="bg-info text-info-foreground px-4 py-2 rounded-lg shadow-card hover:scale-105 transition-all text-sm"
+          >
+            📊 Demo: Analytics
           </button>
         </div>
       )}
