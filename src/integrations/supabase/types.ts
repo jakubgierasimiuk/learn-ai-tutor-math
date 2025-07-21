@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          category: string
+          condition_type: string
+          condition_value: number
+          created_at: string
+          description: string
+          icon: string
+          id: number
+          is_active: boolean | null
+          name: string
+          points_reward: number
+        }
+        Insert: {
+          category?: string
+          condition_type: string
+          condition_value: number
+          created_at?: string
+          description: string
+          icon: string
+          id?: number
+          is_active?: boolean | null
+          name: string
+          points_reward?: number
+        }
+        Update: {
+          category?: string
+          condition_type?: string
+          condition_value?: number
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: number
+          is_active?: boolean | null
+          name?: string
+          points_reward?: number
+        }
+        Relationships: []
+      }
       chat_logs: {
         Row: {
           id: number
@@ -453,6 +492,38 @@ export type Database = {
         }
         Relationships: []
       }
+      user_achievements: {
+        Row: {
+          achievement_id: number
+          created_at: string
+          id: number
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: number
+          created_at?: string
+          id?: number
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: number
+          created_at?: string
+          id?: number
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_lesson_progress: {
         Row: {
           completed_at: string | null
@@ -516,14 +587,52 @@ export type Database = {
           },
         ]
       }
+      user_streaks: {
+        Row: {
+          created_at: string
+          current_streak: number | null
+          id: number
+          last_activity_date: string | null
+          longest_streak: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number | null
+          id?: number
+          last_activity_date?: string | null
+          longest_streak?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number | null
+          id?: number
+          last_activity_date?: string | null
+          longest_streak?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      check_and_award_achievements: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       generate_random_id: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      update_user_streak: {
+        Args: { p_user_id: string }
+        Returns: undefined
       }
     }
     Enums: {

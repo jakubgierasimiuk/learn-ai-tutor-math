@@ -1,317 +1,371 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   Trophy, 
-  BookOpen, 
   Target, 
-  TrendingUp,
-  PlayCircle,
-  Calendar,
+  TrendingUp, 
+  Clock, 
+  Flame, 
+  BookOpen, 
+  Star,
   Award,
-  Star
+  Calendar,
+  BarChart3
 } from "lucide-react";
-import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
-interface Profile {
-  user_id: string;
-  name: string | null;
-  email: string;
-  level: number;
+interface UserStats {
   total_points: number;
-  diagnosis_completed: boolean;
+  lessons_completed: number;
+  topics_started: number;
+  current_streak: number;
+  longest_streak: number;
+  average_score: number;
+  recent_achievements: Achievement[];
 }
 
-interface SkillMastery {
+interface Achievement {
   id: number;
-  mastery_percentage: number;
-  topics: {
-    name: string;
-  } | null;
+  name: string;
+  description: string;
+  icon: string;
+  category: string;
+  unlocked_at: string;
 }
 
-interface LessonSession {
-  id: number;
-  completed_at: string | null;
-  points_earned: number | null;
-  topics: {
-    name: string;
-  } | null;
+interface RecentActivity {
+  lesson_title: string;
+  topic_name: string;
+  score: number;
+  completed_at: string;
+  points_earned: number;
 }
 
 export const Dashboard = () => {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [skillMastery, setSkillMastery] = useState<SkillMastery[]>([]);
-  const [recentLessons, setRecentLessons] = useState<LessonSession[]>([]);
+  const [stats, setStats] = useState<UserStats | null>(null);
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) {
-      fetchDashboardData();
-    }
-  }, [user]);
+    fetchDashboardData();
+  }, []);
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch user profile
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user?.id)
+      // Fetch user profile and basic stats
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("total_points")
+        .eq("user_id", user?.id)
         .single();
 
-      if (profileData) {
-        setProfile(profileData);
-      }
-
-      // Fetch skill mastery with topic names
-      const { data: masteryData } = await supabase
-        .from('skill_mastery')
+      // Fetch lesson completion stats
+      const { data: lessonStats } = await supabase
+        .from("user_lesson_progress")
         .select(`
-          id,
-          mastery_percentage,
-          topics:topic_id (
-            name
+          lesson_id,
+          topic_id,
+          score,
+          status,
+          completed_at
+        `)
+        .eq("user_id", user?.id);
+
+      // Fetch streak data
+      const { data: streakData } = await supabase
+        .from("user_streaks")
+        .select("current_streak, longest_streak")
+        .eq("user_id", user?.id)
+        .maybeSingle();
+
+      // Fetch recent achievements
+      const { data: achievements } = await supabase
+        .from("user_achievements")
+        .select(`
+          unlocked_at,
+          achievements!inner(
+            id,
+            name,
+            description,
+            icon,
+            category
           )
         `)
-        .eq('user_id', user?.id);
-
-      if (masteryData) {
-        setSkillMastery(masteryData);
-      }
-
-      // Fetch recent completed lessons
-      const { data: lessonsData } = await supabase
-        .from('lesson_sessions')
-        .select(`
-          id,
-          completed_at,
-          points_earned,
-          topics:topic_id (
-            name
-          )
-        `)
-        .eq('user_id', user?.id)
-        .eq('status', 'completed')
-        .order('completed_at', { ascending: false })
+        .eq("user_id", user?.id)
+        .order("unlocked_at", { ascending: false })
         .limit(5);
 
-      if (lessonsData) {
-        setRecentLessons(lessonsData);
-      }
+      // Fetch recent activity
+      const { data: activity } = await supabase
+        .from("user_lesson_progress")
+        .select(`
+          score,
+          completed_at,
+          lessons!inner(
+            title,
+            topics!inner(name)
+          )
+        `)
+        .eq("user_id", user?.id)
+        .eq("status", "completed")
+        .order("completed_at", { ascending: false })
+        .limit(5);
+
+      // Process data
+      const completedLessons = lessonStats?.filter(l => l.status === 'completed') || [];
+      const topicsStarted = new Set(lessonStats?.map(l => l.topic_id) || []).size;
+      const averageScore = completedLessons.length > 0
+        ? completedLessons.reduce((sum, lesson) => sum + (lesson.score || 0), 0) / completedLessons.length
+        : 0;
+
+      const processedAchievements = achievements?.map(ua => ({
+        id: ua.achievements.id,
+        name: ua.achievements.name,
+        description: ua.achievements.description,
+        icon: ua.achievements.icon,
+        category: ua.achievements.category,
+        unlocked_at: ua.unlocked_at
+      })) || [];
+
+      const processedActivity = activity?.map(a => ({
+        lesson_title: a.lessons.title,
+        topic_name: a.lessons.topics.name,
+        score: a.score || 0,
+        completed_at: a.completed_at!,
+        points_earned: Math.round((a.score || 0) * 0.5) + 10 // Estimate based on scoring logic
+      })) || [];
+
+      setStats({
+        total_points: profile?.total_points || 0,
+        lessons_completed: completedLessons.length,
+        topics_started: topicsStarted,
+        current_streak: streakData?.current_streak || 0,
+        longest_streak: streakData?.longest_streak || 0,
+        average_score: Math.round(averageScore),
+        recent_achievements: processedAchievements
+      });
+
+      setRecentActivity(processedActivity);
+
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error("Error fetching dashboard data:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pl-PL', {
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'learning': return 'bg-blue-500 text-white';
+      case 'general': return 'bg-green-500 text-white';
+      case 'social': return 'bg-purple-500 text-white';
+      case 'special': return 'bg-yellow-500 text-white';
+      default: return 'bg-gray-500 text-white';
+    }
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-primary/5 flex items-center justify-center">
+      <div className="min-h-screen bg-background p-6 flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  const pointsToNextLevel = 50 * ((profile?.level || 1) + 1);
-  const progressToNextLevel = ((profile?.total_points || 0) % 50) / 50 * 100;
-  const completedLessonsCount = recentLessons.length;
-
-  // Mock achievements for now
-  const achievements = [
-    { id: 1, title: "Pierwszy krok", description: "Ukończ pierwszą lekcję", unlocked: completedLessonsCount > 0 },
-    { id: 2, title: "Perfekcjonista", description: "Zdobądź 100% w diagnozie", unlocked: skillMastery.some(s => s.mastery_percentage === 100) },
-    { id: 3, title: "Wytrwały", description: "Ukończ 3 lekcje", unlocked: completedLessonsCount >= 3 },
-    { id: 4, title: "Ekspert", description: "Osiągnij poziom 3", unlocked: (profile?.level || 1) >= 3 },
-  ];
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-primary/5">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-background p-6">
+      <div className="container mx-auto max-w-6xl space-y-6">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">
-            Witaj z powrotem, {profile?.name || profile?.email || "Uczniu"}! 👋
-          </h1>
-          <p className="text-muted-foreground">
-            Poziom {profile?.level || 1} • {profile?.total_points || 0} punktów
-          </p>
+        <div className="space-y-2">
+          <h1 className="text-4xl font-bold gradient-text">Dashboard</h1>
+          <p className="text-muted-foreground">Przegląd Twojego postępu w nauce</p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6 shadow-card hover:shadow-primary transition-all">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                <Trophy className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-primary">{profile?.total_points || 0}</div>
-                <div className="text-sm text-muted-foreground">Punktów</div>
-              </div>
-            </div>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="card-hover">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-sm font-medium">
+                <Trophy className="w-4 h-4 text-yellow-500" />
+                Punkty
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-primary">{stats?.total_points || 0}</div>
+              <p className="text-xs text-muted-foreground">Łącznie zdobyte</p>
+            </CardContent>
           </Card>
 
-          <Card className="p-6 shadow-card hover:shadow-accent transition-all">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center">
-                <Star className="w-6 h-6 text-accent" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-accent">Poziom {profile?.level || 1}</div>
-                <div className="text-sm text-muted-foreground">{profile?.level === 1 ? "Nowicjusz" : "Zaawansowany"}</div>
-              </div>
-            </div>
+          <Card className="card-hover">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-sm font-medium">
+                <BookOpen className="w-4 h-4 text-blue-500" />
+                Lekcje
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-primary">{stats?.lessons_completed || 0}</div>
+              <p className="text-xs text-muted-foreground">Ukończone lekcje</p>
+            </CardContent>
           </Card>
 
-          <Card className="p-6 shadow-card hover:shadow-success transition-all">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-success/10 rounded-full flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-success" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-success">{completedLessonsCount}</div>
-                <div className="text-sm text-muted-foreground">Ukończone lekcje</div>
-              </div>
-            </div>
+          <Card className="card-hover">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-sm font-medium">
+                <Flame className="w-4 h-4 text-orange-500" />
+                Passa
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-primary">{stats?.current_streak || 0}</div>
+              <p className="text-xs text-muted-foreground">Dni z rzędu</p>
+            </CardContent>
           </Card>
 
-          <Card className="p-6 shadow-card hover:shadow-warning transition-all">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-warning/10 rounded-full flex items-center justify-center">
-                <Target className="w-6 h-6 text-warning" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-warning">0</div>
-                <div className="text-sm text-muted-foreground">Dni z rzędu</div>
-              </div>
-            </div>
+          <Card className="card-hover">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-sm font-medium">
+                <Star className="w-4 h-4 text-green-500" />
+                Średnia
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-primary">{stats?.average_score || 0}%</div>
+              <p className="text-xs text-muted-foreground">Wynik z lekcji</p>
+            </CardContent>
           </Card>
         </div>
 
-        {/* Progress to Next Level */}
-        <Card className="p-6 mb-8 shadow-card">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Postęp do kolejnego poziomu</h3>
-            <Badge variant="outline">{profile?.total_points || 0}/{pointsToNextLevel} pkt</Badge>
-          </div>
-          <Progress value={progressToNextLevel} className="mb-2" />
-          <p className="text-sm text-muted-foreground">
-            Zostało {pointsToNextLevel - (profile?.total_points || 0)} punktów do poziomu {(profile?.level || 1) + 1}
-          </p>
-        </Card>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Mastery Overview */}
-          <div className="lg:col-span-2">
-            <Card className="p-6 shadow-card">
-              <div className="flex items-center gap-3 mb-6">
-                <TrendingUp className="w-6 h-6 text-primary" />
-                <h3 className="text-xl font-semibold">Opanowanie materiału</h3>
-              </div>
-              
-              <div className="space-y-4">
-                {skillMastery.length > 0 ? (
-                  skillMastery.map((skill) => (
-                    <div key={skill.id} className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="font-medium">{skill.topics?.name || "Nieznany temat"}</span>
-                        <span className="text-sm text-muted-foreground">{skill.mastery_percentage}%</span>
-                      </div>
-                      <Progress value={skill.mastery_percentage} className="h-2" />
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-muted-foreground text-center py-4">
-                    Ukończ test diagnostyczny, aby zobaczyć swoje umiejętności
-                  </p>
-                )}
-              </div>
-
-              <div className="mt-6 pt-6 border-t border-border">
-                <Button className="w-full shadow-primary">
-                  <PlayCircle className="w-4 h-4 mr-2" />
-                  Rozpocznij kolejną lekcję
-                </Button>
-              </div>
-            </Card>
-          </div>
-
-          {/* Recent Activity & Achievements */}
-          <div className="space-y-6">
-            {/* Recent Lessons */}
-            <Card className="p-6 shadow-card">
-              <div className="flex items-center gap-3 mb-4">
-                <Calendar className="w-5 h-5 text-accent" />
-                <h3 className="text-lg font-semibold">Ostatnie lekcje</h3>
-              </div>
-              
-              <div className="space-y-3">
-                {recentLessons.length > 0 ? (
-                  recentLessons.map((lesson) => (
-                    <div key={lesson.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                      <div className="flex-1">
-                        <div className="font-medium text-sm">{lesson.topics?.name || "Lekcja"}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {lesson.completed_at ? new Date(lesson.completed_at).toLocaleDateString('pl-PL') : "Brak daty"}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary" className="text-xs">
-                          +{lesson.points_earned || 0} pkt
-                        </Badge>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Recent Achievements */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Award className="w-5 h-5 text-yellow-500" />
+                Ostatnie osiągnięcia
+              </CardTitle>
+              <CardDescription>Twoje najnowsze sukcesy</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {stats?.recent_achievements.length ? (
+                stats.recent_achievements.map((achievement) => (
+                  <div key={achievement.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                    <div className="text-2xl">{achievement.icon}</div>
+                    <div className="flex-1">
+                      <div className="font-medium">{achievement.name}</div>
+                      <div className="text-sm text-muted-foreground">{achievement.description}</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {formatDate(achievement.unlocked_at)}
                       </div>
                     </div>
-                  ))
-                ) : (
-                  <p className="text-muted-foreground text-center py-4">
-                    Brak ukończonych lekcji
-                  </p>
-                )}
-              </div>
-            </Card>
+                    <Badge className={getCategoryColor(achievement.category)}>
+                      {achievement.category}
+                    </Badge>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Award className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p>Ukończ pierwszą lekcję, aby zdobyć osiągnięcia!</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-            {/* Achievements */}
-            <Card className="p-6 shadow-card">
-              <div className="flex items-center gap-3 mb-4">
-                <Award className="w-5 h-5 text-warning" />
-                <h3 className="text-lg font-semibold">Osiągnięcia</h3>
-              </div>
-              
-              <div className="space-y-3">
-                {achievements.map((achievement) => (
-                  <div 
-                    key={achievement.id} 
-                    className={`p-3 rounded-lg border ${
-                      achievement.unlocked 
-                        ? 'bg-success/10 border-success/20' 
-                        : 'bg-muted/50 border-muted opacity-50'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        achievement.unlocked ? 'bg-success/20' : 'bg-muted'
-                      }`}>
-                        <Award className={`w-4 h-4 ${
-                          achievement.unlocked ? 'text-success' : 'text-muted-foreground'
-                        }`} />
+          {/* Recent Activity */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-blue-500" />
+                Ostatnia aktywność
+              </CardTitle>
+              <CardDescription>Twoje najnowsze ukończone lekcje</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {recentActivity.length ? (
+                recentActivity.map((activity, index) => (
+                  <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                    <div className="flex-1">
+                      <div className="font-medium">{activity.lesson_title}</div>
+                      <div className="text-sm text-muted-foreground">{activity.topic_name}</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {formatDate(activity.completed_at)}
                       </div>
-                      <div className="flex-1">
-                        <div className="font-medium text-sm">{achievement.title}</div>
-                        <div className="text-xs text-muted-foreground">{achievement.description}</div>
-                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-medium text-success">{activity.score}%</div>
+                      <div className="text-xs text-muted-foreground">+{activity.points_earned} pkt</div>
                     </div>
                   </div>
-                ))}
-              </div>
-            </Card>
-          </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <BookOpen className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p>Rozpocznij pierwszą lekcję!</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
+
+        {/* Quick Actions */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="w-5 h-5 text-primary" />
+              Szybkie akcje
+            </CardTitle>
+            <CardDescription>Kontynuuj swoją naukę</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Link to="/lessons">
+                <Button className="w-full h-auto p-4 flex-col gap-2">
+                  <BookOpen className="w-6 h-6" />
+                  <div className="text-center">
+                    <div className="font-medium">Przeglądaj lekcje</div>
+                    <div className="text-xs opacity-80">Wybierz nowy temat</div>
+                  </div>
+                </Button>
+              </Link>
+              
+              <Link to="/analytics">
+                <Button variant="outline" className="w-full h-auto p-4 flex-col gap-2">
+                  <BarChart3 className="w-6 h-6" />
+                  <div className="text-center">
+                    <div className="font-medium">Analityka</div>
+                    <div className="text-xs opacity-80">Zobacz szczegóły</div>
+                  </div>
+                </Button>
+              </Link>
+
+              <Link to="/quiz">
+                <Button variant="outline" className="w-full h-auto p-4 flex-col gap-2">
+                  <Target className="w-6 h-6" />
+                  <div className="text-center">
+                    <div className="font-medium">Quiz</div>
+                    <div className="text-xs opacity-80">Sprawdź wiedzę</div>
+                  </div>
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

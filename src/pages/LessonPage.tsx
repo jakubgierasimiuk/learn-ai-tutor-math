@@ -207,6 +207,10 @@ const LessonPage = () => {
         title: "Gratulacje!",
         description: `Zdobyłeś ${totalPoints} punktów za ukończenie lekcji!`,
       });
+
+      // Update streak and check achievements
+      await supabase.rpc('update_user_streak', { p_user_id: user?.id });
+      await supabase.rpc('check_and_award_achievements', { p_user_id: user?.id });
     } catch (error) {
       console.error("Error awarding points:", error);
     }
