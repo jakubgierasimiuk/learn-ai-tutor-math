@@ -16,6 +16,7 @@ import AnalyticsPage from "./pages/AnalyticsPage";
 import AuthPage from "./pages/AuthPage";
 import SmartRecommendations from "./pages/SmartRecommendations";
 import SocialPage from "./pages/SocialPage";
+import GamificationPage from "./pages/GamificationPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -101,6 +102,11 @@ const App = () => (
             <Route path="/social" element={
               <AuthenticatedLayout>
                 <SocialPage />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/gamification" element={
+              <AuthenticatedLayout>
+                <GamificationPage />
               </AuthenticatedLayout>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

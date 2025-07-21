@@ -1,19 +1,21 @@
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, Brain, ArrowLeft, ArrowRight } from "lucide-react";
-import { useState } from "react";
+import { CheckCircle, XCircle, Brain, ArrowLeft, ArrowRight, Clock, Target, Star } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-// Mock quiz data
+// Enhanced quiz data with explanations and difficulty levels
 const quizQuestions = [
   {
     id: 1,
     topic: "Algebra",
+    difficulty: "easy",
     question: "Rozwiąż równanie: 2x + 5 = 13",
+    explanation: "Aby rozwiązać równanie, odejmujemy 5 od obu stron: 2x = 8, następnie dzielimy przez 2: x = 4",
     options: [
       { id: "a", text: "x = 4", correct: true },
       { id: "b", text: "x = 6", correct: false },
