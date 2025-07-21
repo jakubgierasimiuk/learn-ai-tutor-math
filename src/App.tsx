@@ -14,6 +14,7 @@ import DashboardPage from "./pages/DashboardPage";
 import ChatPage from "./pages/ChatPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import AuthPage from "./pages/AuthPage";
+import SmartRecommendations from "./pages/SmartRecommendations";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -69,6 +70,11 @@ const App = () => (
             <Route path="/lesson/:lessonId" element={
               <AuthenticatedLayout>
                 <LessonPage />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/recommendations" element={
+              <AuthenticatedLayout>
+                <SmartRecommendations />
               </AuthenticatedLayout>
             } />
             <Route path="/quiz" element={

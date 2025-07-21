@@ -44,13 +44,22 @@ export const Navigation = () => {
               Quiz
             </Link>
             <Link 
-              to="/dashboard" 
+              to="/chat" 
               className={`flex items-center gap-2 transition-smooth ${
-                isActive('/dashboard') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
+                isActive('/chat') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
               }`}
             >
-              <BarChart3 className="w-4 h-4" />
-              Dashboard
+              <MessageCircle className="w-4 h-4" />
+              AI Chat
+            </Link>
+            <Link 
+              to="/recommendations" 
+              className={`flex items-center gap-2 transition-smooth ${
+                isActive('/recommendations') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
+              }`}
+            >
+              <Brain className="w-4 h-4" />
+              AI Coach
             </Link>
             <Link 
               to="/analytics" 

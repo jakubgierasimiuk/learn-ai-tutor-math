@@ -2,17 +2,32 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Send, ThumbsUp, ThumbsDown, RotateCcw, User, Bot } from "lucide-react";
+import { Brain, Send, ThumbsUp, ThumbsDown, RotateCcw, User, Bot, BookOpen, Target, Lightbulb } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 interface Message {
   id: string;
   role: 'user' | 'assistant' | 'assistant_review';
   content: string;
   timestamp: Date;
+  insights?: LearningInsights;
+}
+
+interface LearningInsights {
+  needsHelp: boolean;
+  topicMastery: string;
+  suggestedActions: string[];
+}
+
+interface UserProgress {
+  recentTopics: string[];
+  averageScore: number;
+  weakAreas: string[];
+  totalLessons: number;
 }
 
 const mockLessonData = {
@@ -41,11 +56,103 @@ Czy rozumiesz to wyjaśnienie?`,
 
 export const AIChat = () => {
   const { user } = useAuth();
-  const [messages, setMessages] = useState<Message[]>([initialMessage]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [showUnderstanding, setShowUnderstanding] = useState(true);
+  const [showUnderstanding, setShowUnderstanding] = useState(false);
+  const [currentTopic, setCurrentTopic] = useState("Matematyka");
+  const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
+  const [currentSessionId, setCurrentSessionId] = useState<number | null>(null);
+  const [showRecommendations, setShowRecommendations] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    initializeChat();
+  }, [user]);
+
+  const initializeChat = async () => {
+    if (!user) return;
+
+    // Fetch user's learning context
+    try {
+      // Get recent lesson progress
+      const { data: recentProgress } = await supabase
+        .from("user_lesson_progress")
+        .select(`
+          score,
+          lessons!inner(title, difficulty_level),
+          topics!inner(name)
+        `)
+        .eq("user_id", user.id)
+        .eq("status", "completed")
+        .order("completed_at", { ascending: false })
+        .limit(10);
+
+      if (recentProgress) {
+        const topics = [...new Set(recentProgress.map(p => p.topics.name))];
+        const avgScore = recentProgress.reduce((sum, p) => sum + (p.score || 0), 0) / recentProgress.length;
+        const weakAreas = recentProgress
+          .filter(p => (p.score || 0) < 70)
+          .map(p => p.topics.name);
+
+        setUserProgress({
+          recentTopics: topics,
+          averageScore: Math.round(avgScore),
+          weakAreas: [...new Set(weakAreas)],
+          totalLessons: recentProgress.length
+        });
+
+        // Set topic based on most recent lesson
+        if (topics.length > 0) {
+          setCurrentTopic(topics[0]);
+        }
+      }
+
+      // Create a new chat session
+      const { data: sessionData } = await supabase
+        .from("lesson_sessions")
+        .insert({
+          user_id: user.id,
+          topic_id: 1, // Default topic, will be updated based on conversation
+          status: 'in_progress'
+        })
+        .select()
+        .single();
+
+      if (sessionData) {
+        setCurrentSessionId(sessionData.id);
+      }
+
+      // Generate personalized welcome message
+      const welcomeMessage = await generateWelcomeMessage();
+      setMessages([welcomeMessage]);
+      
+    } catch (error) {
+      console.error("Error initializing chat:", error);
+      // Fallback welcome message
+      setMessages([{
+        id: '1',
+        role: 'assistant',
+        content: `Cześć! Jestem Twoim AI Learning Coach 🤖\n\nPomogę Ci w nauce matematyki, dostosowując się do Twojego poziomu i stylu uczenia się. Możesz zadawać mi pytania, prosić o wyjaśnienia lub po prostu porozmawiać o matematyce.\n\nO czym chciałbyś dziś porozmawiać?`,
+        timestamp: new Date()
+      }]);
+    }
+  };
+
+  const generateWelcomeMessage = async (): Promise<Message> => {
+    const progressInfo = userProgress ? 
+      `Na podstawie Twojego postępu widzę, że ostatnio pracowałeś nad: ${userProgress.recentTopics.slice(0, 3).join(', ')}. ` +
+      `Twoja średnia ocena to ${userProgress.averageScore}%. ` +
+      (userProgress.weakAreas.length > 0 ? `Mogę pomóc Ci poprawić się w: ${userProgress.weakAreas.join(', ')}.` : 'Świetnie Ci idzie!')
+      : '';
+
+    return {
+      id: '1',
+      role: 'assistant',
+      content: `Cześć! Jestem Twoim personalnym AI Learning Coach 🧠\n\n${progressInfo}\n\nJestem tutaj, aby:\n📚 Wyjaśnić trudne koncepty\n🎯 Dostosować się do Twojego tempa nauki\n💡 Zaproponować ćwiczenia\n🏆 Świętować Twoje sukcesy\n\nO czym chciałbyś dziś porozmawiać?`,
+      timestamp: new Date()
+    };
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -67,8 +174,15 @@ export const AIChat = () => {
       const response = await supabase.functions.invoke('ai-chat', {
         body: {
           message: userInput,
-          topic: 'mathematics',
-          level: 'beginner'
+          topic: currentTopic,
+          level: userProgress?.averageScore ? 
+            (userProgress.averageScore >= 80 ? 'advanced' : 
+             userProgress.averageScore >= 60 ? 'intermediate' : 'beginner') 
+            : 'beginner',
+          userId: user.id,
+          sessionId: currentSessionId,
+          userProgress: userProgress,
+          weakAreas: userProgress?.weakAreas || []
         }
       });
 
@@ -76,21 +190,27 @@ export const AIChat = () => {
         throw response.error;
       }
 
-      const aiResponse = response.data.response;
+      const { response: aiResponse, insights } = response.data;
       
       const newAIMessage: Message = {
         id: Date.now().toString(),
         role: "assistant",
         content: aiResponse,
-        timestamp: new Date()
+        timestamp: new Date(),
+        insights: insights
       };
       
       setMessages(prev => [...prev, newAIMessage]);
       
-      // Show understanding indicator for positive responses
-      if (userInput.toLowerCase().includes("rozumiem") || userInput.toLowerCase().includes("jasne")) {
-        setShowUnderstanding(true);
-        setTimeout(() => setShowUnderstanding(false), 3000);
+      // Handle insights and recommendations
+      if (insights) {
+        if (insights.needsHelp) {
+          setShowUnderstanding(true);
+        }
+        
+        if (insights.suggestedActions.includes('Przejdź do praktycznych ćwiczeń')) {
+          setShowRecommendations(true);
+        }
       }
       
     } catch (error) {
@@ -124,6 +244,7 @@ export const AIChat = () => {
     sendMessageToAI(newMessage);
     setNewMessage("");
     setShowUnderstanding(false);
+    setShowRecommendations(false);
   };
 
   const handleQuickResponse = (response: string) => {
@@ -137,6 +258,7 @@ export const AIChat = () => {
     setMessages(prev => [...prev, userMessage]);
     sendMessageToAI(response);
     setShowUnderstanding(false);
+    setShowRecommendations(false);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -144,6 +266,33 @@ export const AIChat = () => {
       e.preventDefault();
       handleSendMessage();
     }
+  };
+
+  const renderRecommendations = () => {
+    if (!showRecommendations || !userProgress) return null;
+
+    return (
+      <div className="p-4 border-t border-border bg-gradient-to-r from-primary/5 to-accent/5">
+        <div className="flex items-center gap-2 mb-3">
+          <Lightbulb className="w-4 h-4 text-primary" />
+          <span className="text-sm font-medium">Rekomendacje AI</span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <Link to="/lessons">
+            <Button variant="outline" size="sm" className="w-full flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Przeglądaj lekcje
+            </Button>
+          </Link>
+          <Link to="/quiz">
+            <Button variant="outline" size="sm" className="w-full flex items-center gap-2">
+              <Target className="w-4 h-4" />
+              Sprawdź się w quizie
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -156,14 +305,21 @@ export const AIChat = () => {
               <Brain className="w-6 h-6 text-accent" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">{mockLessonData.topic}</h1>
-              <p className="text-muted-foreground">{mockLessonData.description}</p>
+              <h1 className="text-2xl font-bold">AI Learning Coach</h1>
+              <p className="text-muted-foreground">Personalny asystent do nauki matematyki</p>
             </div>
           </div>
-          <Badge variant="outline" className="flex items-center gap-2 w-fit">
-            <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
-            AI Tutor aktywny
-          </Badge>
+          <div className="flex items-center gap-4">
+            <Badge variant="outline" className="flex items-center gap-2 w-fit">
+              <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
+              AI Tutor aktywny
+            </Badge>
+            {userProgress && (
+              <Badge variant="secondary" className="text-xs">
+                Średnia: {userProgress.averageScore}% • {userProgress.totalLessons} lekcji
+              </Badge>
+            )}
+          </div>
         </div>
 
         {/* Chat Container */}
@@ -240,6 +396,9 @@ export const AIChat = () => {
 
               <div ref={messagesEndRef} />
             </div>
+
+            {/* Recommendations */}
+            {renderRecommendations()}
 
             {/* Quick Actions */}
             {showUnderstanding && !isTyping && (
