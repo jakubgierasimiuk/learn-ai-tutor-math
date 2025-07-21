@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Brain, BookOpen, BarChart3, MessageCircle, TrendingUp, User, LogOut } from "lucide-react";
+import { Brain, BookOpen, BarChart3, MessageCircle, TrendingUp, User, LogOut, Target } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -26,12 +26,21 @@ export const Navigation = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             <Link 
+              to="/lessons" 
+              className={`flex items-center gap-2 transition-smooth ${
+                isActive('/lessons') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
+              }`}
+            >
+              <BookOpen className="w-4 h-4" />
+              Lekcje
+            </Link>
+            <Link 
               to="/quiz" 
               className={`flex items-center gap-2 transition-smooth ${
                 isActive('/quiz') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
               }`}
             >
-              <BookOpen className="w-4 h-4" />
+              <Target className="w-4 h-4" />
               Quiz
             </Link>
             <Link 
@@ -42,15 +51,6 @@ export const Navigation = () => {
             >
               <BarChart3 className="w-4 h-4" />
               Dashboard
-            </Link>
-            <Link 
-              to="/chat" 
-              className={`flex items-center gap-2 transition-smooth ${
-                isActive('/chat') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
-              }`}
-            >
-              <MessageCircle className="w-4 h-4" />
-              AI Chat
             </Link>
             <Link 
               to="/analytics" 
@@ -92,13 +92,23 @@ export const Navigation = () => {
           <div className="md:hidden py-4 border-t border-border animate-fadeIn">
             <div className="flex flex-col gap-4">
               <Link 
+                to="/lessons" 
+                className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
+                  isActive('/lessons') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
+                }`}
+                onClick={() => setIsOpen(false)}
+              >
+                <BookOpen className="w-4 h-4" />
+                Lekcje
+              </Link>
+              <Link 
                 to="/quiz" 
                 className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
                   isActive('/quiz') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
                 }`}
                 onClick={() => setIsOpen(false)}
               >
-                <BookOpen className="w-4 h-4" />
+                <Target className="w-4 h-4" />
                 Quiz
               </Link>
               <Link 
@@ -110,16 +120,6 @@ export const Navigation = () => {
               >
                 <BarChart3 className="w-4 h-4" />
                 Dashboard
-              </Link>
-              <Link 
-                to="/chat" 
-                className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                  isActive('/chat') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                }`}
-                onClick={() => setIsOpen(false)}
-              >
-                <MessageCircle className="w-4 h-4" />
-                AI Chat
               </Link>
               <Link 
                 to="/analytics" 

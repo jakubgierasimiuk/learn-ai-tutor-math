@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { Navigation } from "@/components/Navigation";
 import HomePage from "./pages/HomePage";
+import LessonsPage from "./pages/LessonsPage";
+import TopicDetailPage from "./pages/TopicDetailPage";
 import QuizPage from "./pages/QuizPage";
 import DashboardPage from "./pages/DashboardPage";
 import ChatPage from "./pages/ChatPage";
@@ -51,6 +53,16 @@ const App = () => (
             <Route path="/" element={
               <AuthenticatedLayout>
                 <HomePage />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/lessons" element={
+              <AuthenticatedLayout>
+                <LessonsPage />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/topic/:topicId" element={
+              <AuthenticatedLayout>
+                <TopicDetailPage />
               </AuthenticatedLayout>
             } />
             <Route path="/quiz" element={

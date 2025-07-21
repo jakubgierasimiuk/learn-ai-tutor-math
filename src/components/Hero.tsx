@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Brain, BookOpen, Trophy, Users } from "lucide-react";
+import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-education.jpg";
 
 export const Hero = () => {
@@ -49,12 +50,16 @@ export const Hero = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="shadow-primary transition-bounce hover:scale-105">
-                Rozpocznij naukę
-              </Button>
-              <Button variant="outline" size="lg" className="transition-smooth hover:bg-primary/5">
-                Dowiedz się więcej
-              </Button>
+              <Link to="/lessons">
+                <Button size="lg" className="shadow-primary transition-bounce hover:scale-105 w-full sm:w-auto">
+                  Rozpocznij naukę
+                </Button>
+              </Link>
+              <Link to="/quiz">
+                <Button variant="outline" size="lg" className="transition-smooth hover:bg-primary/5 w-full sm:w-auto">
+                  Sprawdź swoją wiedzę
+                </Button>
+              </Link>
             </div>
 
             {/* Stats */}
