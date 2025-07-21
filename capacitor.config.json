@@ -1,0 +1,21 @@
+{
+  "appId": "app.lovable.bb3407cfbda6445086ba6536ea0a1375",
+  "appName": "learn-ai-tutor-math",
+  "webDir": "dist",
+  "server": {
+    "url": "https://bb3407cf-bda6-4450-86ba-6536ea0a1375.lovableproject.com?forceHideBadge=true",
+    "cleartext": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 3000,
+      "launchAutoHide": true,
+      "backgroundColor": "#ffffffff",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_CROP"
+    },
+    "StatusBar": {
+      "style": "dark"
+    }
+  }
+}

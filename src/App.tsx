@@ -17,6 +17,7 @@ import AuthPage from "./pages/AuthPage";
 import SmartRecommendations from "./pages/SmartRecommendations";
 import SocialPage from "./pages/SocialPage";
 import GamificationPage from "./pages/GamificationPage";
+import AIFeaturesPage from "./pages/AIFeaturesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -107,6 +108,11 @@ const App = () => (
             <Route path="/gamification" element={
               <AuthenticatedLayout>
                 <GamificationPage />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/ai-features" element={
+              <AuthenticatedLayout>
+                <AIFeaturesPage />
               </AuthenticatedLayout>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -78,6 +78,69 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    .container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    
+    h1 {
+      font-size: 1.875rem;
+    }
+    
+    h2 {
+      font-size: 1.5rem;
+    }
+    
+    .text-3xl {
+      font-size: 1.875rem;
+    }
+    
+    .text-2xl {
+      font-size: 1.5rem;
+    }
+  }
+
+  /* Touch-friendly interactions */
+  @media (hover: none) and (pointer: coarse) {
+    .hover\:scale-105:hover {
+      transform: none;
+    }
+    
+    button, .cursor-pointer {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    .card-hover:hover {
+      transform: none;
+    }
+  }
+
+  /* Improved scrolling on mobile */
+  .scroll-smooth {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Better touch targets */
+  @media (max-width: 640px) {
+    .touch-target {
+      min-height: 48px;
+      min-width: 48px;
+    }
+  }
+  
+  /* PWA optimizations */
+  @media (display-mode: standalone) {
+    body {
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+  }
+
   .dark {
     --background: 220 15% 8%;
     --foreground: 220 15% 92%;
