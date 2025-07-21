@@ -53,6 +53,54 @@ export type Database = {
         }
         Relationships: []
       }
+      challenges: {
+        Row: {
+          challenged_score: number | null
+          challenged_user: string
+          challenger_score: number | null
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          description: string
+          difficulty_level: number
+          expires_at: string
+          id: number
+          status: string
+          title: string
+          topic_id: number
+        }
+        Insert: {
+          challenged_score?: number | null
+          challenged_user: string
+          challenger_score?: number | null
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          description: string
+          difficulty_level?: number
+          expires_at: string
+          id?: number
+          status?: string
+          title: string
+          topic_id: number
+        }
+        Update: {
+          challenged_score?: number | null
+          challenged_user?: string
+          challenger_score?: number | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string
+          difficulty_level?: number
+          expires_at?: string
+          id?: number
+          status?: string
+          title?: string
+          topic_id?: number
+        }
+        Relationships: []
+      }
       chat_logs: {
         Row: {
           id: number
@@ -119,6 +167,84 @@ export type Database = {
           points_earned?: number | null
           topics_practiced?: number | null
           total_time_minutes?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      group_study_sessions: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          duration_minutes: number
+          group_id: number
+          id: number
+          scheduled_at: string
+          status: string
+          title: string
+          topic_id: number
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          duration_minutes?: number
+          group_id: number
+          id?: number
+          scheduled_at: string
+          status?: string
+          title: string
+          topic_id: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          duration_minutes?: number
+          group_id?: number
+          id?: number
+          scheduled_at?: string
+          status?: string
+          title?: string
+          topic_id?: number
+        }
+        Relationships: []
+      }
+      leaderboards: {
+        Row: {
+          challenges_won: number
+          created_at: string
+          id: number
+          lessons_completed: number
+          period_start: string
+          period_type: string
+          position: number | null
+          total_points: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          challenges_won?: number
+          created_at?: string
+          id?: number
+          lessons_completed?: number
+          period_start: string
+          period_type: string
+          position?: number | null
+          total_points?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          challenges_won?: number
+          created_at?: string
+          id?: number
+          lessons_completed?: number
+          period_start?: string
+          period_type?: string
+          position?: number | null
+          total_points?: number
           updated_at?: string
           user_id?: string
         }
@@ -384,6 +510,30 @@ export type Database = {
         }
         Relationships: []
       }
+      session_participants: {
+        Row: {
+          id: number
+          joined_at: string | null
+          participation_score: number | null
+          session_id: number
+          user_id: string
+        }
+        Insert: {
+          id?: number
+          joined_at?: string | null
+          participation_score?: number | null
+          session_id: number
+          user_id: string
+        }
+        Update: {
+          id?: number
+          joined_at?: string | null
+          participation_score?: number | null
+          session_id?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       skill_mastery: {
         Row: {
           created_at: string
@@ -425,6 +575,102 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      social_achievements: {
+        Row: {
+          achievement_type: string
+          created_at: string
+          description: string
+          icon: string
+          id: number
+          is_active: boolean | null
+          name: string
+          points_reward: number
+          requirement_value: number
+        }
+        Insert: {
+          achievement_type: string
+          created_at?: string
+          description: string
+          icon: string
+          id?: number
+          is_active?: boolean | null
+          name: string
+          points_reward?: number
+          requirement_value: number
+        }
+        Update: {
+          achievement_type?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: number
+          is_active?: boolean | null
+          name?: string
+          points_reward?: number
+          requirement_value?: number
+        }
+        Relationships: []
+      }
+      study_group_members: {
+        Row: {
+          group_id: number
+          id: number
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          group_id: number
+          id?: number
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          group_id?: number
+          id?: number
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      study_groups: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: number
+          is_public: boolean
+          join_code: string
+          max_members: number | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: number
+          is_public?: boolean
+          join_code: string
+          max_members?: number | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: number
+          is_public?: boolean
+          join_code?: string
+          max_members?: number | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       topic_progress_history: {
         Row: {
@@ -626,9 +872,21 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: undefined
       }
+      check_social_achievements: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
+      generate_join_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_random_id: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      update_leaderboard: {
+        Args: { p_user_id: string; p_points: number }
+        Returns: undefined
       }
       update_user_streak: {
         Args: { p_user_id: string }

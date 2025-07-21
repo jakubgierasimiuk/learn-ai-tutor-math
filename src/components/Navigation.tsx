@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Brain, BookOpen, BarChart3, MessageCircle, TrendingUp, User, LogOut, Target } from "lucide-react";
+import { Brain, BookOpen, BarChart3, MessageCircle, TrendingUp, User, LogOut, Target, Users } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -62,6 +62,15 @@ export const Navigation = () => {
               AI Coach
             </Link>
             <Link 
+              to="/social" 
+              className={`flex items-center gap-2 transition-smooth ${
+                isActive('/social') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              Społeczność
+            </Link>
+            <Link 
               to="/analytics" 
               className={`flex items-center gap-2 transition-smooth ${
                 isActive('/analytics') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
@@ -120,26 +129,36 @@ export const Navigation = () => {
                 <Target className="w-4 h-4" />
                 Quiz
               </Link>
-              <Link 
-                to="/dashboard" 
-                className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                  isActive('/dashboard') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                }`}
-                onClick={() => setIsOpen(false)}
-              >
-                <BarChart3 className="w-4 h-4" />
-                Dashboard
-              </Link>
-              <Link 
-                to="/analytics" 
-                className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                  isActive('/analytics') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                }`}
-                onClick={() => setIsOpen(false)}
-              >
-                <TrendingUp className="w-4 h-4" />
-                Analityka
-              </Link>
+               <Link 
+                 to="/dashboard" 
+                 className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
+                   isActive('/dashboard') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
+                 }`}
+                 onClick={() => setIsOpen(false)}
+               >
+                 <BarChart3 className="w-4 h-4" />
+                 Dashboard
+               </Link>
+               <Link 
+                 to="/social" 
+                 className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
+                   isActive('/social') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
+                 }`}
+                 onClick={() => setIsOpen(false)}
+               >
+                 <Users className="w-4 h-4" />
+                 Społeczność
+               </Link>
+               <Link 
+                 to="/analytics" 
+                 className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
+                   isActive('/analytics') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
+                 }`}
+                 onClick={() => setIsOpen(false)}
+               >
+                 <TrendingUp className="w-4 h-4" />
+                 Analityka
+               </Link>
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
                 <span className="text-sm text-muted-foreground px-2">
                   {user?.email}
