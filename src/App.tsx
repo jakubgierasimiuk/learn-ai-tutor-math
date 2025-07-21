@@ -8,6 +8,7 @@ import { Navigation } from "@/components/Navigation";
 import HomePage from "./pages/HomePage";
 import LessonsPage from "./pages/LessonsPage";
 import TopicDetailPage from "./pages/TopicDetailPage";
+import LessonPage from "./pages/LessonPage";
 import QuizPage from "./pages/QuizPage";
 import DashboardPage from "./pages/DashboardPage";
 import ChatPage from "./pages/ChatPage";
@@ -63,6 +64,11 @@ const App = () => (
             <Route path="/topic/:topicId" element={
               <AuthenticatedLayout>
                 <TopicDetailPage />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/lesson/:lessonId" element={
+              <AuthenticatedLayout>
+                <LessonPage />
               </AuthenticatedLayout>
             } />
             <Route path="/quiz" element={
