@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Send, ThumbsUp, ThumbsDown, RotateCcw, User, Bot, BookOpen, Target, Lightbulb } from "lucide-react";
+import { Brain, Send, ThumbsUp, ThumbsDown, RotateCcw, User, Bot, BookOpen, Target, Lightbulb, Volume2, Mic, MicOff } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -64,6 +64,8 @@ export const AIChat = () => {
   const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
   const [currentSessionId, setCurrentSessionId] = useState<number | null>(null);
   const [showRecommendations, setShowRecommendations] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -268,6 +270,83 @@ export const AIChat = () => {
     }
   };
 
+  const handleTextToSpeech = async (text: string) => {
+    try {
+      const response = await supabase.functions.invoke('text-to-speech', {
+        body: { text }
+      });
+
+      if (response.error) throw response.error;
+
+      const audioContent = response.data.audioContent;
+      const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
+      await audio.play();
+      
+      toast.success("Odtwarzanie audio...");
+    } catch (error) {
+      console.error('Error with text-to-speech:', error);
+      toast.error("Błąd podczas odtwarzania audio");
+    }
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      const audioChunks: Blob[] = [];
+
+      recorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+      };
+
+      recorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+        const reader = new FileReader();
+        
+        reader.onloadend = async () => {
+          const base64Audio = reader.result?.toString().split(',')[1];
+          
+          if (base64Audio) {
+            try {
+              const response = await supabase.functions.invoke('voice-to-text', {
+                body: { audio: base64Audio }
+              });
+
+              if (response.error) throw response.error;
+
+              const transcribedText = response.data.text;
+              setNewMessage(transcribedText);
+              toast.success("Tekst został przepisany!");
+            } catch (error) {
+              console.error('Error with voice-to-text:', error);
+              toast.error("Błąd podczas transkrypcji");
+            }
+          }
+        };
+        
+        reader.readAsDataURL(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      recorder.start();
+      setMediaRecorder(recorder);
+      setIsRecording(true);
+      toast.success("Nagrywanie rozpoczęte...");
+    } catch (error) {
+      console.error('Error starting recording:', error);
+      toast.error("Błąd podczas dostępu do mikrofonu");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+      setIsRecording(false);
+      setMediaRecorder(null);
+      toast.success("Nagrywanie zakończone");
+    }
+  };
+
   const renderRecommendations = () => {
     if (!showRecommendations || !userProgress) return null;
 
@@ -330,7 +409,7 @@ export const AIChat = () => {
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex gap-4 group ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {message.role !== 'user' && (
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
@@ -362,11 +441,23 @@ export const AIChat = () => {
                         )}
                       </div>
                     </div>
-                    <div className="text-xs text-muted-foreground mt-1 px-2">
-                      {message.timestamp.toLocaleTimeString('pl-PL', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
+                    <div className="flex items-center justify-between mt-1 px-2">
+                      <div className="text-xs text-muted-foreground">
+                        {message.timestamp.toLocaleTimeString('pl-PL', { 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        })}
+                      </div>
+                      {message.role === 'assistant' && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleTextToSpeech(message.content)}
+                          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Volume2 className="w-3 h-3" />
+                        </Button>
+                      )}
                     </div>
                   </div>
 
@@ -430,17 +521,25 @@ export const AIChat = () => {
             {/* Input */}
             <div className="p-4 border-t border-border">
               <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={isRecording ? stopRecording : startRecording}
+                  className={`flex-shrink-0 ${isRecording ? 'bg-red-50 border-red-200 text-red-600' : ''}`}
+                >
+                  {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                </Button>
                 <Input
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Zadaj pytanie lub napisz swoją odpowiedź..."
+                  placeholder={isRecording ? "Nagrywanie..." : "Zadaj pytanie lub napisz swoją odpowiedź..."}
                   className="flex-1"
-                  disabled={isTyping}
+                  disabled={isTyping || isRecording}
                 />
                 <Button 
                   onClick={handleSendMessage}
-                  disabled={!newMessage.trim() || isTyping}
+                  disabled={!newMessage.trim() || isTyping || isRecording}
                   className="shadow-primary"
                 >
                   <Send className="w-4 h-4" />

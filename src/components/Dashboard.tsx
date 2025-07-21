@@ -54,7 +54,27 @@ export const Dashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
+    checkDiagnosticStatus();
   }, []);
+
+  const checkDiagnosticStatus = async () => {
+    if (!user) return;
+    
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("diagnosis_completed")
+        .eq("user_id", user.id)
+        .single();
+
+      // Redirect to diagnostic quiz if not completed
+      if (profile && !profile.diagnosis_completed) {
+        window.location.href = '/quiz';
+      }
+    } catch (error) {
+      console.error("Error checking diagnostic status:", error);
+    }
+  };
 
   const fetchDashboardData = async () => {
     try {

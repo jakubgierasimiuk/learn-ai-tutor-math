@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, Brain, ArrowLeft, ArrowRight, Clock, Target, Star } from "lucide-react";
+import { CheckCircle, XCircle, Brain, ArrowLeft, ArrowRight, Clock, Target, Star, Volume2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -127,6 +127,25 @@ export const DiagnosticQuiz = () => {
   const handlePrevious = () => {
     if (currentQuestion > 0) {
       setCurrentQuestion(currentQuestion - 1);
+    }
+  };
+
+  const handleTextToSpeech = async (text: string) => {
+    try {
+      const response = await supabase.functions.invoke('text-to-speech', {
+        body: { text }
+      });
+
+      if (response.error) throw response.error;
+
+      const audioContent = response.data.audioContent;
+      const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
+      await audio.play();
+      
+      toast.success("Odtwarzanie pytania...");
+    } catch (error) {
+      console.error('Error with text-to-speech:', error);
+      toast.error("Błąd podczas odtwarzania audio");
     }
   };
 
@@ -286,7 +305,18 @@ export const DiagnosticQuiz = () => {
 
         {/* Question */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-6">{question.question}</h3>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold">{question.question}</h3>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleTextToSpeech(question.question)}
+              className="flex items-center gap-2"
+            >
+              <Volume2 className="w-4 h-4" />
+              Odtwórz
+            </Button>
+          </div>
           
           <div className="space-y-3">
             {question.options.map((option) => (

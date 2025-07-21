@@ -128,16 +128,36 @@ export const Navigation = () => {
                 <BookOpen className="w-4 h-4" />
                 Lekcje
               </Link>
-              <Link 
-                to="/quiz" 
-                className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                  isActive('/quiz') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                }`}
-                onClick={() => setIsOpen(false)}
-              >
-                <Target className="w-4 h-4" />
-                Quiz
-              </Link>
+               <Link 
+                 to="/quiz" 
+                 className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
+                   isActive('/quiz') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
+                 }`}
+                 onClick={() => setIsOpen(false)}
+               >
+                 <Target className="w-4 h-4" />
+                 Quiz
+               </Link>
+               <Link 
+                 to="/chat" 
+                 className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
+                   isActive('/chat') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
+                 }`}
+                 onClick={() => setIsOpen(false)}
+               >
+                 <MessageCircle className="w-4 h-4" />
+                 AI Chat
+               </Link>
+               <Link 
+                 to="/recommendations" 
+                 className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
+                   isActive('/recommendations') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
+                 }`}
+                 onClick={() => setIsOpen(false)}
+               >
+                 <Brain className="w-4 h-4" />
+                 AI Coach
+               </Link>
                <Link 
                  to="/dashboard" 
                  className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
