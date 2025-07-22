@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Brain, BookOpen, BarChart3, MessageCircle, TrendingUp, User, LogOut, Target, Users, Trophy } from "lucide-react";
+import { Brain, BookOpen, BarChart3, MessageCircle, TrendingUp, User, LogOut, Target, Users, Trophy, TestTube } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -87,6 +87,15 @@ export const Navigation = () => {
             >
               <TrendingUp className="w-4 h-4" />
               Analityka
+            </Link>
+            <Link 
+              to="/ux-test" 
+              className={`flex items-center gap-2 transition-smooth ${
+                isActive('/ux-test') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
+              }`}
+            >
+              <TestTube className="w-4 h-4" />
+              UX Test
             </Link>
           </div>
 
@@ -197,6 +206,16 @@ export const Navigation = () => {
                 >
                   <TrendingUp className="w-4 h-4" />
                   Analityka
+                </Link>
+                <Link 
+                  to="/ux-test" 
+                  className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
+                    isActive('/ux-test') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
+                  }`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  <TestTube className="w-4 h-4" />
+                  UX Test
                 </Link>
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
                 <span className="text-sm text-muted-foreground px-2">
