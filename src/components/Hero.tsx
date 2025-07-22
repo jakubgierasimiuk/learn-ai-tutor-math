@@ -16,13 +16,13 @@ export const Hero = () => {
           {/* Left content */}
           <div className="space-y-8 animate-slideInFromLeft">
             <div className="space-y-4">
-              <h1 className="text-4xl md:text-6xl font-bold leading-tight text-balance">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-balance">
                 Ucz się matematyki z{" "}
                 <span className="gradient-hero bg-clip-text text-transparent animate-glow">
                   AI Tutorem
                 </span>
               </h1>
-              <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
+              <p className="text-lg md:text-xl lg:text-xl text-muted-foreground leading-relaxed max-w-lg">
                 Personalizowana nauka matematyki z wykorzystaniem sztucznej inteligencji. 
                 Dostosowujemy się do Twojego tempa i stylu uczenia się.
               </p>

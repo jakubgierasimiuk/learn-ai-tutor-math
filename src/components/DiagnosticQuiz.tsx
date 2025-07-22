@@ -311,9 +311,11 @@ export const DiagnosticQuiz = () => {
               variant="outline"
               size="sm"
               onClick={() => handleTextToSpeech(question.question)}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 min-h-[44px] touch-target focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              aria-label="Odtwórz pytanie"
             >
               <Volume2 className="w-4 h-4" />
+              <span className="sr-only">Odtwórz pytanie audio</span>
               Odtwórz
             </Button>
           </div>
@@ -323,7 +325,7 @@ export const DiagnosticQuiz = () => {
               <button
                 key={option.id}
                 onClick={() => handleAnswerSelect(question.id, option.id)}
-                className={`w-full p-4 text-left rounded-lg border transition-all ${
+                className={`w-full min-h-[48px] p-4 text-left rounded-lg border transition-all touch-target focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
                   selectedAnswer === option.id
                     ? 'border-primary bg-primary/10 text-primary'
                     : 'border-border hover:border-primary/50 hover:bg-primary/5'
@@ -353,6 +355,7 @@ export const DiagnosticQuiz = () => {
             variant="outline"
             onClick={handlePrevious}
             disabled={currentQuestion === 0}
+            className="min-h-[48px] touch-target focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Poprzednie
@@ -361,7 +364,7 @@ export const DiagnosticQuiz = () => {
           <Button
             onClick={handleNext}
             disabled={!selectedAnswer}
-            className="shadow-primary"
+            className="shadow-primary min-h-[48px] touch-target focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
             {currentQuestion === quizQuestions.length - 1 ? 'Zakończ' : 'Następne'}
             <ArrowRight className="w-4 h-4 ml-2" />

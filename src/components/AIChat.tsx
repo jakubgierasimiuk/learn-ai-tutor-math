@@ -285,7 +285,7 @@ export const AIChat = () => {
       toast.success("Odtwarzanie audio...");
     } catch (error) {
       console.error('Error with text-to-speech:', error);
-      toast.error("Błąd podczas odtwarzania audio");
+      toast.error("Funkcja audio niedostępna. Możesz przeczytać wiadomość powyżej.");
     }
   };
 
@@ -319,7 +319,7 @@ export const AIChat = () => {
               toast.success("Tekst został przepisany!");
             } catch (error) {
               console.error('Error with voice-to-text:', error);
-              toast.error("Błąd podczas transkrypcji");
+              toast.error("Funkcja transkrypcji niedostępna. Wpisz wiadomość ręcznie.");
             }
           }
         };
@@ -334,7 +334,7 @@ export const AIChat = () => {
       toast.success("Nagrywanie rozpoczęte...");
     } catch (error) {
       console.error('Error starting recording:', error);
-      toast.error("Błąd podczas dostępu do mikrofonu");
+      toast.error("Mikrofon niedostępny. Sprawdź uprawnienia lub wpisz wiadomość ręcznie.");
     }
   };
 
@@ -453,9 +453,11 @@ export const AIChat = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleTextToSpeech(message.content)}
-                          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity focus:ring-2 focus:ring-primary focus:ring-offset-2 touch-target"
+                          aria-label={`Odtwórz wiadomość: ${message.content.substring(0, 50)}...`}
                         >
                           <Volume2 className="w-3 h-3" />
+                          <span className="sr-only">Odtwórz tę wiadomość jako audio</span>
                         </Button>
                       )}
                     </div>
@@ -500,7 +502,8 @@ export const AIChat = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => handleQuickResponse("Tak, rozumiem")}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 min-h-[48px] touch-target focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                    aria-label="Potwierdzam, że rozumiem wyjaśnienie"
                   >
                     <ThumbsUp className="w-4 h-4" />
                     Tak, rozumiem
@@ -509,7 +512,8 @@ export const AIChat = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => handleQuickResponse("Nie rozumiem, wytłumacz ponownie")}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 min-h-[48px] touch-target focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                    aria-label="Potrzebuję dodatkowego wyjaśnienia"
                   >
                     <ThumbsDown className="w-4 h-4" />
                     Nie rozumiem
@@ -525,24 +529,29 @@ export const AIChat = () => {
                   variant="outline"
                   size="sm"
                   onClick={isRecording ? stopRecording : startRecording}
-                  className={`flex-shrink-0 ${isRecording ? 'bg-red-50 border-red-200 text-red-600' : ''}`}
+                  className={`flex-shrink-0 min-h-[48px] touch-target focus:ring-2 focus:ring-primary focus:ring-offset-2 ${isRecording ? 'bg-destructive/10 border-destructive/20 text-destructive' : ''}`}
+                  aria-label={isRecording ? 'Zatrzymaj nagrywanie głosowe' : 'Rozpocznij nagrywanie głosowe'}
                 >
                   {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                  <span className="sr-only">{isRecording ? 'Zakończ nagrywanie' : 'Nagrywaj wiadomość głosową'}</span>
                 </Button>
                 <Input
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder={isRecording ? "Nagrywanie..." : "Zadaj pytanie lub napisz swoją odpowiedź..."}
-                  className="flex-1"
+                  placeholder={isRecording ? "Nagrywanie... (kliknij mikrofon ponownie aby zakończyć)" : "Zadaj pytanie lub napisz swoją odpowiedź..."}
+                  className="flex-1 min-h-[48px] focus:ring-2 focus:ring-primary focus:ring-offset-2"
                   disabled={isTyping || isRecording}
+                  aria-label="Pole tekstowe do wpisywania wiadomości"
                 />
                 <Button 
                   onClick={handleSendMessage}
                   disabled={!newMessage.trim() || isTyping || isRecording}
-                  className="shadow-primary"
+                  className="shadow-primary min-h-[48px] touch-target focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                  aria-label="Wyślij wiadomość do AI Tutora"
                 >
                   <Send className="w-4 h-4" />
+                  <span className="sr-only">Wyślij wiadomość</span>
                 </Button>
               </div>
             </div>
