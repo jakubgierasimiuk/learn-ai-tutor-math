@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@/test/utils/test-utils'
+import { render, waitFor, screen } from '@/test/utils/test-utils'
 import userEvent from '@testing-library/user-event'
 import { DiagnosticQuiz } from '../../components/DiagnosticQuiz'
 import { mockSupabase } from '../mocks/supabase'
@@ -10,6 +10,7 @@ describe('Quiz Flow Integration', () => {
     
     // Mock successful database operations
     mockSupabase.from.mockReturnValue({
+      ...mockSupabase.from(),
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({
@@ -179,6 +180,7 @@ describe('Quiz Flow Integration', () => {
     
     // Mock database error
     mockSupabase.from.mockReturnValue({
+      ...mockSupabase.from(),
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockRejectedValue(new Error('Database connection failed')),

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@/test/utils/test-utils'
+import { render, waitFor, screen } from '@/test/utils/test-utils'
 import { Navigation } from '../Navigation'
 import userEvent from '@testing-library/user-event'
 

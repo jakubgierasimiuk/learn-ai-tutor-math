@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@/test/utils/test-utils'
+import { render, waitFor, screen } from '@/test/utils/test-utils'
 import { DiagnosticQuiz } from '../DiagnosticQuiz'
 import userEvent from '@testing-library/user-event'
 import { mockSupabase } from '@/test/mocks/supabase'
@@ -10,6 +10,7 @@ describe('DiagnosticQuiz Component', () => {
     
     // Mock successful topic fetch
     mockSupabase.from.mockReturnValue({
+      ...mockSupabase.from(),
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({
@@ -137,6 +138,7 @@ describe('DiagnosticQuiz Component', () => {
     
     // Mock successful save operations
     mockSupabase.from.mockReturnValue({
+      ...mockSupabase.from(),
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({

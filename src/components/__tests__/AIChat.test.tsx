@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@/test/utils/test-utils'
+import { render, waitFor, screen } from '@/test/utils/test-utils'
 import { AIChat } from '../AIChat'
 import userEvent from '@testing-library/user-event'
 import { mockSupabase } from '@/test/mocks/supabase'
@@ -10,6 +10,7 @@ describe('AIChat Component', () => {
     
     // Mock chat session creation
     mockSupabase.from.mockReturnValue({
+      ...mockSupabase.from(),
       insert: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({

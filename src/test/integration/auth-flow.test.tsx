@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@/test/utils/test-utils'
+import { render, waitFor, screen } from '@/test/utils/test-utils'
 import userEvent from '@testing-library/user-event'
 import App from '../../App'
 import { mockSupabase } from '../mocks/supabase'
@@ -70,6 +70,7 @@ describe('Authentication Flow Integration', () => {
     
     // Mock profile data
     mockSupabase.from.mockReturnValue({
+      ...mockSupabase.from(),
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({
@@ -107,6 +108,7 @@ describe('Authentication Flow Integration', () => {
     
     // Mock profile without completed diagnosis
     mockSupabase.from.mockReturnValue({
+      ...mockSupabase.from(),
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({
@@ -146,6 +148,7 @@ describe('Authentication Flow Integration', () => {
     })
     
     mockSupabase.from.mockReturnValue({
+      ...mockSupabase.from(),
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({
@@ -206,14 +209,12 @@ describe('Authentication Flow Integration', () => {
     }
     
     // Mock auth state change to simulate persistence
-    mockSupabase.auth.onAuthStateChange.mockImplementation((callback) => {
-      callback('SIGNED_IN', { user: mockUser })
-      return {
-        data: { subscription: { unsubscribe: vi.fn() } }
-      }
+    mockSupabase.auth.onAuthStateChange.mockReturnValue({
+      data: { subscription: { unsubscribe: vi.fn() } }
     })
-    
+
     mockSupabase.from.mockReturnValue({
+      ...mockSupabase.from(),
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({

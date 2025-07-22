@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@/test/utils/test-utils'
+import { render, waitFor, screen } from '@/test/utils/test-utils'
 import HomePage from '../HomePage'
 import { mockSupabase } from '@/test/mocks/supabase'
 
@@ -9,6 +9,7 @@ describe('HomePage', () => {
     
     // Mock data fetching
     mockSupabase.from.mockReturnValue({
+      ...mockSupabase.from(),
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       order: vi.fn().mockReturnThis(),
@@ -84,6 +85,7 @@ describe('HomePage', () => {
   it('shows DiagnosticQuiz when user has not completed diagnosis', async () => {
     // Mock user without completed diagnosis
     mockSupabase.from.mockReturnValue({
+      ...mockSupabase.from(),
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({
@@ -107,6 +109,7 @@ describe('HomePage', () => {
   it('handles loading state properly', () => {
     // Mock delayed response
     mockSupabase.from.mockReturnValue({
+      ...mockSupabase.from(),
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockImplementation(() => 
@@ -160,6 +163,7 @@ describe('HomePage', () => {
   it('handles error states gracefully', async () => {
     // Mock error response
     mockSupabase.from.mockReturnValue({
+      ...mockSupabase.from(),
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({

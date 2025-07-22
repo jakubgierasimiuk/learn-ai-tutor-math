@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react'
-import { render, RenderOptions, screen, waitFor } from '@testing-library/react'
+import { render, RenderOptions } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -32,7 +32,28 @@ const customRender = (
 ) => render(ui, { wrapper: AllTheProviders, ...options })
 
 export * from '@testing-library/react'
-export { customRender as render, screen, waitFor }
+export { customRender as render }
+
+// Export screen from @testing-library/dom
+export { screen } from '@testing-library/dom'
+
+// Helper function to wait for async operations
+export const waitFor = async (callback: () => void | Promise<void>, options?: { timeout?: number }) => {
+  const timeout = options?.timeout || 1000
+  const start = Date.now()
+  
+  while (Date.now() - start < timeout) {
+    try {
+      await callback()
+      return
+    } catch (error) {
+      await new Promise(resolve => setTimeout(resolve, 10))
+    }
+  }
+  
+  // Final attempt
+  await callback()
+}
 
 // Mock data generators
 export const createMockLesson = (overrides = {}) => ({
