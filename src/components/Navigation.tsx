@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Brain, BookOpen, BarChart3, MessageCircle, TrendingUp, User, LogOut, Target, Users, Trophy, TestTube } from "lucide-react";
+import { Brain, BookOpen, BarChart3, MessageCircle, TrendingUp, User, LogOut, Target, Users, Trophy, TestTube, Gift } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -87,6 +87,15 @@ export const Navigation = () => {
             >
               <TrendingUp className="w-4 h-4" />
               Analityka
+            </Link>
+            <Link 
+              to="/referral" 
+              className={`flex items-center gap-2 transition-smooth ${
+                isActive('/referral') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
+              }`}
+            >
+              <Gift className="w-4 h-4" />
+              Polecenia
             </Link>
             <Link 
               to="/ux-test" 
@@ -197,26 +206,36 @@ export const Navigation = () => {
                   <Trophy className="w-4 h-4" />
                   Gamifikacja
                 </Link>
-                <Link 
-                  to="/analytics" 
-                  className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                    isActive('/analytics') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                  }`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  <TrendingUp className="w-4 h-4" />
-                  Analityka
-                </Link>
-                <Link 
-                  to="/ux-test" 
-                  className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                    isActive('/ux-test') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                  }`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  <TestTube className="w-4 h-4" />
-                  UX Test
-                </Link>
+                 <Link 
+                   to="/analytics" 
+                   className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
+                     isActive('/analytics') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
+                   }`}
+                   onClick={() => setIsOpen(false)}
+                 >
+                   <TrendingUp className="w-4 h-4" />
+                   Analityka
+                 </Link>
+                 <Link 
+                   to="/referral" 
+                   className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
+                     isActive('/referral') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
+                   }`}
+                   onClick={() => setIsOpen(false)}
+                 >
+                   <Gift className="w-4 h-4" />
+                   Polecenia
+                 </Link>
+                 <Link 
+                   to="/ux-test" 
+                   className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
+                     isActive('/ux-test') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
+                   }`}
+                   onClick={() => setIsOpen(false)}
+                 >
+                   <TestTube className="w-4 h-4" />
+                   UX Test
+                 </Link>
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
                 <span className="text-sm text-muted-foreground px-2">
                   {user?.email}

@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { useReferral } from "@/hooks/useReferral";
 import { Navigation } from "@/components/Navigation";
 import HomePage from "./pages/HomePage";
 import LessonsPage from "./pages/LessonsPage";
@@ -19,11 +20,13 @@ import SocialPage from "./pages/SocialPage";
 import GamificationPage from "./pages/GamificationPage";
 import NotFound from "./pages/NotFound";
 import UXTestPage from "./pages/UXTestPage";
+import ReferralPage from "./pages/ReferralPage";
 
 const queryClient = new QueryClient();
 
 const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
+  useReferral(); // Initialize referral processing
 
   if (loading) {
     return (
@@ -108,6 +111,11 @@ const App = () => (
             <Route path="/gamification" element={
               <AuthenticatedLayout>
                 <GamificationPage />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/referral" element={
+              <AuthenticatedLayout>
+                <ReferralPage />
               </AuthenticatedLayout>
             } />
             <Route path="/ux-test" element={
