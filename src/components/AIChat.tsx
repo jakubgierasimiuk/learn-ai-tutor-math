@@ -119,7 +119,7 @@ export const AIChat = () => {
           status: 'in_progress'
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (sessionData) {
         setCurrentSessionId(sessionData.id);

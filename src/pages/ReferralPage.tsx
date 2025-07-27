@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import { useReferralStats } from "@/hooks/useReferralStats";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ReferralDemo } from "@/components/ReferralDemo";
-import { toast } from "sonner";
+import { TierType } from "@/types";
 import { 
   Copy, 
   Share2, 
@@ -20,24 +20,7 @@ import {
   RefreshCw
 } from "lucide-react";
 
-interface ReferralStats {
-  successful_referrals: number;
-  total_points: number;
-  available_points: number;
-  free_months_earned: number;
-  current_tier: string;
-}
-
-interface Reward {
-  id: string;
-  name: string;
-  description: string;
-  points_required: number;
-  category: string;
-  image_url?: string;
-}
-
-const tierInfo = {
+const tierInfo: Record<TierType, { label: string; icon: any; color: string }> = {
   beginner: { label: "Początkujący", icon: Target, color: "bg-gray-500" },
   advocate: { label: "Adwokat", icon: Users, color: "bg-blue-500" },
   promoter: { label: "Promotor", icon: Trophy, color: "bg-green-500" },
@@ -47,134 +30,23 @@ const tierInfo = {
 
 export default function ReferralPage() {
   const { user } = useAuth();
-  const [referralCode, setReferralCode] = useState<string>("");
-  const [stats, setStats] = useState<ReferralStats | null>(null);
-  const [rewards, setRewards] = useState<Reward[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const {
+    stats,
+    rewards,
+    referralCode,
+    loading,
+    refreshing,
+    loadReferralData,
+    claimReward,
+    copyReferralUrl,
+    shareReferralUrl
+  } = useReferralStats();
 
   const referralUrl = referralCode ? `${window.location.origin}?ref=${referralCode}` : "";
 
-  useEffect(() => {
-    if (user) {
-      loadReferralData();
-      loadRewards();
-    }
-  }, [user]);
+  const currentTier = stats?.current_tier || 'beginner';
+  const TierIcon = tierInfo[currentTier]?.icon || Target;
 
-  const loadReferralData = async () => {
-    if (!user) return;
-
-    try {
-      setRefreshing(true);
-      
-      // Get or create referral code
-      const { data: codeData, error: codeError } = await supabase.functions.invoke('create-referral-code');
-      
-      if (codeError) throw codeError;
-      
-      setReferralCode(codeData.code);
-
-      // Get user stats
-      const { data: statsData, error: statsError } = await supabase
-        .from("user_referral_stats")
-        .select("*")
-        .eq("user_id", user.id)
-        .single();
-
-      if (statsError && statsError.code !== 'PGRST116') {
-        throw statsError;
-      }
-
-      if (statsData) {
-        setStats(statsData);
-      } else {
-        // Initialize stats if not found
-        setStats({
-          successful_referrals: 0,
-          total_points: 0,
-          available_points: 0,
-          free_months_earned: 0,
-          current_tier: 'beginner'
-        });
-      }
-
-    } catch (error) {
-      console.error("Error loading referral data:", error);
-      toast.error("Błąd podczas ładowania danych poleceń");
-    } finally {
-      setRefreshing(false);
-      setLoading(false);
-    }
-  };
-
-  const loadRewards = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("rewards_catalog")
-        .select("*")
-        .eq("is_active", true)
-        .order("points_required", { ascending: true });
-
-      if (error) throw error;
-      setRewards(data || []);
-    } catch (error) {
-      console.error("Error loading rewards:", error);
-      toast.error("Błąd podczas ładowania nagród");
-    }
-  };
-
-  const copyReferralUrl = async () => {
-    try {
-      await navigator.clipboard.writeText(referralUrl);
-      toast.success("Link skopiowany do schowka!");
-    } catch (error) {
-      toast.error("Błąd podczas kopiowania linku");
-    }
-  };
-
-  const shareReferralUrl = async () => {
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: "Dołącz do AI Tutora!",
-          text: "Ucz się matematyki z AI! Otrzymaj 7 dni darmowo.",
-          url: referralUrl,
-        });
-      } else {
-        await copyReferralUrl();
-      }
-    } catch (error) {
-      console.error("Error sharing:", error);
-    }
-  };
-
-  const claimReward = async (reward: Reward) => {
-    if (!stats || stats.available_points < reward.points_required) {
-      toast.error("Nie masz wystarczającej liczby punktów!");
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase.functions.invoke('claim-reward', {
-        body: {
-          rewardId: reward.id,
-          deliveryInfo: {
-            email: user?.email || "",
-            name: user?.email?.split("@")[0] || "User"
-          }
-        }
-      });
-
-      if (error) throw error;
-
-      toast.success("Nagroda została zamówiona! Otrzymasz potwierdzenie na email.");
-      loadReferralData(); // Refresh stats
-    } catch (error) {
-      console.error("Error claiming reward:", error);
-      toast.error("Błąd podczas zamawiania nagrody");
-    }
-  };
 
   if (loading) {
     return (
@@ -191,8 +63,6 @@ export default function ReferralPage() {
     );
   }
 
-  const currentTier = stats?.current_tier || 'beginner';
-  const TierIcon = tierInfo[currentTier as keyof typeof tierInfo]?.icon || Target;
 
   return (
     <div className="container mx-auto p-6 space-y-6">

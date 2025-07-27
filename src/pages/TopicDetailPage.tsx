@@ -55,7 +55,7 @@ const TopicDetailPage = () => {
         .from("topics")
         .select("*")
         .eq("id", parseInt(topicId))
-        .single();
+        .maybeSingle();
 
       if (topicError) throw topicError;
 

@@ -64,7 +64,7 @@ export const useReferral = () => {
         .select("referral_code")
         .eq("referred_user_id", user.id)
         .eq("status", "pending")
-        .single();
+        .maybeSingle();
 
       if (referralData?.referral_code) {
         await supabase.functions.invoke('process-referral', {
@@ -89,7 +89,7 @@ export const useReferral = () => {
         .select("referral_code")
         .eq("referred_user_id", user.id)
         .eq("status", "trial")
-        .single();
+        .maybeSingle();
 
       if (referralData?.referral_code) {
         const { error } = await supabase.functions.invoke('process-referral', {

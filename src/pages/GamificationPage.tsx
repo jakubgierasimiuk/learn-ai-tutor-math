@@ -109,14 +109,14 @@ export default function GamificationPage() {
         .from('profiles')
         .select('level, total_points')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
 
       // Get streak data
       const { data: streak } = await supabase
         .from('user_streaks')
         .select('current_streak, longest_streak')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
 
       // Get lesson progress
       const { data: progress } = await supabase

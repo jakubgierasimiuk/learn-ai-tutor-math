@@ -162,7 +162,7 @@ export const DiagnosticQuiz = () => {
           .from('topics')
           .select('id')
           .eq('name', result.topic)
-          .single();
+          .maybeSingle();
           
         if (topics) {
           await supabase

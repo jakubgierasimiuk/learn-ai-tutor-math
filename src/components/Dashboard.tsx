@@ -83,7 +83,7 @@ export const Dashboard = () => {
         .from("profiles")
         .select("total_points")
         .eq("user_id", user?.id)
-        .single();
+        .maybeSingle();
 
       // Fetch lesson completion stats
       const { data: lessonStats } = await supabase

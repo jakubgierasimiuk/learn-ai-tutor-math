@@ -126,13 +126,13 @@ export default function AnalyticsPage() {
         .from('profiles')
         .select('total_points')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
 
       const { data: streakData } = await supabase
         .from('user_streaks')
         .select('current_streak')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
 
       const { data: progressData } = await supabase
         .from('user_lesson_progress')

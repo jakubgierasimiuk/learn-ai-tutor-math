@@ -72,7 +72,7 @@ const LessonPage = () => {
         .from("lessons")
         .select("*")
         .eq("id", parseInt(lessonId!))
-        .single();
+        .maybeSingle();
 
       if (lessonError) throw lessonError;
 
@@ -128,7 +128,7 @@ const LessonPage = () => {
           started_at: new Date().toISOString()
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       setProgress({
@@ -156,7 +156,7 @@ const LessonPage = () => {
         .eq("lesson_id", parseInt(lessonId!))
         .eq("user_id", user?.id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       setProgress({
@@ -194,7 +194,7 @@ const LessonPage = () => {
         .from("profiles")
         .select("total_points")
         .eq("user_id", user?.id)
-        .single();
+        .maybeSingle();
 
       if (profile) {
         await supabase

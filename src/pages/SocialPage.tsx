@@ -201,7 +201,7 @@ export default function SocialPage() {
         .from('study_groups')
         .select('id')
         .eq('join_code', joinCode.toUpperCase())
-        .single();
+        .maybeSingle();
 
       if (!group) {
         toast.error('Nieprawidłowy kod grupy');
@@ -246,7 +246,7 @@ export default function SocialPage() {
           created_by: user?.id
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         toast.error('Błąd podczas tworzenia grupy');

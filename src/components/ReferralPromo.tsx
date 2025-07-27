@@ -1,56 +1,16 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import { useReferralStats } from "@/hooks/useReferralStats";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Gift, Users, Trophy, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
-
-interface ReferralStats {
-  successful_referrals: number;
-  available_points: number;
-  free_months_earned: number;
-  current_tier: string;
-}
+import { TierType } from "@/types";
 
 export const ReferralPromo = () => {
   const { user } = useAuth();
-  const [stats, setStats] = useState<ReferralStats | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (user) {
-      loadStats();
-    } else {
-      setLoading(false);
-    }
-  }, [user]);
-
-  const loadStats = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("user_referral_stats")
-        .select("*")
-        .eq("user_id", user!.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
-
-      setStats(data || {
-        successful_referrals: 0,
-        available_points: 0,
-        free_months_earned: 0,
-        current_tier: 'beginner'
-      });
-    } catch (error) {
-      console.error("Error loading referral stats:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { stats, loading } = useReferralStats();
 
   if (loading) {
     return (
@@ -66,7 +26,7 @@ export const ReferralPromo = () => {
     );
   }
 
-  const getTierColor = (tier: string) => {
+  const getTierColor = (tier: TierType) => {
     switch (tier) {
       case 'legend': return 'bg-yellow-500';
       case 'ambassador': return 'bg-purple-500';
@@ -76,7 +36,7 @@ export const ReferralPromo = () => {
     }
   };
 
-  const getTierLabel = (tier: string) => {
+  const getTierLabel = (tier: TierType) => {
     switch (tier) {
       case 'legend': return 'Legenda';
       case 'ambassador': return 'Ambasador';
