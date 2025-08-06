@@ -21,6 +21,8 @@ import GamificationPage from "./pages/GamificationPage";
 import NotFound from "./pages/NotFound";
 import UXTestPage from "./pages/UXTestPage";
 import ReferralPage from "./pages/ReferralPage";
+import StudyDashboard from "./pages/StudyDashboard";
+import StudyLesson from "./pages/StudyLesson";
 
 const queryClient = new QueryClient();
 
@@ -121,6 +123,16 @@ const App = () => (
             <Route path="/ux-test" element={
               <AuthenticatedLayout>
                 <UXTestPage />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/study" element={
+              <AuthenticatedLayout>
+                <StudyDashboard />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/study/lesson/:skillId" element={
+              <AuthenticatedLayout>
+                <StudyLesson />
               </AuthenticatedLayout>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

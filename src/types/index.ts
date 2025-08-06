@@ -280,3 +280,123 @@ export interface RewardClaimForm {
     address?: string;
   };
 }
+
+// Study & Learn Module Types
+export interface Skill {
+  id: string;
+  name: string;
+  description?: string;
+  department: string; // 'algebra', 'geometry', 'trigonometry', etc.
+  level: 'basic' | 'extended';
+  class_level: number; // 1-4 (liceum)
+  prerequisites?: string[]; // array of skill UUIDs
+  estimated_time_minutes: number;
+  difficulty_rating: number; // 1-5
+  men_code?: string; // official MEN curriculum code
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SkillProgress {
+  id: string;
+  user_id: string;
+  skill_id: string;
+  mastery_level: number; // 0-5 (Leitner boxes)
+  last_reviewed_at?: string;
+  next_review_at?: string;
+  total_attempts: number;
+  correct_attempts: number;
+  consecutive_correct: number;
+  difficulty_multiplier: number;
+  is_mastered: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StudySession {
+  id: string;
+  user_id: string;
+  skill_id: string;
+  session_type: 'lesson' | 'diagnostic' | 'review' | 'quiz';
+  status: 'in_progress' | 'completed' | 'abandoned';
+  total_steps: number;
+  completed_steps: number;
+  hints_used: number;
+  early_reveals: number; // "Pokaż rozwiązanie" clicks
+  pseudo_activity_strikes: number;
+  average_response_time_ms?: number;
+  mastery_score?: number; // final assessment 0-100
+  ai_model_used: string;
+  total_tokens_used: number;
+  started_at: string;
+  completed_at?: string;
+  created_at: string;
+}
+
+export interface LessonStep {
+  id: string;
+  session_id: string;
+  step_number: number;
+  step_type: 'question' | 'explanation' | 'hint' | 'solution';
+  ai_prompt?: string;
+  ai_response?: string;
+  user_input?: string;
+  is_correct?: boolean;
+  response_time_ms?: number;
+  tokens_used: number;
+  created_at: string;
+}
+
+export interface DiagnosticTest {
+  id: string;
+  user_id: string;
+  skill_id: string;
+  test_type: 'pre_lesson' | 'recheck';
+  questions_data: any; // JSONB array of questions and answers
+  total_questions: number;
+  correct_answers: number;
+  final_score?: number; // 0-100
+  estimated_mastery_level?: number; // 0-5 for Leitner
+  completed_at?: string;
+  created_at: string;
+}
+
+export interface UserDailyLimit {
+  id: string;
+  user_id: string;
+  date: string;
+  tokens_used: number;
+  soft_limit: number;
+  hard_limit: number;
+  sessions_count: number;
+  created_at: string;
+}
+
+export interface MathValidationCache {
+  id: string;
+  expression_hash: string;
+  input_expression: string;
+  validation_result?: any;
+  is_correct?: boolean;
+  error_message?: string;
+  cached_at: string;
+}
+
+// Study Dashboard Types
+export interface DepartmentProgress {
+  department: string;
+  total_skills: number;
+  mastered_skills: number;
+  in_progress_skills: number;
+  mastery_percentage: number;
+}
+
+export interface StudyReport {
+  skill_id: string;
+  skill_name: string;
+  status: 'mastered' | 'in_progress' | 'to_review';
+  mastery_level: number;
+  last_reviewed?: string;
+  next_review?: string;
+}

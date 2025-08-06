@@ -172,6 +172,56 @@ export type Database = {
         }
         Relationships: []
       }
+      diagnostic_tests: {
+        Row: {
+          completed_at: string | null
+          correct_answers: number | null
+          created_at: string
+          estimated_mastery_level: number | null
+          final_score: number | null
+          id: string
+          questions_data: Json
+          skill_id: string
+          test_type: string
+          total_questions: number
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          correct_answers?: number | null
+          created_at?: string
+          estimated_mastery_level?: number | null
+          final_score?: number | null
+          id?: string
+          questions_data: Json
+          skill_id: string
+          test_type?: string
+          total_questions: number
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          correct_answers?: number | null
+          created_at?: string
+          estimated_mastery_level?: number | null
+          final_score?: number | null
+          id?: string
+          questions_data?: Json
+          skill_id?: string
+          test_type?: string
+          total_questions?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diagnostic_tests_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_study_sessions: {
         Row: {
           created_at: string
@@ -334,6 +384,56 @@ export type Database = {
           },
         ]
       }
+      lesson_steps: {
+        Row: {
+          ai_prompt: string | null
+          ai_response: string | null
+          created_at: string
+          id: string
+          is_correct: boolean | null
+          response_time_ms: number | null
+          session_id: string
+          step_number: number
+          step_type: string
+          tokens_used: number | null
+          user_input: string | null
+        }
+        Insert: {
+          ai_prompt?: string | null
+          ai_response?: string | null
+          created_at?: string
+          id?: string
+          is_correct?: boolean | null
+          response_time_ms?: number | null
+          session_id: string
+          step_number: number
+          step_type: string
+          tokens_used?: number | null
+          user_input?: string | null
+        }
+        Update: {
+          ai_prompt?: string | null
+          ai_response?: string | null
+          created_at?: string
+          id?: string
+          is_correct?: boolean | null
+          response_time_ms?: number | null
+          session_id?: string
+          step_number?: number
+          step_type?: string
+          tokens_used?: number | null
+          user_input?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_steps_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "study_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lessons: {
         Row: {
           content_data: Json
@@ -386,6 +486,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      math_validation_cache: {
+        Row: {
+          cached_at: string
+          error_message: string | null
+          expression_hash: string
+          id: string
+          input_expression: string
+          is_correct: boolean | null
+          validation_result: Json | null
+        }
+        Insert: {
+          cached_at?: string
+          error_message?: string | null
+          expression_hash: string
+          id?: string
+          input_expression: string
+          is_correct?: boolean | null
+          validation_result?: Json | null
+        }
+        Update: {
+          cached_at?: string
+          error_message?: string | null
+          expression_hash?: string
+          id?: string
+          input_expression?: string
+          is_correct?: boolean | null
+          validation_result?: Json | null
+        }
+        Relationships: []
       }
       points_history: {
         Row: {
@@ -748,6 +878,110 @@ export type Database = {
           },
         ]
       }
+      skill_progress: {
+        Row: {
+          consecutive_correct: number | null
+          correct_attempts: number | null
+          created_at: string
+          difficulty_multiplier: number | null
+          id: string
+          is_mastered: boolean | null
+          last_reviewed_at: string | null
+          mastery_level: number | null
+          next_review_at: string | null
+          skill_id: string
+          total_attempts: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          consecutive_correct?: number | null
+          correct_attempts?: number | null
+          created_at?: string
+          difficulty_multiplier?: number | null
+          id?: string
+          is_mastered?: boolean | null
+          last_reviewed_at?: string | null
+          mastery_level?: number | null
+          next_review_at?: string | null
+          skill_id: string
+          total_attempts?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          consecutive_correct?: number | null
+          correct_attempts?: number | null
+          created_at?: string
+          difficulty_multiplier?: number | null
+          id?: string
+          is_mastered?: boolean | null
+          last_reviewed_at?: string | null
+          mastery_level?: number | null
+          next_review_at?: string | null
+          skill_id?: string
+          total_attempts?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_progress_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      skills: {
+        Row: {
+          class_level: number
+          created_at: string
+          department: string
+          description: string | null
+          difficulty_rating: number | null
+          estimated_time_minutes: number | null
+          id: string
+          is_active: boolean | null
+          level: string
+          men_code: string | null
+          name: string
+          prerequisites: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          class_level?: number
+          created_at?: string
+          department: string
+          description?: string | null
+          difficulty_rating?: number | null
+          estimated_time_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          level?: string
+          men_code?: string | null
+          name: string
+          prerequisites?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          class_level?: number
+          created_at?: string
+          department?: string
+          description?: string | null
+          difficulty_rating?: number | null
+          estimated_time_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          level?: string
+          men_code?: string | null
+          name?: string
+          prerequisites?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       social_achievements: {
         Row: {
           achievement_type: string
@@ -843,6 +1077,74 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      study_sessions: {
+        Row: {
+          ai_model_used: string | null
+          average_response_time_ms: number | null
+          completed_at: string | null
+          completed_steps: number | null
+          created_at: string
+          early_reveals: number | null
+          hints_used: number | null
+          id: string
+          mastery_score: number | null
+          pseudo_activity_strikes: number | null
+          session_type: string
+          skill_id: string
+          started_at: string
+          status: string
+          total_steps: number | null
+          total_tokens_used: number | null
+          user_id: string
+        }
+        Insert: {
+          ai_model_used?: string | null
+          average_response_time_ms?: number | null
+          completed_at?: string | null
+          completed_steps?: number | null
+          created_at?: string
+          early_reveals?: number | null
+          hints_used?: number | null
+          id?: string
+          mastery_score?: number | null
+          pseudo_activity_strikes?: number | null
+          session_type?: string
+          skill_id: string
+          started_at?: string
+          status?: string
+          total_steps?: number | null
+          total_tokens_used?: number | null
+          user_id: string
+        }
+        Update: {
+          ai_model_used?: string | null
+          average_response_time_ms?: number | null
+          completed_at?: string | null
+          completed_steps?: number | null
+          created_at?: string
+          early_reveals?: number | null
+          hints_used?: number | null
+          id?: string
+          mastery_score?: number | null
+          pseudo_activity_strikes?: number | null
+          session_type?: string
+          skill_id?: string
+          started_at?: string
+          status?: string
+          total_steps?: number | null
+          total_tokens_used?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_sessions_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       topic_progress_history: {
         Row: {
@@ -941,6 +1243,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_daily_limits: {
+        Row: {
+          created_at: string
+          date: string
+          hard_limit: number | null
+          id: string
+          sessions_count: number | null
+          soft_limit: number | null
+          tokens_used: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          hard_limit?: number | null
+          id?: string
+          sessions_count?: number | null
+          soft_limit?: number | null
+          tokens_used?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          hard_limit?: number | null
+          id?: string
+          sessions_count?: number | null
+          soft_limit?: number | null
+          tokens_used?: number | null
+          user_id?: string
+        }
+        Relationships: []
       }
       user_lesson_progress: {
         Row: {

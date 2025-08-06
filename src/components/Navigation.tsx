@@ -53,6 +53,15 @@ export const Navigation = () => {
               AI Chat
             </Link>
             <Link 
+              to="/study" 
+              className={`flex items-center gap-2 transition-smooth ${
+                isActive('/study') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
+              }`}
+            >
+              <Brain className="w-4 h-4" />
+              Study & Learn
+            </Link>
+            <Link 
               to="/recommendations" 
               className={`flex items-center gap-2 transition-smooth ${
                 isActive('/recommendations') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
@@ -165,6 +174,16 @@ export const Navigation = () => {
                >
                  <MessageCircle className="w-4 h-4" />
                  AI Chat
+               </Link>
+               <Link 
+                 to="/study" 
+                 className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
+                   isActive('/study') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
+                 }`}
+                 onClick={() => setIsOpen(false)}
+               >
+                 <Brain className="w-4 h-4" />
+                 Study & Learn
                </Link>
                <Link 
                  to="/recommendations" 
