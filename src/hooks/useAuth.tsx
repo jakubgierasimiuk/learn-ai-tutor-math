@@ -14,8 +14,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // TEMPORARY: Mock user for testing without authentication
   const mockUser: User = {
-    id: "test-user-id-123",
-    email: "test@example.com",
+    id: "ea9d2922-d677-47e8-b949-848c94139b4f",
+    email: "jakub.gierasimiuk@gmail.com",
     user_metadata: {},
     app_metadata: {},
     aud: "authenticated",
