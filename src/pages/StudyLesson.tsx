@@ -41,6 +41,70 @@ export default function StudyLesson() {
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Function to render AI response with lesson report detection
+  const renderAIResponse = (response: string) => {
+    // Try to detect JSON lesson report
+    const jsonPattern = /```json\s*\n?(\{[\s\S]*?\})\s*\n?```/;
+    const match = response.match(jsonPattern);
+    
+    if (match) {
+      try {
+        const jsonData = JSON.parse(match[1]);
+        if (jsonData.mastered || jsonData.struggled || jsonData.nextSuggested) {
+          // Split response into text and JSON parts
+          const textPart = response.replace(jsonPattern, '').trim();
+          
+          return (
+            <div className="space-y-4">
+              {textPart && <p className="whitespace-pre-wrap">{textPart}</p>}
+              <div className="bg-accent/20 border border-accent rounded-lg p-4">
+                <h4 className="font-semibold text-sm mb-3">📋 Raport z lekcji</h4>
+                
+                {jsonData.mastered && jsonData.mastered.length > 0 && (
+                  <div className="mb-3">
+                    <p className="text-sm font-medium text-green-700 dark:text-green-300 mb-1">
+                      ✅ Opanowane umiejętności:
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {jsonData.mastered.length} umiejętność(i)
+                    </p>
+                  </div>
+                )}
+                
+                {jsonData.struggled && jsonData.struggled.length > 0 && (
+                  <div className="mb-3">
+                    <p className="text-sm font-medium text-yellow-700 dark:text-yellow-300 mb-1">
+                      ⚠️ Wymagają powtórzenia:
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {jsonData.struggled.length} umiejętność(i)
+                    </p>
+                  </div>
+                )}
+                
+                {jsonData.nextSuggested && (
+                  <div>
+                    <p className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-1">
+                      📚 Następny temat:
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Przygotowana kolejna lekcja
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        }
+      } catch (e) {
+        // If JSON parsing fails, show the raw response
+      }
+    }
+    
+    // Default rendering for regular responses
+    return <p className="whitespace-pre-wrap">{response}</p>;
+  };
+
   // Fetch skill data
   const { data: skill } = useQuery({
     queryKey: ['skill', skillId],
@@ -372,9 +436,9 @@ export default function StudyLesson() {
                           <Brain className="w-4 h-4 text-primary-foreground" />
                         </div>
                         <div className="flex-1 space-y-2">
-                          <div className="bg-muted p-3 rounded-lg">
-                            <p className="whitespace-pre-wrap">{step.ai_response}</p>
-                          </div>
+                           <div className="bg-muted p-3 rounded-lg">
+                             {renderAIResponse(step.ai_response)}
+                           </div>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <span>Krok {step.step_number}</span>
                             {step.step_type === 'hint' && (
