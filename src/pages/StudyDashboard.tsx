@@ -19,7 +19,12 @@ export default function StudyDashboard() {
   const { data: skillsWithProgress, isLoading } = useQuery({
     queryKey: ['study-dashboard', user?.id],
     queryFn: async () => {
-      if (!user?.id) return [];
+      console.log('Fetching skills for user:', user?.id);
+      
+      if (!user?.id) {
+        console.log('No user ID available');
+        return [];
+      }
 
       // Get all skills
       const { data: skills, error: skillsError } = await supabase
@@ -29,7 +34,11 @@ export default function StudyDashboard() {
         .order('department', { ascending: true })
         .order('class_level', { ascending: true });
 
-      if (skillsError) throw skillsError;
+      console.log('Skills fetched:', skills);
+      if (skillsError) {
+        console.error('Skills error:', skillsError);
+        throw skillsError;
+      }
 
       // Get user progress for all skills
       const { data: progressData, error: progressError } = await supabase
@@ -37,24 +46,33 @@ export default function StudyDashboard() {
         .select('*')
         .eq('user_id', user.id);
 
-      if (progressError) throw progressError;
+      console.log('Progress data fetched:', progressData);
+      if (progressError) {
+        console.error('Progress error:', progressError);
+        throw progressError;
+      }
 
       // Combine skills with progress data
-      return skills.map(skill => ({
+      const result = skills.map(skill => ({
         ...skill,
         progress: progressData.find(p => p.skill_id === skill.id) || null
       }));
+      
+      console.log('Final skills with progress:', result);
+      return result;
     },
     enabled: !!user?.id,
   });
 
   // Calculate department statistics
   const departmentStats: DepartmentProgress[] = React.useMemo(() => {
+    console.log('Calculating department stats for:', skillsWithProgress);
     if (!skillsWithProgress) return [];
 
     const departments = [...new Set(skillsWithProgress.map(s => s.department))];
+    console.log('Found departments:', departments);
     
-    return departments.map(dept => {
+    const stats = departments.map(dept => {
       const deptSkills = skillsWithProgress.filter(s => s.department === dept);
       const masteredSkills = deptSkills.filter(s => s.progress?.is_mastered).length;
       const inProgressSkills = deptSkills.filter(s => s.progress && !s.progress.is_mastered).length;
@@ -67,6 +85,9 @@ export default function StudyDashboard() {
         mastery_percentage: deptSkills.length > 0 ? Math.round((masteredSkills / deptSkills.length) * 100) : 0
       };
     });
+    
+    console.log('Department stats calculated:', stats);
+    return stats;
   }, [skillsWithProgress]);
 
   const startLesson = (skillId: string) => {
