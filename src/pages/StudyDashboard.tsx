@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -11,6 +12,7 @@ import type { Skill, SkillProgress, DepartmentProgress } from '@/types';
 
 export default function StudyDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
 
   // Fetch skills with progress
@@ -67,9 +69,8 @@ export default function StudyDashboard() {
     });
   }, [skillsWithProgress]);
 
-  const startLesson = async (skillId: string) => {
-    // Navigate to lesson page
-    window.location.href = `/study/lesson/${skillId}`;
+  const startLesson = (skillId: string) => {
+    navigate(`/study/lesson/${skillId}`);
   };
 
   const getDepartmentIcon = (department: string) => {
