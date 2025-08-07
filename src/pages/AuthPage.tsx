@@ -91,6 +91,45 @@ export default function AuthPage() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        title: "Błąd",
+        description: "Wprowadź adres email",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth`
+      });
+
+      if (error) {
+        toast({
+          title: "Błąd",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Email wysłany",
+          description: "Sprawdź swoją skrzynkę email z linkiem do zresetowania hasła",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Błąd",
+        description: "Wystąpił nieoczekiwany błąd",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-4">
       <Card className="w-full max-w-md">
@@ -128,6 +167,14 @@ export default function AuthPage() {
                 disabled={loading}
               >
                 {loading ? "Logowanie..." : "Zaloguj się"}
+              </Button>
+              <Button 
+                onClick={handleForgotPassword} 
+                variant="outline" 
+                className="w-full" 
+                disabled={loading}
+              >
+                Przypomnij hasło
               </Button>
             </TabsContent>
             
