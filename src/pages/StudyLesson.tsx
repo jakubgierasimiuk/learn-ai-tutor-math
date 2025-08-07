@@ -293,20 +293,34 @@ export default function StudyLesson() {
 
   // Start session on component mount
   useEffect(() => {
+    console.log('StudyLesson useEffect triggered:', {
+      userId: user?.id,
+      skillId,
+      hasSessionData: !!sessionData?.session,
+      isInitPending: initSessionMutation.isPending,
+      stepsLength: sessionData?.steps?.length || 0
+    });
+
     if (user?.id && skillId && !sessionData?.session && !initSessionMutation.isPending) {
+      console.log('Creating new session...');
       initSessionMutation.mutate();
     } else if (sessionData?.session) {
+      console.log('Setting existing session:', sessionData.session.id);
       setCurrentSession(sessionData.session);
       setResponseStartTime(Date.now());
       
       // Start lesson automatically if no steps exist yet
       if (sessionData.steps.length === 0) {
+        console.log('No steps found, starting lesson automatically...');
         setTimeout(() => {
+          console.log('Sending automatic start lesson message...');
           sendMessageMutation.mutate({
             message: "Rozpocznij lekcję",
             sessionId: sessionData.session.id
           });
         }, 1000);
+      } else {
+        console.log('Steps already exist:', sessionData.steps.length);
       }
     }
   }, [user?.id, skillId, sessionData]);
