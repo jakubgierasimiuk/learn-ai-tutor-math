@@ -12,32 +12,33 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  // TEMPORARY: Mock user for testing without authentication
+  const mockUser: User = {
+    id: "test-user-id-123",
+    email: "test@example.com",
+    user_metadata: {},
+    app_metadata: {},
+    aud: "authenticated",
+    created_at: new Date().toISOString(),
+  } as User;
 
-  useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
+  const mockSession: Session = {
+    access_token: "mock-token",
+    refresh_token: "mock-refresh",
+    expires_in: 3600,
+    expires_at: Date.now() + 3600000,
+    token_type: "bearer",
+    user: mockUser,
+  } as Session;
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  // For testing purposes, always return the mock user
+  const [user] = useState<User | null>(mockUser);
+  const [session] = useState<Session | null>(mockSession);
+  const [loading] = useState(false);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    // Mock sign out - do nothing for now
+    console.log("Mock sign out");
   };
 
   return (
