@@ -12,33 +12,35 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  // TEMPORARY: Mock user for testing without authentication
-  const mockUser: User = {
-    id: "ea9d2922-d677-47e8-b949-848c94139b4f",
-    email: "jakub.gierasimiuk@gmail.com",
-    user_metadata: {},
-    app_metadata: {},
-    aud: "authenticated",
-    created_at: new Date().toISOString(),
-  } as User;
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const mockSession: Session = {
-    access_token: "mock-token",
-    refresh_token: "mock-refresh",
-    expires_in: 3600,
-    expires_at: Date.now() + 3600000,
-    token_type: "bearer",
-    user: mockUser,
-  } as Session;
+  useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    );
 
-  // For testing purposes, always return the mock user
-  const [user] = useState<User | null>(mockUser);
-  const [session] = useState<Session | null>(mockSession);
-  const [loading] = useState(false);
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const signOut = async () => {
-    // Mock sign out - do nothing for now
-    console.log("Mock sign out");
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   return (
