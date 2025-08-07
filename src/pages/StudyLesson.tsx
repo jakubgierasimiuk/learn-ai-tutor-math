@@ -118,6 +118,14 @@ export default function StudyLesson() {
       setCurrentSession(session);
       setResponseStartTime(Date.now());
       queryClient.invalidateQueries({ queryKey: ['study-session', skillId, user?.id] });
+      
+      // Start lesson automatically after session creation
+      setTimeout(() => {
+        sendMessageMutation.mutate({
+          message: "Rozpocznij lekcję",
+          sessionId: session.id
+        });
+      }, 1000);
     },
   });
 
@@ -226,6 +234,16 @@ export default function StudyLesson() {
     } else if (sessionData?.session) {
       setCurrentSession(sessionData.session);
       setResponseStartTime(Date.now());
+      
+      // Start lesson automatically if no steps exist yet
+      if (sessionData.steps.length === 0) {
+        setTimeout(() => {
+          sendMessageMutation.mutate({
+            message: "Rozpocznij lekcję",
+            sessionId: sessionData.session.id
+          });
+        }, 1000);
+      }
     }
   }, [user?.id, skillId, sessionData]);
 

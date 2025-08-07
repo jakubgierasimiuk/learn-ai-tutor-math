@@ -125,10 +125,15 @@ serve(async (req) => {
       });
     }
 
-    // Add current user message
+    // Add current user message with proper handling for lesson start
+    let userMessage = message;
+    if (message === "Rozpocznij lekcję" && previousSteps.length === 0) {
+      userMessage = `Rozpocznij lekcję sokratejską dla umiejętności: ${skill.name}. Przedstaw się krótko i zadaj pierwsze pytanie diagnostyczne.`;
+    }
+    
     messages.push({
       role: 'user',
-      content: `${JSON.stringify(skillContext)}\n${message}`
+      content: `${JSON.stringify(skillContext)}\n${userMessage}`
     });
 
     // Limit conversation history to prevent token overflow
