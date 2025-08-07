@@ -335,32 +335,7 @@ export default function StudyLesson() {
 
                 {steps.map((step, index) => (
                   <div key={step.id} className="space-y-2">
-                    {step.ai_response && (
-                      <div className="flex gap-3">
-                        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                          <Brain className="w-4 h-4 text-primary-foreground" />
-                        </div>
-                        <div className="flex-1 space-y-2">
-                          <div className="bg-muted p-3 rounded-lg">
-                            <p className="whitespace-pre-wrap">{step.ai_response}</p>
-                          </div>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <span>Krok {step.step_number}</span>
-                            {step.step_type === 'hint' && (
-                              <Badge variant="outline" className="text-xs">
-                                Podpowiedź
-                              </Badge>
-                            )}
-                            {step.step_type === 'solution' && (
-                              <Badge variant="secondary" className="text-xs">
-                                Rozwiązanie
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
+                    {/* Show user input first if it exists */}
                     {step.user_input && (
                       <div className="flex gap-3 justify-end">
                         <div className="flex-1 max-w-sm space-y-2">
@@ -386,6 +361,33 @@ export default function StudyLesson() {
                         </div>
                         <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
                           <span className="text-xs font-medium">Ty</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Show AI response after user input */}
+                    {step.ai_response && (
+                      <div className="flex gap-3">
+                        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                          <Brain className="w-4 h-4 text-primary-foreground" />
+                        </div>
+                        <div className="flex-1 space-y-2">
+                          <div className="bg-muted p-3 rounded-lg">
+                            <p className="whitespace-pre-wrap">{step.ai_response}</p>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span>Krok {step.step_number}</span>
+                            {step.step_type === 'hint' && (
+                              <Badge variant="outline" className="text-xs">
+                                Podpowiedź
+                              </Badge>
+                            )}
+                            {step.step_type === 'solution' && (
+                              <Badge variant="secondary" className="text-xs">
+                                Rozwiązanie
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
                     )}
