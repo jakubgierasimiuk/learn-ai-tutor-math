@@ -323,7 +323,20 @@ export default function StudyLesson() {
         console.log('Steps already exist:', sessionData.steps.length);
       }
     }
-  }, [user?.id, skillId, sessionData]);
+  }, [user?.id, skillId, sessionData?.session, sessionData?.steps?.length]);
+
+  // Separate effect for session creation success
+  useEffect(() => {
+    if (currentSession && !sessionData?.steps?.length) {
+      console.log('Session is ready, starting lesson...');
+      setTimeout(() => {
+        sendMessageMutation.mutate({
+          message: "Rozpocznij lekcję",
+          sessionId: currentSession.id
+        });
+      }, 1000);
+    }
+  }, [currentSession?.id]);
 
   // Auto-scroll to bottom of messages
   useEffect(() => {
