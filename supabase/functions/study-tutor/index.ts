@@ -8,25 +8,20 @@ const corsHeaders = {
 };
 
 const SYSTEM_PROMPT = `Jesteś StudyTutor – wirtualnym nauczycielem matematyki dla polskiej szkoły średniej.
-Twój nadrzędny cel: ZROZUMIENIE ucznia, nie "szybka odpowiedź".
+Twój nadrzędny cel: ZROZUMIENIE ucznia i prowadzenie go do samodzielnego rozwiązania.
 
-Zasady absolutne:
-1. Prowadzisz dialog sokratejski: pytasz → ucznia → oceniasz → podpowiadasz.
-2. Nigdy nie wyjawiasz pełnego rozwiązania, dopóki uczeń nie poprosi "Pokaż rozwiązanie" lub trzykrotnie odpowie błędnie.
-3. Tłumaczysz w blokach ≤ 90 sekund czytania, numerujesz kroki KROK 1, KROK 2…
-4. Korzystasz z języka polskiego na poziomie B2, unikasz żargonu akademickiego.
-5. Zapisu matematycznego używasz w LaTeX inline, np. $Δ=b^2-4ac$.
-6. Uwzględniasz meta-dane JSON przesyłane w każdym komunikacie użytkownika (skill_id, klasa, poziom).
-7. Po zakończeniu lekcji zwracasz blok JSON z podsumowaniem w formie:
-   {
-     "mastered": ["skill_uuid1", "skill_uuid2"],
-     "struggled": ["skill_uuid3"],
-     "nextSuggested": "skill_uuid4"
-   }
-   Ale przed JSON dodaj naturalne zakończenie lekcji w języku polskim.
-8. Jeśli uczeń zada pytanie poza bieżącym tematem, odpowiedz: "Zapiszę to pytanie i wrócimy do niego po lekcji. Czy kontynuujemy?"
-9. Maksymalne użycie tokenów w Twojej odpowiedzi ≤ 350.
-10. Nie omawiasz podręczników ani autorów; koncentruj się na umiejętnościach.`;
+Zasady absolutne (ściśle przestrzegaj):
+1) Poziom licealny: zadania jak w liceum/matura – żadnych trywialnych przykładów typu 2+2=4, tabliczka mnożenia, itp.
+2) Trudność adaptacyjna: korzystaj z target_difficulty ("medium"|"hard"). Jeśli niepewność – wybierz "medium". Unikaj poziomu "easy".
+3) Metoda Sokratesa: pytasz → analizujesz → naprowadzasz. Pełne rozwiązanie tylko gdy uczeń o to poprosi lub po 3 nieudanych próbach.
+4) Struktura odpowiedzi: max 2 krótkie akapity + lista kroków (KROK 1, KROK 2, …). Zawsze zakończ jedynym, konkretnym pytaniem do ucznia.
+5) Język: polski, poziom B2–C1, precyzyjnie, bez zbędnego żargonu.
+6) Notacja: używaj LaTeX inline, np. $\Delta=b^2-4ac$.
+7) Kalibracja: na starcie 2–3 zadania średnio-trudne; jeśli idzie dobrze – podnoś do hard; jeśli słabo – uprość w ramach liceum.
+8) Weryfikacja rachunków: sprawdzaj swoje obliczenia; jeśli korygujesz – krótko wskaż błąd i popraw.
+9) Skupienie: trzymaj się bieżącej umiejętności; dygresje odłóż na koniec.
+10) Tokeny: odpowiedź ≤ 350 tokenów.
+`;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -87,10 +82,27 @@ serve(async (req) => {
       ? userSteps.reduce((sum, step) => sum + (step.response_time_ms || 0), 0) / userSteps.length
       : 5000; // Default 5 seconds
 
-    const minResponseTime = Math.max(averageResponseTime * 0.4, 2000); // Minimum 2 seconds
-    const isPseudoActivity = responseTime > 0 && responseTime < minResponseTime;
+const minResponseTime = Math.max(averageResponseTime * 0.4, 2000); // Minimum 2 seconds
+const isPseudoActivity = responseTime > 0 && responseTime < minResponseTime;
 
-    // Build conversation history for OpenAI
+// Determine target difficulty (never below high-school medium)
+const { data: profile } = await supabaseClient
+  .from('profiles')
+  .select('level')
+  .eq('user_id', session.user_id)
+  .single();
+
+const recent = (previousSteps || []).slice(-4).filter((s: any) => typeof s.is_correct === 'boolean');
+const correctCount = recent.filter((s: any) => s.is_correct).length;
+let targetDifficulty: 'medium' | 'hard' = 'medium';
+if (profile?.level && profile.level >= 3) targetDifficulty = 'hard';
+if (recent.length >= 2) {
+  const ratio = correctCount / recent.length;
+  if (ratio >= 0.75) targetDifficulty = 'hard';
+  if (ratio <= 0.25) targetDifficulty = 'medium';
+}
+
+// Build conversation history for OpenAI
     const messages = [
       {
         role: 'system',
@@ -98,15 +110,16 @@ serve(async (req) => {
       }
     ];
 
-    // Add context about the skill
-    const skillContext = {
-      skill_id: skillId,
-      skill_name: skill.name,
-      class_level: skill.class_level,
-      level: skill.level,
-      department: skill.department,
-      description: skill.description
-    };
+// Add context about the skill
+const skillContext = {
+  skill_id: skillId,
+  skill_name: skill.name,
+  class_level: skill.class_level,
+  level: skill.level,
+  department: skill.department,
+  description: skill.description,
+  target_difficulty: targetDifficulty
+};
 
     // Add previous conversation
     if (previousSteps && previousSteps.length > 0) {
@@ -126,11 +139,11 @@ serve(async (req) => {
       });
     }
 
-    // Add current user message with proper handling for lesson start
-    let userMessage = message;
-    if (message === "Rozpocznij lekcję" && previousSteps.length === 0) {
-      userMessage = `Rozpocznij lekcję sokratejską dla umiejętności: ${skill.name}. Przedstaw się krótko i zadaj pierwsze pytanie diagnostyczne.`;
-    }
+// Add current user message with proper handling for lesson start
+let userMessage = message;
+if (message === "Rozpocznij lekcję" && previousSteps.length === 0) {
+  userMessage = `Rozpocznij lekcję sokratejską dla umiejętności: ${skill.name}. Poziom: szkoła średnia (${targetDifficulty}). Unikaj zadań trywialnych, zacznij od krótkiej diagnozy i zadaj pierwsze pytanie.`;
+}
     
     messages.push({
       role: 'user',

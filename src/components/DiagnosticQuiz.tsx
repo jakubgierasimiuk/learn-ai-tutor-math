@@ -26,6 +26,7 @@ const quizQuestions = [
   {
     id: 2,
     topic: "Geometria",
+    difficulty: "medium",
     question: "Oblicz pole koła o promieniu 3 cm (π ≈ 3.14)",
     options: [
       { id: "a", text: "18.84 cm²", correct: false },
@@ -37,6 +38,7 @@ const quizQuestions = [
   {
     id: 3,
     topic: "Funkcje",
+    difficulty: "medium",
     question: "Jaka jest wartość funkcji f(x) = 2x² - 3x + 1 dla x = 2?",
     options: [
       { id: "a", text: "3", correct: true },
@@ -48,6 +50,7 @@ const quizQuestions = [
   {
     id: 4,
     topic: "Trygonometria",
+    difficulty: "medium",
     question: "Czemu równa się sin(30°)?",
     options: [
       { id: "a", text: "1/2", correct: true },
@@ -59,6 +62,7 @@ const quizQuestions = [
   {
     id: 5,
     topic: "Logarytmy",
+    difficulty: "medium",
     question: "Oblicz log₂(8)",
     options: [
       { id: "a", text: "2", correct: false },
@@ -70,6 +74,7 @@ const quizQuestions = [
   {
     id: 6,
     topic: "Statystyka",
+    difficulty: "medium",
     question: "Jaka jest mediana zbioru: 3, 7, 2, 9, 5?",
     options: [
       { id: "a", text: "3", correct: false },
@@ -81,6 +86,7 @@ const quizQuestions = [
   {
     id: 7,
     topic: "Równania kwadratowe",
+    difficulty: "hard",
     question: "Ile rozwiązań ma równanie x² - 4x + 4 = 0?",
     options: [
       { id: "a", text: "0", correct: false },
@@ -92,6 +98,7 @@ const quizQuestions = [
   {
     id: 8,
     topic: "Ciągi",
+    difficulty: "medium",
     question: "Jaki jest następny element ciągu: 2, 6, 18, 54, ...?",
     options: [
       { id: "a", text: "108", correct: false },
@@ -346,6 +353,17 @@ export const DiagnosticQuiz = () => {
                 </div>
               </button>
             ))}
+
+            <div className="pt-2">
+              <Button
+                variant="ghost"
+                onClick={() => handleAnswerSelect(question.id, 'unknown')}
+                className="min-h-[48px] touch-target focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                aria-label="Nie znam odpowiedzi"
+              >
+                Nie wiem
+              </Button>
+            </div>
           </div>
         </div>
 
