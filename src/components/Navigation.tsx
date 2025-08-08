@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Brain, BookOpen, BarChart3, MessageCircle, TrendingUp, User, LogOut, Target, Users, Trophy, TestTube, Gift, Upload } from "lucide-react";
+import { Brain, BookOpen, MessageCircle, LogOut, Upload } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -26,6 +26,15 @@ export const Navigation = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             <Link 
+              to="/study" 
+              className={`flex items-center gap-2 transition-smooth ${
+                isActive('/study') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
+              }`}
+            >
+              <Brain className="w-4 h-4" />
+              Study & Learn
+            </Link>
+            <Link 
               to="/lessons" 
               className={`flex items-center gap-2 transition-smooth ${
                 isActive('/lessons') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
@@ -33,15 +42,6 @@ export const Navigation = () => {
             >
               <BookOpen className="w-4 h-4" />
               Lekcje
-            </Link>
-            <Link 
-              to="/quiz" 
-              className={`flex items-center gap-2 transition-smooth ${
-                isActive('/quiz') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
-              }`}
-            >
-              <Target className="w-4 h-4" />
-              Quiz
             </Link>
             <Link 
               to="/chat" 
@@ -53,51 +53,6 @@ export const Navigation = () => {
               AI Chat
             </Link>
             <Link 
-              to="/study" 
-              className={`flex items-center gap-2 transition-smooth ${
-                isActive('/study') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
-              }`}
-            >
-              <Brain className="w-4 h-4" />
-              Study & Learn
-            </Link>
-            <Link 
-              to="/recommendations" 
-              className={`flex items-center gap-2 transition-smooth ${
-                isActive('/recommendations') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
-              }`}
-            >
-              <Brain className="w-4 h-4" />
-              AI Coach
-            </Link>
-            <Link 
-              to="/social" 
-              className={`flex items-center gap-2 transition-smooth ${
-                isActive('/social') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
-              }`}
-            >
-              <Users className="w-4 h-4" />
-              Społeczność
-            </Link>
-            <Link 
-              to="/gamification" 
-              className={`flex items-center gap-2 transition-smooth ${
-                isActive('/gamification') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
-              }`}
-            >
-              <Trophy className="w-4 h-4" />
-              Gamifikacja
-            </Link>
-            <Link 
-              to="/analytics" 
-              className={`flex items-center gap-2 transition-smooth ${
-                isActive('/analytics') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
-              }`}
-            >
-              <TrendingUp className="w-4 h-4" />
-              Analityka
-            </Link>
-            <Link 
               to="/materials" 
               className={`flex items-center gap-2 transition-smooth ${
                 isActive('/materials') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
@@ -105,24 +60,6 @@ export const Navigation = () => {
             >
               <Upload className="w-4 h-4" />
               Materiały
-            </Link>
-            <Link 
-              to="/referral" 
-              className={`flex items-center gap-2 transition-smooth ${
-                isActive('/referral') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
-              }`}
-            >
-              <Gift className="w-4 h-4" />
-              Polecenia
-            </Link>
-            <Link 
-              to="/ux-test" 
-              className={`flex items-center gap-2 transition-smooth ${
-                isActive('/ux-test') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
-              }`}
-            >
-              <TestTube className="w-4 h-4" />
-              UX Test
             </Link>
           </div>
 
@@ -155,6 +92,16 @@ export const Navigation = () => {
           <div className="md:hidden py-4 border-t border-border animate-fadeIn">
             <div className="flex flex-col gap-4">
               <Link 
+                to="/study" 
+                className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
+                  isActive('/study') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
+                }`}
+                onClick={() => setIsOpen(false)}
+              >
+                <Brain className="w-4 h-4" />
+                Study & Learn
+              </Link>
+              <Link 
                 to="/lessons" 
                 className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
                   isActive('/lessons') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
@@ -164,127 +111,37 @@ export const Navigation = () => {
                 <BookOpen className="w-4 h-4" />
                 Lekcje
               </Link>
-               <Link 
-                 to="/quiz" 
-                 className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                   isActive('/quiz') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                 }`}
-                 onClick={() => setIsOpen(false)}
-               >
-                 <Target className="w-4 h-4" />
-                 Quiz
-               </Link>
-               <Link 
-                 to="/chat" 
-                 className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                   isActive('/chat') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                 }`}
-                 onClick={() => setIsOpen(false)}
-               >
-                 <MessageCircle className="w-4 h-4" />
-                 AI Chat
-               </Link>
-               <Link 
-                 to="/study" 
-                 className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                   isActive('/study') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                 }`}
-                 onClick={() => setIsOpen(false)}
-               >
-                 <Brain className="w-4 h-4" />
-                 Study & Learn
-               </Link>
-               <Link 
-                 to="/recommendations" 
-                 className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                   isActive('/recommendations') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                 }`}
-                 onClick={() => setIsOpen(false)}
-               >
-                 <Brain className="w-4 h-4" />
-                 AI Coach
-               </Link>
-               <Link 
-                 to="/dashboard" 
-                 className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                   isActive('/dashboard') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                 }`}
-                 onClick={() => setIsOpen(false)}
-               >
-                 <BarChart3 className="w-4 h-4" />
-                 Dashboard
-               </Link>
-                <Link 
-                  to="/social" 
-                  className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                    isActive('/social') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                  }`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  <Users className="w-4 h-4" />
-                  Społeczność
-                </Link>
-                <Link 
-                  to="/gamification" 
-                  className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                    isActive('/gamification') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                  }`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  <Trophy className="w-4 h-4" />
-                  Gamifikacja
-                </Link>
-                 <Link 
-                   to="/analytics" 
-                   className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                     isActive('/analytics') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                   }`}
-                   onClick={() => setIsOpen(false)}
-                 >
-                   <TrendingUp className="w-4 h-4" />
-                   Analityka
-                 </Link>
-                <Link 
-                  to="/referral" 
-                  className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                    isActive('/referral') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                  }`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  <Gift className="w-4 h-4" />
-                  Polecenia
-                </Link>
-                <Link 
-                  to="/materials" 
-                  className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                    isActive('/materials') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                  }`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  <Upload className="w-4 h-4" />
-                  Materiały
-                </Link>
-                <Link 
-                  to="/ux-test" 
-                  className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                    isActive('/ux-test') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                  }`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  <TestTube className="w-4 h-4" />
-                  UX Test
-                </Link>
-              <div className="flex flex-col gap-2 pt-4 border-t border-border">
-                <span className="text-sm text-muted-foreground px-2">
-                  {user?.email}
-                </span>
-                <Button variant="outline" onClick={signOut} className="w-full flex items-center gap-2">
-                  <LogOut className="w-4 h-4" />
-                  Wyloguj
-                </Button>
-              </div>
+              <Link 
+                to="/chat" 
+                className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
+                  isActive('/chat') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
+                }`}
+                onClick={() => setIsOpen(false)}
+              >
+                <MessageCircle className="w-4 h-4" />
+                AI Chat
+              </Link>
+              <Link 
+                to="/materials" 
+                className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
+                  isActive('/materials') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
+                }`}
+                onClick={() => setIsOpen(false)}
+              >
+                <Upload className="w-4 h-4" />
+                Materiały
+              </Link>
             </div>
-          </div>
+            <div className="flex flex-col gap-2 pt-4 border-t border-border">
+              <span className="text-sm text-muted-foreground px-2">
+                {user?.email}
+              </span>
+              <Button variant="outline" onClick={signOut} className="w-full flex items-center gap-2">
+                <LogOut className="w-4 h-4" />
+                Wyloguj
+              </Button>
+            </div>
+            </div>
         )}
       </div>
     </nav>
