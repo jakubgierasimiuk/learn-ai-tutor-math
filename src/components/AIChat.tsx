@@ -75,6 +75,8 @@ export const AIChat = () => {
   const initializeChat = async () => {
     if (!user) return;
 
+    let nextProgress: UserProgress | null = null;
+
     // Fetch user's learning context
     try {
       // Get recent lesson progress
@@ -97,12 +99,13 @@ export const AIChat = () => {
           .filter(p => (p.score || 0) < 70)
           .map(p => p.topics.name);
 
-        setUserProgress({
+        nextProgress = {
           recentTopics: topics,
           averageScore: Math.round(avgScore),
           weakAreas: [...new Set(weakAreas)],
           totalLessons: recentProgress.length
-        });
+        };
+        setUserProgress(nextProgress);
 
         // Set topic based on most recent lesson
         if (topics.length > 0) {
@@ -140,7 +143,7 @@ export const AIChat = () => {
       }
 
       // Generate personalized welcome message
-      const welcomeMessage = await generateWelcomeMessage();
+      const welcomeMessage = await generateWelcomeMessage(nextProgress);
       setMessages([welcomeMessage]);
       
     } catch (error) {
@@ -155,11 +158,11 @@ export const AIChat = () => {
     }
   };
 
-  const generateWelcomeMessage = async (): Promise<Message> => {
-    const progressInfo = userProgress ? 
-      `Na podstawie Twojego postępu widzę, że ostatnio pracowałeś nad: ${userProgress.recentTopics.slice(0, 3).join(', ')}. ` +
-      `Twoja średnia ocena to ${userProgress.averageScore}%. ` +
-      (userProgress.weakAreas.length > 0 ? `Mogę pomóc Ci poprawić się w: ${userProgress.weakAreas.join(', ')}.` : 'Świetnie Ci idzie!')
+  const generateWelcomeMessage = async (progress: UserProgress | null): Promise<Message> => {
+    const progressInfo = progress ? 
+      `Na podstawie Twojego postępu widzę, że ostatnio pracowałeś nad: ${progress.recentTopics.slice(0, 3).join(', ')}. ` +
+      `Twoja średnia ocena to ${progress.averageScore}%. ` +
+      (progress.weakAreas.length > 0 ? `Mogę pomóc Ci poprawić się w: ${progress.weakAreas.join(', ')}.` : 'Świetnie Ci idzie!')
       : '';
 
     return {

@@ -71,29 +71,52 @@ User Learning Context:
       }
     }
 
-    // Enhanced AI prompt with educational coaching
-    const systemPrompt = `You are an advanced AI Learning Coach specialized in mathematics education. Your role is to:
+    // Enhanced AI prompt with educational coaching (Polish, structured)
+    const systemPrompt = `Jesteś polskim AI Learning Coach specjalizującym się w matematyce.
 
-1. **Adapt to Learning Level**: Adjust explanations based on user's demonstrated ability
-2. **Provide Contextual Help**: Reference the user's learning history and weak areas
-3. **Use Socratic Method**: Guide discovery through questions rather than just giving answers
-4. **Offer Multiple Approaches**: Present different ways to understand concepts
-5. **Encourage Growth Mindset**: Focus on progress and learning from mistakes
+Zasady pracy:
+1) Dopasowanie poziomu: dostosuj słownictwo i złożoność (beginner/intermediate/advanced).
+2) Metoda Sokratesa: zadawaj pytania naprowadzające, nie podawaj od razu pełnego rozwiązania.
+3) Struktura odpowiedzi: max 2 krótkie akapity + lista kroków; używaj Markdown; wzory pogrubiaj jak **a² + b² = c²**.
+4) Na końcu ZAWSZE jedno krótkie pytanie sprawdzające zrozumienie.
+5) Weryfikacja obliczeń: sprawdzaj rachunki; jeśli poprawiasz, wskaż błąd i popraw.
+6) Personalizacja przykładów: użyj ostatnich tematów i słabych obszarów.
+7) Co 3 tury zaproponuj mini-ćwiczenie (1 krótkie zadanie), jeśli użytkownik nie wyrazi sprzeciwu.
 
+Wyjście powinno zawierać zwykłą odpowiedź dla ucznia, a na końcu opcjonalny blok z wnioskami:
+---INSIGHTS--- {"needsHelp": boolean, "confidence": number (0..1), "nextAction": string, "difficulty": "low"|"med"|"high"}
+(Jeśli nie masz pewności, pomiń blok INSIGHTS.)
+
+Kontekst użytkownika (jeśli dostępny):
 ${userContext}
 
-Guidelines:
-- Always respond in Polish
-- Break down complex concepts into digestible steps
-- Use real-world examples and visual metaphors
-- Ask follow-up questions to ensure understanding
-- Suggest practice exercises when appropriate
-- Celebrate progress and provide encouragement
-- If user seems confused, offer simpler explanations or different approaches
-- Track common misconceptions and address them proactively
+Bieżący temat: ${topic || 'Matematyka – ogólne'}
+Poziom użytkownika: ${level || 'beginner'}`;
 
-Current topic: ${topic || 'General mathematics'}
-User level: ${level || 'beginner'}`;
+    // Build conversation history for better continuity
+    const messagesForOpenAI: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
+      { role: 'system', content: systemPrompt },
+    ];
+
+    if (sessionId) {
+      const { data: logs } = await supabase
+        .from('chat_logs')
+        .select('role, message, id')
+        .eq('session_id', sessionId)
+        .order('id', { ascending: false })
+        .limit(12);
+
+      if (logs && logs.length) {
+        const ordered = [...logs].reverse();
+        for (const l of ordered) {
+          if (l.role === 'user' || l.role === 'assistant') {
+            messagesForOpenAI.push({ role: l.role, content: l.message });
+          }
+        }
+      }
+    }
+
+    messagesForOpenAI.push({ role: 'user', content: message });
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -103,10 +126,7 @@ User level: ${level || 'beginner'}`;
       },
       body: JSON.stringify({
         model: 'gpt-4.1-2025-04-14',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: message }
-        ],
+        messages: messagesForOpenAI,
         temperature: 0.7,
         max_tokens: 500,
       }),
@@ -117,7 +137,21 @@ User level: ${level || 'beginner'}`;
     }
 
     const data = await response.json();
-    const aiResponse = data.choices[0].message.content;
+    const aiResponse: string = data.choices?.[0]?.message?.content ?? '';
+
+    // Extract optional INSIGHTS block from the end of the response
+    let insightsFromModel: any = null;
+    let cleanedResponse = aiResponse;
+
+    const match = aiResponse.match(/---INSIGHTS---\s*({[\s\S]*?})/);
+    if (match) {
+      try {
+        insightsFromModel = JSON.parse(match[1]);
+        cleanedResponse = aiResponse.replace(match[0], '').trim();
+      } catch {
+        // Ignore parsing errors; we'll fall back to heuristic insights
+      }
+    }
 
     // Log the chat interaction for learning analytics
     if (userId && sessionId) {
@@ -130,15 +164,29 @@ User level: ${level || 'beginner'}`;
       await supabase.from('chat_logs').insert({
         session_id: sessionId,
         role: 'assistant',
-        message: aiResponse
+        message: cleanedResponse
       });
     }
 
-    // Analyze the conversation for learning insights
-    const learningInsights = await analyzeLearningProgress(message, aiResponse, userProgress);
+    // Build learning insights (prefer model JSON, fallback to heuristic)
+    let learningInsights: any;
+    if (insightsFromModel) {
+      learningInsights = {
+        needsHelp: typeof insightsFromModel.needsHelp === 'boolean'
+          ? insightsFromModel.needsHelp
+          : (typeof insightsFromModel.confidence === 'number' ? insightsFromModel.confidence < 0.5 : false),
+        topicMastery: insightsFromModel.topicMastery
+          || (insightsFromModel.difficulty
+              ? (insightsFromModel.difficulty === 'low' ? 'good' : insightsFromModel.difficulty === 'med' ? 'improving' : 'needs_work')
+              : 'unknown'),
+        suggestedActions: insightsFromModel.nextAction ? [insightsFromModel.nextAction] : []
+      };
+    } else {
+      learningInsights = await analyzeLearningProgress(message, cleanedResponse, userProgress);
+    }
 
     return new Response(JSON.stringify({ 
-      response: aiResponse,
+      response: cleanedResponse,
       insights: learningInsights
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
