@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Send, ThumbsUp, ThumbsDown, RotateCcw, User, Bot, BookOpen, Target, Lightbulb, Volume2, Mic, MicOff } from "lucide-react";
+import { Brain, Send, ThumbsUp, ThumbsDown, RotateCcw, User, Bot, BookOpen, Target, Lightbulb, Volume2, Mic, MicOff, Loader2 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -110,19 +110,33 @@ export const AIChat = () => {
         }
       }
 
-      // Create a new chat session
-      const { data: sessionData } = await supabase
-        .from("lesson_sessions")
-        .insert({
-          user_id: user.id,
-          topic_id: 1, // Default topic, will be updated based on conversation
-          status: 'in_progress'
-        })
-        .select()
+      // Ensure we have a valid topic id for the session
+      const { data: firstTopic } = await supabase
+        .from('topics')
+        .select('id, name')
+        .eq('is_active', true)
+        .order('created_at', { ascending: true })
+        .limit(1)
         .maybeSingle();
 
-      if (sessionData) {
-        setCurrentSessionId(sessionData.id);
+      let createdSession: { id: number } | null = null;
+      if (firstTopic?.id) {
+        const { data: inserted } = await supabase
+          .from('lesson_sessions')
+          .insert({
+            user_id: user.id,
+            topic_id: firstTopic.id,
+            status: 'in_progress'
+          })
+          .select()
+          .maybeSingle();
+        createdSession = inserted as any;
+      } else {
+        console.warn('No active topics found; skipping session creation');
+      }
+
+      if (createdSession) {
+        setCurrentSessionId(createdSession.id);
       }
 
       // Generate personalized welcome message
@@ -263,7 +277,7 @@ export const AIChat = () => {
     setShowRecommendations(false);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -538,7 +552,7 @@ export const AIChat = () => {
                 <Input
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
+                  onKeyDown={handleKeyDown}
                   placeholder={isRecording ? "Nagrywanie... (kliknij mikrofon ponownie aby zakończyć)" : "Zadaj pytanie lub napisz swoją odpowiedź..."}
                   className="flex-1 min-h-[48px] focus:ring-2 focus:ring-primary focus:ring-offset-2"
                   disabled={isTyping || isRecording}
@@ -550,8 +564,11 @@ export const AIChat = () => {
                   className="shadow-primary min-h-[48px] touch-target focus:ring-2 focus:ring-primary focus:ring-offset-2"
                   aria-label="Wyślij wiadomość do AI Tutora"
                 >
-                  <Send className="w-4 h-4" />
-                  <span className="sr-only">Wyślij wiadomość</span>
+                  {isTyping ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )
                 </Button>
               </div>
             </div>

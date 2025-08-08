@@ -23,6 +23,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // Defer Supabase calls to avoid deadlocks in auth callback
+        if (session?.user) {
+          setTimeout(async () => {
+            try {
+              // Ensure user profile exists
+              const { data: existingProfile, error: profileErr } = await supabase
+                .from('profiles')
+                .select('user_id')
+                .eq('user_id', session.user!.id)
+                .maybeSingle();
+
+              if (profileErr) {
+                console.error('Profile check error:', profileErr);
+              }
+
+              if (!existingProfile) {
+                const { error: insertErr } = await supabase.from('profiles').insert({
+                  user_id: session.user!.id,
+                  email: session.user!.email ?? '',
+                  name: (session.user!.user_metadata as any)?.name || '',
+                  level: 1,
+                  total_points: 0,
+                  diagnosis_completed: false,
+                });
+                if (insertErr) {
+                  console.error('Profile auto-provision failed:', insertErr);
+                }
+              }
+            } catch (e) {
+              console.error('Error ensuring profile exists:', e);
+            }
+          }, 0);
+        }
       }
     );
 
