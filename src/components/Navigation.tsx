@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Brain, BookOpen, MessageCircle, LogOut, Upload } from "lucide-react";
+import { Brain, BookOpen, MessageCircle, LogOut, Upload, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -42,6 +42,15 @@ export const Navigation = () => {
             >
               <BookOpen className="w-4 h-4" />
               Lekcje
+            </Link>
+            <Link 
+              to="/postepy" 
+              className={`flex items-center gap-2 transition-smooth ${
+                isActive('/postepy') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
+              }`}
+            >
+              <TrendingUp className="w-4 h-4" />
+              Postępy
             </Link>
             <Link to="/chat">
               <Button size="sm" className="shadow-primary" onClick={() => console.log('cta_chat_clicked', { source: 'nav' })}>

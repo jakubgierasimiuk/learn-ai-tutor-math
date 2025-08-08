@@ -25,6 +25,7 @@ import StudyDashboard from "./pages/StudyDashboard";
 import StudyLesson from "./pages/StudyLesson";
 import MaterialsPage from "./pages/MaterialsPage";
 import UXAuditPage from "./pages/UXAuditPage";
+import ProgressPage from "./pages/ProgressPage";
 
 const queryClient = new QueryClient();
 
@@ -135,6 +136,11 @@ const App = () => (
             <Route path="/ux-audit" element={
               <AuthenticatedLayout>
                 <UXAuditPage />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/postepy" element={
+              <AuthenticatedLayout>
+                <ProgressPage />
               </AuthenticatedLayout>
             } />
             <Route path="/study" element={
