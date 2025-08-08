@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Send, ThumbsUp, ThumbsDown, RotateCcw, User, Bot, BookOpen, Target, Lightbulb, Volume2, Mic, MicOff, Loader2, Image as ImageIcon } from "lucide-react";
+import { Brain, Send, ThumbsUp, ThumbsDown, RotateCcw, User, Bot, BookOpen, Target, Lightbulb, Volume2, Mic, MicOff, Loader2, Image as ImageIcon, MoreHorizontal } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,6 +12,8 @@ import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Message {
   id: string;
@@ -76,6 +78,8 @@ export const AIChat = () => {
   const hasSentPromptRef = useRef(false);
   const [slowNetwork, setSlowNetwork] = useState(false);
   const [lastUserMessage, setLastUserMessage] = useState<string | null>(null);
+  const isMobile = useIsMobile();
+  const [moreOpen, setMoreOpen] = useState(false);
   useEffect(() => {
     initializeChat();
   }, [user]);
@@ -466,9 +470,8 @@ export const AIChat = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-accent/5">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-6">
+      <div className="container mx-auto px-4 py-2 md:py-8">
+        <div className="mb-4 hidden md:block">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center">
               <Brain className="w-6 h-6 text-accent" />
@@ -493,7 +496,7 @@ export const AIChat = () => {
 
         {/* Chat Container */}
         <div className="max-w-4xl mx-auto">
-          <Card className="h-[600px] flex flex-col shadow-card">
+          <Card className="md:h-[600px] h-[calc(100dvh-6rem)] flex flex-col shadow-card">
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6" role="log" aria-live="polite" aria-relevant="additions text">
               {messages.map((message) => (
@@ -584,39 +587,41 @@ export const AIChat = () => {
             </div>
 
             {/* Recommendations */}
-            {renderRecommendations()}
+            <div className="hidden md:block">{renderRecommendations()}</div>
 
             {/* Quick Actions */}
             {showUnderstanding && !isTyping && (
-              <div className="p-4 border-t border-border bg-muted/30">
-                <p className="text-sm text-muted-foreground mb-3">Czy rozumiesz wyjaśnienie?</p>
-                <div className="flex gap-3">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleQuickResponse("Tak, rozumiem")}
-                    className="flex items-center gap-2 min-h-[48px] touch-target focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                    aria-label="Potwierdzam, że rozumiem wyjaśnienie"
-                  >
-                    <ThumbsUp className="w-4 h-4" />
-                    Tak, rozumiem
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleQuickResponse("Nie rozumiem, wytłumacz ponownie")}
-                    className="flex items-center gap-2 min-h-[48px] touch-target focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                    aria-label="Potrzebuję dodatkowego wyjaśnienia"
-                  >
-                    <ThumbsDown className="w-4 h-4" />
-                    Nie rozumiem
-                  </Button>
+              <div className="hidden md:block">
+                <div className="p-4 border-t border-border bg-muted/30">
+                  <p className="text-sm text-muted-foreground mb-3">Czy rozumiesz wyjaśnienie?</p>
+                  <div className="flex gap-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleQuickResponse("Tak, rozumiem")}
+                      className="flex items-center gap-2 min-h-[48px] touch-target focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                      aria-label="Potwierdzam, że rozumiem wyjaśnienie"
+                    >
+                      <ThumbsUp className="w-4 h-4" />
+                      Tak, rozumiem
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleQuickResponse("Nie rozumiem, wytłumacz ponownie")}
+                      className="flex items-center gap-2 min-h-[48px] touch-target focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                      aria-label="Potrzebuję dodatkowego wyjaśnienia"
+                    >
+                      <ThumbsDown className="w-4 h-4" />
+                      Nie rozumiem
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
 
             {/* Szybkie podpowiedzi */}
-            <div className="px-4 pt-2">
+            <div className="px-4 pt-2 hidden md:block">
               <p className="text-xs text-muted-foreground mb-2">Podpowiedzi do szybkiego startu:</p>
               <div className="flex flex-wrap gap-2">
                 <Button variant="outline" size="sm" onClick={() => handleQuickResponse("Mam jutro kartkówkę z funkcji liniowych. Przygotuj mnie.")}>Kartkówka: funkcje liniowe</Button>
@@ -626,13 +631,13 @@ export const AIChat = () => {
             </div>
 
             {/* Input */}
-            <div className="p-4 border-t border-border">
+            <div className="p-4 border-t border-border pb-[env(safe-area-inset-bottom)]">
               <div className="flex gap-3">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={isRecording ? stopRecording : startRecording}
-                  className={`flex-shrink-0 min-h-[48px] touch-target focus:ring-2 focus:ring-primary focus:ring-offset-2 ${isRecording ? 'bg-destructive/10 border-destructive/20 text-destructive' : ''}`}
+                  className={`hidden md:inline-flex flex-shrink-0 min-h-[48px] touch-target focus:ring-2 focus:ring-primary focus:ring-offset-2 ${isRecording ? 'bg-destructive/10 border-destructive/20 text-destructive' : ''}`}
                   aria-label={isRecording ? 'Zatrzymaj nagrywanie głosowe' : 'Rozpocznij nagrywanie głosowe'}
                 >
                   {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
@@ -649,17 +654,27 @@ export const AIChat = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex-shrink-0 min-h-[48px] touch-target focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                  className="hidden md:inline-flex flex-shrink-0 min-h-[48px] touch-target focus:ring-2 focus:ring-primary focus:ring-offset-2"
                   aria-label="Wyślij zdjęcie zadania do analizy"
                 >
                   <ImageIcon className="w-4 h-4" />
+                </Button>
+                {/* More panel trigger - mobile only */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setMoreOpen(true)}
+                  className="md:hidden flex-shrink-0 min-h-[48px] touch-target focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                  aria-label="Więcej opcji"
+                >
+                  <MoreHorizontal className="w-4 h-4" />
                 </Button>
                 <Input
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder={isRecording ? "Nagrywanie... (kliknij mikrofon ponownie aby zakończyć)" : "Zadaj pytanie lub napisz swoją odpowiedź..."}
-                  className="flex-1 min-h-[48px] focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                  className="flex-1 h-12 md:h-12 focus:ring-2 focus:ring-primary focus:ring-offset-2"
                   disabled={isTyping || isRecording}
                   aria-label="Pole tekstowe do wpisywania wiadomości"
                 />
@@ -678,6 +693,61 @@ export const AIChat = () => {
               </div>
             </div>
           </Card>
+          {isMobile && (
+            <Drawer open={moreOpen} onOpenChange={setMoreOpen}>
+              <DrawerContent>
+                <DrawerHeader>
+                  <DrawerTitle>Więcej opcji</DrawerTitle>
+                  <DrawerDescription>Dodatkowe skróty i narzędzia</DrawerDescription>
+                </DrawerHeader>
+                <div className="px-4 pb-4">
+                  <div className="flex gap-2 mb-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={isRecording ? stopRecording : startRecording}
+                      className={`min-h-[44px] ${isRecording ? 'bg-destructive/10 border-destructive/20 text-destructive' : ''}`}
+                    >
+                      {isRecording ? <MicOff className="w-4 h-4 mr-2" /> : <Mic className="w-4 h-4 mr-2" />}
+                      {isRecording ? 'Zatrzymaj nagrywanie' : 'Nagraj wiadomość'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="min-h-[44px]"
+                    >
+                      <ImageIcon className="w-4 h-4 mr-2" />
+                      Wyślij zdjęcie
+                    </Button>
+                  </div>
+
+                  {showUnderstanding && !isTyping && (
+                    <div className="mb-4">
+                      <p className="text-sm text-muted-foreground mb-2">Czy rozumiesz wyjaśnienie?</p>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => handleQuickResponse("Tak, rozumiem")} className="min-h-[44px]"><ThumbsUp className="w-4 h-4 mr-2" /> Tak, rozumiem</Button>
+                        <Button variant="outline" size="sm" onClick={() => handleQuickResponse("Nie rozumiem, wytłumacz ponownie")} className="min-h-[44px]"><ThumbsDown className="w-4 h-4 mr-2" /> Nie rozumiem</Button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="mb-4">
+                    <p className="text-xs text-muted-foreground mb-2">Podpowiedzi do szybkiego startu:</p>
+                    <div className="flex flex-wrap gap-2">
+                      <Button variant="outline" size="sm" onClick={() => handleQuickResponse("Mam jutro kartkówkę z funkcji liniowych. Przygotuj mnie.")}>Kartkówka: funkcje liniowe</Button>
+                      <Button variant="outline" size="sm" onClick={() => handleQuickResponse("Wyjaśnij krok po kroku deltę i pokaż przykłady.")}>Wyjaśnij deltę</Button>
+                      <Button variant="outline" size="sm" onClick={() => handleQuickResponse("Przećwiczmy 3 zadania z trygonometrii (podstawy).")}>3 zadania: trygonometria</Button>
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    {renderRecommendations()}
+                  </div>
+                </div>
+              </DrawerContent>
+            </Drawer>
+          )}
         </div>
       </div>
     </div>
