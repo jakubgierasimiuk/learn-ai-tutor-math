@@ -2,12 +2,16 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Send, ThumbsUp, ThumbsDown, RotateCcw, User, Bot, BookOpen, Target, Lightbulb, Volume2, Mic, MicOff, Loader2 } from "lucide-react";
+import { Brain, Send, ThumbsUp, ThumbsDown, RotateCcw, User, Bot, BookOpen, Target, Lightbulb, Volume2, Mic, MicOff, Loader2, Image as ImageIcon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Link, useSearchParams } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 
 interface Message {
   id: string;
@@ -67,6 +71,7 @@ export const AIChat = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchParams] = useSearchParams();
   const hasSentPromptRef = useRef(false);
 
@@ -185,21 +190,33 @@ export const AIChat = () => {
 
   useEffect(() => {
     const p = searchParams.get('prompt');
-    if (p && !hasSentPromptRef.current && user) {
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        role: 'user',
-        content: p,
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, userMessage]);
-      sendMessageToAI(p);
-      hasSentPromptRef.current = true;
-      console.log('cta_chat_clicked', { source: searchParams.get('source') || 'deep_link' });
+    const topic = searchParams.get('topic');
+    const goal = searchParams.get('goal');
+
+    if (!hasSentPromptRef.current && user) {
+      let initial = p || '';
+      if (!initial && (topic || goal)) {
+        const t = topic ? `z ${topic}` : '';
+        const g = goal || 'przygotuj mnie do kartkówki';
+        initial = `${g} ${t}. Daj krótkie podsumowanie i 3 zadania na rozgrzewkę.`;
+      }
+
+      if (initial) {
+        const userMessage: Message = {
+          id: Date.now().toString(),
+          role: 'user',
+          content: initial,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, userMessage]);
+        sendMessageToAI(initial);
+        hasSentPromptRef.current = true;
+        console.log('cta_chat_clicked', { source: searchParams.get('source') || 'deep_link' });
+      }
     }
   }, [searchParams, user]);
 
-  const sendMessageToAI = async (userInput: string) => {
+  const sendMessageToAI = async (userInput: string, imageBase64?: string) => {
     if (!user) {
       toast.error("Musisz być zalogowany, aby korzystać z czatu AI");
       return;
@@ -219,7 +236,8 @@ export const AIChat = () => {
           userId: user.id,
           sessionId: currentSessionId,
           userProgress: userProgress,
-          weakAreas: userProgress?.weakAreas || []
+          weakAreas: userProgress?.weakAreas || [],
+          imageBase64: imageBase64 || null
         }
       });
 
@@ -382,6 +400,29 @@ export const AIChat = () => {
     }
   };
 
+  const handleImageSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      const base64 = result.includes(',') ? result.split(',')[1] : result;
+      const prompt = "Przeanalizuj proszę to zadanie ze zdjęcia i wyjaśnij krok po kroku. Jeśli to możliwe, podaj rozwiązanie i krótkie wskazówki.";
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: `${prompt}\n[Załączono obraz zadania]`,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, userMessage]);
+      sendMessageToAI(prompt, base64);
+      toast.success("Obraz wysłany do analizy");
+    };
+    reader.readAsDataURL(file);
+    // reset input so the same file can be re-selected if needed
+    e.currentTarget.value = "";
+  };
+
   const renderRecommendations = () => {
     if (!showRecommendations || !userProgress) return null;
 
@@ -409,7 +450,6 @@ export const AIChat = () => {
     );
   };
 
-  return (
     <div className="min-h-screen bg-gradient-to-br from-background to-accent/5">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
@@ -470,10 +510,10 @@ export const AIChat = () => {
                           Reviewer AI - Uproszczone wyjaśnienie
                         </div>
                       )}
-                      <div className="whitespace-pre-wrap">
-                        {message.content.split('**').map((part, index) => 
-                          index % 2 === 1 ? <strong key={index}>{part}</strong> : part
-                        )}
+                      <div className="markdown-body">
+                        <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                          {message.content}
+                        </ReactMarkdown>
                       </div>
                     </div>
                     <div className="flex items-center justify-between mt-1 px-2">
@@ -579,6 +619,22 @@ export const AIChat = () => {
                 >
                   {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
                   <span className="sr-only">{isRecording ? 'Zakończ nagrywanie' : 'Nagrywaj wiadomość głosową'}</span>
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageSelected}
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex-shrink-0 min-h-[48px] touch-target focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                  aria-label="Wyślij zdjęcie zadania do analizy"
+                >
+                  <ImageIcon className="w-4 h-4" />
                 </Button>
                 <Input
                   value={newMessage}
