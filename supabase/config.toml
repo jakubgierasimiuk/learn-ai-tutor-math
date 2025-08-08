@@ -1,1 +1,4 @@
 project_id = "rfcjhdxsczcwbpknudyy"
+
+[functions.analyze-student-materials]
+verify_jwt = true

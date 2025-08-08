@@ -23,6 +23,7 @@ import UXTestPage from "./pages/UXTestPage";
 import ReferralPage from "./pages/ReferralPage";
 import StudyDashboard from "./pages/StudyDashboard";
 import StudyLesson from "./pages/StudyLesson";
+import MaterialsPage from "./pages/MaterialsPage";
 
 const queryClient = new QueryClient();
 
@@ -98,6 +99,11 @@ const App = () => (
             <Route path="/chat" element={
               <AuthenticatedLayout>
                 <ChatPage />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/materials" element={
+              <AuthenticatedLayout>
+                <MaterialsPage />
               </AuthenticatedLayout>
             } />
             <Route path="/analytics" element={
