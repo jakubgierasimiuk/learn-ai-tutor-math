@@ -74,7 +74,8 @@ export const AIChat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchParams] = useSearchParams();
   const hasSentPromptRef = useRef(false);
-
+  const [slowNetwork, setSlowNetwork] = useState(false);
+  const [lastUserMessage, setLastUserMessage] = useState<string | null>(null);
   useEffect(() => {
     initializeChat();
   }, [user]);
@@ -215,7 +216,17 @@ export const AIChat = () => {
       }
     }
   }, [searchParams, user]);
-
+  
+  useEffect(() => {
+    let t: any;
+    if (isTyping) {
+      t = setTimeout(() => setSlowNetwork(true), 4000);
+    } else {
+      setSlowNetwork(false);
+    }
+    return () => { if (t) clearTimeout(t); };
+  }, [isTyping]);
+  
   const sendMessageToAI = async (userInput: string, imageBase64?: string) => {
     if (!user) {
       toast.error("Musisz być zalogowany, aby korzystać z czatu AI");
@@ -296,6 +307,7 @@ export const AIChat = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    setLastUserMessage(newMessage);
     sendMessageToAI(newMessage);
     setNewMessage("");
     setShowUnderstanding(false);
@@ -311,6 +323,7 @@ export const AIChat = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    setLastUserMessage(response);
     sendMessageToAI(response);
     setShowUnderstanding(false);
     setShowRecommendations(false);
@@ -415,6 +428,7 @@ export const AIChat = () => {
         timestamp: new Date()
       };
       setMessages(prev => [...prev, userMessage]);
+      setLastUserMessage(prompt);
       sendMessageToAI(prompt, base64);
       toast.success("Obraz wysłany do analizy");
     };
@@ -481,7 +495,7 @@ export const AIChat = () => {
         <div className="max-w-4xl mx-auto">
           <Card className="h-[600px] flex flex-col shadow-card">
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6" role="log" aria-live="polite" aria-relevant="additions text">
               {messages.map((message) => (
                 <div
                   key={message.id}
@@ -549,7 +563,7 @@ export const AIChat = () => {
 
               {/* Typing indicator */}
               {isTyping && (
-                <div className="flex gap-4 justify-start">
+                <div className="flex gap-4 justify-start" aria-live="polite" aria-label="Asystent pisze odpowiedź">
                   <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center">
                     <Bot className="w-5 h-5 text-accent" />
                   </div>
@@ -559,6 +573,9 @@ export const AIChat = () => {
                       <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                       <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                     </div>
+                    {slowNetwork && (
+                      <p className="text-xs text-muted-foreground mt-2">Łączenie z AI… to może potrwać chwilę.</p>
+                    )}
                   </div>
                 </div>
               )}

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, Brain, ArrowLeft, ArrowRight, Clock, Target, Star, Volume2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -118,6 +118,7 @@ export const DiagnosticQuiz = () => {
   const [showResults, setShowResults] = useState(false);
   const [currentDifficulty, setCurrentDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const TARGET_QUESTIONS = Math.min(8, quizQuestions.length);
+  const questionHeadingRef = useRef<HTMLHeadingElement>(null);
 
   // Helpers
   const getQuestionById = (id: number) => quizQuestions.find(q => q.id === id)!;
@@ -159,8 +160,11 @@ export const DiagnosticQuiz = () => {
       const firstId = chooseInitialQuestion();
       setAskedQuestions([firstId]);
       setCurrentIndex(0);
+    } else {
+      // Przenieś focus na nagłówek pytania przy zmianie pytania
+      questionHeadingRef.current?.focus();
     }
-  }, [askedQuestions.length]);
+  }, [askedQuestions.length, currentIndex]);
 
   const handleAnswerSelect = (questionId: number, optionId: string) => {
     setSelectedAnswers(prev => ({
@@ -384,7 +388,7 @@ export const DiagnosticQuiz = () => {
         {/* Question */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-semibold">{question.question}</h3>
+            <h3 ref={questionHeadingRef} tabIndex={-1} id={`question-${question.id}-label`} className="text-xl font-semibold">{question.question}</h3>
             <Button
               variant="outline"
               size="sm"
@@ -398,12 +402,14 @@ export const DiagnosticQuiz = () => {
             </Button>
           </div>
           
-          <div className="space-y-3">
+          <div className="space-y-3" role="radiogroup" aria-labelledby={`question-${question.id}-label`}>
             {question.options.map((option) => (
               <button
                 key={option.id}
+                role="radio"
+                aria-checked={selectedAnswer === option.id}
                 onClick={() => handleAnswerSelect(question.id, option.id)}
-                className={`w-full min-h-[48px] p-4 text-left rounded-lg border transition-all touch-target focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+                className={`w-full min-h-[52px] p-4 text-left rounded-lg border transition-all touch-target focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
                   selectedAnswer === option.id
                     ? 'border-primary bg-primary/10 text-primary'
                     : 'border-border hover:border-primary/50 hover:bg-primary/5'

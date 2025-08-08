@@ -61,6 +61,30 @@ export const StudentMaterialsWizard: React.FC<StudentMaterialsWizardProps> = ({ 
     setPreviews(p);
   };
 
+  // Kompresja do ~1600px szerokości, JPEG 0.85
+  const compressToDataURL = (file: File): Promise<string> => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    const img = new Image();
+    reader.onload = () => {
+      img.onload = () => {
+        const MAX = 1600;
+        let w = img.width; let h = img.height;
+        const scale = Math.min(1, MAX / Math.max(w, h));
+        w = Math.round(w * scale); h = Math.round(h * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { resolve(reader.result as string); return; }
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.onerror = () => resolve(reader.result as string);
+      img.src = reader.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
   const analyze = async () => {
     if (!files.length) {
       toast({ title: 'Brak zdjęć', description: 'Dodaj przynajmniej jedno zdjęcie.' });
@@ -71,14 +95,8 @@ export const StudentMaterialsWizard: React.FC<StudentMaterialsWizardProps> = ({ 
       setUploading(true);
       setProgress(10);
 
-      // Convert to base64 data URLs
-      const imagesBase64 = await Promise.all(files.map(file => new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve((reader.result as string));
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      })));
-
+      // Konwersja + kompresja do Base64
+      const imagesBase64 = await Promise.all(files.map((file) => compressToDataURL(file)));
       setProgress(40);
 
       const { data, error } = await supabase.functions.invoke('analyze-student-materials', {
