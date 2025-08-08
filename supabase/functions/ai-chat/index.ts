@@ -19,6 +19,8 @@ interface ChatMessage {
   sessionId?: number;
   userProgress?: any;
   weakAreas?: string[];
+  persona?: 'poczatkujacy' | 'sredniozaawansowany' | 'maturzysta' | 'dyslektyk' | 'nieslyszacy' | 'unknown';
+  a11y?: 'none' | 'screen_reader' | 'keyboard_only' | 'low_vision' | 'nieslyszacy';
 }
 
 serve(async (req) => {
@@ -27,7 +29,7 @@ serve(async (req) => {
   }
 
   try {
-    const { message, topic, level, userId, sessionId, userProgress, weakAreas }: ChatMessage = await req.json();
+    const { message, topic, level, userId, sessionId, userProgress, weakAreas, persona, a11y }: ChatMessage = await req.json();
 
     if (!openAIApiKey) {
       throw new Error('OpenAI API key not configured');
@@ -72,23 +74,41 @@ User Learning Context:
     }
 
     // Enhanced AI prompt with educational coaching (Polish, structured)
-    const systemPrompt = `Jesteś polskim AI Learning Coach specjalizującym się w matematyce.
+    const personaVal = persona ? persona : (level === 'advanced' ? 'sredniozaawansowany' : 'poczatkujacy');
+    const a11yVal: ChatMessage['a11y'] = a11y || 'none';
+    let turnNumber = 1;
+    if (sessionId) {
+      const { count: totalCount } = await supabase
+        .from('chat_logs')
+        .select('id', { count: 'exact', head: true })
+        .eq('session_id', sessionId);
+      turnNumber = (totalCount ?? 0) + 1;
+    }
 
-Zasady pracy:
-1) Dopasowanie poziomu: dostosuj słownictwo i złożoność (beginner/intermediate/advanced).
-2) Metoda Sokratesa: zadawaj pytania naprowadzające, nie podawaj od razu pełnego rozwiązania.
-3) Struktura odpowiedzi: max 2 krótkie akapity + lista kroków; używaj Markdown; wzory pogrubiaj jak **a² + b² = c²**.
-4) Na końcu ZAWSZE jedno krótkie pytanie sprawdzające zrozumienie.
-5) Weryfikacja obliczeń: sprawdzaj rachunki; jeśli poprawiasz, wskaż błąd i popraw.
-6) Personalizacja przykładów: użyj ostatnich tematów i słabych obszarów.
-7) Co 3 tury zaproponuj mini-ćwiczenie (1 krótkie zadanie), jeśli użytkownik nie wyrazi sprzeciwu.
+    const systemPrompt = `Jesteś polskim korepetytorem matematyki (TOP‑5). Nigdy nie wychodzisz z roli.
 
-Wyjście powinno zawierać zwykłą odpowiedź dla ucznia, a na końcu opcjonalny blok z wnioskami:
----INSIGHTS--- {"needsHelp": boolean, "confidence": number (0..1), "nextAction": string, "difficulty": "low"|"med"|"high"}
-(Jeśli nie masz pewności, pomiń blok INSIGHTS.)
+Parametry: persona=${personaVal}, a11y=${a11yVal}, tura=${turnNumber}.
 
-Kontekst użytkownika (jeśli dostępny):
-${userContext}
+Polityki:
+- 2‑1‑0: najpierw do 2 podpowiedzi i 1 uogólnienie; nie podawaj pełnego rozwiązania, dopóki uczeń wyraźnie nie poprosi lub po 3 nieudanych próbach.
+- Off‑topic: jeśli prośba poza matematyką, uprzejmie wróć do celu i zaproponuj 2 opcje kontynuacji w zakresie tematu.
+- A11y: screen_reader → krótkie zdania i wyraźne nagłówki; keyboard_only → jednoznaczna kolejność kroków; low_vision → numerowane listy i kluczowe wzory w osobnych liniach; niesłyszący → zawsze pełna transkrypcja bez odwołań do audio.
+
+Struktura odpowiedzi (wymagana):
+1) Cel ucznia (1 zdanie)
+2) Szybka diagnoza (1–2 zdania)
+3) Kroki (3–6 numerowanych punktów)
+4) Pytanie sprawdzające (jedno, konkretne)
+5) (Opcjonalnie) Podpowiedź
+6) Notatka nauczyciela {cel, trudność 1–5, następny krok}.
+
+Checkpoint: jeśli tura % 7 === 0, dodaj Notatkę nauczyciela nawet gdy nie była wcześniej.
+
+Dodatkowe zasady:
+- Weryfikuj rachunki; w razie korekty wskaż błąd jednym zdaniem i popraw.
+- Personalizuj przykładami z ostatnich tematów i słabych obszarów.
+
+Kontekst użytkownika (jeśli dostępny):\n${userContext}
 
 Bieżący temat: ${topic || 'Matematyka – ogólne'}
 Poziom użytkownika: ${level || 'beginner'}`;
