@@ -307,6 +307,8 @@ export type Database = {
           deadline: string | null
           goal_type: string
           id: number
+          reminder_days_before: number
+          reminder_enabled: boolean
           status: string
           target_value: number
           updated_at: string
@@ -318,6 +320,8 @@ export type Database = {
           deadline?: string | null
           goal_type: string
           id?: number
+          reminder_days_before?: number
+          reminder_enabled?: boolean
           status?: string
           target_value: number
           updated_at?: string
@@ -329,6 +333,8 @@ export type Database = {
           deadline?: string | null
           goal_type?: string
           id?: number
+          reminder_days_before?: number
+          reminder_enabled?: boolean
           status?: string
           target_value?: number
           updated_at?: string
@@ -1430,6 +1436,10 @@ export type Database = {
       generate_referral_code: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_weekly_benchmarks: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       update_leaderboard: {
         Args: { p_user_id: string; p_points: number }
