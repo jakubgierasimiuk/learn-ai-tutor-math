@@ -222,6 +222,50 @@ export type Database = {
           },
         ]
       }
+      goal_reminders: {
+        Row: {
+          active: boolean
+          created_at: string
+          days_of_week: number[]
+          goal_id: number
+          id: string
+          notify_channel: string
+          reminder_time: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          days_of_week?: number[]
+          goal_id: number
+          id?: string
+          notify_channel?: string
+          reminder_time: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          days_of_week?: number[]
+          goal_id?: number
+          id?: string
+          notify_channel?: string
+          reminder_time?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_reminders_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "learning_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_study_sessions: {
         Row: {
           created_at: string
