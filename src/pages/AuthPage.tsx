@@ -12,6 +12,9 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [recoveryMode, setRecoveryMode] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -22,6 +25,27 @@ export default function AuthPage() {
       navigate("/");
     }
   }, [user, navigate]);
+
+  // Enable password recovery mode when user opens recovery link
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setRecoveryMode(true);
+        toast({ title: "Ustal nowe hasło", description: "Wpisz nowe hasło do konta." });
+      }
+    });
+
+    // Fallback: detect via URL params/hash
+    const hash = window.location.hash || "";
+    const search = window.location.search || "";
+    if (hash.includes("type=recovery") || search.includes("type=recovery")) {
+      setRecoveryMode(true);
+    }
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [toast]);
 
   const handleSignIn = async () => {
     setLoading(true);
@@ -130,6 +154,40 @@ export default function AuthPage() {
     }
   };
 
+  const handleUpdatePassword = async () => {
+    if (newPassword.length < 6) {
+      toast({
+        title: "Hasło za krótkie",
+        description: "Minimum 6 znaków",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Hasła się nie zgadzają",
+        description: "Wpisz identyczne hasła",
+        variant: "destructive",
+      });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        toast({ title: "Błąd", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Hasło zaktualizowane", description: "Zalogowano na nowe hasło" });
+        setRecoveryMode(false);
+        setNewPassword("");
+        setConfirmPassword("");
+        navigate("/");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-4">
       <Card className="w-full max-w-md">
@@ -140,68 +198,101 @@ export default function AuthPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Logowanie</TabsTrigger>
-              <TabsTrigger value="signup">Rejestracja</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="signin" className="space-y-4">
+          {recoveryMode ? (
+            <div className="space-y-4">
               <div className="space-y-2">
                 <Input
-                  type="email"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  type="password"
+                  placeholder="Nowe hasło"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
                 />
                 <Input
                   type="password"
-                  placeholder="Hasło"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Powtórz nowe hasło"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                 />
               </div>
-              <Button 
-                onClick={handleSignIn} 
-                className="w-full" 
+              <Button
+                onClick={handleUpdatePassword}
+                className="w-full"
                 disabled={loading}
               >
-                {loading ? "Logowanie..." : "Zaloguj się"}
+                {loading ? "Aktualizowanie..." : "Ustaw nowe hasło"}
               </Button>
-              <Button 
-                onClick={handleForgotPassword} 
-                variant="outline" 
-                className="w-full" 
-                disabled={loading}
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => setRecoveryMode(false)}
               >
-                Przypomnij hasło
+                Anuluj
               </Button>
-            </TabsContent>
-            
-            <TabsContent value="signup" className="space-y-4">
-              <div className="space-y-2">
-                <Input
-                  type="email"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-                <Input
-                  type="password"
-                  placeholder="Hasło"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <Button 
-                onClick={handleSignUp} 
-                className="w-full" 
-                disabled={loading}
-              >
-                {loading ? "Tworzenie konta..." : "Utwórz konto"}
-              </Button>
-            </TabsContent>
-          </Tabs>
+            </div>
+          ) : (
+            <Tabs defaultValue="signin" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="signin">Logowanie</TabsTrigger>
+                <TabsTrigger value="signup">Rejestracja</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="signin" className="space-y-4">
+                <div className="space-y-2">
+                  <Input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  <Input
+                    type="password"
+                    placeholder="Hasło"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+                <Button 
+                  onClick={handleSignIn} 
+                  className="w-full" 
+                  disabled={loading}
+                >
+                  {loading ? "Logowanie..." : "Zaloguj się"}
+                </Button>
+                <Button 
+                  onClick={handleForgotPassword} 
+                  variant="outline" 
+                  className="w-full" 
+                  disabled={loading}
+                >
+                  Przypomnij hasło
+                </Button>
+              </TabsContent>
+              
+              <TabsContent value="signup" className="space-y-4">
+                <div className="space-y-2">
+                  <Input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  <Input
+                    type="password"
+                    placeholder="Hasło"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+                <Button 
+                  onClick={handleSignUp} 
+                  className="w-full" 
+                  disabled={loading}
+                >
+                  {loading ? "Tworzenie konta..." : "Utwórz konto"}
+                </Button>
+              </TabsContent>
+            </Tabs>
+          )}
         </CardContent>
       </Card>
     </div>
