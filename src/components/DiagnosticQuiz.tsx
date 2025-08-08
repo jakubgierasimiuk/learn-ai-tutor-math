@@ -111,10 +111,56 @@ const quizQuestions = [
 
 export const DiagnosticQuiz = () => {
   const { user } = useAuth();
-  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [askedQuestions, setAskedQuestions] = useState<number[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const [isCompleted, setIsCompleted] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [currentDifficulty, setCurrentDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
+  const TARGET_QUESTIONS = Math.min(8, quizQuestions.length);
+
+  // Helpers
+  const getQuestionById = (id: number) => quizQuestions.find(q => q.id === id)!;
+  const getCorrectOptionId = (qId: number) => {
+    const q = getQuestionById(qId);
+    return q.options.find(o => o.correct)?.id || '';
+  };
+  const isAnswerCorrect = (qId: number): boolean | null => {
+    const ans = selectedAnswers[qId];
+    if (!ans) return null;
+    if (ans === 'unknown') return false;
+    return ans === getCorrectOptionId(qId);
+  };
+  const recentPerformance = (k = 2) => {
+    const last = askedQuestions.slice(0, currentIndex + 1).slice(-k);
+    const vals = last.map(id => isAnswerCorrect(id));
+    const correct = vals.filter(v => v === true).length;
+    const answered = vals.filter(v => v !== null).length;
+    return { correct, answered };
+  };
+  const chooseInitialQuestion = () => {
+    const candidates = quizQuestions.filter(q => q.difficulty === 'medium') 
+      .concat(quizQuestions.filter(q => q.difficulty === 'hard'))
+      .concat(quizQuestions.filter(q => q.difficulty === 'easy'));
+    return candidates[0]?.id || quizQuestions[0].id;
+  };
+  const chooseNextQuestion = (desired: 'easy' | 'medium' | 'hard', asked: number[]) => {
+    const remaining = quizQuestions.filter(q => !asked.includes(q.id));
+    const order: Array<'hard' | 'medium' | 'easy'> = desired === 'hard' ? ['hard','medium','easy'] : desired === 'medium' ? ['medium','hard','easy'] : ['easy','medium','hard'];
+    for (const level of order) {
+      const candidate = remaining.find(q => q.difficulty === level);
+      if (candidate) return candidate.id;
+    }
+    return remaining[0]?.id;
+  };
+
+  useEffect(() => {
+    if (askedQuestions.length === 0) {
+      const firstId = chooseInitialQuestion();
+      setAskedQuestions([firstId]);
+      setCurrentIndex(0);
+    }
+  }, [askedQuestions.length]);
 
   const handleAnswerSelect = (questionId: number, optionId: string) => {
     setSelectedAnswers(prev => ({
@@ -124,16 +170,41 @@ export const DiagnosticQuiz = () => {
   };
 
   const handleNext = () => {
-    if (currentQuestion < quizQuestions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
+    // Adapt difficulty based on last two answers
+    const perf = recentPerformance(2);
+    let nextDifficulty = currentDifficulty;
+    if (perf.answered >= 2) {
+      if (perf.correct === 2) nextDifficulty = 'hard';
+      else if (perf.correct === 0) nextDifficulty = 'easy';
+      else nextDifficulty = 'medium';
+    }
+    setCurrentDifficulty(nextDifficulty);
+
+    // If navigating within already asked sequence
+    if (currentIndex < askedQuestions.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      return;
+    }
+
+    // Finish if target reached
+    if (askedQuestions.length >= TARGET_QUESTIONS) {
+      setIsCompleted(true);
+      return;
+    }
+
+    // Choose next question adaptively
+    const nextId = chooseNextQuestion(nextDifficulty, askedQuestions);
+    if (nextId) {
+      setAskedQuestions(prev => [...prev, nextId]);
+      setCurrentIndex(currentIndex + 1);
     } else {
       setIsCompleted(true);
     }
   };
 
   const handlePrevious = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1);
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
     }
   };
 
@@ -222,7 +293,7 @@ export const DiagnosticQuiz = () => {
     }));
   };
 
-  const progress = ((currentQuestion + 1) / quizQuestions.length) * 100;
+  const progress = askedQuestions.length > 0 ? ((currentIndex + 1) / TARGET_QUESTIONS) * 100 : 0;
   const answeredQuestions = Object.keys(selectedAnswers).length;
 
   if (showResults) {
@@ -278,7 +349,7 @@ export const DiagnosticQuiz = () => {
           </div>
           <h2 className="text-2xl font-bold mb-4">Świetna robota!</h2>
           <p className="text-muted-foreground mb-6">
-            Odpowiedziałeś na {answeredQuestions} z {quizQuestions.length} pytań. 
+            Odpowiedziałeś na {answeredQuestions} z {TARGET_QUESTIONS} pytań. 
             Kliknij poniżej, aby zobaczyć swoje wyniki i rekomendacje.
           </p>
           <Button onClick={handleSubmit} size="lg" className="shadow-primary">
@@ -289,9 +360,9 @@ export const DiagnosticQuiz = () => {
     );
   }
 
-  const question = quizQuestions[currentQuestion];
+  const currentQuestionId = askedQuestions[currentIndex];
+  const question = quizQuestions.find(q => q.id === currentQuestionId) || quizQuestions[0];
   const selectedAnswer = selectedAnswers[question.id];
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-accent/10 flex items-center justify-center p-4">
       <Card className="w-full max-w-3xl p-8 shadow-card">
@@ -300,7 +371,7 @@ export const DiagnosticQuiz = () => {
           <div className="flex items-center justify-between mb-4">
             <Badge variant="outline">{question.topic}</Badge>
             <span className="text-sm text-muted-foreground">
-              {currentQuestion + 1} z {quizQuestions.length}
+              {currentIndex + 1} z {TARGET_QUESTIONS}
             </span>
           </div>
           <Progress value={progress} className="mb-4" />
@@ -372,7 +443,7 @@ export const DiagnosticQuiz = () => {
           <Button
             variant="outline"
             onClick={handlePrevious}
-            disabled={currentQuestion === 0}
+            disabled={currentIndex === 0}
             className="min-h-[48px] touch-target focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -384,7 +455,7 @@ export const DiagnosticQuiz = () => {
             disabled={!selectedAnswer}
             className="shadow-primary min-h-[48px] touch-target focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
-            {currentQuestion === quizQuestions.length - 1 ? 'Zakończ' : 'Następne'}
+            {currentIndex === TARGET_QUESTIONS - 1 ? 'Zakończ' : 'Następne'}
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
