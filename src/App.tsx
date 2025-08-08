@@ -24,6 +24,7 @@ import ReferralPage from "./pages/ReferralPage";
 import StudyDashboard from "./pages/StudyDashboard";
 import StudyLesson from "./pages/StudyLesson";
 import MaterialsPage from "./pages/MaterialsPage";
+import UXAuditPage from "./pages/UXAuditPage";
 
 const queryClient = new QueryClient();
 
@@ -129,6 +130,11 @@ const App = () => (
             <Route path="/ux-test" element={
               <AuthenticatedLayout>
                 <UXTestPage />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/ux-audit" element={
+              <AuthenticatedLayout>
+                <UXAuditPage />
               </AuthenticatedLayout>
             } />
             <Route path="/study" element={
