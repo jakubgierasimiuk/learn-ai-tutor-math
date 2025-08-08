@@ -568,7 +568,7 @@ export const AIChat = () => {
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <Send className="w-4 h-4" />
-                  )
+                  )}
                 </Button>
               </div>
             </div>
