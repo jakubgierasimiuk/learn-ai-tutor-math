@@ -19,7 +19,12 @@ interface AnalysisResult {
   skillMatches: { id: string; name: string; confidence: number }[];
 }
 
-export const StudentMaterialsWizard: React.FC = () => {
+interface StudentMaterialsWizardProps {
+  onAnalysisComplete?: (result: AnalysisResult) => void;
+  onStartLesson?: (skillId: string) => void;
+}
+
+export const StudentMaterialsWizard: React.FC<StudentMaterialsWizardProps> = ({ onAnalysisComplete, onStartLesson }) => {
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -83,8 +88,10 @@ export const StudentMaterialsWizard: React.FC = () => {
       setProgress(85);
 
       if (error) throw error;
-      setResult(data as AnalysisResult);
+      const res = data as AnalysisResult;
+      setResult(res);
       setProgress(100);
+      onAnalysisComplete?.(res);
       toast({ title: 'Analiza zakończona', description: 'Znaleziono tematy i przygotowano plan lekcji.' });
     } catch (e: any) {
       console.error(e);
@@ -223,7 +230,14 @@ export const StudentMaterialsWizard: React.FC = () => {
                 )}
 
                 <div className="flex flex-wrap gap-3">
-                  <Button variant="default" className="flex items-center gap-2">
+                  <Button variant="default" className="flex items-center gap-2" onClick={() => {
+                    if (!result?.skillMatches?.length) {
+                      toast({ variant: 'destructive', title: 'Brak dopasowań', description: 'Nie znaleziono pasującej umiejętności.' });
+                      return;
+                    }
+                    const best = [...result.skillMatches].sort((a, b) => b.confidence - a.confidence)[0];
+                    onStartLesson?.(best.id);
+                  }}>
                     <Play className="w-4 h-4" /> Rozpocznij prowadzoną lekcję
                   </Button>
                   <Button variant="secondary" className="flex items-center gap-2">

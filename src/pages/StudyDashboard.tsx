@@ -9,11 +9,15 @@ import { BookOpen, Brain, Clock, TrendingUp, Play, Trophy, Target } from 'lucide
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import type { Skill, SkillProgress, DepartmentProgress } from '@/types';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { StudentMaterialsWizard } from '@/components/StudentMaterialsWizard';
+import { Upload } from 'lucide-react';
 
 export default function StudyDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
+  const [materialsOpen, setMaterialsOpen] = useState(false);
 
   // Fetch skills with progress
   const { data: skillsWithProgress, isLoading } = useQuery({
@@ -142,11 +146,16 @@ export default function StudyDashboard() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Study & Learn</h1>
-        <p className="text-muted-foreground">
-          Interaktywny tutor matematyki - ucz się w swoim tempie z metodą sokratejską
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">Study & Learn</h1>
+          <p className="text-muted-foreground">
+            Interaktywny tutor matematyki - ucz się w swoim tempie z metodą sokratejską
+          </p>
+        </div>
+        <Button variant="outline" size="sm" className="flex items-center gap-2" onClick={() => setMaterialsOpen(true)}>
+          <Upload className="w-4 h-4" /> Dodaj materiały
+        </Button>
       </div>
 
       {/* Overview Stats */}
@@ -316,6 +325,17 @@ export default function StudyDashboard() {
           </CardContent>
         </Card>
       )}
+
+      <Dialog open={materialsOpen} onOpenChange={setMaterialsOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Dodaj materiały</DialogTitle>
+          </DialogHeader>
+          <StudentMaterialsWizard
+            onStartLesson={(id) => { setMaterialsOpen(false); startLesson(id); }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,12 +17,15 @@ import {
   ArrowLeft, 
   CheckCircle,
   AlertTriangle,
-  MessageSquare
+  MessageSquare,
+  Upload
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import type { Skill, StudySession, LessonStep } from '@/types';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { StudentMaterialsWizard } from '@/components/StudentMaterialsWizard';
 
 export default function StudyLesson() {
   const { skillId } = useParams();
@@ -38,6 +41,8 @@ export default function StudyLesson() {
   const [showHint, setShowHint] = useState(false);
   const [canRevealSolution, setCanRevealSolution] = useState(false);
   const [attemptCount, setAttemptCount] = useState(0);
+  const [materialsOpen, setMaterialsOpen] = useState(false);
+  const navigate = useNavigate();
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -373,10 +378,15 @@ export default function StudyLesson() {
             <h1 className="text-2xl font-bold">{skill.name}</h1>
             <p className="text-muted-foreground">{skill.description}</p>
           </div>
-          <Badge variant="outline">
-            <Clock className="w-3 h-3 mr-1" />
-            ~{skill.estimated_time_minutes} min
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline">
+              <Clock className="w-3 h-3 mr-1" />
+              ~{skill.estimated_time_minutes} min
+            </Badge>
+            <Button variant="outline" size="sm" className="flex items-center gap-2" onClick={() => setMaterialsOpen(true)}>
+              <Upload className="w-4 h-4" /> Dodaj materiały
+            </Button>
+          </div>
         </div>
 
         {session && (
@@ -641,6 +651,22 @@ export default function StudyLesson() {
           </Card>
         </div>
       </div>
+
+      <Dialog open={materialsOpen} onOpenChange={setMaterialsOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Dodaj materiały</DialogTitle>
+          </DialogHeader>
+          <StudentMaterialsWizard
+            onStartLesson={(id) => {
+              setMaterialsOpen(false);
+              if (id !== skillId) {
+                navigate(`/study/lesson/${id}`);
+              }
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
