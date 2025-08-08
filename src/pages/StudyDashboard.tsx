@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -153,9 +153,16 @@ export default function StudyDashboard() {
             Interaktywny tutor matematyki - ucz się w swoim tempie z metodą sokratejską
           </p>
         </div>
-        <Button variant="outline" size="sm" className="flex items-center gap-2" onClick={() => setMaterialsOpen(true)}>
-          <Upload className="w-4 h-4" /> Dodaj materiały
-        </Button>
+        <div className="flex items-center gap-2">
+          <Link to="/chat">
+            <Button size="sm" className="flex items-center gap-2 shadow-primary" onClick={() => console.log('cta_chat_clicked', { source: 'study-dashboard' })}>
+              <Brain className="w-4 h-4" /> Zapytaj korepetytora
+            </Button>
+          </Link>
+          <Button variant="outline" size="sm" className="flex items-center gap-2" onClick={() => setMaterialsOpen(true)}>
+            <Upload className="w-4 h-4" /> Dodaj materiały
+          </Button>
+        </div>
       </div>
 
       {/* Overview Stats */}

@@ -43,14 +43,11 @@ export const Navigation = () => {
               <BookOpen className="w-4 h-4" />
               Lekcje
             </Link>
-            <Link 
-              to="/chat" 
-              className={`flex items-center gap-2 transition-smooth ${
-                isActive('/chat') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
-              }`}
-            >
-              <MessageCircle className="w-4 h-4" />
-              AI Chat
+            <Link to="/chat">
+              <Button size="sm" className="shadow-primary" onClick={() => console.log('cta_chat_clicked', { source: 'nav' })}>
+                <MessageCircle className="w-4 h-4 mr-2" />
+                AI Korepetytor
+              </Button>
             </Link>
             <Link 
               to="/materials" 
@@ -119,7 +116,7 @@ export const Navigation = () => {
                 onClick={() => setIsOpen(false)}
               >
                 <MessageCircle className="w-4 h-4" />
-                AI Chat
+                AI Korepetytor
               </Link>
               <Link 
                 to="/materials" 

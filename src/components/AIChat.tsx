@@ -7,7 +7,7 @@ import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 interface Message {
   id: string;
@@ -67,6 +67,8 @@ export const AIChat = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [searchParams] = useSearchParams();
+  const hasSentPromptRef = useRef(false);
 
   useEffect(() => {
     initializeChat();
@@ -180,6 +182,22 @@ export const AIChat = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    const p = searchParams.get('prompt');
+    if (p && !hasSentPromptRef.current && user) {
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: p,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, userMessage]);
+      sendMessageToAI(p);
+      hasSentPromptRef.current = true;
+      console.log('cta_chat_clicked', { source: searchParams.get('source') || 'deep_link' });
+    }
+  }, [searchParams, user]);
 
   const sendMessageToAI = async (userInput: string) => {
     if (!user) {
@@ -538,6 +556,16 @@ export const AIChat = () => {
                 </div>
               </div>
             )}
+
+            {/* Szybkie podpowiedzi */}
+            <div className="px-4 pt-2">
+              <p className="text-xs text-muted-foreground mb-2">Podpowiedzi do szybkiego startu:</p>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" onClick={() => handleQuickResponse("Mam jutro kartkówkę z funkcji liniowych. Przygotuj mnie.")}>Kartkówka: funkcje liniowe</Button>
+                <Button variant="outline" size="sm" onClick={() => handleQuickResponse("Wyjaśnij krok po kroku deltę i pokaż przykłady.")}>Wyjaśnij deltę</Button>
+                <Button variant="outline" size="sm" onClick={() => handleQuickResponse("Przećwiczmy 3 zadania z trygonometrii (podstawy).")}>3 zadania: trygonometria</Button>
+              </div>
+            </div>
 
             {/* Input */}
             <div className="p-4 border-t border-border">

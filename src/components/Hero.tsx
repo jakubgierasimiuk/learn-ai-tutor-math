@@ -50,14 +50,14 @@ export const Hero = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/lessons">
-                <Button size="lg" className="shadow-primary transition-bounce hover:scale-105 w-full sm:w-auto">
-                  Rozpocznij naukę
+              <Link to="/chat">
+                <Button size="lg" className="shadow-primary transition-bounce hover:scale-105 w-full sm:w-auto" onClick={() => console.log('cta_chat_clicked', { source: 'hero' })}>
+                  Rozpocznij korepetycje
                 </Button>
               </Link>
               <Link to="/quiz">
                 <Button variant="outline" size="lg" className="transition-smooth hover:bg-primary/5 w-full sm:w-auto">
-                  Sprawdź swoją wiedzę
+                  Szybki test
                 </Button>
               </Link>
             </div>
