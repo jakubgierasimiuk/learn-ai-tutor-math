@@ -73,6 +73,7 @@ export const AIChat = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchParams] = useSearchParams();
   const hasSentPromptRef = useRef(false);
@@ -186,13 +187,21 @@ export const AIChat = () => {
   };
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    requestAnimationFrame(() => {
+      container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+    });
   };
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
+  // Dodatkowy autoscroll podczas pisania AI, aby utrzymać widoczność najnowszej odpowiedzi
+  useEffect(() => {
+    if (isTyping) scrollToBottom();
+  }, [isTyping]);
   useEffect(() => {
     const p = searchParams.get('prompt');
     const topic = searchParams.get('topic');
@@ -498,7 +507,7 @@ export const AIChat = () => {
         <div className="max-w-4xl mx-auto">
           <Card className="md:h-[600px] h-[calc(100dvh-6rem)] flex flex-col shadow-card rounded-none md:rounded-xl border-0 md:border">
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-6" role="log" aria-live="polite" aria-relevant="additions text">
+            <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-3 md:p-6 space-y-6 pb-24 md:pb-6" role="log" aria-live="polite" aria-relevant="additions text">
               {messages.map((message) => (
                 <div
                   key={message.id}
