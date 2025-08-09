@@ -17,7 +17,10 @@ function getMeta() {
 export async function logEvent(event_type: string, payload?: any) {
   try {
     const meta = getMeta();
-    await supabase.from('app_event_logs').insert({
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return; // RLS requires user_id
+    await (supabase as any).from('app_event_logs').insert({
+      user_id: user.id,
       event_type,
       payload: payload ?? null,
       route: meta.route,
@@ -33,8 +36,11 @@ export async function logEvent(event_type: string, payload?: any) {
 export async function logError(error: unknown, location?: string, payload?: any) {
   try {
     const meta = getMeta();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return; // RLS requires user_id
     const err = error as any;
-    await supabase.from('app_error_logs').insert({
+    await (supabase as any).from('app_error_logs').insert({
+      user_id: user.id,
       message: err?.message || String(error),
       stack: err?.stack || null,
       location: location || meta.route,
