@@ -206,7 +206,7 @@ export const ReferralDemo = () => {
                 <p className="text-sm font-medium">4. Otrzymujesz nagrodę</p>
                 <p className="text-xs text-muted-foreground">Darmowe miesiące lub punkty</p>
               </div>
-              <Badge className="bg-gradient-to-r from-primary to-accent text-white">
+              <Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground">
                 Nagroda!
               </Badge>
             </div>

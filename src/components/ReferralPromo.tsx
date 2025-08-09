@@ -80,7 +80,7 @@ export const ReferralPromo = () => {
             <div>
               <h3 className="text-lg font-semibold">System Poleceń</h3>
               <div className="flex items-center gap-2 mt-1">
-                <Badge className={`text-xs text-white ${getTierColor(stats?.current_tier || 'beginner')}`}>
+                <Badge className={`text-xs text-primary-foreground ${getTierColor(stats?.current_tier || 'beginner')}`}>
                   {getTierLabel(stats?.current_tier || 'beginner')}
                 </Badge>
                 <span className="text-sm text-muted-foreground">

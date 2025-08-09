@@ -373,10 +373,10 @@ export default function SocialPage() {
                     <div key={entry.user_id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                          index === 0 ? 'bg-yellow-500 text-white' :
-                          index === 1 ? 'bg-gray-400 text-white' :
-                          index === 2 ? 'bg-amber-600 text-white' :
-                          'bg-muted-foreground text-muted'
+                          index === 0 ? 'bg-warning text-warning-foreground' :
+                          index === 1 ? 'bg-secondary text-secondary-foreground' :
+                          index === 2 ? 'bg-accent text-accent-foreground' :
+                          'bg-muted text-muted-foreground'
                         }`}>
                           {index + 1}
                         </div>
@@ -409,10 +409,10 @@ export default function SocialPage() {
                     <div key={entry.user_id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                          index === 0 ? 'bg-yellow-500 text-white' :
-                          index === 1 ? 'bg-gray-400 text-white' :
-                          index === 2 ? 'bg-amber-600 text-white' :
-                          'bg-muted-foreground text-muted'
+                          index === 0 ? 'bg-warning text-warning-foreground' :
+                          index === 1 ? 'bg-secondary text-secondary-foreground' :
+                          index === 2 ? 'bg-accent text-accent-foreground' :
+                          'bg-muted text-muted-foreground'
                         }`}>
                           {index + 1}
                         </div>

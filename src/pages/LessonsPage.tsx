@@ -84,11 +84,11 @@ const LessonsPage = () => {
 
   const getDifficultyColor = (level: number) => {
     switch (level) {
-      case 1: return "bg-green-500 text-white";
-      case 2: return "bg-yellow-500 text-white";
-      case 3: return "bg-orange-500 text-white";
-      case 4: return "bg-red-500 text-white";
-      default: return "bg-gray-500 text-white";
+      case 1: return "bg-success text-success-foreground";
+      case 2: return "bg-warning text-warning-foreground";
+      case 3: return "bg-destructive text-destructive-foreground";
+      case 4: return "bg-destructive text-destructive-foreground";
+      default: return "bg-muted text-muted-foreground";
     }
   };
 

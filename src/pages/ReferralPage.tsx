@@ -78,7 +78,7 @@ export default function ReferralPage() {
         <Card className="border-primary/20">
           <CardContent className="p-4 text-center">
             <div className={`w-12 h-12 rounded-full ${tierInfo[currentTier as keyof typeof tierInfo]?.color} flex items-center justify-center mx-auto mb-2`}>
-              <TierIcon className="w-6 h-6 text-white" />
+              <TierIcon className="w-6 h-6 text-primary-foreground" />
             </div>
             <p className="text-sm text-muted-foreground">Twój status</p>
             <p className="font-semibold">{tierInfo[currentTier as keyof typeof tierInfo]?.label}</p>

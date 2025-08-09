@@ -122,11 +122,11 @@ const TopicDetailPage = () => {
 
   const getContentTypeColor = (type: string) => {
     switch (type) {
-      case 'theory': return 'bg-blue-500 text-white';
-      case 'practice': return 'bg-green-500 text-white';
-      case 'quiz': return 'bg-purple-500 text-white';
-      case 'interactive': return 'bg-orange-500 text-white';
-      default: return 'bg-gray-500 text-white';
+      case 'theory': return 'bg-primary text-primary-foreground';
+      case 'practice': return 'bg-success text-success-foreground';
+      case 'quiz': return 'bg-accent text-accent-foreground';
+      case 'interactive': return 'bg-warning text-warning-foreground';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 

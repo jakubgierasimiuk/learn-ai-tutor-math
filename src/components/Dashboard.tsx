@@ -191,11 +191,11 @@ export const Dashboard = () => {
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'learning': return 'bg-blue-500 text-white';
-      case 'general': return 'bg-green-500 text-white';
-      case 'social': return 'bg-purple-500 text-white';
-      case 'special': return 'bg-yellow-500 text-white';
-      default: return 'bg-gray-500 text-white';
+      case 'learning': return 'bg-primary text-primary-foreground';
+      case 'general': return 'bg-success text-success-foreground';
+      case 'social': return 'bg-accent text-accent-foreground';
+      case 'special': return 'bg-warning text-warning-foreground';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 

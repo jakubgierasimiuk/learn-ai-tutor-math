@@ -19,7 +19,7 @@ export const Navigation = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
             <div className="w-10 h-10 gradient-hero rounded-xl flex items-center justify-center">
-              <Brain className="w-6 h-6 text-white" />
+              <Brain className="w-6 h-6 text-primary-foreground" />
             </div>
             <span className="text-xl font-bold">AI Tutor</span>
           </Link>
