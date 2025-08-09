@@ -378,7 +378,7 @@ const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   const completionPercentage = session ? (session.completed_steps / Math.max(session.total_steps, 1)) * 100 : 0;
 
   return (
-    <div className="container mx-auto p-4 max-w-6xl">
+    <div className="container mx-auto px-0 md:px-4 py-2 md:py-6 max-w-6xl">
       <Seo
         title={`Lekcja — ${skill.name}`}
         description={`Study & Learn: ${skill.description || 'Lekcja z tutorem AI'}`}
@@ -396,21 +396,34 @@ const [pendingMessage, setPendingMessage] = useState<string | null>(null);
             <ArrowLeft className="w-4 h-4 mr-2" />
             Powrót
           </Button>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <h1 className="text-2xl font-bold">{skill.name}</h1>
             <p className="text-muted-foreground">{skill.description}</p>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs md:text-sm">
+              <Badge variant="outline">{skill.department}</Badge>
+              <Badge variant={skill.level === 'extended' ? 'default' : 'secondary'}>
+                {skill.level === 'extended' ? 'Rozszerzona' : 'Podstawa'}
+              </Badge>
+              <Badge variant="secondary">Klasa {skill.class_level}</Badge>
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <span className="text-xs">Trudność:</span>
+                {[1,2,3,4,5].map(i => (
+                  <span key={i} className={`w-1.5 h-1.5 rounded-full ${i <= skill.difficulty_rating ? 'bg-primary' : 'bg-muted'}`} />
+                ))}
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline">
+          <div className="flex flex-wrap items-center gap-2 md:flex-nowrap md:gap-2 w-full md:w-auto">
+            <Badge variant="outline" className="w-auto">
               <Clock className="w-3 h-3 mr-1" />
               ~{skill.estimated_time_minutes} min
             </Badge>
-            <Link to="/chat">
-              <Button variant="default" size="sm" className="flex items-center gap-2 shadow-primary" onClick={() => console.log('cta_chat_clicked', { source: 'study-lesson', skillId })}>
+            <Link to="/chat" className="w-full md:w-auto">
+              <Button variant="default" size="sm" className="w-full md:w-auto flex items-center gap-2 shadow-primary" onClick={() => console.log('cta_chat_clicked', { source: 'study-lesson', skillId })}>
                 <MessageSquare className="w-4 h-4" /> Zapytaj korepetytora
               </Button>
             </Link>
-            <Button variant="outline" size="sm" className="flex items-center gap-2" onClick={() => setMaterialsOpen(true)}>
+            <Button variant="outline" size="sm" className="w-full md:w-auto flex items-center gap-2" onClick={() => setMaterialsOpen(true)}>
               <Upload className="w-4 h-4" /> Dodaj materiały
             </Button>
           </div>
@@ -440,7 +453,7 @@ const [pendingMessage, setPendingMessage] = useState<string | null>(null);
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Chat Panel */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 max-w-4xl mx-auto w-full">
           <Card className="md:h-[600px] h-[calc(100dvh-6rem)] flex flex-col rounded-none md:rounded-xl border-0 md:border">
             <CardHeader className="hidden md:block">
               <CardTitle className="flex items-center gap-2">
@@ -631,7 +644,7 @@ const [pendingMessage, setPendingMessage] = useState<string | null>(null);
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="hidden md:block">
             <CardHeader>
               <CardTitle className="text-base">Informacje o umiejętności</CardTitle>
             </CardHeader>
