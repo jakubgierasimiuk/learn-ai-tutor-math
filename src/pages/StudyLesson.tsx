@@ -45,6 +45,7 @@ export default function StudyLesson() {
   const navigate = useNavigate();
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   // Function to render AI response with lesson report detection
   const renderAIResponse = (response: string) => {
@@ -343,10 +344,20 @@ export default function StudyLesson() {
     }
   }, [currentSession?.id]);
 
-  // Auto-scroll to bottom of messages
+  // Auto-scroll to bottom of messages (container-based to avoid overscroll)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const c = messagesContainerRef.current;
+    if (!c) return;
+    requestAnimationFrame(() => c.scrollTo({ top: c.scrollHeight, behavior: 'smooth' }));
   }, [sessionData?.steps]);
+
+  // Keep newest content visible while AI "pisze"
+  useEffect(() => {
+    if (!isLoading) return;
+    const c = messagesContainerRef.current;
+    if (!c) return;
+    requestAnimationFrame(() => c.scrollTo({ top: c.scrollHeight, behavior: 'smooth' }));
+  }, [isLoading]);
 
   if (!skill) {
     return (
@@ -419,8 +430,8 @@ export default function StudyLesson() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Chat Panel */}
         <div className="lg:col-span-2">
-          <Card className="h-[600px] flex flex-col">
-            <CardHeader>
+          <Card className="md:h-[600px] h-[calc(100dvh-6rem)] flex flex-col rounded-none md:rounded-xl border-0 md:border">
+            <CardHeader className="hidden md:block">
               <CardTitle className="flex items-center gap-2">
                 <MessageSquare className="w-5 h-5" />
                 Rozmowa z tutorem AI
@@ -429,7 +440,7 @@ export default function StudyLesson() {
 
             <CardContent className="flex-1 flex flex-col">
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+              <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-3 md:p-6 space-y-6 pb-24">
                 {steps.length === 0 && !isLoading && (
                   <div className="text-center py-8">
                     <Brain className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -444,8 +455,8 @@ export default function StudyLesson() {
                     {/* Show user input first if it exists */}
                     {step.user_input && (
                       <div className="flex gap-3 justify-end">
-                        <div className="flex-1 max-w-sm space-y-2">
-                          <div className="bg-primary p-3 rounded-lg text-primary-foreground">
+                        <div className="max-w-full md:max-w-[70%] space-y-2">
+                          <div className="bg-primary rounded-2xl p-4 text-primary-foreground">
                             <p className="whitespace-pre-wrap">{step.user_input}</p>
                           </div>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground justify-end">
@@ -465,7 +476,7 @@ export default function StudyLesson() {
                             )}
                           </div>
                         </div>
-                        <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
+                        <div className="hidden md:flex w-8 h-8 rounded-full bg-accent items-center justify-center flex-shrink-0">
                           <span className="text-xs font-medium">Ty</span>
                         </div>
                       </div>
@@ -474,11 +485,11 @@ export default function StudyLesson() {
                     {/* Show AI response after user input */}
                     {step.ai_response && (
                       <div className="flex gap-3">
-                        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                       <div className="hidden md:flex w-8 h-8 rounded-full bg-primary items-center justify-center flex-shrink-0">
                           <Brain className="w-4 h-4 text-primary-foreground" />
                         </div>
-                        <div className="flex-1 space-y-2">
-                           <div className="bg-muted p-3 rounded-lg">
+                        <div className="max-w-full md:max-w-[70%] space-y-2">
+                           <div className="bg-muted rounded-2xl p-4">
                              {renderAIResponse(step.ai_response)}
                            </div>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -524,12 +535,12 @@ export default function StudyLesson() {
               </div>
 
               {/* Input Area */}
-              <div className="space-y-3">
+              <div className="p-2 md:p-4 border-t border-border pb-[env(safe-area-inset-bottom)] space-y-3">
                 <Textarea
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
                   placeholder="Napisz swoją odpowiedź lub zadaj pytanie..."
-                  className="min-h-[80px]"
+                  className="min-h-[72px] md:min-h-[80px]"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
