@@ -24,6 +24,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
         setLoading(false);
 
+        // If arriving from password recovery link, force redirect to the reset form
+        if (event === "PASSWORD_RECOVERY") {
+          window.location.replace("/auth?type=recovery");
+          return;
+        }
+
         // Defer Supabase calls to avoid deadlocks in auth callback
         if (session?.user) {
           setTimeout(async () => {

@@ -19,12 +19,15 @@ export default function AuthPage() {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated, except during password recovery
   useEffect(() => {
-    if (user) {
+    const hash = window.location.hash || "";
+    const search = window.location.search || "";
+    const isRecovery = recoveryMode || hash.includes("type=recovery") || search.includes("type=recovery");
+    if (user && !isRecovery) {
       navigate("/");
     }
-  }, [user, navigate]);
+  }, [user, navigate, recoveryMode]);
 
   // Enable password recovery mode when user opens recovery link
   useEffect(() => {
@@ -128,7 +131,7 @@ export default function AuthPage() {
     setLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth`
+        redirectTo: `${window.location.origin}/auth?type=recovery`
       });
 
       if (error) {
@@ -155,10 +158,10 @@ export default function AuthPage() {
   };
 
   const handleUpdatePassword = async () => {
-    if (newPassword.length < 6) {
+    if (newPassword.length < 8 || !/[A-Za-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
       toast({
-        title: "Hasło za krótkie",
-        description: "Minimum 6 znaków",
+        title: "Zbyt słabe hasło",
+        description: "Min. 8 znaków oraz kombinacja liter i cyfr",
         variant: "destructive",
       });
       return;
