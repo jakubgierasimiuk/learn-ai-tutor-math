@@ -28,7 +28,7 @@ import UXAuditPage from "./pages/UXAuditPage";
 import ProgressPage from "./pages/ProgressPage";
 
 import { useEffect } from "react";
-import { setupGlobalLogging, logEvent } from "@/lib/logger";
+import { setupGlobalLogging, setupGlobalInteractionLogging, logEvent } from "@/lib/logger";
 
 const queryClient = new QueryClient();
 
@@ -61,9 +61,13 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
 function LoggingBootstrap() {
   const location = useLocation();
   useEffect(() => {
-    const cleanup = setupGlobalLogging();
+    const cleanupErrors = setupGlobalLogging();
+    const cleanupInteractions = setupGlobalInteractionLogging();
     logEvent('app_loaded');
-    return cleanup;
+    return () => {
+      cleanupErrors?.();
+      cleanupInteractions?.();
+    };
   }, []);
   useEffect(() => {
     logEvent('route_change', { path: location.pathname });

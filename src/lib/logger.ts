@@ -82,3 +82,71 @@ export function setupGlobalLogging() {
     window.removeEventListener('unhandledrejection', onRejection);
   };
 }
+
+// Global interaction logging (clicks and form submissions)
+function truncate(text: string | null | undefined, max = 96) {
+  const t = (text ?? '').trim().replace(/\s+/g, ' ');
+  return t.length > max ? t.slice(0, max - 1) + '…' : t;
+}
+
+function serializeElement(el: Element) {
+  const tag = el.tagName.toLowerCase();
+  const anyEl = el as HTMLElement;
+  const inputEl = el as HTMLInputElement;
+  const anchorEl = el as HTMLAnchorElement;
+  const isTextual = tag === 'button' || tag === 'a' || tag === 'summary' || anyEl.getAttribute('role') === 'button';
+  return {
+    tag,
+    id: anyEl.id || null,
+    classes: anyEl.className || null,
+    role: anyEl.getAttribute('role') || null,
+    name: inputEl.name || anyEl.getAttribute('name') || null,
+    type: inputEl.type || null,
+    href: anchorEl.getAttribute?.('href') || null,
+    ariaLabel: anyEl.getAttribute('aria-label') || null,
+    text: isTextual ? truncate(anyEl.innerText || anyEl.textContent || '') : null,
+    // Do NOT capture values for privacy
+  } as const;
+}
+
+export function setupGlobalInteractionLogging() {
+  const onClick = (event: MouseEvent) => {
+    const target = event.target as Element | null;
+    if (!target) return;
+    const clickable = target.closest(
+      'button, a, [role="button"], [data-track], input, label, summary, textarea, select'
+    ) as Element | null;
+    const el = clickable ?? target;
+    const info = serializeElement(el);
+    logEvent('ui_click', {
+      ...info,
+      x: Math.round(event.clientX ?? 0),
+      y: Math.round(event.clientY ?? 0),
+    });
+  };
+
+  const onSubmit = (event: Event) => {
+    const form = event.target as HTMLFormElement | null;
+    if (!form || form.tagName !== 'FORM') return;
+    const fields: string[] = Array.from(form.elements || [])
+      .map((e: any) => e?.name || e?.id || null)
+      .filter(Boolean)
+      .slice(0, 100);
+    const info = serializeElement(form);
+    logEvent('ui_submit', {
+      ...info,
+      fields,
+      method: form.getAttribute('method') || 'post',
+      action: form.getAttribute('action') || null,
+    });
+  };
+
+  document.addEventListener('click', onClick, { passive: true, capture: true });
+  document.addEventListener('submit', onSubmit, { capture: true });
+
+  return () => {
+    // removeEventListener options require same capture flag
+    document.removeEventListener('click', onClick, { capture: true } as any);
+    document.removeEventListener('submit', onSubmit, { capture: true } as any);
+  };
+}
