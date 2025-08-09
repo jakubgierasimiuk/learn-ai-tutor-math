@@ -470,7 +470,7 @@ export const AIChat = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-accent/5">
-      <div className="container mx-auto px-4 py-2 md:py-8">
+      <div className="container mx-auto px-0 md:px-4 py-2 md:py-8">
         <div className="mb-4 hidden md:block">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center">
@@ -496,16 +496,16 @@ export const AIChat = () => {
 
         {/* Chat Container */}
         <div className="max-w-4xl mx-auto">
-          <Card className="md:h-[600px] h-[calc(100dvh-6rem)] flex flex-col shadow-card">
+          <Card className="md:h-[600px] h-[calc(100dvh-6rem)] flex flex-col shadow-card rounded-none md:rounded-xl border-0 md:border">
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6" role="log" aria-live="polite" aria-relevant="additions text">
+            <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-6" role="log" aria-live="polite" aria-relevant="additions text">
               {messages.map((message) => (
                 <div
                   key={message.id}
                   className={`flex gap-4 group ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {message.role !== 'user' && (
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    <div className={`hidden md:flex w-10 h-10 rounded-full items-center justify-center flex-shrink-0 ${
                       message.role === 'assistant_review' 
                         ? 'bg-warning/10 text-warning' 
                         : 'bg-accent/10 text-accent'
@@ -514,7 +514,7 @@ export const AIChat = () => {
                     </div>
                   )}
                   
-                  <div className={`max-w-[70%] ${message.role === 'user' ? 'order-2' : ''}`}>
+                  <div className={`max-w-full md:max-w-[70%] ${message.role === 'user' ? 'order-2' : ''}`}>
                     <div className={`rounded-2xl p-4 ${
                       message.role === 'user'
                         ? 'bg-primary text-primary-foreground ml-auto'
@@ -557,7 +557,7 @@ export const AIChat = () => {
                   </div>
 
                   {message.role === 'user' && (
-                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 text-primary">
+                    <div className="hidden md:flex w-10 h-10 bg-primary/10 rounded-full items-center justify-center flex-shrink-0 text-primary">
                       <User className="w-5 h-5" />
                     </div>
                   )}
@@ -631,8 +631,8 @@ export const AIChat = () => {
             </div>
 
             {/* Input */}
-            <div className="p-4 border-t border-border pb-[env(safe-area-inset-bottom)]">
-              <div className="flex gap-3">
+            <div className="p-2 md:p-4 border-t border-border pb-[env(safe-area-inset-bottom)]">
+              <div className="flex gap-2 md:gap-3">
                 <Button
                   variant="outline"
                   size="sm"
