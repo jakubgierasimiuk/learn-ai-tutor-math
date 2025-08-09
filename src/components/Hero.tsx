@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { BookOpen, ClipboardList, FolderOpen } from "lucide-react";
+import { BookOpen, ClipboardList, FolderOpen, GraduationCap } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-education.jpg";
 import { logEvent } from "@/lib/logger";
@@ -37,7 +37,16 @@ export const Hero = () => {
             </div>
 
             {/* Podstawowe funkcje */}
-            <nav aria-label="Podstawowe funkcje" className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <nav aria-label="Podstawowe funkcje" className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <Link
+                to="/study"
+                className="flex items-center gap-3 p-4 rounded-lg bg-card shadow-card transition-smooth hover:shadow-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label="Study & Learn — Twoja ścieżka nauki"
+                onClick={() => logEvent('shortcut_click', { source: 'hero', target: 'study' })}
+              >
+                <GraduationCap className="w-8 h-8 text-accent" />
+                <span className="font-medium">Study & Learn</span>
+              </Link>
               <Link
                 to="/lessons"
                 className="flex items-center gap-3 p-4 rounded-lg bg-card shadow-card transition-smooth hover:shadow-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
