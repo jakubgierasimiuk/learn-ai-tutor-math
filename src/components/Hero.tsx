@@ -30,32 +30,55 @@ export const Hero = () => {
             </div>
 
             {/* Feature highlights */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center gap-3 p-4 rounded-lg bg-card shadow-card transition-smooth hover:shadow-primary">
+            <nav aria-label="Skróty do kluczowych funkcji" className="grid grid-cols-2 gap-4">
+              <Link
+                to="/chat"
+                className="flex items-center gap-3 p-4 rounded-lg bg-card shadow-card transition-smooth hover:shadow-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label="AI Teacher — rozpocznij rozmowę z tutorem"
+                onClick={() => logEvent('shortcut_click', { source: 'hero', target: 'chat' })}
+              >
                 <Brain className="w-8 h-8 text-primary" />
                 <span className="font-medium">AI Teacher</span>
-              </div>
-              <div className="flex items-center gap-3 p-4 rounded-lg bg-card shadow-card transition-smooth hover:shadow-accent">
+              </Link>
+              <Link
+                to="/lessons"
+                className="flex items-center gap-3 p-4 rounded-lg bg-card shadow-card transition-smooth hover:shadow-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label="Interaktywne lekcje — przejdź do lekcji"
+                onClick={() => logEvent('shortcut_click', { source: 'hero', target: 'lessons' })}
+              >
                 <BookOpen className="w-8 h-8 text-accent" />
                 <span className="font-medium">Interaktywne lekcje</span>
-              </div>
-              <div className="flex items-center gap-3 p-4 rounded-lg bg-card shadow-card transition-smooth hover:shadow-success">
+              </Link>
+              <Link
+                to="/gamification"
+                className="flex items-center gap-3 p-4 rounded-lg bg-card shadow-card transition-smooth hover:shadow-success focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label="Gamifikacja — przejdź do wyzwań i nagród"
+                onClick={() => logEvent('shortcut_click', { source: 'hero', target: 'gamification' })}
+              >
                 <Trophy className="w-8 h-8 text-success" />
                 <span className="font-medium">Gamifikacja</span>
-              </div>
-              <div className="flex items-center gap-3 p-4 rounded-lg bg-card shadow-card transition-smooth hover:shadow-warning">
+              </Link>
+              <Link
+                to="/social"
+                className="flex items-center gap-3 p-4 rounded-lg bg-card shadow-card transition-smooth hover:shadow-warning focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label="Społeczność — dołącz do innych uczniów"
+                onClick={() => logEvent('shortcut_click', { source: 'hero', target: 'social' })}
+              >
                 <Users className="w-8 h-8 text-warning" />
                 <span className="font-medium">Społeczność</span>
-              </div>
-            </div>
+              </Link>
+            </nav>
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
               <Button asChild size="lg" className="shadow-primary transition-bounce hover:scale-105 w-full sm:w-auto" onClick={() => logEvent('cta_click', { source: 'hero' })}>
                 <Link to="/chat">Rozpocznij korepetycje</Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="transition-smooth hover:bg-primary/5 w-full sm:w-auto">
+              <Button asChild variant="outline" size="lg" className="transition-smooth hover:bg-primary/5 w-full sm:w-auto" onClick={() => logEvent('cta_click', { source: 'hero_quiz' })}>
                 <Link to="/quiz">Szybki test</Link>
+              </Button>
+              <Button asChild variant="ghost" size="lg" className="transition-smooth w-full sm:w-auto" onClick={() => logEvent('cta_click', { source: 'hero_lessons' })}>
+                <Link to="/lessons">Lekcje</Link>
               </Button>
             </div>
 
