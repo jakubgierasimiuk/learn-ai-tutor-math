@@ -294,6 +294,57 @@ export type Database = {
           },
         ]
       }
+      diagnostic_items: {
+        Row: {
+          choices: Json
+          class_levels: number[] | null
+          correct_key: string
+          created_at: string
+          difficulty: number
+          id: string
+          is_active: boolean
+          prompt: string
+          question_code: string
+          tags: string[]
+          topic: string
+          track: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          choices: Json
+          class_levels?: number[] | null
+          correct_key: string
+          created_at?: string
+          difficulty?: number
+          id?: string
+          is_active?: boolean
+          prompt: string
+          question_code: string
+          tags?: string[]
+          topic: string
+          track?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          choices?: Json
+          class_levels?: number[] | null
+          correct_key?: string
+          created_at?: string
+          difficulty?: number
+          id?: string
+          is_active?: boolean
+          prompt?: string
+          question_code?: string
+          tags?: string[]
+          topic?: string
+          track?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       diagnostic_sessions: {
         Row: {
           class_level: number | null
