@@ -1,7 +1,7 @@
-import { DiagnosticQuiz } from "@/components/DiagnosticQuiz";
+import EnhancedDiagnostic from "@/components/EnhancedDiagnostic";
 
 const QuizPage = () => {
-  return <DiagnosticQuiz />;
+  return <EnhancedDiagnostic />;
 };
 
 export default QuizPage;

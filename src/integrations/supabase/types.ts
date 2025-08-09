@@ -53,6 +53,72 @@ export type Database = {
         }
         Relationships: []
       }
+      app_error_logs: {
+        Row: {
+          created_at: string
+          id: string
+          location: string | null
+          message: string
+          payload: Json | null
+          source: string
+          stack: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location?: string | null
+          message: string
+          payload?: Json | null
+          source?: string
+          stack?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location?: string | null
+          message?: string
+          payload?: Json | null
+          source?: string
+          stack?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      app_event_logs: {
+        Row: {
+          created_at: string
+          device: string | null
+          event_type: string
+          id: string
+          payload: Json | null
+          platform: string | null
+          route: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          device?: string | null
+          event_type: string
+          id?: string
+          payload?: Json | null
+          platform?: string | null
+          route?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          device?: string | null
+          event_type?: string
+          id?: string
+          payload?: Json | null
+          platform?: string | null
+          route?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       challenges: {
         Row: {
           challenged_score: number | null
@@ -167,6 +233,107 @@ export type Database = {
           points_earned?: number | null
           topics_practiced?: number | null
           total_time_minutes?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      diagnostic_item_attempts: {
+        Row: {
+          answer: Json | null
+          confidence: number | null
+          created_at: string
+          hint_level: number | null
+          id: string
+          is_correct: boolean | null
+          item_id: string | null
+          meta: Json | null
+          phase: number | null
+          question_code: string | null
+          response_time_ms: number | null
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          answer?: Json | null
+          confidence?: number | null
+          created_at?: string
+          hint_level?: number | null
+          id?: string
+          is_correct?: boolean | null
+          item_id?: string | null
+          meta?: Json | null
+          phase?: number | null
+          question_code?: string | null
+          response_time_ms?: number | null
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          answer?: Json | null
+          confidence?: number | null
+          created_at?: string
+          hint_level?: number | null
+          id?: string
+          is_correct?: boolean | null
+          item_id?: string | null
+          meta?: Json | null
+          phase?: number | null
+          question_code?: string | null
+          response_time_ms?: number | null
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diagnostic_item_attempts_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "diagnostic_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diagnostic_sessions: {
+        Row: {
+          class_level: number | null
+          completed_at: string | null
+          created_at: string
+          current_phase: number
+          id: string
+          meta: Json | null
+          self_ratings: Json | null
+          status: string
+          summary: Json | null
+          track: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          class_level?: number | null
+          completed_at?: string | null
+          created_at?: string
+          current_phase?: number
+          id?: string
+          meta?: Json | null
+          self_ratings?: Json | null
+          status?: string
+          summary?: Json | null
+          track?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          class_level?: number | null
+          completed_at?: string | null
+          created_at?: string
+          current_phase?: number
+          id?: string
+          meta?: Json | null
+          self_ratings?: Json | null
+          status?: string
+          summary?: Json | null
+          track?: string | null
           updated_at?: string
           user_id?: string
         }
