@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Brain, BookOpen, MessageCircle, LogOut, Upload, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { logEvent } from "@/lib/logger";
 
 export const Navigation = () => {
   const { user, signOut } = useAuth();
@@ -52,12 +53,11 @@ export const Navigation = () => {
               <TrendingUp className="w-4 h-4" />
               Postępy
             </Link>
-            <Link to="/chat">
-              <Button size="sm" className="shadow-primary" onClick={() => console.log('cta_chat_clicked', { source: 'nav' })}>
-                <MessageCircle className="w-4 h-4 mr-2" />
-                AI Korepetytor
-              </Button>
-            </Link>
+            <Button asChild size="sm" className="shadow-primary" onClick={() => logEvent('cta_click', { source: 'nav' })}>
+              <Link to="/chat">
+                <span className="inline-flex items-center"><MessageCircle className="w-4 h-4 mr-2" />AI Korepetytor</span>
+              </Link>
+            </Button>
             <Link 
               to="/materials" 
               className={`flex items-center gap-2 transition-smooth ${

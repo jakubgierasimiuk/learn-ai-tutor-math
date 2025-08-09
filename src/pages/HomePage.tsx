@@ -22,6 +22,7 @@ const HomePage = () => {
       />
       <main id="main-content">
         <section aria-labelledby="home-hero">
+          <h2 id="home-hero" className="sr-only">Sekcja hero – AI Tutor Matematyki</h2>
           <Hero />
         </section>
         <section aria-labelledby="mini-progress">

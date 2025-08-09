@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Brain, BookOpen, Trophy, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-education.jpg";
+import { logEvent } from "@/lib/logger";
 
 export const Hero = () => {
   return (
@@ -50,16 +51,12 @@ export const Hero = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/chat">
-                <Button size="lg" className="shadow-primary transition-bounce hover:scale-105 w-full sm:w-auto" onClick={() => console.log('cta_chat_clicked', { source: 'hero' })}>
-                  Rozpocznij korepetycje
-                </Button>
-              </Link>
-              <Link to="/quiz">
-                <Button variant="outline" size="lg" className="transition-smooth hover:bg-primary/5 w-full sm:w-auto">
-                  Szybki test
-                </Button>
-              </Link>
+              <Button asChild size="lg" className="shadow-primary transition-bounce hover:scale-105 w-full sm:w-auto" onClick={() => logEvent('cta_click', { source: 'hero' })}>
+                <Link to="/chat">Rozpocznij korepetycje</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="transition-smooth hover:bg-primary/5 w-full sm:w-auto">
+                <Link to="/quiz">Szybki test</Link>
+              </Button>
             </div>
 
             {/* Stats */}

@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Brain, Target, Sigma } from "lucide-react";
 import { Link } from "react-router-dom";
+import { logEvent } from "@/lib/logger";
 
 const prompts = [
   {
@@ -31,16 +32,17 @@ export const QuickStartPanel = () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {prompts.map((p, idx) => (
-              <Link key={idx} to={`/chat?prompt=${encodeURIComponent(p.text)}&source=quickstart`}>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start gap-2"
-                  onClick={() => console.log('cta_chat_clicked', { source: 'quickstart', idx })}
-                >
-                  {p.icon}
-                  {p.label}
-                </Button>
-              </Link>
+              <Button 
+                key={idx}
+                asChild
+                variant="outline" 
+                className="w-full justify-start gap-2"
+                onClick={() => logEvent('cta_click', { source: 'quickstart', idx })}
+              >
+                <Link to={`/chat?prompt=${encodeURIComponent(p.text)}&source=quickstart`}>
+                  <span className="inline-flex items-center gap-2">{p.icon}{p.label}</span>
+                </Link>
+              </Button>
             ))}
           </div>
         </CardContent>

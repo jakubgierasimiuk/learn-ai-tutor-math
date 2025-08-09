@@ -29,6 +29,7 @@ import ProgressPage from "./pages/ProgressPage";
 
 import { useEffect } from "react";
 import { setupGlobalLogging, setupGlobalInteractionLogging, logEvent } from "@/lib/logger";
+import { Seo } from "@/components/Seo";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +76,29 @@ function LoggingBootstrap() {
   return null;
 }
 
+function RouteSeo() {
+  const location = useLocation();
+  const path = location.pathname;
+  const canonical = typeof window !== 'undefined' ? `${window.location.origin}${path}` : undefined;
+  const map: Record<string, { title: string; description: string }> = {
+    '/lessons': { title: 'Lekcje matematyki – AI Tutor', description: 'Lista lekcji i tematów z poziomami trudności.' },
+    '/dashboard': { title: 'Panel ucznia – AI Tutor', description: 'Twoje postępy, aktywność i szybkie skróty.' },
+    '/chat': { title: 'AI Korepetytor – Chat', description: 'Rozmawiaj z AI Tutorem i rozwiązuj zadania krok po kroku.' },
+    '/analytics': { title: 'Analityka nauki – AI Tutor', description: 'Wgląd w metryki nauki i efektywność.' },
+    '/materials': { title: 'Materiały ucznia – AI Tutor', description: 'Dodawaj i analizuj własne materiały do nauki.' },
+    '/social': { title: 'Społeczność – AI Tutor', description: 'Rankingi, aktywność i interakcje społeczne.' },
+    '/gamification': { title: 'Gamifikacja – AI Tutor', description: 'Zdobywaj punkty, odznaki i nagrody.' },
+    '/referral': { title: 'Program poleceń – AI Tutor', description: 'Polecaj znajomym i odbieraj nagrody.' },
+    '/ux-test': { title: 'UX Testy – Panel', description: 'Zestaw testów użyteczności i jakości UI.' },
+    '/ux-audit': { title: 'UX Audyt – Raport', description: 'Wyniki audytu UX i priorytety działań.' },
+    '/study': { title: 'Panel nauki – AI Tutor', description: 'Twoje umiejętności i ścieżka nauki.' },
+  };
+  if (path === '/' || path.startsWith('/postepy')) return null;
+  const match = Object.entries(map).find(([k]) => path === k || path.startsWith(k + '/'))?.[1];
+  if (!match) return null;
+  return <Seo title={match.title} description={match.description} canonical={canonical} />;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -83,6 +107,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <LoggingBootstrap />
+          <RouteSeo />
           <Routes>
             <Route path="/" element={
               <AuthenticatedLayout>

@@ -111,20 +111,25 @@ function serializeElement(el: Element) {
 
 export function setupGlobalInteractionLogging() {
   const onClick = (event: MouseEvent) => {
-    const target = event.target as Element | null;
-    if (!target) return;
-    const clickable = target.closest(
+    // Ensure we have an Element (Text nodes can be targets)
+    const rawTarget = (event.target || (event as any).srcElement) as EventTarget | null;
+    const primary = rawTarget instanceof Element ? rawTarget : null;
+    const fromPath = typeof (event as any).composedPath === 'function' ? (event as any).composedPath()[0] : null;
+    const fallback = fromPath instanceof Element ? fromPath : null;
+    const baseEl = primary || fallback;
+    if (!baseEl) return;
+
+    const clickable = baseEl.closest(
       'button, a, [role="button"], [data-track], input, label, summary, textarea, select'
     ) as Element | null;
-    const el = clickable ?? target;
+    const el = clickable ?? baseEl;
     const info = serializeElement(el);
     logEvent('ui_click', {
       ...info,
-      x: Math.round(event.clientX ?? 0),
-      y: Math.round(event.clientY ?? 0),
+      x: Math.round((event as MouseEvent).clientX ?? 0),
+      y: Math.round((event as MouseEvent).clientY ?? 0),
     });
   };
-
   const onSubmit = (event: Event) => {
     const form = event.target as HTMLFormElement | null;
     if (!form || form.tagName !== 'FORM') return;
