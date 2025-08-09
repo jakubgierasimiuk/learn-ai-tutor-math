@@ -374,12 +374,8 @@ export default function EnhancedDiagnostic() {
       setLoading(true);
       if (!sessionId) return;
       // Build initial queue: one screener per topic, order by weakest self-rating first
-      const order: ("algebra" | "geometry" | "functions")[] = [
-        "algebra",
-        "geometry",
-        "functions",
-      ].sort((a, b) => ratings[a] - ratings[b]);
-
+      const topics: Array<keyof SelfRatings> = ["algebra", "geometry", "functions"];
+      const order = [...topics].sort((a, b) => ratings[a] - ratings[b]);
       const initial: Item[] = order.map((t) => TOPIC_SCREENERS[t][0]);
       setP2Queue(initial);
       setP2Index(0);
