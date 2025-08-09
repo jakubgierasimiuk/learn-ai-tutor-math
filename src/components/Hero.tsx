@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Brain, BookOpen, Trophy, Users } from "lucide-react";
+import { BookOpen, ClipboardList, FolderOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-education.jpg";
 import { logEvent } from "@/lib/logger";
@@ -29,17 +29,15 @@ export const Hero = () => {
               </p>
             </div>
 
-            {/* Feature highlights */}
-            <nav aria-label="Skróty do kluczowych funkcji" className="grid grid-cols-2 gap-4">
-              <Link
-                to="/chat"
-                className="flex items-center gap-3 p-4 rounded-lg bg-card shadow-card transition-smooth hover:shadow-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label="AI Teacher — rozpocznij rozmowę z tutorem"
-                onClick={() => logEvent('shortcut_click', { source: 'hero', target: 'chat' })}
-              >
-                <Brain className="w-8 h-8 text-primary" />
-                <span className="font-medium">AI Teacher</span>
-              </Link>
+            {/* Główne CTA */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button asChild size="lg" className="shadow-primary transition-bounce hover:scale-105 w-full sm:w-auto" onClick={() => logEvent('cta_click', { source: 'hero' })}>
+                <Link to="/chat" aria-label="Rozpocznij korepetycje z AI">Rozpocznij korepetycje</Link>
+              </Button>
+            </div>
+
+            {/* Podstawowe funkcje */}
+            <nav aria-label="Podstawowe funkcje" className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <Link
                 to="/lessons"
                 className="flex items-center gap-3 p-4 rounded-lg bg-card shadow-card transition-smooth hover:shadow-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -47,40 +45,27 @@ export const Hero = () => {
                 onClick={() => logEvent('shortcut_click', { source: 'hero', target: 'lessons' })}
               >
                 <BookOpen className="w-8 h-8 text-accent" />
-                <span className="font-medium">Interaktywne lekcje</span>
+                <span className="font-medium">Lekcje</span>
               </Link>
               <Link
-                to="/gamification"
+                to="/quiz"
+                className="flex items-center gap-3 p-4 rounded-lg bg-card shadow-card transition-smooth hover:shadow-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label="Szybki test — sprawdź poziom"
+                onClick={() => logEvent('shortcut_click', { source: 'hero', target: 'quiz' })}
+              >
+                <ClipboardList className="w-8 h-8 text-primary" />
+                <span className="font-medium">Szybki test</span>
+              </Link>
+              <Link
+                to="/materials"
                 className="flex items-center gap-3 p-4 rounded-lg bg-card shadow-card transition-smooth hover:shadow-success focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label="Gamifikacja — przejdź do wyzwań i nagród"
-                onClick={() => logEvent('shortcut_click', { source: 'hero', target: 'gamification' })}
+                aria-label="Materiały — Twoje notatki i pliki"
+                onClick={() => logEvent('shortcut_click', { source: 'hero', target: 'materials' })}
               >
-                <Trophy className="w-8 h-8 text-success" />
-                <span className="font-medium">Gamifikacja</span>
-              </Link>
-              <Link
-                to="/social"
-                className="flex items-center gap-3 p-4 rounded-lg bg-card shadow-card transition-smooth hover:shadow-warning focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label="Społeczność — dołącz do innych uczniów"
-                onClick={() => logEvent('shortcut_click', { source: 'hero', target: 'social' })}
-              >
-                <Users className="w-8 h-8 text-warning" />
-                <span className="font-medium">Społeczność</span>
+                <FolderOpen className="w-8 h-8 text-success" />
+                <span className="font-medium">Materiały</span>
               </Link>
             </nav>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button asChild size="lg" className="shadow-primary transition-bounce hover:scale-105 w-full sm:w-auto" onClick={() => logEvent('cta_click', { source: 'hero' })}>
-                <Link to="/chat">Rozpocznij korepetycje</Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="transition-smooth hover:bg-primary/5 w-full sm:w-auto" onClick={() => logEvent('cta_click', { source: 'hero_quiz' })}>
-                <Link to="/quiz">Szybki test</Link>
-              </Button>
-              <Button asChild variant="ghost" size="lg" className="transition-smooth w-full sm:w-auto" onClick={() => logEvent('cta_click', { source: 'hero_lessons' })}>
-                <Link to="/lessons">Lekcje</Link>
-              </Button>
-            </div>
 
             {/* Stats */}
             <div className="flex gap-8 pt-8 border-t border-border">
