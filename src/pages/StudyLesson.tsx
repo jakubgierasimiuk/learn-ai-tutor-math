@@ -26,7 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { Skill, StudySession, LessonStep } from '@/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { StudentMaterialsWizard } from '@/components/StudentMaterialsWizard';
-
+import { Seo } from '@/components/Seo';
 export default function StudyLesson() {
   const { skillId } = useParams();
   const { user } = useAuth();
@@ -44,8 +44,10 @@ export default function StudyLesson() {
   const [materialsOpen, setMaterialsOpen] = useState(false);
   const navigate = useNavigate();
   
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
+const messagesEndRef = useRef<HTMLDivElement>(null);
+const messagesContainerRef = useRef<HTMLDivElement>(null);
+const autoStartedRef = useRef(false);
+const [pendingMessage, setPendingMessage] = useState<string | null>(null);
 
   // Function to render AI response with lesson report detection
   const renderAIResponse = (response: string) => {
@@ -188,14 +190,14 @@ export default function StudyLesson() {
       setCurrentSession(session);
       setResponseStartTime(Date.now());
       queryClient.invalidateQueries({ queryKey: ['study-session', skillId, user?.id] });
-      
-      // Start lesson automatically after session creation
-      setTimeout(() => {
+      // If user tried to send a message before session existed, send it now
+      if (pendingMessage) {
         sendMessageMutation.mutate({
-          message: "Rozpocznij lekcję",
+          message: pendingMessage,
           sessionId: session.id
         });
-      }, 1000);
+        setPendingMessage(null);
+      }
     },
   });
 
@@ -265,15 +267,25 @@ export default function StudyLesson() {
 
   // Handle sending message
   const handleSendMessage = () => {
-    if (!userInput.trim() || !currentSession || isLoading) return;
-    
-    setIsLoading(true);
-    sendMessageMutation.mutate({
-      message: userInput.trim(),
-      sessionId: currentSession.id
-    });
+    const raw = userInput.trim();
+    if (!raw || isLoading) return;
+    const stepsCount = sessionData?.steps?.length || 0;
+    const lower = raw.toLowerCase();
+    let msg = raw;
+    if (stepsCount === 0 && [
+      'zacznij', 'rozpocznij', 'start', 'startuj', 'zacznij lekcję', 'rozpocznij lekcję'
+    ].includes(lower)) {
+      msg = 'Rozpocznij lekcję';
+    }
+    if (currentSession) {
+      setIsLoading(true);
+      sendMessageMutation.mutate({ message: msg, sessionId: currentSession.id });
+    } else if (!initSessionMutation.isPending) {
+      setIsLoading(true);
+      setPendingMessage(msg);
+      initSessionMutation.mutate();
+    }
   };
-
   // Handle requesting hint
   const handleRequestHint = () => {
     if (!currentSession || isLoading) return;
@@ -297,7 +309,6 @@ export default function StudyLesson() {
     });
   };
 
-  // Start session on component mount
   useEffect(() => {
     console.log('StudyLesson useEffect triggered:', {
       userId: user?.id,
@@ -315,34 +326,24 @@ export default function StudyLesson() {
       setCurrentSession(sessionData.session);
       setResponseStartTime(Date.now());
       
-      // Start lesson automatically if no steps exist yet
-      if (sessionData.steps.length === 0) {
+      // Start lesson automatically if no steps exist yet (only once)
+      if ((sessionData.steps.length === 0) && !autoStartedRef.current && !pendingMessage) {
         console.log('No steps found, starting lesson automatically...');
+        autoStartedRef.current = true;
         setTimeout(() => {
           console.log('Sending automatic start lesson message...');
           sendMessageMutation.mutate({
-            message: "Rozpocznij lekcję",
+            message: 'Rozpocznij lekcję',
             sessionId: sessionData.session.id
           });
-        }, 1000);
+        }, 800);
       } else {
         console.log('Steps already exist:', sessionData.steps.length);
       }
     }
   }, [user?.id, skillId, sessionData?.session, sessionData?.steps?.length]);
 
-  // Separate effect for session creation success
-  useEffect(() => {
-    if (currentSession && !sessionData?.steps?.length) {
-      console.log('Session is ready, starting lesson...');
-      setTimeout(() => {
-        sendMessageMutation.mutate({
-          message: "Rozpocznij lekcję",
-          sessionId: currentSession.id
-        });
-      }, 1000);
-    }
-  }, [currentSession?.id]);
+  // removed duplicate auto-start effect to prevent double starts
 
   // Auto-scroll to bottom of messages (container-based to avoid overscroll)
   useEffect(() => {
@@ -378,9 +379,19 @@ export default function StudyLesson() {
 
   return (
     <div className="container mx-auto p-4 max-w-6xl">
+      <Seo
+        title={`Lekcja — ${skill.name}`}
+        description={`Study & Learn: ${skill.description || 'Lekcja z tutorem AI'}`}
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          name: `Lekcja — ${skill.name}`,
+          description: `Study & Learn: ${skill.description || 'Lekcja z tutorem AI'}`
+        }}
+      />
       {/* Header */}
       <div className="mb-6">
-        <div className="flex items-center gap-4 mb-4">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4 mb-4">
           <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Powrót
@@ -416,8 +427,8 @@ export default function StudyLesson() {
         )}
       </div>
 
-      {/* Pseudo-activity warning */}
-      {pseudoActivityStrikes > 0 && (
+      {/* Pseudo-activity warning (hide at start) */}
+      {pseudoActivityStrikes > 0 && (steps.length > 2) && (
         <Alert className="mb-4">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
@@ -591,7 +602,7 @@ export default function StudyLesson() {
 
         {/* Progress Panel */}
         <div className="space-y-4">
-          <Card>
+          <Card className="hidden md:block">
             <CardHeader>
               <CardTitle className="text-base">Statystyki sesji</CardTitle>
             </CardHeader>

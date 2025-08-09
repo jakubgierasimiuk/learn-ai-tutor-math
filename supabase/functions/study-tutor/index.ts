@@ -88,14 +88,16 @@ serve(async (req) => {
       throw stepsError;
     }
 
-    // Calculate average response time for pseudo-activity detection
+    // Calculate average response time for pseudo-activity detection (skip for initial/start steps)
     const userSteps = previousSteps?.filter(step => step.user_input && step.response_time_ms) || [];
     const averageResponseTime = userSteps.length > 0 
       ? userSteps.reduce((sum, step) => sum + (step.response_time_ms || 0), 0) / userSteps.length
       : 5000; // Default 5 seconds
-
-const minResponseTime = Math.max(averageResponseTime * 0.4, 2000); // Minimum 2 seconds
-const isPseudoActivity = responseTime > 0 && responseTime < minResponseTime;
+    const minResponseTime = Math.max(averageResponseTime * 0.4, 2000); // Minimum 2 seconds
+    const startKeywords = ['rozpocznij', 'zacznij', 'start'];
+    const isStartLike = typeof message === 'string' && startKeywords.some(k => message.toLowerCase().includes(k));
+    const hasEnoughHistory = (previousSteps?.length || 0) >= 2;
+    const isPseudoActivity = hasEnoughHistory && !isStartLike && responseTime > 0 && responseTime < minResponseTime;
 
 // Determine target difficulty (never below high-school medium)
 const { data: profile } = await supabaseClient
