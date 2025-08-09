@@ -12,6 +12,7 @@ import type { Skill, SkillProgress, DepartmentProgress } from '@/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { StudentMaterialsWizard } from '@/components/StudentMaterialsWizard';
 import { Upload } from 'lucide-react';
+import { Seo } from '@/components/Seo';
 
 export default function StudyDashboard() {
   const { user } = useAuth();
@@ -126,7 +127,7 @@ export default function StudyDashboard() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
+      <div className="container mx-auto p-4 md:p-6 space-y-6">
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-muted rounded w-1/3"></div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -144,22 +145,32 @@ export default function StudyDashboard() {
     : skillsWithProgress;
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-4 md:p-6 space-y-6">
+      <Seo
+        title="Study & Learn — Korepetycje z matematyki"
+        description="Rozpocznij naukę matematyki: ścieżki, postępy i szybkie starty."
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: "Study & Learn — Korepetycje z matematyki",
+          description: "Rozpocznij naukę matematyki: ścieżki, postępy i szybkie starty."
+        }}
+      />
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">Study & Learn</h1>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Study & Learn</h1>
           <p className="text-muted-foreground">
             Interaktywny tutor matematyki - ucz się w swoim tempie z metodą sokratejską
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="w-full md:w-auto flex items-center gap-2 flex-wrap md:flex-nowrap md:justify-end">
           <Link to="/chat">
-            <Button size="sm" className="flex items-center gap-2 shadow-primary" onClick={() => console.log('cta_chat_clicked', { source: 'study-dashboard' })}>
+            <Button size="sm" className="w-full md:w-auto flex items-center gap-2 shadow-primary" onClick={() => console.log('cta_chat_clicked', { source: 'study-dashboard' })}>
               <Brain className="w-4 h-4" /> Zapytaj korepetytora
             </Button>
           </Link>
-          <Button variant="outline" size="sm" className="flex items-center gap-2" onClick={() => setMaterialsOpen(true)}>
+          <Button variant="outline" size="sm" className="w-full md:w-auto flex items-center gap-2" onClick={() => setMaterialsOpen(true)}>
             <Upload className="w-4 h-4" /> Dodaj materiały
           </Button>
         </div>
@@ -223,10 +234,10 @@ export default function StudyDashboard() {
       </div>
 
       {/* Department Filter */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex gap-2 overflow-x-auto whitespace-nowrap -mx-4 md:mx-0 px-4">
         <Button
           variant={selectedDepartment === null ? "default" : "outline"}
-          size="sm"
+          size="sm" className="shrink-0"
           onClick={() => setSelectedDepartment(null)}
         >
           Wszystkie działy
@@ -237,7 +248,7 @@ export default function StudyDashboard() {
             variant={selectedDepartment === dept.department ? "default" : "outline"}
             size="sm"
             onClick={() => setSelectedDepartment(dept.department)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 shrink-0"
           >
             {getDepartmentIcon(dept.department)}
             {getDepartmentName(dept.department)}
@@ -334,7 +345,7 @@ export default function StudyDashboard() {
       )}
 
       <Dialog open={materialsOpen} onOpenChange={setMaterialsOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="w-[95vw] sm:max-w-3xl">
           <DialogHeader>
             <DialogTitle>Dodaj materiały</DialogTitle>
           </DialogHeader>
