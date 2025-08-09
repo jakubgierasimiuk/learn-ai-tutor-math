@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logEvent, logError } from "@/lib/logger";
 
 // Enhanced quiz data with explanations and difficulty levels
 const quizQuestions = [
@@ -214,6 +215,7 @@ export const DiagnosticQuiz = () => {
 
   const handleTextToSpeech = async (text: string) => {
     try {
+      logEvent('tts_play_clicked', { source: 'quiz', length: text?.length || 0 });
       const response = await supabase.functions.invoke('text-to-speech', {
         body: { text }
       });
@@ -223,10 +225,11 @@ export const DiagnosticQuiz = () => {
       const audioContent = response.data.audioContent;
       const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
       await audio.play();
-      
+      logEvent('tts_play_success', { source: 'quiz' });
       toast.success("Odtwarzanie pytania...");
     } catch (error) {
       console.error('Error with text-to-speech:', error);
+      logError(error, 'DiagnosticQuiz.handleTextToSpeech', { source: 'quiz' });
       toast.error("Błąd podczas odtwarzania audio");
     }
   };

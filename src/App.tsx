@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useReferral } from "@/hooks/useReferral";
 import { Navigation } from "@/components/Navigation";
@@ -26,6 +26,9 @@ import StudyLesson from "./pages/StudyLesson";
 import MaterialsPage from "./pages/MaterialsPage";
 import UXAuditPage from "./pages/UXAuditPage";
 import ProgressPage from "./pages/ProgressPage";
+
+import { useEffect } from "react";
+import { setupGlobalLogging, logEvent } from "@/lib/logger";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +58,19 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+function LoggingBootstrap() {
+  const location = useLocation();
+  useEffect(() => {
+    const cleanup = setupGlobalLogging();
+    logEvent('app_loaded');
+    return cleanup;
+  }, []);
+  useEffect(() => {
+    logEvent('route_change', { path: location.pathname });
+  }, [location.pathname]);
+  return null;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -62,6 +78,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <LoggingBootstrap />
           <Routes>
             <Route path="/" element={
               <AuthenticatedLayout>

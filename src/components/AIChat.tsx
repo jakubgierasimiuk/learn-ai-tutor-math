@@ -14,6 +14,7 @@ import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { logEvent, logError, logAIMessage } from "@/lib/logger";
 
 interface Message {
   id: string;
@@ -153,6 +154,7 @@ export const AIChat = () => {
 
       if (createdSession) {
         setCurrentSessionId(createdSession.id);
+        logEvent('ai_chat_session_started', { session_id: createdSession.id, topic: firstTopic?.name });
       }
 
       // Generate personalized welcome message
@@ -278,8 +280,8 @@ export const AIChat = () => {
         timestamp: new Date(),
         insights: insights
       };
-      
       setMessages(prev => [...prev, newAIMessage]);
+      if (currentSessionId) { logAIMessage(currentSessionId, 'assistant', aiResponse); }
       
       // Handle insights and recommendations
       if (insights) {
@@ -312,16 +314,17 @@ export const AIChat = () => {
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
 
+    const content = newMessage;
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: newMessage,
+      content,
       timestamp: new Date()
     };
-
     setMessages(prev => [...prev, userMessage]);
-    setLastUserMessage(newMessage);
-    sendMessageToAI(newMessage);
+    setLastUserMessage(content);
+    sendMessageToAI(content);
+    if (currentSessionId) { logAIMessage(currentSessionId, 'user', content); }
     setNewMessage("");
     setShowUnderstanding(false);
     setShowRecommendations(false);
@@ -334,10 +337,10 @@ export const AIChat = () => {
       content: response,
       timestamp: new Date()
     };
-
     setMessages(prev => [...prev, userMessage]);
     setLastUserMessage(response);
     sendMessageToAI(response);
+    if (currentSessionId) { logAIMessage(currentSessionId, 'user', response); }
     setShowUnderstanding(false);
     setShowRecommendations(false);
   };
@@ -351,6 +354,7 @@ export const AIChat = () => {
 
   const handleTextToSpeech = async (text: string) => {
     try {
+      logEvent('tts_play_clicked', { source: 'ai_chat', length: text?.length || 0 });
       const response = await supabase.functions.invoke('text-to-speech', {
         body: { text }
       });
@@ -360,10 +364,11 @@ export const AIChat = () => {
       const audioContent = response.data.audioContent;
       const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
       await audio.play();
-      
+      logEvent('tts_play_success', { source: 'ai_chat' });
       toast.success("Odtwarzanie audio...");
     } catch (error) {
       console.error('Error with text-to-speech:', error);
+      logError(error, 'AIChat.handleTextToSpeech', { source: 'ai_chat' });
       toast.error("Funkcja audio niedostępna. Możesz przeczytać wiadomość powyżej.");
     }
   };
