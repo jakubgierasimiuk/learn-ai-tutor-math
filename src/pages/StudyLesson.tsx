@@ -224,6 +224,8 @@ const [pendingMessage, setPendingMessage] = useState<string | null>(null);
       setIsLoading(false);
       setResponseStartTime(Date.now());
       setShowHint(false);
+      // ensure fresh data
+      queryClient.invalidateQueries({ queryKey: ['study-session', skillId, user?.id] });
       
       // Handle pseudo-activity detection
       if (data.pseudoActivityDetected) {
@@ -312,6 +314,7 @@ const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   // Manual start lesson
   const handleStartLesson = () => {
     if (isLoading) return;
+    autoStartedRef.current = true;
     if (currentSession) {
       setIsLoading(true);
       sendMessageMutation.mutate({
