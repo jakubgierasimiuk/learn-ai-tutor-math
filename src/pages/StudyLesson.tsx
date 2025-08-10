@@ -309,6 +309,22 @@ const [pendingMessage, setPendingMessage] = useState<string | null>(null);
     });
   };
 
+  // Manual start lesson
+  const handleStartLesson = () => {
+    if (isLoading) return;
+    if (currentSession) {
+      setIsLoading(true);
+      sendMessageMutation.mutate({
+        message: 'Rozpocznij lekcję',
+        sessionId: currentSession.id
+      });
+    } else if (!initSessionMutation.isPending) {
+      setIsLoading(true);
+      setPendingMessage('Rozpocznij lekcję');
+      initSessionMutation.mutate();
+    }
+  };
+
   useEffect(() => {
     console.log('StudyLesson useEffect triggered:', {
       userId: user?.id,
@@ -471,6 +487,11 @@ const [pendingMessage, setPendingMessage] = useState<string | null>(null);
                     <p className="text-muted-foreground">
                       Rozpocznij rozmowę, aby rozpocząć lekcję sokratejską
                     </p>
+                    <div className="mt-4 flex justify-center">
+                      <Button size="sm" onClick={handleStartLesson} disabled={isLoading}>
+                        Rozpocznij lekcję
+                      </Button>
+                    </div>
                   </div>
                 )}
 
