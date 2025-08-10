@@ -242,6 +242,10 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
       setIsLoading(false);
       setResponseStartTime(Date.now());
       setShowHint(false);
+      // Show AI response immediately if no steps yet (avoid blank start screen)
+      if (((sessionData?.steps?.length || 0) === 0) && data?.message) {
+        setOptimisticIntro(data.message);
+      }
       // ensure fresh data
       queryClient.invalidateQueries({ queryKey: ['study-session', skillId, user?.id] });
       
