@@ -242,7 +242,6 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
       setIsLoading(false);
       setResponseStartTime(Date.now());
       setShowHint(false);
-      setOptimisticIntro(null);
       // ensure fresh data
       queryClient.invalidateQueries({ queryKey: ['study-session', skillId, user?.id] });
       
@@ -402,6 +401,13 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
     requestAnimationFrame(() => c.scrollTo({ top: c.scrollHeight, behavior: 'smooth' }));
   }, [isLoading]);
 
+  // When real steps arrive, remove optimistic intro
+  useEffect(() => {
+    if ((sessionData?.steps?.length || 0) > 0 && optimisticIntro) {
+      setOptimisticIntro(null);
+    }
+  }, [sessionData?.steps?.length]);
+
   if (!skill) {
     return (
       <div className="container mx-auto p-6">
@@ -495,7 +501,7 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Chat Panel */}
-        <div className="lg:col-span-2 max-w-4xl mx-auto w-full">
+        <div className="lg:col-span-2 w-full">
           <Card className="md:h-[600px] h-[calc(100dvh-6rem)] flex flex-col rounded-none md:rounded-xl border-0 md:border">
             <CardHeader className="hidden md:block">
               <CardTitle className="flex items-center gap-2">
