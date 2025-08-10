@@ -48,7 +48,7 @@ const messagesEndRef = useRef<HTMLDivElement>(null);
 const messagesContainerRef = useRef<HTMLDivElement>(null);
 const autoStartedRef = useRef(false);
 const [pendingMessage, setPendingMessage] = useState<string | null>(null);
-
+const [optimisticIntro, setOptimisticIntro] = useState<string | null>(null);
   // Function to render AI response with lesson report detection
   const renderAIResponse = (response: string) => {
     // Try to detect JSON lesson report
@@ -128,6 +128,24 @@ const [pendingMessage, setPendingMessage] = useState<string | null>(null);
     },
     enabled: !!skillId,
   });
+  // Optimistic first message generator
+  const generateIntro = () => {
+    if (!skill) return '';
+    const levelText = skill.level === 'extended' ? 'rozszerzonej' : 'podstawowej';
+    return `### Cel ucznia
+Poznać w praktyce kluczowe kroki dla tematu: ${skill.name} (poziom ${levelText}).
+
+### Szybka diagnoza
+Zaczniemy od krótkiego, licealnego przykładu i sprawdzimy Twój tok rozumowania.
+
+### Kroki
+1. Zidentyfikuj typ zadania i zapis formalny.
+2. Wskaż pierwszy sensowny krok przekształcenia.
+3. Wykonaj obliczenie i sprawdź wynik.
+
+### Pytanie sprawdzające
+Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || 'tego zagadnienia'}?`;
+  };
 
   // Fetch current session and lesson steps
   const { data: sessionData, refetch: refetchSession } = useQuery({
@@ -224,6 +242,7 @@ const [pendingMessage, setPendingMessage] = useState<string | null>(null);
       setIsLoading(false);
       setResponseStartTime(Date.now());
       setShowHint(false);
+      setOptimisticIntro(null);
       // ensure fresh data
       queryClient.invalidateQueries({ queryKey: ['study-session', skillId, user?.id] });
       
@@ -315,6 +334,10 @@ const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   const handleStartLesson = () => {
     if (isLoading) return;
     autoStartedRef.current = true;
+    const hasSteps = (sessionData?.steps?.length || 0) > 0;
+    if (!hasSteps && !optimisticIntro) {
+      setOptimisticIntro(generateIntro());
+    }
     if (currentSession) {
       setIsLoading(true);
       sendMessageMutation.mutate({
@@ -484,7 +507,7 @@ const [pendingMessage, setPendingMessage] = useState<string | null>(null);
             <CardContent className="flex-1 flex flex-col">
               {/* Messages */}
               <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-3 md:p-6 space-y-6 pb-24">
-                {steps.length === 0 && !isLoading && (
+                {steps.length === 0 && !isLoading && !optimisticIntro && (
                   <div className="text-center py-8">
                     <Brain className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                     <p className="text-muted-foreground">
@@ -494,6 +517,23 @@ const [pendingMessage, setPendingMessage] = useState<string | null>(null);
                       <Button size="sm" onClick={handleStartLesson} disabled={isLoading}>
                         Rozpocznij lekcję
                       </Button>
+                    </div>
+                  </div>
+                )}
+
+                {optimisticIntro && (
+                  <div className="flex gap-3">
+                    <div className="hidden md:flex w-8 h-8 rounded-full bg-primary items-center justify-center flex-shrink-0">
+                      <Brain className="w-4 h-4 text-primary-foreground" />
+                    </div>
+                    <div className="max-w-full md:max-w-[70%] space-y-2">
+                      <div className="bg-muted rounded-2xl p-4">
+                        {renderAIResponse(optimisticIntro)}
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span>Krok 1</span>
+                        <Badge variant="outline" className="text-xs">Wprowadzenie</Badge>
+                      </div>
                     </div>
                   </div>
                 )}
