@@ -118,7 +118,14 @@ if (recent.length >= 2) {
 
 // Build conversation history for OpenAI
     const turnNumber = (previousSteps?.length || 0) + 1;
-    const runtimeDirectives = `Runtime: tura=${turnNumber}. Jeśli tura % 7 === 0, dodaj „Notatkę nauczyciela” (cel, trudność 1–5, następny krok). Stosuj politykę 2‑1‑0. Off‑topic → redirect do celu.`;
+    const runtimeDirectives = `Runtime: tura=${turnNumber}.
+- Jeśli tura === 1: ODPOWIEDZ TYLKO w tym formacie i max 6–8 linijek:
+Zadanie: [konkretne liczby, zgodne z tematem]
+Podpowiedź: [jedna, krótka]
+Pytanie: [jedno, konkretne]
+Bez wstępów, podsumowań, notatek ani dodatkowych sekcji.
+- Jeśli tura % 7 === 0, dodaj „Notatkę nauczyciela” (cel, trudność 1–5, następny krok).
+Stosuj politykę 2‑1‑0. Off‑topic → redirect do celu.`;
     const messages = [
       {
         role: 'system',
@@ -162,7 +169,7 @@ const skillContext = {
 // Add current user message with proper handling for lesson start
 let userMessage = message;
 if (message === "Rozpocznij lekcję" && previousSteps.length === 0) {
-  userMessage = `Rozpocznij lekcję sokratejską dla umiejętności: ${skill.name}. Poziom: szkoła średnia (${targetDifficulty}). Unikaj zadań trywialnych, zacznij od krótkiej diagnozy i zadaj pierwsze pytanie.`;
+  userMessage = `Pierwsza tura: podaj tylko trzy sekcje –\nZadanie: [zawiera konkretne liczby, dotyczy: ${skill.name}]\nPodpowiedź: [jedna, krótka]\nPytanie: [jedno, konkretne]\nPoziom: szkoła średnia (${targetDifficulty}). Zero metatekstu.`;
 }
     
     messages.push({

@@ -334,9 +334,7 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
     if (isLoading) return;
     autoStartedRef.current = true;
     const hasSteps = (sessionData?.steps?.length || 0) > 0;
-    if (!hasSteps && !optimisticIntro) {
-      setOptimisticIntro(generateIntro());
-    }
+    // No optimistic intro – wait for the AI's first response
     if (currentSession) {
       setIsLoading(true);
       sendMessageMutation.mutate({
