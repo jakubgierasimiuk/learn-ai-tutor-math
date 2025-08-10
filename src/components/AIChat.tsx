@@ -174,16 +174,24 @@ export const AIChat = () => {
   };
 
   const generateWelcomeMessage = async (progress: UserProgress | null): Promise<Message> => {
-    const progressInfo = progress ? 
-      `Na podstawie Twojego postępu widzę, że ostatnio pracowałeś nad: ${progress.recentTopics.slice(0, 3).join(', ')}. ` +
-      `Twoja średnia ocena to ${progress.averageScore}%. ` +
-      (progress.weakAreas.length > 0 ? `Mogę pomóc Ci poprawić się w: ${progress.weakAreas.join(', ')}.` : 'Świetnie Ci idzie!')
-      : '';
+    const topics = progress?.recentTopics?.filter(Boolean) || [];
+    const avg = Number.isFinite(progress?.averageScore as number) ? (progress?.averageScore as number) : undefined;
+    const weak = progress?.weakAreas?.filter(Boolean) || [];
+
+    const infoParts: string[] = [];
+    if (topics.length > 0) infoParts.push(`Ostatnio pracowałeś nad: ${topics.slice(0, 3).join(', ')}.`);
+    if (typeof avg === 'number' && avg >= 1) infoParts.push(`Średnia z ostatnich lekcji: ok. ${avg}%.`);
+    if (weak.length > 0) infoParts.push(`Możemy popracować nad: ${weak.slice(0, 3).join(', ')}.`);
+
+    const progressInfo = infoParts.join(' ');
+
+    const base = `Cześć! Jestem Twoim AI Tutor 🧠\n\nPomogę Ci uczyć się matematyki krok po kroku. Zacznij pytaniem albo napisz, jaki temat chcesz poćwiczyć.`;
+    const content = progressInfo ? `${base}\n\n${progressInfo}` : base;
 
     return {
       id: '1',
       role: 'assistant',
-      content: `Cześć! Jestem Twoim personalnym AI Learning Coach 🧠\n\n${progressInfo}\n\nJestem tutaj, aby:\n📚 Wyjaśnić trudne koncepty\n🎯 Dostosować się do Twojego tempa nauki\n💡 Zaproponować ćwiczenia\n🏆 Świętować Twoje sukcesy\n\nO czym chciałbyś dziś porozmawiać?`,
+      content,
       timestamp: new Date()
     };
   };
