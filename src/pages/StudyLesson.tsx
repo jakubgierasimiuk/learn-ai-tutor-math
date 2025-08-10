@@ -153,17 +153,36 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
     queryFn: async () => {
       if (!user?.id || !skillId) return null;
 
-      // Get current active session
-      const { data: session, error } = await supabase
-        .from('study_sessions')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('skill_id', skillId)
-        .eq('status', 'in_progress')
-        .order('created_at', { ascending: false })
-        .maybeSingle();
+      // Try to resume from saved session
+      const savedKey = `study_session_${user.id}_${skillId}`;
+      const savedId = localStorage.getItem(savedKey);
 
-      if (error) throw error;
+      let session: StudySession | null = null;
+      if (savedId) {
+        const { data, error } = await supabase
+          .from('study_sessions')
+          .select('*')
+          .eq('id', savedId)
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (error) throw error;
+        session = data as StudySession | null;
+      }
+
+      if (!session) {
+        // Fallback to latest active session
+        const { data, error } = await supabase
+          .from('study_sessions')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('skill_id', skillId)
+          .eq('status', 'in_progress')
+          .order('created_at', { ascending: false })
+          .maybeSingle();
+        if (error) throw error;
+        session = data as StudySession | null;
+        if (session?.id) localStorage.setItem(savedKey, session.id);
+      }
 
       if (!session) return null;
 
@@ -177,7 +196,7 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
       if (stepsError) throw stepsError;
 
       return {
-        session: session as StudySession,
+        session,
         steps: steps as LessonStep[]
       };
     },
@@ -207,6 +226,7 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
     onSuccess: (session) => {
       setCurrentSession(session);
       setResponseStartTime(Date.now());
+      try { localStorage.setItem(`study_session_${user?.id}_${skillId}`, session.id); } catch {}
       queryClient.invalidateQueries({ queryKey: ['study-session', skillId, user?.id] });
       // If user tried to send a message before session existed, send it now
       if (pendingMessage) {

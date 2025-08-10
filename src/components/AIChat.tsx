@@ -83,8 +83,32 @@ export const AIChat = () => {
   const isMobile = useIsMobile();
   const [moreOpen, setMoreOpen] = useState(false);
   useEffect(() => {
+    if (!user) return;
+    try {
+      const saved = localStorage.getItem(`ai_chat_state_${user.id}`);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.sessionId) setCurrentSessionId(parsed.sessionId as number);
+        if (Array.isArray(parsed.messages) && parsed.messages.length > 0) {
+          setMessages(parsed.messages.map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) })));
+          return; // Skip fresh init, we restored previous session
+        }
+      }
+    } catch {}
     initializeChat();
   }, [user]);
+
+  // Persist chat session locally to allow resuming after reload/inactivity
+  useEffect(() => {
+    if (!user) return;
+    try {
+      const payload = {
+        sessionId: currentSessionId,
+        messages,
+      };
+      localStorage.setItem(`ai_chat_state_${user.id}`, JSON.stringify(payload));
+    } catch {}
+  }, [user, currentSessionId, messages]);
 
   const initializeChat = async () => {
     if (!user) return;
