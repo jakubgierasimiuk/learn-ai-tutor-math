@@ -549,7 +549,7 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
                     {/* Show user input first if it exists */}
                     {step.user_input && (
                       <div className="flex gap-3 justify-end">
-                        <div className="max-w-full md:max-w-[70%] space-y-2">
+                        <div className="flex-1 min-w-0 space-y-2">
                           <div className="bg-primary rounded-2xl p-4 text-primary-foreground">
                             <p className="whitespace-pre-wrap">{step.user_input}</p>
                           </div>
@@ -582,9 +582,9 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
                        <div className="hidden md:flex w-8 h-8 rounded-full bg-primary items-center justify-center flex-shrink-0">
                           <Brain className="w-4 h-4 text-primary-foreground" />
                         </div>
-                        <div className="max-w-full md:max-w-[70%] space-y-2">
-                           <div className="bg-muted rounded-2xl p-4">
-                             {renderAIResponse(step.ai_response)}
+                         <div className="flex-1 min-w-0 space-y-2">
+                            <div className="bg-muted rounded-2xl p-4 w-full">
+                              {renderAIResponse(step.ai_response)}
                            </div>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <span>Krok {step.step_number}</span>
@@ -611,7 +611,7 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
                       <Brain className="w-4 h-4 text-primary-foreground" />
                     </div>
                     <div className="flex-1">
-                      <div className="bg-muted p-3 rounded-lg">
+                      <div className="bg-muted p-3 rounded-lg w-full">
                         <div className="flex items-center gap-2">
                           <div className="animate-pulse flex space-x-1">
                             <div className="rounded-full bg-primary h-2 w-2"></div>
