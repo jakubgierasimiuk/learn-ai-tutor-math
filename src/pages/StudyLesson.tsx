@@ -501,7 +501,7 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Chat Panel */}
-        <div className="lg:col-span-2 w-full">
+        <div className="lg:col-span-3 w-full">
           <Card className="md:h-[600px] h-[calc(100dvh-6rem)] flex flex-col rounded-none md:rounded-xl border-0 md:border">
             <CardHeader className="hidden md:block">
               <CardTitle className="flex items-center gap-2">
@@ -684,7 +684,7 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
         </div>
 
         {/* Progress Panel */}
-        <div className="space-y-4">
+        <div className="space-y-4 lg:col-span-3">
           <Card className="hidden md:block">
             <CardHeader>
               <CardTitle className="text-base">Statystyki sesji</CardTitle>
