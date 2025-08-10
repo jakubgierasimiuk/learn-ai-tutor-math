@@ -532,8 +532,8 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
                     <div className="hidden md:flex w-8 h-8 rounded-full bg-primary items-center justify-center flex-shrink-0">
                       <Brain className="w-4 h-4 text-primary-foreground" />
                     </div>
-                    <div className="max-w-full md:max-w-[70%] space-y-2">
-                      <div className="bg-muted rounded-2xl p-4">
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <div className="bg-muted rounded-2xl p-4 w-full">
                         {renderAIResponse(optimisticIntro)}
                       </div>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
