@@ -5,6 +5,21 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  const chunkSize = 0x8000; // 32KB chunks to avoid call stack overflow
+  for (let i = 0; i < bytes.byteLength; i += chunkSize) {
+    const chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.byteLength));
+    let chunkStr = '';
+    for (let j = 0; j < chunk.length; j++) {
+      chunkStr += String.fromCharCode(chunk[j]);
+    }
+    binary += chunkStr;
+  }
+  return btoa(binary);
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -40,8 +55,8 @@ serve(async (req) => {
     }
 
     const audioBuffer = await response.arrayBuffer();
-    const base64Audio = btoa(String.fromCharCode(...new Uint8Array(audioBuffer)));
-
+    // Encode to base64 safely in chunks to avoid call stack limits
+    const base64Audio = arrayBufferToBase64(audioBuffer);
     return new Response(
       JSON.stringify({ audioContent: base64Audio }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
