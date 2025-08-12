@@ -4,7 +4,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -29,18 +29,36 @@ serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get('Authorization') || '';
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const { message, topic, level, userId, sessionId, userProgress, weakAreas, persona, a11y }: ChatMessage = await req.json();
 
     if (!openAIApiKey) {
       throw new Error('OpenAI API key not configured');
     }
 
-    // Initialize Supabase client for server operations
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Initialize Supabase client bound to the user's JWT so RLS applies
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
 
-    // Get user's learning context if userId provided
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Get user's learning context
     let userContext = "";
-    if (userId) {
+    if (user) {
       // Fetch user's recent lesson progress
       const { data: recentProgress } = await supabase
         .from('user_lesson_progress')
@@ -50,7 +68,7 @@ serve(async (req) => {
           lessons!inner(title, content_type, difficulty_level),
           topics!inner(name)
         `)
-        .eq('user_id', userId)
+        .eq('user_id', user.id)
         .order('last_accessed_at', { ascending: false })
         .limit(5);
 
@@ -58,7 +76,7 @@ serve(async (req) => {
       const { data: profile } = await supabase
         .from('profiles')
         .select('total_points, level')
-        .eq('user_id', userId)
+        .eq('user_id', user.id)
         .single();
 
       if (recentProgress && profile) {
@@ -174,7 +192,7 @@ Poziom użytkownika: ${level || 'beginner'}`;
     }
 
     // Log the chat interaction for learning analytics
-    if (userId && sessionId) {
+    if (sessionId) {
       await supabase.from('chat_logs').insert({
         session_id: sessionId,
         role: 'user',
