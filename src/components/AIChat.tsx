@@ -15,6 +15,7 @@ import "katex/dist/katex.min.css";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { logEvent, logError } from "@/lib/logger";
+import { normalizeMath } from "@/lib/markdown";
 
 interface Message {
   id: string;
@@ -76,6 +77,7 @@ export const AIChat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [searchParams] = useSearchParams();
   const hasSentPromptRef = useRef(false);
   const [slowNetwork, setSlowNetwork] = useState(false);
@@ -95,7 +97,12 @@ export const AIChat = () => {
         }
       }
     } catch {}
-    initializeChat();
+    (async () => {
+      const restored = await restoreLastSession();
+      if (!restored) {
+        initializeChat();
+      }
+    })();
   }, [user]);
 
   // Persist chat session locally to allow resuming after reload/inactivity
@@ -109,6 +116,43 @@ export const AIChat = () => {
       localStorage.setItem(`ai_chat_state_${user.id}`, JSON.stringify(payload));
     } catch {}
   }, [user, currentSessionId, messages]);
+
+  const restoreLastSession = async (): Promise<boolean> => {
+    if (!user) return false;
+    try {
+      const { data: lastSession } = await supabase
+        .from('lesson_sessions')
+        .select('id')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!lastSession?.id) return false;
+      const sessionId = (lastSession as any).id as number;
+      const { data: logs } = await supabase
+        .from('chat_logs')
+        .select('role, message, created_at')
+        .eq('session_id', sessionId)
+        .order('id', { ascending: true });
+      if (!logs || logs.length === 0) return false;
+
+      const restored = logs
+        .filter(l => l.role === 'user' || l.role === 'assistant')
+        .map((l, idx) => ({
+          id: `${sessionId}-${idx}`,
+          role: l.role as 'user' | 'assistant',
+          content: l.message as string,
+          timestamp: l.created_at ? new Date(l.created_at as any) : new Date(),
+        }));
+      setCurrentSessionId(sessionId);
+      setMessages(restored);
+      return true;
+    } catch (e) {
+      console.warn('restoreLastSession failed', e);
+      return false;
+    }
+  };
 
   const initializeChat = async () => {
     if (!user) return;
@@ -235,6 +279,7 @@ export const AIChat = () => {
   // Dodatkowy autoscroll podczas pisania AI, aby utrzymać widoczność najnowszej odpowiedzi
   useEffect(() => {
     if (isTyping) scrollToBottom();
+    else inputRef.current?.focus();
   }, [isTyping]);
   useEffect(() => {
     const p = searchParams.get('prompt');
@@ -576,7 +621,7 @@ export const AIChat = () => {
                       )}
                       <div className="markdown-body">
                         <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                          {message.content}
+                          {normalizeMath(message.content)}
                         </ReactMarkdown>
                       </div>
                     </div>
@@ -716,6 +761,7 @@ export const AIChat = () => {
                   <MoreHorizontal className="w-4 h-4" />
                 </Button>
                 <Input
+                  ref={inputRef}
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={handleKeyDown}

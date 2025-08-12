@@ -31,6 +31,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
+import { normalizeMath } from '@/lib/markdown';
 export default function StudyLesson() {
   const { skillId } = useParams();
   const { user } = useAuth();
@@ -53,6 +54,7 @@ const messagesContainerRef = useRef<HTMLDivElement>(null);
 const autoStartedRef = useRef(false);
 const [pendingMessage, setPendingMessage] = useState<string | null>(null);
 const [optimisticIntro, setOptimisticIntro] = useState<string | null>(null);
+const textareaRef = useRef<HTMLTextAreaElement>(null);
   // Function to render AI response with lesson report detection
   const renderAIResponse = (response: string) => {
     // Try to detect JSON lesson report
@@ -71,7 +73,7 @@ const [optimisticIntro, setOptimisticIntro] = useState<string | null>(null);
               {textPart && (
                 <div className="markdown-body">
                   <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                    {textPart}
+                    {normalizeMath(textPart)}
                   </ReactMarkdown>
                 </div>
               )}
@@ -123,7 +125,7 @@ const [optimisticIntro, setOptimisticIntro] = useState<string | null>(null);
     return (
       <div className="markdown-body">
         <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-          {response}
+          {normalizeMath(response)}
         </ReactMarkdown>
       </div>
     );
@@ -446,6 +448,13 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
     }
   }, [sessionData?.steps?.length]);
 
+  // Auto-focus input after each AI odpowiedź/zmiana stanu
+  useEffect(() => {
+    if (!isLoading) {
+      textareaRef.current?.focus();
+    }
+  }, [isLoading, sessionData?.steps?.length]);
+
   if (!skill) {
     return (
       <div className="container mx-auto p-6">
@@ -669,6 +678,7 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
               {/* Input Area */}
               <div className="p-2 md:p-4 border-t border-border pb-[env(safe-area-inset-bottom)] space-y-3">
                 <Textarea
+                  ref={textareaRef}
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
                   placeholder="Napisz swoją odpowiedź lub zadaj pytanie..."
