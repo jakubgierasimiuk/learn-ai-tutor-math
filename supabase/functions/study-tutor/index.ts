@@ -41,14 +41,8 @@ Struktura odpowiedzi (dla ucznia; bez metadanych):
 - Pytanie sprawdzające (1)
 - (co 7 tur) Notatka nauczyciela
 
-Na końcu, tylko gdy masz materiał do mini‑raportu (po domknięciu wątku lub przy checkpointach), dodaj blok kodu:
-```json
-{
-  "mastered": string[],
-  "struggled": string[],
-  "nextSuggested": { "title": string, "rationale": string }
-}
-```
+Na końcu, tylko gdy masz materiał do mini‑raportu (po domknięciu wątku lub przy checkpointach), dodaj surowy JSON (bez komentarzy), np.:
+{ "mastered": ["..."], "struggled": ["..."], "nextSuggested": { "title": "...", "rationale": "..." } }
 Bez żadnych komentarzy wokół. Nie powielaj treści odpowiedzi w JSON. JSON jest wyłącznie do użytku systemu.
 `;
 
