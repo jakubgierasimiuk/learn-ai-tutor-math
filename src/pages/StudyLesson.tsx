@@ -27,6 +27,10 @@ import type { Skill, StudySession, LessonStep } from '@/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { StudentMaterialsWizard } from '@/components/StudentMaterialsWizard';
 import { Seo } from '@/components/Seo';
+import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 export default function StudyLesson() {
   const { skillId } = useParams();
   const { user } = useAuth();
@@ -64,7 +68,13 @@ const [optimisticIntro, setOptimisticIntro] = useState<string | null>(null);
           
           return (
             <div className="space-y-4">
-              {textPart && <p className="whitespace-pre-wrap">{textPart}</p>}
+              {textPart && (
+                <div className="markdown-body">
+                  <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                    {textPart}
+                  </ReactMarkdown>
+                </div>
+              )}
               <div className="bg-accent/20 border border-accent rounded-lg p-4">
                 <h4 className="font-semibold text-sm mb-3">📋 Raport z lekcji</h4>
                 
@@ -105,12 +115,18 @@ const [optimisticIntro, setOptimisticIntro] = useState<string | null>(null);
           );
         }
       } catch (e) {
-        // If JSON parsing fails, show the raw response
+        // If JSON parsing fails, fall through to default rendering
       }
     }
     
-    // Default rendering for regular responses
-    return <p className="whitespace-pre-wrap">{response}</p>;
+    // Default rendering for regular responses with Markdown + LaTeX
+    return (
+      <div className="markdown-body">
+        <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+          {response}
+        </ReactMarkdown>
+      </div>
+    );
   };
 
   // Fetch skill data
