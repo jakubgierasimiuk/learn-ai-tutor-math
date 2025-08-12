@@ -311,3 +311,31 @@
     text-shadow: 0 0 30px hsl(214 88% 52% / 0.8);
   }
 }
+
+/* Markdown content safety */
+@layer base {
+  .markdown-body {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .markdown-body pre,
+  .markdown-body code {
+    white-space: pre;
+  }
+  .markdown-body pre {
+    overflow-x: auto;
+  }
+  .markdown-body table {
+    display: block;
+    width: max-content;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  .markdown-body img {
+    max-width: 100%;
+    height: auto;
+  }
+  .katex-display {
+    overflow-x: auto;
+  }
+}

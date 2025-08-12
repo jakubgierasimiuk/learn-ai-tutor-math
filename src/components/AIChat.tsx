@@ -542,9 +542,9 @@ export const AIChat = () => {
 
         {/* Chat Container */}
         <div className="max-w-4xl mx-auto">
-          <Card className="md:h-[600px] h-[calc(100dvh-6rem)] flex flex-col shadow-card rounded-none md:rounded-xl border-0 md:border">
+          <Card className="flex flex-col shadow-card rounded-none md:rounded-xl border-0 md:border overflow-hidden">
             {/* Messages */}
-            <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-3 md:p-6 space-y-6 pb-24 md:pb-6" role="log" aria-live="polite" aria-relevant="additions text">
+            <div ref={messagesContainerRef} className="p-3 md:p-6 space-y-6" role="log" aria-live="polite" aria-relevant="additions text">
               {messages.map((message) => (
                 <div
                   key={message.id}
@@ -561,7 +561,7 @@ export const AIChat = () => {
                   )}
                   
                   <div className={`max-w-full md:max-w-[70%] ${message.role === 'user' ? 'order-2' : ''}`}>
-                    <div className={`rounded-2xl p-4 ${
+                    <div className={`rounded-2xl p-4 break-words ${
                       message.role === 'user'
                         ? 'bg-primary text-primary-foreground ml-auto'
                         : message.role === 'assistant_review'

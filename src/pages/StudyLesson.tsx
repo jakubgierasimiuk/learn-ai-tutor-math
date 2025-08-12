@@ -540,7 +540,7 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Chat Panel */}
         <div className="lg:col-span-2 w-full">
-          <Card className="md:h-[600px] h-[calc(100dvh-6rem)] flex flex-col rounded-none md:rounded-xl border-0 md:border">
+          <Card className="flex flex-col rounded-none md:rounded-xl border-0 md:border overflow-hidden">
             <CardHeader className="hidden md:block">
               <CardTitle className="flex items-center gap-2">
                 <MessageSquare className="w-5 h-5" />
@@ -548,9 +548,9 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
               </CardTitle>
             </CardHeader>
 
-            <CardContent className="flex-1 flex flex-col">
+            <CardContent className="flex flex-col">
               {/* Messages */}
-              <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-3 md:p-6 space-y-6 pb-24">
+              <div ref={messagesContainerRef} className="p-3 md:p-6 space-y-6">
                 {steps.length === 0 && !isLoading && !optimisticIntro && (
                   <div className="text-center py-8">
                     <Brain className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -571,7 +571,7 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
                       <Brain className="w-4 h-4 text-primary-foreground" />
                     </div>
                     <div className="flex-1 min-w-0 space-y-2">
-                      <div className="bg-muted rounded-2xl p-4 w-full">
+                      <div className="bg-muted rounded-2xl p-4 w-full break-words">
                         {renderAIResponse(optimisticIntro)}
                       </div>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -588,7 +588,7 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
                     {step.user_input && (
                       <div className="flex gap-3 justify-end">
                         <div className="flex-1 min-w-0 space-y-2">
-                          <div className="bg-primary rounded-2xl p-4 text-primary-foreground">
+                          <div className="bg-primary rounded-2xl p-4 text-primary-foreground break-words">
                             <p className="whitespace-pre-wrap">{step.user_input}</p>
                           </div>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground justify-end">
@@ -621,7 +621,7 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
                           <Brain className="w-4 h-4 text-primary-foreground" />
                         </div>
                          <div className="flex-1 min-w-0 space-y-2">
-                            <div className="bg-muted rounded-2xl p-4 w-full">
+                            <div className="bg-muted rounded-2xl p-4 w-full break-words">
                               {renderAIResponse(step.ai_response)}
                            </div>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
