@@ -14,7 +14,7 @@ import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { logEvent, logError, logAIMessage } from "@/lib/logger";
+import { logEvent, logError } from "@/lib/logger";
 
 interface Message {
   id: string;
@@ -313,7 +313,7 @@ export const AIChat = () => {
         insights: insights
       };
       setMessages(prev => [...prev, newAIMessage]);
-      if (currentSessionId) { logAIMessage(currentSessionId, 'assistant', aiResponse); }
+      // persisted in server-side logs (chat_logs)
       
       // Handle insights and recommendations
       if (insights) {
@@ -356,7 +356,7 @@ export const AIChat = () => {
     setMessages(prev => [...prev, userMessage]);
     setLastUserMessage(content);
     sendMessageToAI(content);
-    if (currentSessionId) { logAIMessage(currentSessionId, 'user', content); }
+    // persisted in server-side logs (chat_logs)
     setNewMessage("");
     setShowUnderstanding(false);
     setShowRecommendations(false);
@@ -372,7 +372,7 @@ export const AIChat = () => {
     setMessages(prev => [...prev, userMessage]);
     setLastUserMessage(response);
     sendMessageToAI(response);
-    if (currentSessionId) { logAIMessage(currentSessionId, 'user', response); }
+    // persisted in server-side logs (chat_logs)
     setShowUnderstanding(false);
     setShowRecommendations(false);
   };
