@@ -601,18 +601,18 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
                             <p className="whitespace-pre-wrap">{step.user_input}</p>
                           </div>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground justify-end">
-                            {step.is_correct === true && (
+                            {typeof step.is_correct === 'boolean' && step.is_correct === true && (
                               <Badge variant="default" className="text-xs">
                                 <CheckCircle className="w-3 h-3 mr-1" />
                                 Poprawnie
                               </Badge>
                             )}
-                            {step.is_correct === false && (
+                            {typeof step.is_correct === 'boolean' && step.is_correct === false && (
                               <Badge variant="destructive" className="text-xs">
                                 Spróbuj ponownie
                               </Badge>
                             )}
-                            {step.response_time_ms && (
+                            {typeof step.is_correct === 'boolean' && typeof step.response_time_ms === 'number' && (
                               <span>{(step.response_time_ms / 1000).toFixed(1)}s</span>
                             )}
                           </div>
