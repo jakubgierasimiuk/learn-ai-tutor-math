@@ -130,20 +130,24 @@ export const AIChat = () => {
 
       if (!lastSession?.id) return false;
       const sessionId = (lastSession as any).id as number;
-      const { data: logs } = await supabase
+      const { data: logs, error: logsError } = await supabase
         .from('chat_logs')
-        .select('role, message, created_at')
+        .select('role, message, timestamp')
         .eq('session_id', sessionId)
         .order('id', { ascending: true });
+      if (logsError) {
+        console.warn('restoreLastSession logs error', logsError);
+        return false;
+      }
       if (!logs || logs.length === 0) return false;
 
-      const restored = logs
-        .filter(l => l.role === 'user' || l.role === 'assistant')
-        .map((l, idx) => ({
+      const restored = (logs as any[])
+        .filter((l: any) => l.role === 'user' || l.role === 'assistant')
+        .map((l: any, idx: number) => ({
           id: `${sessionId}-${idx}`,
           role: l.role as 'user' | 'assistant',
           content: l.message as string,
-          timestamp: l.created_at ? new Date(l.created_at as any) : new Date(),
+          timestamp: l.timestamp ? new Date(l.timestamp as any) : new Date(),
         }));
       setCurrentSessionId(sessionId);
       setMessages(restored);
