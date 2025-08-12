@@ -30,6 +30,7 @@ import ProgressPage from "./pages/ProgressPage";
 import { useEffect } from "react";
 import { setupGlobalLogging, setupGlobalInteractionLogging, logEvent } from "@/lib/logger";
 import { Seo } from "@/components/Seo";
+import { supabase } from "@/integrations/supabase/client";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
+      <CurriculumSeeder />
       <main>
         {children}
       </main>
@@ -97,6 +99,27 @@ function RouteSeo() {
   const match = Object.entries(map).find(([k]) => path === k || path.startsWith(k + '/'))?.[1];
   if (!match) return null;
   return <Seo title={match.title} description={match.description} canonical={canonical} />;
+}
+
+function CurriculumSeeder() {
+  useEffect(() => {
+    const key = 'curriculumSeededV1';
+    if (typeof window === 'undefined') return;
+    if (localStorage.getItem(key)) return;
+    const run = async () => {
+      try {
+        await supabase.functions.invoke('seed-curriculum', { body: { phase: '1' } });
+        await supabase.functions.invoke('seed-curriculum', { body: { phase: '2' } });
+        await supabase.functions.invoke('seed-curriculum', { body: { phase: '3' } });
+        localStorage.setItem(key, '1');
+        logEvent('curriculum_seeded', { phases: [1,2,3] });
+      } catch (err) {
+        console.error('Curriculum seeding failed', err);
+      }
+    };
+    run();
+  }, []);
+  return null;
 }
 
 const App = () => (
