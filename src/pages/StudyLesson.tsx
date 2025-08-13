@@ -284,6 +284,13 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
       if (((sessionData?.steps?.length || 0) === 0) && data?.message) {
         setOptimisticIntro(data.message);
       }
+      
+      console.log('Message sent successfully:', {
+        stepNumber: data?.stepNumber,
+        correctAnswer: data?.correctAnswer,
+        pseudoActivity: data?.pseudoActivityDetected,
+        stepsCount: sessionData?.steps?.length || 0
+      });
       // ensure fresh data
       queryClient.invalidateQueries({ queryKey: ['study-session', skillId, user?.id] });
       

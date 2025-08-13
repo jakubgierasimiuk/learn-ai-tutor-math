@@ -159,7 +159,10 @@ Stosuj politykę 2‑1‑0. Off‑topic → redirect do celu.`;
       }
     ];
 
-// Add context about the skill
+// Add context about the skill and current equation/problem
+const currentProblem = previousSteps && previousSteps.length > 0 ? 
+  previousSteps[0]?.ai_response?.match(/([xy]\s*[\+\-=]\s*[^\.]*)/g)?.[0] || null : null;
+
 const skillContext = {
   skill_id: skillId,
   skill_name: skill.name,
@@ -167,7 +170,9 @@ const skillContext = {
   level: skill.level,
   department: skill.department,
   description: skill.description,
-  target_difficulty: targetDifficulty
+  target_difficulty: targetDifficulty,
+  current_equation: currentProblem,
+  step_number: turnNumber
 };
 
     // Add previous conversation
@@ -238,28 +243,66 @@ messages.push({
 
     const tokensUsed = aiResponse.usage?.total_tokens || 0;
 
-    // Determine if this is a correct answer (simple heuristic)
-    const isCorrect = aiMessage.toLowerCase().includes('poprawnie') || 
-                     aiMessage.toLowerCase().includes('świetnie') ||
-                     aiMessage.toLowerCase().includes('brawo');
+    // Enhanced answer evaluation - check both AI response and user input context
+    const isAnswerCorrect = (userMessage: string, aiResponse: string): boolean => {
+      const response = aiResponse.toLowerCase();
+      const input = userMessage.toLowerCase();
+      
+      // Check for positive feedback words in AI response
+      const positiveWords = ['poprawnie', 'świetnie', 'brawo', 'dobrze', 'tak to jest', 'zgadza się', 'doskonale'];
+      const hasPositive = positiveWords.some(word => response.includes(word));
+      
+      // Check for negative feedback words
+      const negativeWords = ['niepoprawnie', 'błędnie', 'niestety', 'nie do końca', 'spróbuj ponownie', 'nie tak'];
+      const hasNegative = negativeWords.some(word => response.includes(word));
+      
+      // Check if AI is asking follow-up questions (usually means answer was correct)
+      const hasFollowUp = response.includes('teraz') || response.includes('następnie') || response.includes('dalej');
+      
+      // Mathematical answer patterns (x=number, y=number, etc.)
+      const mathAnswerPattern = /[a-z]\s*=\s*-?\d+/;
+      const hasMathAnswer = mathAnswerPattern.test(input);
+      
+      // If user provided a mathematical answer and AI didn't explicitly say it's wrong
+      if (hasMathAnswer && !hasNegative) {
+        return true;
+      }
+      
+      // Default logic
+      return hasPositive && !hasNegative;
+    };
 
-    // Get next step number
+    const isCorrect = isAnswerCorrect(message, aiMessage);
+
+    // Generate unique step number to prevent overwriting
     const nextStepNumber = (previousSteps?.length || 0) + 1;
+    const stepId = `${sessionId}_${nextStepNumber}_${Date.now()}`;
+    
+    console.log(`Creating step ${nextStepNumber} for session ${sessionId}`, {
+      userMessage: message,
+      aiResponse: aiMessage.substring(0, 100) + '...',
+      isCorrect,
+      stepType: stepType || 'question'
+    });
 
-    // Save lesson step
+    // Save lesson step with better error handling
+    const stepData = {
+      session_id: sessionId,
+      step_number: nextStepNumber,
+      step_type: stepType || 'question',
+      ai_prompt: JSON.stringify(skillContext),
+      ai_response: aiMessage,
+      user_input: message,
+      is_correct: isCorrect,
+      response_time_ms: responseTime,
+      tokens_used: tokensUsed
+    };
+    
+    console.log('Inserting lesson step:', stepData);
+    
     const { error: stepInsertError } = await supabaseClient
       .from('lesson_steps')
-      .insert({
-        session_id: sessionId,
-        step_number: nextStepNumber,
-        step_type: stepType || 'question',
-        ai_prompt: JSON.stringify(skillContext),
-        ai_response: aiMessage,
-        user_input: message,
-        is_correct: isCorrect,
-        response_time_ms: responseTime,
-        tokens_used: tokensUsed
-      });
+      .insert(stepData);
 
     if (stepInsertError) {
       console.error('Error saving lesson step:', stepInsertError);
