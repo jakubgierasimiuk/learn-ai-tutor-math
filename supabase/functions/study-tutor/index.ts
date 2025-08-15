@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { evaluateAnswer, MathContext } from './mathValidation.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -268,60 +269,27 @@ messages.push({
 
     const tokensUsed = aiResponse.usage?.total_tokens || 0;
 
-    // Enhanced answer evaluation using AI response analysis and mathematical patterns
-    const isAnswerCorrect = (userMessage: string, aiResponse: string): boolean => {
-      const response = aiResponse.toLowerCase();
-      const input = userMessage.toLowerCase().trim();
-      
-      // Strong positive indicators - AI confirms correct answer
-      const positiveWords = ['poprawnie', 'świetnie', 'brawo', 'dobrze', 'tak to jest', 'zgadza się', 'doskonale', 'excellent', 'correct'];
-      const hasPositive = positiveWords.some(word => response.includes(word));
-      
-      // Strong negative indicators - AI says it's wrong
-      const negativeWords = ['niepoprawnie', 'błędnie', 'niestety', 'nie do końca', 'spróbuj ponownie', 'nie tak', 'błąd', 'pomyłka'];
-      const hasNegative = negativeWords.some(word => response.includes(word));
-      
-      // Mathematical answer detection - various forms of x=number
-      const mathAnswerPatterns = [
-        /^[a-z]\s*=\s*-?\d+(\.\d+)?$/,  // x=4, X=4
-        /^-?\d+(\.\d+)?$/,              // just 4, -2, 1.5
-        /^[a-z]\s+(=|equals?|wynosi)\s+-?\d+(\.\d+)?/  // x equals 4, x wynosi 4
-      ];
-      const hasMathAnswer = mathAnswerPatterns.some(pattern => pattern.test(input));
-      
-      // If AI gives positive feedback, it's correct
-      if (hasPositive && !hasNegative) {
-        console.log('Answer marked correct: AI gave positive feedback');
-        return true;
-      }
-      
-      // If AI gives negative feedback, it's incorrect
-      if (hasNegative && !hasPositive) {
-        console.log('Answer marked incorrect: AI gave negative feedback');
-        return false;
-      }
-      
-      // If user gives mathematical answer and AI doesn't explicitly say it's wrong
-      if (hasMathAnswer && !hasNegative) {
-        console.log('Answer marked correct: Mathematical answer without negative feedback');
-        return true;
-      }
-      
-      // If AI continues with "następnie", "teraz", "dalej" - usually means previous answer was correct
-      const continuesPattern = response.includes('następnie') || response.includes('teraz') || response.includes('dalej');
-      if (continuesPattern && !hasNegative) {
-        console.log('Answer marked correct: AI continues to next step');
-        return true;
-      }
-      
-      console.log('Answer evaluation inconclusive, defaulting to false');
-      return false;
-    };
-
-    const isCorrect = isAnswerCorrect(message, aiMessage);
-
     // Generate unique step number to prevent overwriting
     const nextStepNumber = (previousSteps?.length || 0) + 1;
+
+    // Enhanced answer evaluation using dedicated math validation
+    const mathContext: MathContext = {
+      currentEquation: currentEquation || undefined,
+      expectedAnswerType: 'number', // Default - can be enhanced later
+      stepNumber: nextStepNumber,
+      previousSteps: previousSteps?.map(s => s.user_input || '') || []
+    };
+
+    const evaluation = evaluateAnswer(message, aiMessage, mathContext);
+    const isCorrect = evaluation.isCorrect;
+    
+    console.log('Answer evaluation result:', {
+      userInput: message,
+      isCorrect: evaluation.isCorrect,
+      confidence: evaluation.confidence,
+      errorType: evaluation.errorType,
+      pseudoActivity: evaluation.pseudoActivity
+    });
     const stepId = `${sessionId}_${nextStepNumber}_${Date.now()}`;
     
     console.log(`Creating step ${nextStepNumber} for session ${sessionId}`, {
@@ -366,7 +334,7 @@ messages.push({
     const newHintsUsed = stepType === 'hint' ? session.hints_used + 1 : session.hints_used;
     const newEarlyReveals = message.toLowerCase().includes('pokaż rozwiązanie') ? 
                            session.early_reveals + 1 : session.early_reveals;
-    const newStrikes = isPseudoActivity ? session.pseudo_activity_strikes + 1 : 
+    const newStrikes = evaluation.pseudoActivity ? session.pseudo_activity_strikes + 1 : 
                       (isCorrect ? Math.max(0, session.pseudo_activity_strikes - 1) : session.pseudo_activity_strikes);
 
     const sessionUpdate: any = {
@@ -423,7 +391,7 @@ messages.push({
       message: aiMessage,
       tokensUsed: tokensUsed,
       stepNumber: nextStepNumber,
-      pseudoActivityDetected: isPseudoActivity,
+      pseudoActivityDetected: evaluation.pseudoActivity || false,
       correctAnswer: isCorrect,
       hints: newHintsUsed,
       strikes: newStrikes
