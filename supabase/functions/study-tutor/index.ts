@@ -89,7 +89,7 @@ serve(async (req) => {
     // Get session details including current_equation and initialized status
     const { data: session, error: sessionError } = await supabaseClient
       .from('study_sessions')
-      .select('*, current_equation, initialized')
+      .select('*')
       .eq('id', sessionId)
       .single();
 
@@ -160,7 +160,7 @@ Stosuj politykę 2‑1‑0. Off‑topic → redirect do celu.`;
     ];
 
 // Handle session initialization and current equation tracking
-let currentEquation = session.current_equation;
+let currentEquation = session.current_equation || null;
 const isFirstMessage = turnNumber === 1 && message === "Rozpocznij lekcję";
 
 // If this is the first message, mark session as initialized and extract equation from AI response later
@@ -236,9 +236,10 @@ messages.push({
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
+        model: 'gpt-4o-mini',
         messages: messages,
-        max_completion_tokens: 350,
+        max_tokens: 350,
+        temperature: 0.7,
       }),
     });
 
@@ -359,13 +360,15 @@ messages.push({
         responseTime
     };
 
-    // Mark session as initialized and store current equation
+    // Mark session as initialized and store current equation  
     if (isFirstMessage) {
       sessionUpdate.initialized = true;
       if (extractedEquation) {
         sessionUpdate.current_equation = extractedEquation;
       }
     }
+
+    console.log('Updating session with:', sessionUpdate);
 
     const { error: sessionUpdateError } = await supabaseClient
       .from('study_sessions')
