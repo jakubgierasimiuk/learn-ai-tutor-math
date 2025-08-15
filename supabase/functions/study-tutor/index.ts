@@ -268,33 +268,54 @@ messages.push({
 
     const tokensUsed = aiResponse.usage?.total_tokens || 0;
 
-    // Enhanced answer evaluation - check both AI response and user input context
+    // Enhanced answer evaluation using AI response analysis and mathematical patterns
     const isAnswerCorrect = (userMessage: string, aiResponse: string): boolean => {
       const response = aiResponse.toLowerCase();
-      const input = userMessage.toLowerCase();
+      const input = userMessage.toLowerCase().trim();
       
-      // Check for positive feedback words in AI response
-      const positiveWords = ['poprawnie', 'świetnie', 'brawo', 'dobrze', 'tak to jest', 'zgadza się', 'doskonale'];
+      // Strong positive indicators - AI confirms correct answer
+      const positiveWords = ['poprawnie', 'świetnie', 'brawo', 'dobrze', 'tak to jest', 'zgadza się', 'doskonale', 'excellent', 'correct'];
       const hasPositive = positiveWords.some(word => response.includes(word));
       
-      // Check for negative feedback words
-      const negativeWords = ['niepoprawnie', 'błędnie', 'niestety', 'nie do końca', 'spróbuj ponownie', 'nie tak'];
+      // Strong negative indicators - AI says it's wrong
+      const negativeWords = ['niepoprawnie', 'błędnie', 'niestety', 'nie do końca', 'spróbuj ponownie', 'nie tak', 'błąd', 'pomyłka'];
       const hasNegative = negativeWords.some(word => response.includes(word));
       
-      // Check if AI is asking follow-up questions (usually means answer was correct)
-      const hasFollowUp = response.includes('teraz') || response.includes('następnie') || response.includes('dalej');
+      // Mathematical answer detection - various forms of x=number
+      const mathAnswerPatterns = [
+        /^[a-z]\s*=\s*-?\d+(\.\d+)?$/,  // x=4, X=4
+        /^-?\d+(\.\d+)?$/,              // just 4, -2, 1.5
+        /^[a-z]\s+(=|equals?|wynosi)\s+-?\d+(\.\d+)?/  // x equals 4, x wynosi 4
+      ];
+      const hasMathAnswer = mathAnswerPatterns.some(pattern => pattern.test(input));
       
-      // Mathematical answer patterns (x=number, y=number, etc.)
-      const mathAnswerPattern = /[a-z]\s*=\s*-?\d+/;
-      const hasMathAnswer = mathAnswerPattern.test(input);
-      
-      // If user provided a mathematical answer and AI didn't explicitly say it's wrong
-      if (hasMathAnswer && !hasNegative) {
+      // If AI gives positive feedback, it's correct
+      if (hasPositive && !hasNegative) {
+        console.log('Answer marked correct: AI gave positive feedback');
         return true;
       }
       
-      // Default logic
-      return hasPositive && !hasNegative;
+      // If AI gives negative feedback, it's incorrect
+      if (hasNegative && !hasPositive) {
+        console.log('Answer marked incorrect: AI gave negative feedback');
+        return false;
+      }
+      
+      // If user gives mathematical answer and AI doesn't explicitly say it's wrong
+      if (hasMathAnswer && !hasNegative) {
+        console.log('Answer marked correct: Mathematical answer without negative feedback');
+        return true;
+      }
+      
+      // If AI continues with "następnie", "teraz", "dalej" - usually means previous answer was correct
+      const continuesPattern = response.includes('następnie') || response.includes('teraz') || response.includes('dalej');
+      if (continuesPattern && !hasNegative) {
+        console.log('Answer marked correct: AI continues to next step');
+        return true;
+      }
+      
+      console.log('Answer evaluation inconclusive, defaulting to false');
+      return false;
     };
 
     const isCorrect = isAnswerCorrect(message, aiMessage);
