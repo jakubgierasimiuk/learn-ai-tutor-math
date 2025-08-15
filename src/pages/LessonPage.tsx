@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { areAnswersEquivalent } from "@/lib/mathValidation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -220,6 +221,12 @@ const LessonPage = () => {
     setUserAnswers(prev => ({ ...prev, [exerciseIndex]: answer }));
   };
 
+  // Enhanced answer validation function
+  const validateExerciseAnswer = (userAnswer: string, expectedAnswer: string): boolean => {
+    if (!userAnswer || !expectedAnswer) return false;
+    return areAnswersEquivalent(userAnswer, expectedAnswer);
+  };
+
   const calculateScore = () => {
     if (!lesson?.content_data?.exercises) return 0;
     
@@ -227,7 +234,7 @@ const LessonPage = () => {
     let correct = 0;
     
     exercises.forEach((exercise: Exercise, index: number) => {
-      if (userAnswers[index]?.toLowerCase().trim() === exercise.answer.toLowerCase().trim()) {
+      if (validateExerciseAnswer(userAnswers[index] || '', exercise.answer)) {
         correct++;
       }
     });
@@ -324,7 +331,7 @@ const LessonPage = () => {
     if (showResults) {
       const score = calculateScore();
       const correct = exercises.filter((exercise: Exercise, index: number) => 
-        userAnswers[index]?.toLowerCase().trim() === exercise.answer.toLowerCase().trim()
+        validateExerciseAnswer(userAnswers[index] || '', exercise.answer)
       ).length;
 
       return (
@@ -360,7 +367,7 @@ const LessonPage = () => {
           <div className="space-y-3">
             {exercises.map((exercise: Exercise, index: number) => {
               const userAnswer = userAnswers[index] || '';
-              const isCorrect = userAnswer.toLowerCase().trim() === exercise.answer.toLowerCase().trim();
+              const isCorrect = validateExerciseAnswer(userAnswer, exercise.answer);
               
               return (
                 <Card key={index} className={isCorrect ? 'border-green-200' : 'border-red-200'}>
