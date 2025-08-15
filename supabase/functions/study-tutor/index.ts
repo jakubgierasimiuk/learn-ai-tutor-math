@@ -227,7 +227,8 @@ messages.push({
       messages.splice(0, messages.length, systemMessage, ...recentMessages);
     }
 
-    // Call OpenAI API
+    // Call OpenAI API with GPT-5 parameters
+    console.log('Calling OpenAI API with GPT-5...');
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -241,17 +242,27 @@ messages.push({
       }),
     });
 
+    console.log('OpenAI Response status:', openAIResponse.status);
+    
     if (!openAIResponse.ok) {
-      const error = await openAIResponse.text();
-      console.error('OpenAI API error:', error);
-      throw new Error(`OpenAI API error: ${openAIResponse.status}`);
+      const errorText = await openAIResponse.text();
+      console.error('OpenAI API error:', errorText);
+      throw new Error(`OpenAI API error: ${openAIResponse.status} - ${errorText}`);
     }
 
     const aiResponse = await openAIResponse.json();
-    const aiMessage = aiResponse.choices[0]?.message?.content;
+    console.log('OpenAI Response received:', {
+      hasChoices: !!aiResponse.choices,
+      choicesLength: aiResponse.choices?.length || 0,
+      hasMessage: !!aiResponse.choices?.[0]?.message,
+      hasContent: !!aiResponse.choices?.[0]?.message?.content
+    });
+    
+    const aiMessage = aiResponse.choices?.[0]?.message?.content;
     
     if (!aiMessage) {
-      throw new Error('No response from AI');
+      console.error('No AI message in response:', aiResponse);
+      throw new Error('No response from AI - empty message content');
     }
 
     const tokensUsed = aiResponse.usage?.total_tokens || 0;
