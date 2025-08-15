@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { logEvent, logError } from "@/lib/logger";
+import { areAnswersEquivalent } from "@/lib/mathValidation";
 
 // Enhanced quiz data with explanations and difficulty levels
 const quizQuestions = [
@@ -285,10 +286,14 @@ export const DiagnosticQuiz = () => {
       
       results[topic].total++;
       const userAnswer = selectedAnswers[question.id];
-      const correctAnswer = question.options.find(opt => opt.correct)?.id;
+      const correctOption = question.options.find(opt => opt.correct);
       
-      if (userAnswer === correctAnswer) {
-        results[topic].correct++;
+      // Enhanced answer validation using math validation system
+      if (userAnswer && correctOption) {
+        const isCorrect = areAnswersEquivalent(userAnswer, correctOption.id);
+        if (isCorrect) {
+          results[topic].correct++;
+        }
       }
     });
 
