@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -1353,9 +1353,11 @@ export type Database = {
           completed_at: string | null
           completed_steps: number | null
           created_at: string
+          current_equation: string | null
           early_reveals: number | null
           hints_used: number | null
           id: string
+          initialized: boolean | null
           mastery_score: number | null
           pseudo_activity_strikes: number | null
           session_type: string
@@ -1372,9 +1374,11 @@ export type Database = {
           completed_at?: string | null
           completed_steps?: number | null
           created_at?: string
+          current_equation?: string | null
           early_reveals?: number | null
           hints_used?: number | null
           id?: string
+          initialized?: boolean | null
           mastery_score?: number | null
           pseudo_activity_strikes?: number | null
           session_type?: string
@@ -1391,9 +1395,11 @@ export type Database = {
           completed_at?: string | null
           completed_steps?: number | null
           created_at?: string
+          current_equation?: string | null
           early_reveals?: number | null
           hints_used?: number | null
           id?: string
+          initialized?: boolean | null
           mastery_score?: number | null
           pseudo_activity_strikes?: number | null
           session_type?: string
@@ -1734,7 +1740,7 @@ export type Database = {
         Returns: Json
       }
       update_leaderboard: {
-        Args: { p_user_id: string; p_points: number }
+        Args: { p_points: number; p_user_id: string }
         Returns: undefined
       }
       update_referral_stats: {

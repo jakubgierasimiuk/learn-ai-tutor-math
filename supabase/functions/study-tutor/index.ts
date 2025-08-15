@@ -86,10 +86,10 @@ serve(async (req) => {
       throw skillError;
     }
 
-    // Get session details
+    // Get session details including current_equation and initialized status
     const { data: session, error: sessionError } = await supabaseClient
       .from('study_sessions')
-      .select('*')
+      .select('*, current_equation, initialized')
       .eq('id', sessionId)
       .single();
 
@@ -159,9 +159,22 @@ Stosuj politykę 2‑1‑0. Off‑topic → redirect do celu.`;
       }
     ];
 
-// Add context about the skill and current equation/problem
-const currentProblem = previousSteps && previousSteps.length > 0 ? 
-  previousSteps[0]?.ai_response?.match(/([xy]\s*[\+\-=]\s*[^\.]*)/g)?.[0] || null : null;
+// Handle session initialization and current equation tracking
+let currentEquation = session.current_equation;
+const isFirstMessage = turnNumber === 1 && message === "Rozpocznij lekcję";
+
+// If this is the first message, mark session as initialized and extract equation from AI response later
+if (isFirstMessage && !session.initialized) {
+  console.log('First message - initializing session');
+}
+
+// For subsequent messages, use the stored equation
+if (turnNumber > 1 && !currentEquation && previousSteps && previousSteps.length > 0) {
+  // Try to extract equation from first AI response
+  const firstResponse = previousSteps[0]?.ai_response || '';
+  const equationMatch = firstResponse.match(/([a-z]\s*[+\-=]\s*[^.]*?(?=\s|$|\.|\n))/i);
+  currentEquation = equationMatch ? equationMatch[0].trim() : null;
+}
 
 const skillContext = {
   skill_id: skillId,
@@ -171,8 +184,9 @@ const skillContext = {
   department: skill.department,
   description: skill.description,
   target_difficulty: targetDifficulty,
-  current_equation: currentProblem,
-  step_number: turnNumber
+  current_equation: currentEquation,
+  step_number: turnNumber,
+  session_initialized: session.initialized || false
 };
 
     // Add previous conversation
@@ -221,10 +235,9 @@ messages.push({
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-5-2025-08-07',
         messages: messages,
-        temperature: 0.7,
-        max_tokens: 350,
+        max_completion_tokens: 350,
       }),
     });
 
@@ -308,6 +321,14 @@ messages.push({
       console.error('Error saving lesson step:', stepInsertError);
     }
 
+    // Extract equation from AI response for first message
+    let extractedEquation = currentEquation;
+    if (isFirstMessage && !extractedEquation) {
+      const equationMatch = aiMessage.match(/([a-z]\s*[+\-=]\s*[^.]*?(?=\s|$|\.|\n))/i);
+      extractedEquation = equationMatch ? equationMatch[0].trim() : null;
+      console.log('Extracted equation from first response:', extractedEquation);
+    }
+
     // Update session statistics
     const newHintsUsed = stepType === 'hint' ? session.hints_used + 1 : session.hints_used;
     const newEarlyReveals = message.toLowerCase().includes('pokaż rozwiązanie') ? 
@@ -315,19 +336,29 @@ messages.push({
     const newStrikes = isPseudoActivity ? session.pseudo_activity_strikes + 1 : 
                       (isCorrect ? Math.max(0, session.pseudo_activity_strikes - 1) : session.pseudo_activity_strikes);
 
+    const sessionUpdate: any = {
+      completed_steps: nextStepNumber,
+      total_steps: Math.max(session.total_steps, nextStepNumber),
+      hints_used: newHintsUsed,
+      early_reveals: newEarlyReveals,
+      pseudo_activity_strikes: newStrikes,
+      total_tokens_used: session.total_tokens_used + tokensUsed,
+      average_response_time_ms: userSteps.length > 0 ? 
+        Math.round((session.average_response_time_ms * userSteps.length + responseTime) / (userSteps.length + 1)) :
+        responseTime
+    };
+
+    // Mark session as initialized and store current equation
+    if (isFirstMessage) {
+      sessionUpdate.initialized = true;
+      if (extractedEquation) {
+        sessionUpdate.current_equation = extractedEquation;
+      }
+    }
+
     const { error: sessionUpdateError } = await supabaseClient
       .from('study_sessions')
-      .update({
-        completed_steps: nextStepNumber,
-        total_steps: Math.max(session.total_steps, nextStepNumber),
-        hints_used: newHintsUsed,
-        early_reveals: newEarlyReveals,
-        pseudo_activity_strikes: newStrikes,
-        total_tokens_used: session.total_tokens_used + tokensUsed,
-        average_response_time_ms: userSteps.length > 0 ? 
-          Math.round((session.average_response_time_ms * userSteps.length + responseTime) / (userSteps.length + 1)) :
-          responseTime
-      })
+      .update(sessionUpdate)
       .eq('id', sessionId);
 
     if (sessionUpdateError) {

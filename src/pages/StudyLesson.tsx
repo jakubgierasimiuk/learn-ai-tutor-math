@@ -233,7 +233,7 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
           skill_id: skillId,
           session_type: 'lesson',
           status: 'in_progress',
-          ai_model_used: 'gpt-4o'
+          ai_model_used: 'gpt-5-2025-08-07'
         })
         .select()
         .single();
@@ -414,17 +414,9 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
       setCurrentSession(sessionData.session);
       setResponseStartTime(Date.now());
       
-      // Start lesson automatically if no steps exist yet (only once)
-      if ((sessionData.steps.length === 0) && !autoStartedRef.current && !pendingMessage) {
-        console.log('No steps found, starting lesson automatically...');
-        autoStartedRef.current = true;
-        setTimeout(() => {
-          console.log('Sending automatic start lesson message...');
-          sendMessageMutation.mutate({
-            message: 'Rozpocznij lekcję',
-            sessionId: sessionData.session.id
-          });
-        }, 800);
+      // REMOVED automatic lesson start - let user manually start or use existing steps
+      if (sessionData.steps.length === 0) {
+        console.log('No steps found - user can manually start lesson');
       } else {
         console.log('Steps already exist:', sessionData.steps.length);
       }
