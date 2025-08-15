@@ -55,7 +55,14 @@ const autoStartedRef = useRef(false);
 const [pendingMessage, setPendingMessage] = useState<string | null>(null);
 const [optimisticIntro, setOptimisticIntro] = useState<string | null>(null);
 const textareaRef = useRef<HTMLTextAreaElement>(null);
-  // Function to render AI response with lesson report detection
+const [userInputDisplayed, setUserInputDisplayed] = useState(true); // Fix for missing user input
+
+  // Keep focus on textarea to prevent jumping cursor
+  const maintainFocus = () => {
+    if (textareaRef.current && !isLoading) {
+      textareaRef.current.focus();
+    }
+  };
   const renderAIResponse = (response: string) => {
     // Try to detect JSON lesson report
     const jsonPattern = /```json\s*\n?(\{[\s\S]*?\})\s*\n?```/;
@@ -338,6 +345,10 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
   const handleSendMessage = () => {
     const raw = userInput.trim();
     if (!raw || isLoading) return;
+    
+    // Show user input immediately in UI 
+    setUserInputDisplayed(true);
+    
     const stepsCount = sessionData?.steps?.length || 0;
     const lower = raw.toLowerCase();
     let msg = raw;
@@ -354,6 +365,9 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
       setPendingMessage(msg);
       initSessionMutation.mutate();
     }
+    
+    // Keep focus - fix for jumping cursor
+    setTimeout(maintainFocus, 100);
   };
   // Handle requesting hint
   const handleRequestHint = () => {
@@ -447,12 +461,17 @@ Gotów? Jak rozpocząłbyś rozwiązanie w kontekście: ${skill.description || '
     }
   }, [sessionData?.steps?.length]);
 
-  // Auto-focus input after each AI odpowiedź/zmiana stanu
+  // Auto-focus input after each AI response and maintain focus
   useEffect(() => {
     if (!isLoading) {
-      textareaRef.current?.focus();
+      maintainFocus();
     }
   }, [isLoading, sessionData?.steps?.length]);
+
+  // Restore focus when component remounts
+  useEffect(() => {
+    maintainFocus();
+  }, []);
 
   if (!skill) {
     return (
