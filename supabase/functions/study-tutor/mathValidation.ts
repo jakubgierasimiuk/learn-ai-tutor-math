@@ -1,7 +1,8 @@
 // Mathematical validation for study-tutor edge function
+// Updated to match Universal Interfaces
 export interface MathContext {
   currentEquation?: string;
-  expectedAnswerType: 'number' | 'equation' | 'expression' | 'set' | 'steps';
+  expectedAnswerType: 'number' | 'expression' | 'equation_set' | 'equation' | 'set' | 'steps';
   stepNumber: number;
   previousSteps?: string[];
 }

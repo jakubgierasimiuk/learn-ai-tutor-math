@@ -22,10 +22,10 @@ export interface TaskDefinition {
 }
 
 export interface MathContext {
-  currentEquation: string;
-  expectedAnswerType: 'number' | 'expression' | 'equation_set';
+  currentEquation?: string;
+  expectedAnswerType: 'number' | 'expression' | 'equation_set' | 'equation' | 'set' | 'steps';
   stepNumber: number;
-  previousSteps: string[];
+  previousSteps?: string[];
 }
 
 export interface MathValidationResult {

@@ -1,20 +1,10 @@
 // Mathematical validation and answer parsing utility
 // Phase 1: System Weryfikacji Matematycznej
 
-export interface MathValidationResult {
-  isCorrect: boolean;
-  normalizedAnswer: string;
-  confidence: number;
-  errorType?: 'computation' | 'method' | 'format' | 'unknown';
-  feedback?: string;
-}
+import { MathValidationResult, MathContext } from './UniversalInterfaces';
+import { UniversalAnswerValidator } from './UniversalAnswerValidator';
 
-export interface MathContext {
-  currentEquation?: string;
-  expectedAnswerType: 'number' | 'equation' | 'expression' | 'set' | 'steps';
-  stepNumber: number;
-  previousSteps?: string[];
-}
+const universalValidator = new UniversalAnswerValidator();
 
 /**
  * Normalizes mathematical answers to handle different valid formats
@@ -114,50 +104,53 @@ function areSetsEquivalent(set1: string, set2: string): boolean {
  * Validates a mathematical answer in context
  */
 export function validateMathAnswer(
-  userAnswer: string, 
+  userAnswer: string,
   expectedAnswer: string,
   context: MathContext
 ): MathValidationResult {
-  const normalized = normalizeAnswer(userAnswer);
-  const isCorrect = areAnswersEquivalent(userAnswer, expectedAnswer);
+  // Use the universal validator for enhanced validation
+  const result = universalValidator.validateAnswer(userAnswer, {
+    id: 'legacy',
+    department: 'unknown',
+    skillName: 'Legacy Validation',
+    microSkill: 'unknown',
+    difficulty: 1,
+    latex: '',
+    expectedAnswer,
+    misconceptionMap: {}
+  });
+
+  // Legacy compatibility - convert to old format expectations
+  let errorType: 'computation' | 'method' | 'format' | 'unknown' | undefined;
   
-  let confidence = isCorrect ? 1.0 : 0.0;
-  let errorType: MathValidationResult['errorType'];
-  let feedback: string | undefined;
-  
-  if (!isCorrect) {
-    // Analyze error type
-    if (context.expectedAnswerType === 'number') {
-      const userNum = parseFloat(normalized);
-      const expectedNum = parseFloat(normalizeAnswer(expectedAnswer));
+  if (!result.isCorrect && context.expectedAnswerType === 'number') {
+    const userNum = parseFloat(normalizeAnswer(userAnswer));
+    const expectedNum = parseFloat(normalizeAnswer(expectedAnswer));
+    
+    if (!isNaN(userNum) && !isNaN(expectedNum)) {
+      const diff = Math.abs(userNum - expectedNum);
+      const relativeDiff = diff / Math.abs(expectedNum);
       
-      if (!isNaN(userNum) && !isNaN(expectedNum)) {
-        const diff = Math.abs(userNum - expectedNum);
-        const relativeDiff = diff / Math.abs(expectedNum);
-        
-        if (relativeDiff < 0.1) {
-          errorType = 'computation';
-          confidence = 0.7;
-          feedback = "Bliska odpowiedź - sprawdź obliczenia";
-        } else {
-          errorType = 'method';
-          confidence = 0.3;
-          feedback = "Inne podejście może być potrzebne";
-        }
-      } else if (isNaN(userNum)) {
-        errorType = 'format';
-        confidence = 0.1;
-        feedback = "Odpowiedź powinna być liczbą";
+      if (relativeDiff < 0.1) {
+        errorType = 'computation';
+      } else {
+        errorType = 'method';
       }
+    } else if (isNaN(userNum)) {
+      errorType = 'format';
+    } else {
+      errorType = 'unknown';
     }
   }
-  
+
   return {
-    isCorrect,
-    normalizedAnswer: normalized,
-    confidence,
-    errorType,
-    feedback
+    isCorrect: result.isCorrect,
+    normalizedAnswer: result.normalizedAnswer,
+    confidence: result.confidence,
+    detectedMisconception: result.detectedMisconception,
+    feedback: result.feedback || (errorType === 'computation' ? "Bliska odpowiedź - sprawdź obliczenia" :
+                                  errorType === 'method' ? "Inne podejście może być potrzebne" :
+                                  errorType === 'format' ? "Odpowiedź powinna być liczbą" : undefined)
   };
 }
 

@@ -80,6 +80,7 @@ export class UniversalAnswerValidator {
 
   public validateAnswer(userAnswer: string, task: TaskDefinition): {
     isCorrect: boolean;
+    normalizedAnswer: string;
     confidence: number;
     detectedMisconception?: string;
     feedback?: string;
@@ -110,6 +111,7 @@ export class UniversalAnswerValidator {
     
     const result = {
       isCorrect,
+      normalizedAnswer: normalizedUser,
       confidence: isCorrect ? 0.95 : 0.3,
       detectedMisconception: undefined as string | undefined,
       feedback: undefined as string | undefined
