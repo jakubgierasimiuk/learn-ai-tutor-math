@@ -370,7 +370,7 @@ export class AlgebraicExpressionsTaskGenerator {
       // Result = ( (x+q) + (x+p) ) / ((x+p)(x+q)) = (2x + (p+q)) / ((x+p)(x+q))
       const numCoeff_x = 2;
       const numConst = p + q;
-      correctAnswer = `(${numCoeff_x !== 1 ? numCoeff_x : ""}x${numConst >= 0 ? " + " : " - "}${Math.abs(numConst)})/((x+${p})(x+${q}))`;
+      correctAnswer = `(2x${numConst >= 0 ? " + " : " - "}${Math.abs(numConst)})/((x+${p})(x+${q}))`;
     } else {
       // e.g. 2/(x+p) + 3/(x+q)
       const p = this.randInt(1, 5, rand);
@@ -382,7 +382,7 @@ export class AlgebraicExpressionsTaskGenerator {
       // Result numerator: A*(x+q) + B*(x+p) = (A+B)x + (A*q + B*p)
       const coeffX = A + B;
       const constTerm = A * q + B * p;
-      correctAnswer = `(${coeffX !== 1 ? coeffX : ""}x${constTerm >= 0 ? " + " : " - "}${Math.abs(constTerm)})/((x+${p})(x+${q}))`;
+      correctAnswer = `(${coeffX === 1 ? "" : coeffX}x${constTerm >= 0 ? " + " : " - "}${Math.abs(constTerm)})/((x+${p})(x+${q}))`;
     }
 
     return { problemText, correctAnswer };
