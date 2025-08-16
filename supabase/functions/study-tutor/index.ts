@@ -2,14 +2,15 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { evaluateAnswer, MathContext } from './mathValidation.ts';
+import { analyzeStudentAnswer, StudentProfile } from './adaptivePedagogy.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const SYSTEM_PROMPT = `Jesteś StudyTutor – wirtualnym nauczycielem matematyki dla polskiej szkoły średniej.
-Twój nadrzędny cel: ZROZUMIENIE ucznia i prowadzenie go do samodzielnego rozwiązania.
+const SYSTEM_PROMPT = `Jesteś StudyTutor – inteligentnym nauczycielem matematyki z ADAPTACYJNĄ PEDAGOGIKĄ.
+Twój nadrzędny cel: REAGUJ na wzorce odpowiedzi ucznia! Czytaj INSTRUKCJE_PEDAGOGICZNE w kontekście.
 
 Model nauczania: I do → We do → You do
 - I do: krótkie modelowanie (2–3 zdania + 1 kluczowy wzór), bez pełnego rozwiązania zadania.
@@ -213,7 +214,8 @@ let userMessage = message;
 if (message === "Rozpocznij lekcję" && previousSteps.length === 0) {
   userMessage = `Pierwsza tura: podaj tylko dwie sekcje –\nZadanie: [zawiera konkretne liczby, dotyczy: ${skill.name}]\nPytanie: [jedno, konkretne]\nPoziom: szkoła średnia (${targetDifficulty}). Zero metatekstu. Nie dodawaj podpowiedzi.`;
 }
-    
+
+// For now, just add the basic context (we'll analyze after getting AI response)
 const currentContext = JSON.stringify({ ...skillContext, step_type: stepType || 'question', turn_number: turnNumber });
 messages.push({
   role: 'user',
@@ -282,6 +284,51 @@ messages.push({
 
     const evaluation = evaluateAnswer(message, aiMessage, mathContext);
     const isCorrect = evaluation.isCorrect;
+
+    // Build student profile from session data
+    const studentProfile: StudentProfile = {
+      averageResponseTime: session.average_response_time_ms || 5000,
+      correctAnswerRate: recent.length > 0 ? correctCount / recent.length : 0.5,
+      commonMistakes: [], // Could be enhanced from historical data
+      preferredExplanationStyle: 'step_by_step', // Default
+      difficultyLevel: profile?.level || 3,
+      knowledgeGaps: [], // Could be enhanced
+      lastActivity: new Date()
+    };
+
+    // Analyze student answer using adaptive pedagogy
+    const sessionContext = {
+      stepsCompleted: nextStepNumber - 1,
+      consecutiveCorrect: getConsecutiveCorrect(previousSteps || []),
+      recentPerformance: recent.map(s => ({
+        isCorrect: s.is_correct,
+        responseTime: s.response_time_ms || 5000,
+        confidence: 0.7 // Default confidence
+      })),
+      currentDifficulty: targetDifficulty === 'hard' ? 7 : 5,
+      timeSpent: calculateSessionTime(previousSteps || [])
+    };
+
+    // Only analyze for non-first messages (after we have AI response)
+    let analysis: any = undefined;
+    if (turnNumber > 1) {
+      analysis = analyzeStudentAnswer(
+        message,
+        "dummy_expected", // We don't have expected answer here, using AI evaluation instead
+        responseTime || 5000,
+        isCorrect,
+        studentProfile,
+        sessionContext
+      );
+      
+      console.log('Adaptive pedagogy analysis:', {
+        pattern: analysis.pattern,
+        confidence: analysis.confidence,
+        teachingMomentType: analysis.teachingMoment.type,
+        nextAction: analysis.teachingMoment.nextAction,
+        sessionShouldContinue: analysis.sessionShouldContinue
+      });
+    }
     
     console.log('Answer evaluation result:', {
       userInput: message,
@@ -386,8 +433,8 @@ messages.push({
       console.error('Error updating daily limits:', dailyLimitError);
     }
 
-    // Return response with metadata
-    return new Response(JSON.stringify({
+    // Return response with enhanced metadata
+    const responseData: any = {
       message: aiMessage,
       tokensUsed: tokensUsed,
       stepNumber: nextStepNumber,
@@ -395,7 +442,21 @@ messages.push({
       correctAnswer: isCorrect,
       hints: newHintsUsed,
       strikes: newStrikes
-    }), {
+    };
+
+    // Add adaptive pedagogy insights for debugging/monitoring
+    if (typeof analysis !== 'undefined') {
+      responseData.pedagogyInsights = {
+        pattern: analysis.pattern,
+        confidence: analysis.confidence,
+        teachingMomentType: analysis.teachingMoment.type,
+        nextAction: analysis.teachingMoment.nextAction,
+        sessionShouldContinue: analysis.sessionShouldContinue,
+        difficultyAdjustment: analysis.teachingMoment.difficultyAdjustment
+      };
+    }
+
+    return new Response(JSON.stringify(responseData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
@@ -411,3 +472,27 @@ messages.push({
     });
   }
 });
+
+// Helper functions for adaptive pedagogy
+function getConsecutiveCorrect(steps: any[]): number {
+  let count = 0;
+  for (let i = steps.length - 1; i >= 0; i--) {
+    if (steps[i].is_correct === true) {
+      count++;
+    } else if (steps[i].is_correct === false) {
+      break;
+    }
+  }
+  return count;
+}
+
+function calculateSessionTime(steps: any[]): number {
+  if (steps.length === 0) return 0;
+  const firstStep = steps[0];
+  const lastStep = steps[steps.length - 1];
+  if (!firstStep.created_at || !lastStep.created_at) return 0;
+  
+  const start = new Date(firstStep.created_at);
+  const end = new Date(lastStep.created_at);
+  return end.getTime() - start.getTime();
+}
