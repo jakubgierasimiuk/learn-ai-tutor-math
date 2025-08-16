@@ -1,8 +1,8 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-// Updated to use Universal Interfaces
-import { MathContext } from './mathValidation.ts';
+import { evaluateAnswer, MathContext } from './mathValidation.ts';
+import { analyzeStudentAnswer, StudentProfile } from './adaptivePedagogy.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
