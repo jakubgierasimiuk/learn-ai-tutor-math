@@ -64,7 +64,7 @@ serve(async (req) => {
       });
     }
 
-    const { message, sessionId, skillId, responseTime, stepType } = await req.json();
+    const { message, sessionId, skillId, responseTime, stepType, currentPhase } = await req.json();
     
     if (!message || !sessionId || !skillId) {
       throw new Error('Missing required parameters');
@@ -87,6 +87,20 @@ serve(async (req) => {
       console.error('Error fetching skill:', skillError);
       throw skillError;
     }
+
+    // Get current phase details
+    const { data: phaseData, error: phaseError } = await supabaseClient
+      .from('skill_phases')
+      .select('*')
+      .eq('skill_id', skillId)
+      .eq('phase_number', currentPhase || 1)
+      .single();
+
+    if (phaseError) {
+      console.error('Error fetching phase data:', phaseError);
+      // Continue without phase data rather than failing
+    }
+
 
     // Get session details including current_equation and initialized status
     const { data: session, error: sessionError } = await supabaseClient
@@ -189,7 +203,12 @@ const skillContext = {
   target_difficulty: targetDifficulty,
   current_equation: currentEquation,
   step_number: turnNumber,
-  session_initialized: session.initialized || false
+  session_initialized: session.initialized || false,
+  current_phase: currentPhase || 1,
+  phase_name: phaseData?.phase_name || 'Nieznana faza',
+  phase_description: phaseData?.phase_description || '',
+  phase_ai_instructions: phaseData?.ai_instructions || '',
+  phase_success_criteria: phaseData?.success_criteria || {}
 };
 
     // Add previous conversation
