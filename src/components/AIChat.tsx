@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Brain, Send, ThumbsUp, ThumbsDown, RotateCcw, User, Bot, BookOpen, Target, Lightbulb, Volume2, Mic, MicOff, Loader2, Image as ImageIcon, MoreHorizontal } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -16,6 +16,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } f
 import { useIsMobile } from "@/hooks/use-mobile";
 import { logEvent, logError } from "@/lib/logger";
 import { normalizeMath } from "@/lib/markdown";
+import { EnhancedAIChatController } from "@/lib/EnhancedAIChatController";
 
 interface Message {
   id: string;
@@ -84,6 +85,9 @@ export const AIChat = () => {
   const [lastUserMessage, setLastUserMessage] = useState<string | null>(null);
   const isMobile = useIsMobile();
   const [moreOpen, setMoreOpen] = useState(false);
+  
+  // Enhanced AI Chat Controller for task generation
+  const aiChatController = useMemo(() => new EnhancedAIChatController(), []);
   useEffect(() => {
     if (!user) return;
     try {

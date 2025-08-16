@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 import { logEvent, logError } from "@/lib/logger";
-import { areAnswersEquivalent } from "@/lib/mathValidation";
+import { EnhancedDiagnosticController } from "@/lib/EnhancedDiagnosticController";
+import { TaskDefinition } from "@/lib/UniversalInterfaces";
 
 // Question types
 interface Choice {
@@ -316,7 +317,7 @@ export default function EnhancedDiagnostic() {
     const timeMs = Date.now() - startTimeRef.current;
     
     // Enhanced answer validation using math validation system
-    const is_correct = areAnswersEquivalent(selected, item.correctKey);
+    const is_correct = selected === item.correctKey;
 
     await (supabase as any)
       .from("diagnostic_item_attempts")
