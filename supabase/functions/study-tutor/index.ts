@@ -143,10 +143,11 @@ if (recent.length >= 2) {
 // Build conversation history for OpenAI
     const turnNumber = (previousSteps?.length || 0) + 1;
 const runtimeDirectives = `Runtime: tura=${turnNumber}.
-- Jeśli tura === 1: ODPOWIEDZ TYLKO w tym formacie i max 6–8 linijek:
+- Jeśli to PIERWSZA WIADOMOŚĆ w sesji (brak poprzednich kroków): ODPOWIEDZ TYLKO w tym formacie i max 6–8 linijek:
 Zadanie: [konkretne liczby, zgodne z tematem]
 Pytanie: [jedno, konkretne]
 Nie dawaj żadnej podpowiedzi.
+- Jeśli to kontynuacja sesji: ANALIZUJ odpowiedź ucznia i prowadź go dalej przez to samo zadanie.
 - Jeśli step_type === "hint": zastosuj „Politykę podpowiedzi (globalna)” ze sprawdzeniem znajomości metody i krótkim mikro‑wyjaśnieniem gdy trzeba.
 - Jeśli tura % 7 === 0, dodaj „Notatkę nauczyciela” (cel, trudność 1–5, następny krok).
 Stosuj politykę 2‑1‑0. Off‑topic → redirect do celu.`;
