@@ -604,6 +604,62 @@ export type Database = {
         }
         Relationships: []
       }
+      learning_phase_progress: {
+        Row: {
+          attempts_count: number | null
+          completed_at: string | null
+          correct_attempts: number | null
+          created_at: string | null
+          id: string
+          last_attempt_at: string | null
+          phase_number: number
+          progress_percentage: number | null
+          skill_id: string
+          status: string
+          time_spent_minutes: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          attempts_count?: number | null
+          completed_at?: string | null
+          correct_attempts?: number | null
+          created_at?: string | null
+          id?: string
+          last_attempt_at?: string | null
+          phase_number: number
+          progress_percentage?: number | null
+          skill_id: string
+          status?: string
+          time_spent_minutes?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          attempts_count?: number | null
+          completed_at?: string | null
+          correct_attempts?: number | null
+          created_at?: string | null
+          id?: string
+          last_attempt_at?: string | null
+          phase_number?: number
+          progress_percentage?: number | null
+          skill_id?: string
+          status?: string
+          time_spent_minutes?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_phase_progress_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_sessions: {
         Row: {
           completed_at: string | null
@@ -782,6 +838,89 @@ export type Database = {
           input_expression?: string
           is_correct?: boolean | null
           validation_result?: Json | null
+        }
+        Relationships: []
+      }
+      micro_skills: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          difficulty_range: number[] | null
+          id: string
+          is_active: boolean | null
+          name: string
+          skill_id: string
+          task_types: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          difficulty_range?: number[] | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          skill_id: string
+          task_types?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          difficulty_range?: number[] | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          skill_id?: string
+          task_types?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "micro_skills_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      misconception_patterns: {
+        Row: {
+          correction_strategy: string | null
+          created_at: string | null
+          department: string
+          description: string
+          difficulty_adjustment: number | null
+          feedback_template: string
+          id: string
+          is_active: boolean | null
+          micro_skill: string
+          misconception_id: string
+        }
+        Insert: {
+          correction_strategy?: string | null
+          created_at?: string | null
+          department: string
+          description: string
+          difficulty_adjustment?: number | null
+          feedback_template: string
+          id?: string
+          is_active?: boolean | null
+          micro_skill: string
+          misconception_id: string
+        }
+        Update: {
+          correction_strategy?: string | null
+          created_at?: string | null
+          department?: string
+          description?: string
+          difficulty_adjustment?: number | null
+          feedback_template?: string
+          id?: string
+          is_active?: boolean | null
+          micro_skill?: string
+          misconception_id?: string
         }
         Relationships: []
       }
@@ -1146,6 +1285,98 @@ export type Database = {
           },
         ]
       }
+      skill_phases: {
+        Row: {
+          ai_instructions: string | null
+          created_at: string | null
+          estimated_duration_minutes: number | null
+          id: string
+          is_active: boolean | null
+          phase_description: string | null
+          phase_name: string
+          phase_number: number
+          skill_id: string
+          success_criteria: Json
+          updated_at: string | null
+        }
+        Insert: {
+          ai_instructions?: string | null
+          created_at?: string | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          phase_description?: string | null
+          phase_name: string
+          phase_number: number
+          skill_id: string
+          success_criteria?: Json
+          updated_at?: string | null
+        }
+        Update: {
+          ai_instructions?: string | null
+          created_at?: string | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          phase_description?: string | null
+          phase_name?: string
+          phase_number?: number
+          skill_id?: string
+          success_criteria?: Json
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_phases_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      skill_prerequisites: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_hard_requirement: boolean | null
+          prerequisite_skill_id: string
+          required_mastery_level: number | null
+          skill_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_hard_requirement?: boolean | null
+          prerequisite_skill_id: string
+          required_mastery_level?: number | null
+          skill_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_hard_requirement?: boolean | null
+          prerequisite_skill_id?: string
+          required_mastery_level?: number | null
+          skill_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_prerequisites_prerequisite_skill_id_fkey"
+            columns: ["prerequisite_skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skill_prerequisites_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       skill_progress: {
         Row: {
           consecutive_correct: number | null
@@ -1212,9 +1443,11 @@ export type Database = {
           estimated_time_minutes: number | null
           id: string
           is_active: boolean | null
+          learning_objectives: Json | null
           level: string
           men_code: string | null
           name: string
+          phases: Json | null
           prerequisites: string[] | null
           updated_at: string
         }
@@ -1227,9 +1460,11 @@ export type Database = {
           estimated_time_minutes?: number | null
           id?: string
           is_active?: boolean | null
+          learning_objectives?: Json | null
           level?: string
           men_code?: string | null
           name: string
+          phases?: Json | null
           prerequisites?: string[] | null
           updated_at?: string
         }
@@ -1242,9 +1477,11 @@ export type Database = {
           estimated_time_minutes?: number | null
           id?: string
           is_active?: boolean | null
+          learning_objectives?: Json | null
           level?: string
           men_code?: string | null
           name?: string
+          phases?: Json | null
           prerequisites?: string[] | null
           updated_at?: string
         }
