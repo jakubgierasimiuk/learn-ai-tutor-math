@@ -69,31 +69,63 @@ export function LandingPage() {
             programowa w jednym miejscu.
           </p>
           
-          <div className="flex justify-center gap-6 flex-wrap animate-fadeIn" style={{animationDelay: '0.6s'}}>
-            <Button 
-              asChild 
-              size="lg"
-              className="bg-warning text-warning-foreground hover:bg-warning/90 text-lg px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 border-2 border-warning/50 hover:border-warning animate-glow"
-              onClick={() => handleCtaClick('start_ai_tutor')}
-            >
-              <Link to="/auth" className="flex items-center gap-2">
-                <GraduationCap className="w-5 h-5" />
-                Rozpocznij lekcję z AI Tutorem
-              </Link>
-            </Button>
-            
-            <Button 
-              asChild 
-              variant="outline" 
-              size="lg"
-              className="bg-white/10 text-primary-foreground border-2 border-white/30 hover:bg-white/20 backdrop-blur-sm text-lg px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-              onClick={() => handleCtaClick('discover_study_learn')}
-            >
-              <Link to="/auth" className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5" />
-                Odkryj Study & Learn
-              </Link>
-            </Button>
+          
+          {/* Główne opcje nauki */}
+          <div className="max-w-4xl mx-auto animate-fadeIn" style={{animationDelay: '0.6s'}}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Chat z AI Tutorem */}
+              <div className="group relative p-6 rounded-xl bg-gradient-to-br from-white/20 via-white/10 to-transparent border border-white/30 hover:border-white/50 transition-all duration-300 hover:scale-105 backdrop-blur-sm">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="relative">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 rounded-lg bg-white/20">
+                      <span className="text-2xl">🤖</span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-primary-foreground">Chat z AI Tutorem</h3>
+                  </div>
+                  <p className="text-sm text-primary-foreground/80 mb-4 leading-relaxed">
+                    Zadaj pytanie, wyślij zdjęcie zadania lub po prostu powiedz czego nie rozumiesz. 
+                    AI pomoże Ci krok po kroku.
+                  </p>
+                  <Button 
+                    asChild 
+                    className="w-full bg-warning text-warning-foreground hover:bg-warning/90 group-hover:shadow-warning transition-all"
+                    onClick={() => handleCtaClick('start_ai_tutor')}
+                  >
+                    <Link to="/auth">
+                      Rozpocznij rozmowę
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+
+              {/* Study & Learn */}
+              <div className="group relative p-6 rounded-xl bg-gradient-to-br from-white/20 via-white/10 to-transparent border border-white/30 hover:border-white/50 transition-all duration-300 hover:scale-105 backdrop-blur-sm">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="relative">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 rounded-lg bg-white/20">
+                      <BookOpen className="w-6 h-6 text-primary-foreground" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-primary-foreground">Study & Learn</h3>
+                  </div>
+                  <p className="text-sm text-primary-foreground/80 mb-4 leading-relaxed">
+                    Systematyczna nauka z AI. Wybierz temat, rozwiązuj zadania dopasowane do Twojego poziomu
+                    i śledź postępy.
+                  </p>
+                  <Button 
+                    asChild 
+                    variant="outline" 
+                    className="w-full bg-white/10 text-primary-foreground border-white/30 hover:bg-white/20 group-hover:shadow-accent transition-all"
+                    onClick={() => handleCtaClick('discover_study_learn')}
+                  >
+                    <Link to="/auth">
+                      Zacznij naukę
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
           
           {/* Stats badges */}
