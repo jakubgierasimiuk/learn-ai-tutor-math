@@ -29,21 +29,53 @@ export const Hero = () => {
               </p>
             </div>
 
-            {/* Główne CTA */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button asChild size="lg" className="shadow-primary transition-bounce hover:scale-105 w-full sm:w-auto" onClick={() => logEvent('cta_click', { source: 'hero' })}>
-                <Link to="/chat" aria-label="Rozpocznij korepetycje z AI">Rozpocznij korepetycje</Link>
-              </Button>
-            </div>
+            {/* Główne opcje nauki */}
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Chat z AI Tutorem */}
+                <div className="group relative p-6 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 hover:border-primary/40 transition-all duration-300 hover:scale-105">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="relative">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 rounded-lg bg-primary/20">
+                        <span className="text-2xl">🤖</span>
+                      </div>
+                      <h3 className="text-lg font-semibold">Chat z AI Tutorem</h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                      Zadaj pytanie, wyślij zdjęcie zadania lub po prostu powiedz czego nie rozumiesz. 
+                      AI pomoże Ci krok po kroku.
+                    </p>
+                    <Button asChild className="w-full group-hover:shadow-primary transition-all">
+                      <Link to="/chat" onClick={() => logEvent('cta_click', { source: 'hero', target: 'chat' })}>
+                        Rozpocznij rozmowę
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
 
-            {/* Główne funkcje */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button asChild size="lg" variant="outline" className="shadow-accent transition-bounce hover:scale-105 w-full sm:w-auto" onClick={() => logEvent('cta_click', { source: 'hero', target: 'study' })}>
-                <Link to="/study" aria-label="Study & Learn — Twoja ścieżka nauki">
-                  <GraduationCap className="w-5 h-5 mr-2" />
-                  Study & Learn
-                </Link>
-              </Button>
+                {/* Study & Learn */}
+                <div className="group relative p-6 rounded-xl bg-gradient-to-br from-accent/10 via-accent/5 to-transparent border border-accent/20 hover:border-accent/40 transition-all duration-300 hover:scale-105">
+                  <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="relative">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 rounded-lg bg-accent/20">
+                        <GraduationCap className="w-6 h-6 text-accent" />
+                      </div>
+                      <h3 className="text-lg font-semibold">Study & Learn</h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                      Systematyczna nauka z AI. Wybierz temat, rozwiązuj zadania dopasowane do Twojego poziomu
+                      i śledź postępy.
+                    </p>
+                    <Button asChild variant="outline" className="w-full group-hover:shadow-accent transition-all">
+                      <Link to="/study" onClick={() => logEvent('cta_click', { source: 'hero', target: 'study' })}>
+                        Zacznij naukę
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Stats */}
