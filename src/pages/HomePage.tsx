@@ -4,9 +4,41 @@ import { Hero } from "@/components/Hero";
 import { Features } from "@/components/Features";
 import { ReferralPromo } from "@/components/ReferralPromo";
 import { QuickStartPanel } from "@/components/QuickStartPanel";
+import { LandingPage } from "@/components/LandingPage";
+import { useAuth } from "@/hooks/useAuth";
 
 const HomePage = () => {
-  const jsonLd = {
+  const { user, loading } = useAuth();
+
+  // Show landing page for non-authenticated users
+  if (!loading && !user) {
+    const landingJsonLd = {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: "AI Tutor Matematyki – Najlepszy nauczyciel matematyki online",
+      description: "Ucz się matematyki z AI Tutorem 24/7. Dopasowane lekcje, quizy i pełna podstawa programowa. Rozpocznij darmowy okres próbny.",
+      offers: {
+        "@type": "Offer",
+        price: "49.99",
+        priceCurrency: "PLN",
+        description: "Miesięczny dostęp do AI Tutora Matematyki"
+      }
+    } as const;
+
+    return (
+      <>
+        <Seo
+          title="AI Tutor Matematyki – Najlepszy nauczyciel matematyki online"
+          description="Ucz się matematyki z AI Tutorem 24/7. Dopasowane lekcje, quizy i pełna podstawa programowa liceum. Darmowy okres próbny 7 dni."
+          jsonLd={landingJsonLd}
+        />
+        <LandingPage />
+      </>
+    );
+  }
+
+  // Show dashboard for authenticated users
+  const dashboardJsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "AI Tutor Matematyki – Strona główna",
@@ -18,7 +50,7 @@ const HomePage = () => {
       <Seo
         title="AI Tutor Matematyki – Strona główna"
         description="Ucz się z AI Tutorem: lekcje, quizy, rekomendacje. Czytelnie na desktop i mobile."
-        jsonLd={jsonLd}
+        jsonLd={dashboardJsonLd}
       />
       <main id="main-content">
         <section aria-labelledby="home-hero">
