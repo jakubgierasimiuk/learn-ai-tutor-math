@@ -1,0 +1,63 @@
+-- Dodanie wszystkich umiejętności z Paczki #3
+
+-- Część 4: Funkcje liniowe (klasy 7–8)
+INSERT INTO skills (
+  name, department, level, class_level, men_code, description, chapter_tag,
+  estimated_time_minutes, difficulty_rating, learning_objectives
+) VALUES
+('Pojęcie funkcji - wprowadzenie', 'functions', 'basic', 7, 'III.4.1', 'Uczeń rozumie pojęcie funkcji jako przyporządkowania każdemu x dokładnie jednego y.', 'Funkcje liniowe', 20, 1, '["Uczeń zna definicję funkcji.", "Uczeń potrafi podać przykłady i kontrprzykłady funkcji.", "Uczeń odróżnia funkcję od relacji niefunkcyjnych."]'),
+
+('Odczytywanie wartości funkcji z tabeli', 'functions', 'basic', 7, 'III.4.2', 'Uczeń potrafi odczytać wartość funkcji dla danego argumentu z tabeli.', 'Funkcje liniowe', 15, 2, '["Uczeń odczytuje wartości funkcji dla podanych argumentów.", "Uczeń uzupełnia brakujące dane w tabeli.", "Uczeń analizuje proste tabele wartości."]'),
+
+('Odczytywanie wartości funkcji z wykresu', 'functions', 'basic', 7, 'III.4.3', 'Uczeń potrafi odczytać wartość funkcji dla danego argumentu z wykresu.', 'Funkcje liniowe', 15, 2, '["Uczeń odczytuje wartości funkcji na podstawie wykresu.", "Uczeń potrafi znaleźć miejsca zerowe funkcji na wykresie.", "Uczeń interpretuje graficzną reprezentację funkcji."]'),
+
+('Wzór funkcji liniowej', 'functions', 'basic', 7, 'III.4.4', 'Uczeń zna wzór funkcji liniowej postaci y = ax + b.', 'Funkcje liniowe', 20, 2, '["Uczeń rozpoznaje wzór funkcji liniowej.", "Uczeń oblicza wartości funkcji dla danych argumentów.", "Uczeń zapisuje wzór na podstawie zadania tekstowego."]'),
+
+('Interpretacja współczynnika kierunkowego', 'functions', 'intermediate', 7, 'III.4.5', 'Uczeń interpretuje współczynnik a we wzorze funkcji liniowej jako nachylenie prostej.', 'Funkcje liniowe', 25, 3, '["Uczeń rozumie rolę współczynnika kierunkowego.", "Uczeń potrafi określić monotoniczność funkcji liniowej.", "Uczeń stosuje a w interpretacji praktycznej (np. prędkość)."]'),
+
+('Interpretacja wyrazu wolnego', 'functions', 'intermediate', 7, 'III.4.6', 'Uczeń interpretuje wyraz wolny b we wzorze funkcji liniowej jako punkt przecięcia z osią y.', 'Funkcje liniowe', 20, 3, '["Uczeń zna rolę wyrazu wolnego we wzorze funkcji liniowej.", "Uczeń wyznacza punkt przecięcia z osią y.", "Uczeń interpretuje wyraz wolny w kontekście praktycznym."]'),
+
+('Szkicowanie wykresu funkcji liniowej', 'functions', 'intermediate', 7, 'III.4.7', 'Uczeń szkicuje wykres funkcji liniowej korzystając z dwóch punktów.', 'Funkcje liniowe', 25, 3, '["Uczeń wyznacza punkty charakterystyczne.", "Uczeń rysuje wykres funkcji liniowej.", "Uczeń interpretuje wykres w kontekście zadania."]'),
+
+('Wyznaczanie wzoru funkcji liniowej na podstawie wykresu', 'functions', 'intermediate', 8, 'III.4.8', 'Uczeń potrafi wyznaczyć wzór funkcji liniowej na podstawie wykresu.', 'Funkcje liniowe', 25, 4, '["Uczeń wyznacza współczynnik kierunkowy na podstawie nachylenia prostej.", "Uczeń odczytuje wyraz wolny z wykresu.", "Uczeń zapisuje poprawny wzór funkcji."]'),
+
+('Miejsca zerowe funkcji liniowej', 'functions', 'intermediate', 8, 'III.4.9', 'Uczeń znajduje miejsca zerowe funkcji liniowej metodą analityczną i graficzną.', 'Funkcje liniowe', 20, 3, '["Uczeń rozwiązuje równanie ax + b = 0.", "Uczeń odczytuje miejsca zerowe z wykresu.", "Uczeń interpretuje wynik w kontekście zadania."]'),
+
+('Zadania tekstowe z funkcją liniową', 'functions', 'intermediate', 8, 'III.4.10', 'Uczeń stosuje funkcję liniową do rozwiązywania zadań tekstowych.', 'Funkcje liniowe - zastosowania', 30, 4, '["Uczeń tłumaczy sytuację praktyczną na wzór funkcji.", "Uczeń interpretuje znaczenie współczynnika kierunkowego i wyrazu wolnego.", "Uczeń analizuje i sprawdza poprawność rozwiązania."]'),
+
+('Układ dwóch funkcji liniowych - interpretacja graficzna', 'functions', 'advanced', 8, 'III.4.11', 'Uczeń rozwiązuje układ dwóch równań liniowych interpretując graficznie przecięcie prostych.', 'Funkcje liniowe - zastosowania', 30, 4, '["Uczeń rysuje wykresy dwóch prostych.", "Uczeń wskazuje punkt przecięcia jako rozwiązanie układu.", "Uczeń interpretuje wynik w kontekście praktycznym."]'),
+
+('Monotoniczność funkcji liniowej', 'functions', 'advanced', 8, 'III.4.12', 'Uczeń analizuje, kiedy funkcja liniowa jest rosnąca, malejąca lub stała.', 'Funkcje liniowe', 20, 4, '["Uczeń wskazuje przypadki a > 0, a < 0, a = 0.", "Uczeń interpretuje monotoniczność w praktycznych sytuacjach.", "Uczeń stosuje kryterium monotoniczności w zadaniach."]'),
+
+('Funkcja liniowa w zadaniach problemowych', 'functions', 'advanced', 8, 'III.4.13', 'Uczeń rozwiązuje złożone zadania problemowe z użyciem funkcji liniowych.', 'Funkcje liniowe - zadania problemowe', 35, 5, '["Uczeń stosuje funkcję liniową w nietypowych kontekstach.", "Uczeń rozwiązuje zadania wymagające kilku kroków i połączenia różnych metod.", "Uczeń interpretuje wynik w kontekście realnym."]'),
+
+-- Część 5: Ciągi arytmetyczne (klasy 7–8)
+('Pojęcie ciągu i zapis pierwszych wyrazów', 'sequences', 'basic', 7, 'III.5.1', 'Uczeń rozumie pojęcie ciągu liczbowego jako uporządkowanej listy wyrazów i zapisuje kilka pierwszych wyrazów prostych ciągów.', 'Ciągi - wprowadzenie', 15, 2, '["Uczeń rozumie różnicę między zbiorem a ciągiem.", "Uczeń zapisuje pierwsze n wyrazów ciągu według reguły słownej.", "Uczeń posługuje się indeksem n do numerowania wyrazów."]'),
+
+('Rozpoznawanie ciągu arytmetycznego', 'sequences', 'basic', 7, 'III.5.2', 'Uczeń rozpoznaje ciąg arytmetyczny na podstawie stałej różnicy między kolejnymi wyrazami.', 'Ciąg arytmetyczny - wprowadzenie', 20, 2, '["Uczeń oblicza różnice kolejnych wyrazów.", "Uczeń sprawdza stałość różnicy.", "Uczeń odróżnia ciąg arytmetyczny od niearytmetycznego."]'),
+
+('Wyznaczanie różnicy ciągu arytmetycznego', 'sequences', 'basic', 7, 'III.5.3', 'Uczeń oblicza różnicę r na podstawie dwóch kolejnych wyrazów lub dwóch odległych wyrazów.', 'Ciąg arytmetyczny - parametry', 20, 2, '["Uczeń stosuje zależność r = a_{n} - a_{n-1}.", "Uczeń oblicza r z pary niekolejnych wyrazów używając r = (a_k - a_m)/(k-m).", "Uczeń interpretuje znak r (wzrost/malejący)."]'),
+
+('Wyznaczanie pierwszego wyrazu ciągu arytmetycznego', 'sequences', 'basic', 7, 'III.5.4', 'Uczeń oblicza pierwszy wyraz a₁ na podstawie znanego wyrazu i różnicy.', 'Ciąg arytmetyczny - parametry', 15, 2, '["Uczeń korzysta ze wzoru a_n = a_1 + (n-1)r w prostych przekształceniach.", "Uczeń rozwiązuje proste równanie do wyznaczenia a_1.", "Uczeń sprawdza wynik podstawieniem."]'),
+
+('N-ty wyraz ciągu arytmetycznego - wzór ogólny', 'sequences', 'intermediate', 8, 'III.5.5', 'Uczeń stosuje wzór aₙ = a₁ + (n−1)r do obliczania wyrazów ciągu i rozwiązywania prostych równań.', 'Ciąg arytmetyczny - wzór ogólny', 25, 3, '["Uczeń oblicza a_n dla podanych a_1, r i n.", "Uczeń znajduje n dla danego a_n.", "Uczeń interpretuje liniowy charakter wzoru."]'),
+
+('Zapis rekurencyjny ciągu arytmetycznego', 'sequences', 'intermediate', 8, 'III.5.6', 'Uczeń zapisuje i wykorzystuje definicję rekurencyjną: a₁ znane, aₙ = aₙ₋₁ + r.', 'Ciąg arytmetyczny - zapis rekurencyjny', 20, 3, '["Uczeń generuje kolejne wyrazy na podstawie poprzedniego.", "Uczeń przechodzi między zapisem rekurencyjnym a jawnym.", "Uczeń rozwiązuje proste zadania z rekurencją."]'),
+
+('Suma pierwszych n wyrazów ciągu arytmetycznego', 'sequences', 'intermediate', 8, 'III.5.7', 'Uczeń stosuje wzór Sₙ = n(a₁ + aₙ)/2 lub Sₙ = n[2a₁ + (n−1)r]/2 do obliczania sumy.', 'Ciąg arytmetyczny - suma', 25, 3, '["Uczeń oblicza sumę pierwszych n wyrazów.", "Uczeń wyznacza n znając Sₙ, a₁, r.", "Uczeń interpretuje sumę w zadaniach praktycznych."]'),
+
+('Wyraz o danym numerze a warunek na bycie dodatnim/ujemnym', 'sequences', 'intermediate', 8, 'III.5.8', 'Uczeń bada znak wyrazów ciągu: dla których n zachodzi aₙ > 0, a dla których aₙ < 0.', 'Ciąg arytmetyczny - własności', 20, 3, '["Uczeń rozwiązuje nierówności liniowe w n.", "Uczeń wskazuje indeksy, dla których wyrazy spełniają warunek.", "Uczeń interpretuje wynik na osi liczbowej."]'),
+
+('Znajdowanie indeksu wyrazu na podstawie jego wartości', 'sequences', 'intermediate', 8, 'III.5.9', 'Uczeń wyznacza numer n wyrazu, gdy znane są a₁, r oraz wartość aₙ.', 'Ciąg arytmetyczny - obliczenia odwrotne', 20, 3, '["Uczeń przekształca wzór aₙ = a₁ + (n−1)r.", "Uczeń rozwiązuje proste równania w n.", "Uczeń sprawdza poprawność podstawieniem."]'),
+
+('Średnia arytmetyczna jako wyraz środkowy ciągu arytmetycznego', 'sequences', 'intermediate', 7, 'III.5.10', 'Uczeń wykorzystuje własność, że w ciągu arytmetycznym wyraz środkowy jest średnią arytmetyczną skrajnych.', 'Ciąg arytmetyczny - własności', 20, 3, '["Uczeń stosuje zależność a_{k} = (a_{k-1} + a_{k+1})/2.", "Uczeń rozwiązuje zadania z brakującym wyrazem.", "Uczeń łączy pojęcie średniej z własnościami ciągu."]'),
+
+('Ciągi arytmetyczne z różnicą ułamkową i ujemną', 'sequences', 'intermediate', 8, 'III.5.11', 'Uczeń operuje na ciągach arytmetycznych o różnicy ułamkowej lub ujemnej i interpretuje je na osi liczbowej.', 'Ciąg arytmetyczny - różne różnice', 25, 3, '["Uczeń oblicza kolejne wyrazy dla r ujemnego i ułamkowego.", "Uczeń interpretuje malejące i gęste ciągi.", "Uczeń rozwiązuje zadania wymagające precyzyjnych rachunków."]'),
+
+('Zadania tekstowe modelowane ciągiem arytmetycznym', 'sequences', 'advanced', 8, 'III.5.12', 'Uczeń tworzy model ciągu arytmetycznego dla sytuacji praktycznych (oszczędzanie, rabaty, rozkłady siedzeń, harmonogramy).', 'Ciąg arytmetyczny - zastosowania', 30, 4, '["Uczeń zapisuje dane problemu jako parametry a₁, r, n.", "Uczeń wybiera właściwy wzór (aₙ lub Sₙ).", "Uczeń interpretuje wyniki w kontekście zadania."]'),
+
+('Identyfikacja błędów w zadaniach z ciągu arytmetycznego', 'sequences', 'advanced', 8, 'III.5.13', 'Uczeń rozpoznaje typowe błędy (mylenie aₙ i Sₙ, błędne indeksowanie, pomyłki znaków) i koryguje rozwiązania.', 'Ciąg arytmetyczny - diagnostyka błędów', 25, 4, '["Uczeń wykrywa mylenie wzorów aₙ i Sₙ.", "Uczeń poprawia błędne indeksowanie (n vs liczba kroków).", "Uczeń koryguje błędy znaków w obliczeniach r."]'),
+
+('Zadania mieszane: przejście między opisem słownym, tabelą i wzorem', 'sequences', 'advanced', 8, 'III.5.14', 'Uczeń swobodnie przechodzi między reprezentacjami ciągu: opis słowny ↔ tabela ↔ wzór jawny/rekurencyjny.', 'Ciąg arytmetyczny - reprezentacje', 30, 4, '["Uczeń tworzy tabelę wartości z definicji rekurencyjnej.", "Uczeń wyprowadza wzór jawny z tabeli.", "Uczeń opisuje słownie regułę ciągu na podstawie wzoru."]'),
+
+('Mini-test opanowania: ciąg arytmetyczny (a₁, r, aₙ, Sₙ)', 'sequences', 'advanced', 8, 'III.5.15', 'Uczeń rozwiązuje zestaw 3–5 zadań sprawdzających łącznie: rozpoznanie ciągu, obliczenia aₙ, wyznaczanie n, suma Sₙ, zadanie tekstowe.', 'Ciąg arytmetyczny - podsumowanie', 25, 5, '["Uczeń demonstruje biegłość w podstawowych obliczeniach ciągu arytmetycznego.", "Uczeń dobiera właściwe wzory do sytuacji.", "Uczeń sprawnie wykrywa i eliminuje typowe błędy."]');
