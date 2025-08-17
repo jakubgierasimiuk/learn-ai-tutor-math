@@ -36,45 +36,15 @@ export const Hero = () => {
               </Button>
             </div>
 
-            {/* Podstawowe funkcje */}
-            <nav aria-label="Podstawowe funkcje" className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <Link
-                to="/study"
-                className="flex items-center gap-3 p-4 rounded-lg bg-card shadow-card transition-smooth hover:shadow-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label="Study & Learn — Twoja ścieżka nauki"
-                onClick={() => logEvent('shortcut_click', { source: 'hero', target: 'study' })}
-              >
-                <GraduationCap className="w-8 h-8 text-accent" />
-                <span className="font-medium">Study & Learn</span>
-              </Link>
-              <Link
-                to="/lessons"
-                className="flex items-center gap-3 p-4 rounded-lg bg-card shadow-card transition-smooth hover:shadow-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label="Interaktywne lekcje — przejdź do lekcji"
-                onClick={() => logEvent('shortcut_click', { source: 'hero', target: 'lessons' })}
-              >
-                <BookOpen className="w-8 h-8 text-accent" />
-                <span className="font-medium">Lekcje</span>
-              </Link>
-              <Link
-                to="/quiz"
-                className="flex items-center gap-3 p-4 rounded-lg bg-card shadow-card transition-smooth hover:shadow-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label="Szybki test — sprawdź poziom"
-                onClick={() => logEvent('shortcut_click', { source: 'hero', target: 'quiz' })}
-              >
-                <ClipboardList className="w-8 h-8 text-primary" />
-                <span className="font-medium">Szybki test</span>
-              </Link>
-              <Link
-                to="/materials"
-                className="flex items-center gap-3 p-4 rounded-lg bg-card shadow-card transition-smooth hover:shadow-success focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label="Materiały — Twoje notatki i pliki"
-                onClick={() => logEvent('shortcut_click', { source: 'hero', target: 'materials' })}
-              >
-                <FolderOpen className="w-8 h-8 text-success" />
-                <span className="font-medium">Materiały</span>
-              </Link>
-            </nav>
+            {/* Główne funkcje */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button asChild size="lg" variant="outline" className="shadow-accent transition-bounce hover:scale-105 w-full sm:w-auto" onClick={() => logEvent('cta_click', { source: 'hero', target: 'study' })}>
+                <Link to="/study" aria-label="Study & Learn — Twoja ścieżka nauki">
+                  <GraduationCap className="w-5 h-5 mr-2" />
+                  Study & Learn
+                </Link>
+              </Button>
+            </div>
 
             {/* Stats */}
             <div className="flex gap-8 pt-8 border-t border-border">
