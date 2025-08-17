@@ -132,11 +132,7 @@ const App = () => (
           <LoggingBootstrap />
           <RouteSeo />
           <Routes>
-            <Route path="/" element={
-              <AuthenticatedLayout>
-                <HomePage />
-              </AuthenticatedLayout>
-            } />
+            <Route path="/" element={<HomePage />} />
             <Route path="/lessons" element={
               <AuthenticatedLayout>
                 <LessonsPage />
