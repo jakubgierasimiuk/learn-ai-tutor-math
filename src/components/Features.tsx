@@ -138,18 +138,6 @@ export const Features = () => {
           </div>
         </div>
 
-        {/* CTA Section */}
-        <div className="text-center mt-16 animate-fadeIn">
-          <h3 className="text-2xl md:text-3xl font-bold mb-6">
-            Gotowy na przygodę z matematyką?
-          </h3>
-          <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Rozpocznij swoją edukacyjną podróż już dziś. Pierwszy test diagnostyczny jest darmowy!
-          </p>
-          <Button size="lg" className="shadow-primary transition-bounce hover:scale-105">
-            Rozpocznij za darmo
-          </Button>
-        </div>
       </div>
     </section>
   );

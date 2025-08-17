@@ -36,15 +36,6 @@ export const Navigation = () => {
               Study & Learn
             </Link>
             <Link 
-              to="/lessons" 
-              className={`flex items-center gap-2 transition-smooth ${
-                isActive('/lessons') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
-              }`}
-            >
-              <BookOpen className="w-4 h-4" />
-              Lekcje
-            </Link>
-            <Link 
               to="/postepy" 
               className={`flex items-center gap-2 transition-smooth ${
                 isActive('/postepy') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
@@ -58,15 +49,6 @@ export const Navigation = () => {
                 <span className="inline-flex items-center"><MessageCircle className="w-4 h-4 mr-2" />AI Korepetytor</span>
               </Link>
             </Button>
-            <Link 
-              to="/materials" 
-              className={`flex items-center gap-2 transition-smooth ${
-                isActive('/materials') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
-              }`}
-            >
-              <Upload className="w-4 h-4" />
-              Materiały
-            </Link>
           </div>
 
           {/* User Info & Logout */}
@@ -108,16 +90,6 @@ export const Navigation = () => {
                 Study & Learn
               </Link>
               <Link 
-                to="/lessons" 
-                className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                  isActive('/lessons') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                }`}
-                onClick={() => setIsOpen(false)}
-              >
-                <BookOpen className="w-4 h-4" />
-                Lekcje
-              </Link>
-              <Link 
                 to="/chat" 
                 className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
                   isActive('/chat') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
@@ -126,16 +98,6 @@ export const Navigation = () => {
               >
                 <MessageCircle className="w-4 h-4" />
                 AI Korepetytor
-              </Link>
-              <Link 
-                to="/materials" 
-                className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                  isActive('/materials') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                }`}
-                onClick={() => setIsOpen(false)}
-              >
-                <Upload className="w-4 h-4" />
-                Materiały
               </Link>
             </div>
             <div className="flex flex-col gap-2 pt-4 border-t border-border">

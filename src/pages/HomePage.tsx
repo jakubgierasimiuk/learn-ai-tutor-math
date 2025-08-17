@@ -70,28 +70,10 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* Progress Section with Enhanced Styling */}
+        {/* Enhanced Progress Section */}
         <section className="relative py-8 px-6 bg-gradient-to-r from-background via-primary/5 to-background">
           <div className="max-w-6xl mx-auto">
             <ProgressMiniBar />
-          </div>
-        </section>
-
-        {/* Quick Start Panel with Glass Effect */}
-        <section className="relative py-12 px-6">
-          <div className="max-w-6xl mx-auto">
-            <div className="glass-card rounded-2xl p-8 border border-primary/20 shadow-elegant">
-              <QuickStartPanel />
-            </div>
-          </div>
-        </section>
-
-        {/* Referral Section with Enhanced Background */}
-        <section className="relative py-12 px-6 bg-gradient-to-br from-secondary/10 via-background to-accent/10">
-          <div className="max-w-6xl mx-auto">
-            <div className="glass-card rounded-2xl p-8 border border-accent/20">
-              <ReferralPromo />
-            </div>
           </div>
         </section>
 
