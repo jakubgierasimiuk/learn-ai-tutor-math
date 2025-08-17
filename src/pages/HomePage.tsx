@@ -37,7 +37,7 @@ const HomePage = () => {
     );
   }
 
-  // Show dashboard for authenticated users
+  // Show enhanced dashboard for authenticated users
   const dashboardJsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -52,28 +52,57 @@ const HomePage = () => {
         description="Ucz się z AI Tutorem: lekcje, quizy, rekomendacje. Czytelnie na desktop i mobile."
         jsonLd={dashboardJsonLd}
       />
-      <main id="main-content">
-        <section aria-labelledby="home-hero">
-          <h2 id="home-hero" className="sr-only">Sekcja hero – AI Tutor Matematyki</h2>
-          <Hero />
+      <div className="font-sans text-foreground bg-background overflow-hidden min-h-screen">
+        {/* Enhanced Hero Section for Authenticated Users */}
+        <section className="relative py-16 px-6 overflow-hidden">
+          {/* Animated background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-glow to-accent opacity-10">
+            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent"></div>
+          </div>
+          
+          {/* Floating geometric shapes */}
+          <div className="absolute top-10 left-10 w-16 h-16 bg-primary/10 rounded-full animate-float"></div>
+          <div className="absolute top-20 right-20 w-12 h-12 bg-accent/10 rounded-lg rotate-45 animate-float" style={{animationDelay: '2s'}}></div>
+          <div className="absolute bottom-10 left-1/4 w-8 h-8 bg-success/10 rounded-full animate-float" style={{animationDelay: '4s'}}></div>
+          
+          <div className="relative z-10 max-w-6xl mx-auto">
+            <Hero />
+          </div>
         </section>
-        <section aria-labelledby="mini-progress">
-          <h2 id="mini-progress" className="sr-only">Szybkie podsumowanie dnia</h2>
-          <ProgressMiniBar />
+
+        {/* Progress Section with Enhanced Styling */}
+        <section className="relative py-8 px-6 bg-gradient-to-r from-background via-primary/5 to-background">
+          <div className="max-w-6xl mx-auto">
+            <ProgressMiniBar />
+          </div>
         </section>
-        <section aria-labelledby="home-quickstart" className="container mx-auto px-6 py-8">
-          <h2 id="home-quickstart" className="sr-only">Szybki start</h2>
-          <QuickStartPanel />
+
+        {/* Quick Start Panel with Glass Effect */}
+        <section className="relative py-12 px-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="glass-card rounded-2xl p-8 border border-primary/20 shadow-elegant">
+              <QuickStartPanel />
+            </div>
+          </div>
         </section>
-        <section aria-labelledby="home-referral" className="container mx-auto px-6 py-8">
-          <h2 id="home-referral" className="sr-only">Polecenia i nagrody</h2>
-          <ReferralPromo />
+
+        {/* Referral Section with Enhanced Background */}
+        <section className="relative py-12 px-6 bg-gradient-to-br from-secondary/10 via-background to-accent/10">
+          <div className="max-w-6xl mx-auto">
+            <div className="glass-card rounded-2xl p-8 border border-accent/20">
+              <ReferralPromo />
+            </div>
+          </div>
         </section>
-        <section aria-labelledby="home-features">
-          <h2 id="home-features" className="sr-only">Najważniejsze funkcje</h2>
-          <Features />
+
+        {/* Features Section with Modern Layout */}
+        <section className="relative py-16 px-6">
+          <div className="absolute inset-0 bg-gradient-to-t from-primary/5 via-transparent to-transparent"></div>
+          <div className="relative z-10">
+            <Features />
+          </div>
         </section>
-      </main>
+      </div>
     </>
   );
 };

@@ -11,6 +11,29 @@ export function LandingPage() {
 
   return (
     <div className="font-sans text-foreground bg-background overflow-hidden">
+      {/* Navigation Bar */}
+      <nav className="relative z-50 flex justify-between items-center px-6 py-4 bg-background/80 backdrop-blur-sm border-b border-border/20">
+        <div className="flex items-center gap-2">
+          <GraduationCap className="w-8 h-8 text-primary" />
+          <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            AI Tutor
+          </span>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          <Link to="/auth">
+            <Button variant="outline" className="hover-scale">
+              Zaloguj się
+            </Button>
+          </Link>
+          <Link to="/auth">
+            <Button className="button-glow hover-scale" onClick={() => handleCtaClick('header_signup')}>
+              Darmowy dostęp
+            </Button>
+          </Link>
+        </div>
+      </nav>
+
       {/* Hero Section */}
       <section className="relative py-20 px-6 text-center overflow-hidden">
         {/* Animated background */}
@@ -53,7 +76,7 @@ export function LandingPage() {
               className="bg-warning text-warning-foreground hover:bg-warning/90 text-lg px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 border-2 border-warning/50 hover:border-warning animate-glow"
               onClick={() => handleCtaClick('start_ai_tutor')}
             >
-              <Link to="/chat" className="flex items-center gap-2">
+              <Link to="/auth" className="flex items-center gap-2">
                 <GraduationCap className="w-5 h-5" />
                 Rozpocznij lekcję z AI Tutorem
               </Link>
@@ -66,7 +89,7 @@ export function LandingPage() {
               className="bg-white/10 text-primary-foreground border-2 border-white/30 hover:bg-white/20 backdrop-blur-sm text-lg px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
               onClick={() => handleCtaClick('discover_study_learn')}
             >
-              <Link to="/lessons" className="flex items-center gap-2">
+              <Link to="/auth" className="flex items-center gap-2">
                 <BookOpen className="w-5 h-5" />
                 Odkryj Study & Learn
               </Link>
