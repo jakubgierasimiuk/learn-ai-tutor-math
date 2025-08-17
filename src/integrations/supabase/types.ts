@@ -1435,6 +1435,7 @@ export type Database = {
       }
       skills: {
         Row: {
+          chapter_tag: string | null
           class_level: number
           created_at: string
           department: string
@@ -1452,6 +1453,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          chapter_tag?: string | null
           class_level?: number
           created_at?: string
           department: string
@@ -1469,6 +1471,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          chapter_tag?: string | null
           class_level?: number
           created_at?: string
           department?: string
