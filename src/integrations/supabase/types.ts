@@ -1452,11 +1452,13 @@ export type Database = {
         Row: {
           chapter_tag: string | null
           class_level: number
+          content_data: Json | null
           created_at: string
           department: string
           description: string | null
           difficulty_rating: number | null
           estimated_time_minutes: number | null
+          generator_params: Json | null
           id: string
           is_active: boolean | null
           learning_objectives: Json | null
@@ -1470,11 +1472,13 @@ export type Database = {
         Insert: {
           chapter_tag?: string | null
           class_level?: number
+          content_data?: Json | null
           created_at?: string
           department: string
           description?: string | null
           difficulty_rating?: number | null
           estimated_time_minutes?: number | null
+          generator_params?: Json | null
           id?: string
           is_active?: boolean | null
           learning_objectives?: Json | null
@@ -1488,11 +1492,13 @@ export type Database = {
         Update: {
           chapter_tag?: string | null
           class_level?: number
+          content_data?: Json | null
           created_at?: string
           department?: string
           description?: string | null
           difficulty_rating?: number | null
           estimated_time_minutes?: number | null
+          generator_params?: Json | null
           id?: string
           is_active?: boolean | null
           learning_objectives?: Json | null
