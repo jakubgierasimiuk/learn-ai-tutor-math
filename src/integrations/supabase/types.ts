@@ -760,43 +760,58 @@ export type Database = {
       }
       lessons: {
         Row: {
+          assessment_rubric: Json | null
           content_data: Json
           content_type: string
           created_at: string
           description: string | null
           difficulty_level: number
           estimated_time_minutes: number | null
+          generator_params: Json | null
           id: number
           is_active: boolean | null
           lesson_order: number
+          misconception_patterns: Json | null
+          real_world_applications: Json | null
+          teaching_flow: Json | null
           title: string
           topic_id: number
           updated_at: string
         }
         Insert: {
+          assessment_rubric?: Json | null
           content_data?: Json
           content_type?: string
           created_at?: string
           description?: string | null
           difficulty_level?: number
           estimated_time_minutes?: number | null
+          generator_params?: Json | null
           id?: number
           is_active?: boolean | null
           lesson_order?: number
+          misconception_patterns?: Json | null
+          real_world_applications?: Json | null
+          teaching_flow?: Json | null
           title: string
           topic_id: number
           updated_at?: string
         }
         Update: {
+          assessment_rubric?: Json | null
           content_data?: Json
           content_type?: string
           created_at?: string
           description?: string | null
           difficulty_level?: number
           estimated_time_minutes?: number | null
+          generator_params?: Json | null
           id?: number
           is_active?: boolean | null
           lesson_order?: number
+          misconception_patterns?: Json | null
+          real_world_applications?: Json | null
+          teaching_flow?: Json | null
           title?: string
           topic_id?: number
           updated_at?: string
