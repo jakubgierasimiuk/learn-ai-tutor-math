@@ -27,6 +27,7 @@ import MaterialsPage from "./pages/MaterialsPage";
 import UXAuditPage from "./pages/UXAuditPage";
 import ProgressPage from "./pages/ProgressPage";
 import ContentManagerPage from "./pages/ContentManagerPage";
+import ImportAllContentPage from "./pages/ImportAllContentPage";
 
 import { useEffect } from "react";
 import { setupGlobalLogging, setupGlobalInteractionLogging, logEvent } from "@/lib/logger";
@@ -96,6 +97,7 @@ function RouteSeo() {
     '/ux-audit': { title: 'UX Audyt – Raport', description: 'Wyniki audytu UX i priorytety działań.' },
     '/study': { title: 'Panel nauki – AI Tutor', description: 'Twoje umiejętności i ścieżka nauki.' },
     '/content-manager': { title: 'Content Manager – AI Tutor', description: 'Import and manage educational content database.' },
+    '/import-all-content': { title: 'Import Content Packages – AI Tutor', description: 'Import all predefined content packages into the database.' },
   };
   if (path === '/' || path.startsWith('/postepy')) return null;
   const match = Object.entries(map).find(([k]) => path === k || path.startsWith(k + '/'))?.[1];
@@ -223,6 +225,11 @@ const App = () => (
             <Route path="/content-manager" element={
               <AuthenticatedLayout>
                 <ContentManagerPage />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/import-all-content" element={
+              <AuthenticatedLayout>
+                <ImportAllContentPage />
               </AuthenticatedLayout>
             } />
             <Route path="/auth" element={<AuthPage />} />
