@@ -26,6 +26,7 @@ import StudyLesson from "./pages/StudyLesson";
 import MaterialsPage from "./pages/MaterialsPage";
 import UXAuditPage from "./pages/UXAuditPage";
 import ProgressPage from "./pages/ProgressPage";
+import ContentManagerPage from "./pages/ContentManagerPage";
 
 import { useEffect } from "react";
 import { setupGlobalLogging, setupGlobalInteractionLogging, logEvent } from "@/lib/logger";
@@ -94,6 +95,7 @@ function RouteSeo() {
     '/ux-test': { title: 'UX Testy – Panel', description: 'Zestaw testów użyteczności i jakości UI.' },
     '/ux-audit': { title: 'UX Audyt – Raport', description: 'Wyniki audytu UX i priorytety działań.' },
     '/study': { title: 'Panel nauki – AI Tutor', description: 'Twoje umiejętności i ścieżka nauki.' },
+    '/content-manager': { title: 'Content Manager – AI Tutor', description: 'Import and manage educational content database.' },
   };
   if (path === '/' || path.startsWith('/postepy')) return null;
   const match = Object.entries(map).find(([k]) => path === k || path.startsWith(k + '/'))?.[1];
@@ -216,6 +218,11 @@ const App = () => (
             <Route path="/study/lesson/:skillId" element={
               <AuthenticatedLayout>
                 <StudyLesson />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/content-manager" element={
+              <AuthenticatedLayout>
+                <ContentManagerPage />
               </AuthenticatedLayout>
             } />
             <Route path="/auth" element={<AuthPage />} />

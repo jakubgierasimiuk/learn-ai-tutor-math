@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Brain, BookOpen, MessageCircle, LogOut, Upload, TrendingUp } from "lucide-react";
+import { Brain, BookOpen, MessageCircle, LogOut, Upload, TrendingUp, Database } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { logEvent } from "@/lib/logger";
@@ -43,6 +43,15 @@ export const Navigation = () => {
             >
               <TrendingUp className="w-4 h-4" />
               Postępy
+            </Link>
+            <Link 
+              to="/content-manager" 
+              className={`flex items-center gap-2 transition-smooth ${
+                isActive('/content-manager') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
+              }`}
+            >
+              <Database className="w-4 h-4" />
+              Content
             </Link>
             <Button asChild size="sm" className="shadow-primary" onClick={() => logEvent('cta_click', { source: 'nav' })}>
               <Link to="/chat">
@@ -98,6 +107,16 @@ export const Navigation = () => {
               >
                 <MessageCircle className="w-4 h-4" />
                 AI Korepetytor
+              </Link>
+              <Link 
+                to="/content-manager" 
+                className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
+                  isActive('/content-manager') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
+                }`}
+                onClick={() => setIsOpen(false)}
+              >
+                <Database className="w-4 h-4" />
+                Content Manager
               </Link>
             </div>
             <div className="flex flex-col gap-2 pt-4 border-t border-border">
