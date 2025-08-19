@@ -8,6 +8,7 @@ import { AlertCircle, CheckCircle, Clock, HelpCircle, Lightbulb } from "lucide-r
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { PhaseProgress } from "./PhaseProgress";
+import { useConsolidatedLearning } from "@/hooks/useConsolidatedLearning";
 
 interface PhaseData {
   id: string;
@@ -54,6 +55,9 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
   const [responseTime, setResponseTime] = useState<number>(0);
   const [startTime, setStartTime] = useState<number>(Date.now());
   const { toast } = useToast();
+  
+  // Consolidated Learning Integration
+  const { processInteraction, learnerData, preferredDifficulty } = useConsolidatedLearning();
 
   useEffect(() => {
     loadSkillData();
@@ -214,6 +218,15 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
     setResponseTime(currentResponseTime);
 
     try {
+      // Process with consolidated learning engine first
+      const decision = await processInteraction({
+        sessionType: 'study_learn',
+        userResponse: userInput,
+        responseTime: currentResponseTime,
+        currentSkill: skillId,
+        department: 'mathematics'
+      });
+
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/study-tutor`, {
         method: 'POST',
         headers: {
@@ -226,7 +239,11 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
           skillId: skillId,
           responseTime: currentResponseTime,
           stepType: 'question',
-          currentPhase: currentPhase
+          currentPhase: currentPhase,
+          // Add consolidated learning data
+          learnerData: learnerData,
+          adaptations: decision?.adaptations,
+          preferredDifficulty: preferredDifficulty
         }),
       });
 

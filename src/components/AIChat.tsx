@@ -19,7 +19,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { logEvent, logError } from "@/lib/logger";
 import { normalizeMath } from "@/lib/markdown";
 import { EnhancedAIChatController } from "@/lib/EnhancedAIChatController";
-import { useUnifiedLearning } from "@/hooks/useUnifiedLearning";
+import { useConsolidatedLearning } from "@/hooks/useConsolidatedLearning";
 
 interface Message {
   id: string;
@@ -79,16 +79,17 @@ export const AIChat = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   
-  // Unified Learning System Integration
+  // Consolidated Learning System
   const {
-    learnerProfile,
-    currentSession: unifiedSession,
-    isLoading: unifiedLoading,
-    startSession,
-    processLearningStep,
-    completeSession,
-    getRecommendations
-  } = useUnifiedLearning();
+    learnerData,
+    currentDecision,
+    isLoading: consolidatedLoading,
+    processInteraction,
+    cognitiveLoad,
+    flowState,
+    fatigueLevel,
+    preferredDifficulty
+  } = useConsolidatedLearning();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -180,34 +181,18 @@ export const AIChat = () => {
     if (!user) return;
 
     try {
-      // Start unified learning session for AI Chat
-      const sessionId = await startSession('ai_chat', undefined, 'mathematics');
-      if (sessionId) {
-        setCurrentSessionId(parseInt(sessionId));
-        logEvent('unified_ai_chat_session_started', { session_id: sessionId });
-      }
-
-      // Get user progress from unified system
-      if (learnerProfile) {
-        const topics = learnerProfile.recent_skills || [];
-        const avgScore = learnerProfile.average_performance || 0;
-        const weakAreas = learnerProfile.struggling_skills || [];
-
+      // Initialize consolidated learning system
+      if (learnerData) {
         const nextProgress: UserProgress = {
-          recentTopics: topics.map((skill: any) => skill.name),
-          averageScore: Math.round(avgScore * 100),
-          weakAreas: weakAreas.map((skill: any) => skill.name),
-          totalLessons: learnerProfile.total_learning_time_minutes / 15 || 0
+          recentTopics: learnerData.nextStruggleAreas || [],
+          averageScore: Math.round((learnerData.accuracyTrend[0] || 0) * 100),
+          weakAreas: learnerData.nextStruggleAreas || [],
+          totalLessons: Math.round(learnerData.optimalSessionLength / 15) || 0
         };
         setUserProgress(nextProgress);
-
-        // Set topic based on current focus
-        if (topics.length > 0) {
-          setCurrentTopic(topics[0].name);
-        }
       }
 
-      // Generate personalized welcome message based on unified profile
+      // Generate personalized welcome message
       const welcomeMessage = await generateWelcomeMessage(userProgress);
       setMessages([welcomeMessage]);
       
@@ -311,48 +296,28 @@ export const AIChat = () => {
     const startTime = Date.now();
     
     try {
-      // Process learning step with unified system and task generation
-      const learningContext = {
-        userId: user.id,
-        currentSkill: currentTopic,
-        department: 'mathematics',
-        sessionType: 'ai_chat' as const,
+      // Process with consolidated learning engine
+      const decision = await processInteraction({
+        sessionType: 'ai_chat',
         userResponse: userInput,
         responseTime: Date.now() - startTime,
-        confidence: 0.7, // Default confidence, could be enhanced with user input
-        hintsUsed: 0
-      };
+        currentSkill: currentTopic,
+        department: 'mathematics'
+      });
 
-      const adaptationDecision = await processLearningStep(learningContext);
-
-      // Generate task using EnhancedAIChatController for consistency
-      let currentTask = null;
-      if (adaptationDecision?.nextTask) {
-        currentTask = adaptationDecision.nextTask;
-      } else {
-        // Fallback task generation
-        currentTask = await EnhancedAIChatController.generateTaskForChat({
-          department: 'mathematics',
-          difficulty: learnerProfile?.optimal_difficulty_range?.min || 5,
-          userId: user.id,
-          sessionType: 'ai_chat',
-          skillId: currentTopic,
-          useContentFirst: true
-        });
-      }
-
-      // Enhanced AI Chat call with unified system data
+      // Enhanced AI Chat call with consolidated data
       const response = await supabase.functions.invoke('ai-chat', {
         body: {
           messages: [{
             role: 'user',
             content: userInput
           }],
-          // Enhanced unified system data
-          unifiedSessionId: unifiedSession,
-          learnerProfile: learnerProfile,
-          adaptationDecision: adaptationDecision,
-          currentTask: currentTask
+          // Consolidated learning data
+          learnerData: learnerData,
+          adaptationDecision: decision?.adaptations,
+          cognitiveLoad: cognitiveLoad,
+          flowState: flowState,
+          preferredDifficulty: preferredDifficulty
         }
       });
 
@@ -371,19 +336,19 @@ export const AIChat = () => {
       };
       setMessages(prev => [...prev, newAIMessage]);
       
-      // Handle insights and recommendations from unified system
-      if (adaptationDecision) {
-        if (adaptationDecision.recommendedAction === 'review') {
+      // Handle insights and recommendations from consolidated system
+      if (decision?.adaptations) {
+        if (decision.adaptations.nextAction === 'suggest_break') {
           setShowUnderstanding(true);
         }
         
-        if (adaptationDecision.recommendedAction === 'advance') {
+        if (decision.adaptations.nextAction === 'maintain_flow') {
           setShowRecommendations(true);
         }
 
-        // Update current topic if adaptation suggests it
-        if (adaptationDecision.nextTask?.skillName) {
-          setCurrentTopic(adaptationDecision.nextTask.skillName);
+        // Update current topic based on struggle areas
+        if (learnerData?.nextStruggleAreas?.length > 0) {
+          setCurrentTopic(learnerData.nextStruggleAreas[0]);
         }
       }
       
