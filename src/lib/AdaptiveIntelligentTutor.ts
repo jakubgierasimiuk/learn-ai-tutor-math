@@ -1,6 +1,6 @@
 import { LearningVelocityEngine } from './LearningVelocityEngine';
-import { NeuroplasticityEngine } from './NeuroplasticityEngine';
-import { PredictiveLearningAssistant } from './PredictiveLearningAssistant';
+import { SimplifiedNeuroplasticityEngine } from './SimplifiedNeuroplasticityEngine';
+import { SimplifiedPredictiveLearningAssistant } from './SimplifiedPredictiveLearningAssistant';
 import { TaskDefinition } from './UniversalInterfaces';
 
 interface LearningContext {
@@ -26,13 +26,13 @@ interface AdaptationDecision {
 
 export class AdaptiveIntelligentTutor {
   private velocityEngine: LearningVelocityEngine;
-  private neuroplasticityEngine: NeuroplasticityEngine;
-  private predictiveLearning: PredictiveLearningAssistant;
+  private neuroplasticityEngine: SimplifiedNeuroplasticityEngine;
+  private predictiveLearning: SimplifiedPredictiveLearningAssistant;
 
   constructor() {
     this.velocityEngine = LearningVelocityEngine.getInstance();
-    this.neuroplasticityEngine = NeuroplasticityEngine.getInstance();
-    this.predictiveLearning = PredictiveLearningAssistant.getInstance();
+    this.neuroplasticityEngine = SimplifiedNeuroplasticityEngine.getInstance();
+    this.predictiveLearning = SimplifiedPredictiveLearningAssistant.getInstance();
   }
 
   async orchestrateLearning(context: LearningContext): Promise<AdaptationDecision> {
@@ -60,8 +60,8 @@ export class AdaptiveIntelligentTutor {
     const taskParams = {
       department: context.department || 'mathematics',
       difficulty: cognitiveState.optimalDifficulty,
-      microSkill: predictions.strugglingSkills[0],
-      targetMisconception: predictions.likelyMisconceptions[0]
+      microSkill: predictions.strugglingSkills[0] || 'basic_operations',
+      targetMisconception: 'calculation_error'
     };
 
     return this.generateTaskWithAI(taskParams);
@@ -107,7 +107,7 @@ export class AdaptiveIntelligentTutor {
     }
 
     // Priority 3: Neuroplasticity optimization
-    if (neuroplasticityState.synapticStrength < 0.3) {
+    if (neuroplasticityState.masteryLevel < 0.3) {
       return 'strengthen_connections';
     }
 
