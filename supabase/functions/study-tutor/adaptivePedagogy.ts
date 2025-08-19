@@ -1,6 +1,8 @@
-// Adaptive Pedagogy for Study Tutor Edge Function
-// Phase 1: Intelligent Answer Pattern Recognition & Pedagogical Logic
+// Enhanced Adaptive Pedagogy with Mathematical Error Classification
+import { MathErrorClassifier, MathErrorType } from '../../../src/lib/MathErrorClassifier.ts';
+import { EducationalScaffolding, LearningPhase, StudentModel } from '../../../src/lib/EducationalScaffolding.ts';
 
+// Enhanced Student Response Patterns
 export type StudentResponsePattern = 
   | 'quick_correct'      // Szybka prawidłowa odpowiedź → zwiększ trudność
   | 'slow_correct'       // Powolna prawidłowa → pogratuluj, sprawdź obszary trudności  
@@ -12,33 +14,33 @@ export type StudentResponsePattern =
 
 export interface StudentProfile {
   averageResponseTime: number;
-  correctAnswerRate: number;
+  correctnessRate: number;
   commonMistakes: string[];
   preferredExplanationStyle: 'visual' | 'verbal' | 'step_by_step';
-  difficultyLevel: number; // 1-10
+  difficultyLevel: number; // 1-7 (enhanced granularity)
   knowledgeGaps: string[];
   lastActivity: Date;
 }
 
 export interface TeachingMoment {
-  type: 'praise' | 'correction' | 'hint' | 'encouragement' | 'prerequisite_check' | 'checkpoint';
+  type: 'praise' | 'correction' | 'hint' | 'encouragement' | 'prerequisite_check' | 'checkpoint' | 'intervention';
   message: string;
-  nextAction: 'continue' | 'increase_difficulty' | 'practice_more' | 'review_basics' | 'show_checkpoint' | 'end_session';
+  nextAction: 'continue' | 'increase_difficulty' | 'practice_more' | 'review_basics' | 'show_checkpoint' | 'end_session' | 'confidence_building' | 'prerequisite_review';
   focusAreas?: string[];
-  difficultyAdjustment?: number; // -2 to +2
-  generateMoreProblems?: number; // How many more problems of this type
+  difficultyAdjustment?: number; // Now micro-adjustments: -1.5 to +1.0
+  generateMoreProblems?: number;
 }
 
 export interface AnswerAnalysis {
   pattern: StudentResponsePattern;
   confidence: number;
   teachingMoment: TeachingMoment;
-  sessionShouldContinue: boolean;
-  adaptedInstructions?: string;
+  shouldContinueSession: boolean;
+  nextDifficultyAdjustment: number;
 }
 
 /**
- * GŁÓWNA FUNKCJA: Analizuje odpowiedź ucznia i generuje inteligentną reakcję
+ * ENHANCED FUNCTION: Analizuje odpowiedź ucznia z użyciem zaawansowanej klasyfikacji błędów
  */
 export function analyzeStudentAnswer(
   userAnswer: string,
@@ -46,33 +48,60 @@ export function analyzeStudentAnswer(
   responseTime: number,
   isCorrect: boolean,
   profile: StudentProfile,
-  sessionContext: {
-    stepsCompleted: number;
-    consecutiveCorrect: number;
-    recentPerformance: Array<{isCorrect: boolean, responseTime: number, confidence: number}>;
-    currentDifficulty: number;
-    timeSpent: number;
-  }
+  sessionContext: any
 ): AnswerAnalysis {
-  
-  // 1. ROZPOZNAJ WZORZEC ODPOWIEDZI
+  console.log('[Enhanced Pedagogy] Analyzing student answer:', {
+    userAnswer,
+    expectedAnswer,
+    responseTime,
+    isCorrect,
+    profileSnippet: { correctnessRate: profile.correctnessRate, averageResponseTime: profile.averageResponseTime }
+  });
+
+  // Use enhanced math error classification
+  const mathError = MathErrorClassifier.classifyError(
+    userAnswer,
+    expectedAnswer,
+    sessionContext.skillName || 'default',
+    responseTime
+  );
+
+  // Create student model from profile
+  const studentModel: StudentModel = {
+    confidence: Math.min(100, (profile.correctnessRate || 0.5) * 100),
+    methodUnderstanding: calculateMethodUnderstanding(profile),
+    speedVsAccuracy: determineSpeedVsAccuracy(profile),
+    preferredExplanationStyle: profile.preferredExplanationStyle || 'step_by_step',
+    consecutiveCorrect: sessionContext.consecutiveCorrect || 0,
+    consecutiveIncorrect: sessionContext.consecutiveIncorrect || 0,
+    frustrationLevel: calculateFrustrationLevel(profile, sessionContext),
+    engagementLevel: calculateEngagementLevel(sessionContext)
+  };
+
   const pattern = classifyResponsePattern(userAnswer, expectedAnswer, responseTime, isCorrect, profile);
-  
-  // 2. WYGENERUJ TEACHING MOMENT
-  const teachingMoment = generateTeachingMoment(pattern, userAnswer, expectedAnswer, responseTime, profile, sessionContext);
-  
-  // 3. OKREŚL CZY SESJA POWINNA KONTYNUOWAĆ
-  const sessionShouldContinue = shouldContinueSession(pattern, sessionContext, teachingMoment);
-  
-  // 4. WYGENERUJ ADAPTOWANE INSTRUKCJE DLA AI
-  const adaptedInstructions = generateAIInstructions(pattern, teachingMoment, sessionContext);
-  
+  const teachingMoment = generateEnhancedTeachingMoment(mathError, studentModel, sessionContext);
+  const shouldContinue = shouldContinueSession(pattern, teachingMoment, sessionContext);
+
+  // Check for prerequisite gaps
+  if (sessionContext.consecutiveIncorrect >= 3) {
+    const prerequisiteGap = EducationalScaffolding.detectPrerequisiteGap(
+      sessionContext.consecutiveIncorrect,
+      [mathError.type],
+      sessionContext.skillName || 'default'
+    );
+    
+    if (prerequisiteGap) {
+      teachingMoment.nextAction = 'prerequisite_review';
+      teachingMoment.message += ` Sprawdźmy podstawy: ${prerequisiteGap}.`;
+    }
+  }
+
   return {
     pattern,
-    confidence: calculateConfidence(pattern, isCorrect, responseTime, profile),
+    confidence: calculateConfidence(pattern),
     teachingMoment,
-    sessionShouldContinue,
-    adaptedInstructions
+    shouldContinueSession: shouldContinue,
+    nextDifficultyAdjustment: mathError.difficultyAdjustment
   };
 }
 
@@ -351,7 +380,90 @@ function generateAIInstructions(
 
 // FUNKCJE POMOCNICZE
 
-function calculateConfidence(pattern: StudentResponsePattern, isCorrect: boolean, responseTime: number, profile: StudentProfile): number {
+// Enhanced helper functions for new pedagogy system
+function calculateMethodUnderstanding(profile: StudentProfile): number {
+  // Base understanding on error patterns and response consistency
+  return Math.min(100, (profile.correctnessRate || 0.5) * 80 + 20);
+}
+
+function determineSpeedVsAccuracy(profile: StudentProfile): 'speed_focused' | 'accuracy_focused' | 'balanced' {
+  const avgTime = profile.averageResponseTime;
+  const accuracy = profile.correctnessRate || 0.5;
+  
+  if (avgTime < 15000 && accuracy > 0.8) return 'balanced';
+  if (avgTime < 10000) return 'speed_focused';
+  if (accuracy > 0.9) return 'accuracy_focused';
+  return 'balanced';
+}
+
+function calculateFrustrationLevel(profile: StudentProfile, sessionContext: any): number {
+  const incorrectStreak = sessionContext.consecutiveIncorrect || 0;
+  const timePressure = (sessionContext.totalTime || 0) > 20 * 60 * 1000; // > 20 min
+  
+  let frustration = incorrectStreak * 20; // 20% per wrong answer
+  if (timePressure) frustration += 30;
+  if ((profile.correctnessRate || 0.5) < 0.3) frustration += 20;
+  
+  return Math.min(100, frustration);
+}
+
+function calculateEngagementLevel(sessionContext: any): number {
+  const steps = sessionContext.totalSteps || 1;
+  const responseVariability = sessionContext.responseTimeVariability || 0.5;
+  
+  let engagement = 70; // Base engagement
+  if (steps > 10) engagement += 15; // Sustained activity
+  if (responseVariability < 0.3) engagement -= 20; // Too consistent (possible distraction)
+  
+  return Math.max(0, Math.min(100, engagement));
+}
+
+function generateEnhancedTeachingMoment(
+  mathError: any,
+  studentModel: StudentModel,
+  sessionContext: any
+): TeachingMoment {
+  // Use EducationalScaffolding for more sophisticated responses
+  let message = mathError.pedagogicalResponse;
+  let nextAction = 'continue';
+  let difficultyAdjustment = mathError.difficultyAdjustment;
+
+  // Emergency protocols
+  if (studentModel.frustrationLevel > 80) {
+    const recovery = EducationalScaffolding.generateEngagementRecovery(
+      studentModel.frustrationLevel,
+      studentModel.engagementLevel
+    );
+    
+    if (recovery === 'confidence_building') {
+      message = "Spróbujmy czegoś prostszego, żeby odbudować pewność siebie.";
+      difficultyAdjustment = -1.5;
+      nextAction = 'confidence_building';
+    }
+  }
+
+  // Scaffolding recommendations
+  if (mathError.requiresIntervention) {
+    const currentPhase = sessionContext.learningPhase || LearningPhase.INDEPENDENT_PRACTICE;
+    const scaffoldingPrompt = EducationalScaffolding.getScaffoldingPrompt(
+      currentPhase,
+      sessionContext.currentDifficulty || 4,
+      studentModel,
+      sessionContext.skillName || 'default'
+    );
+    
+    message += ` ${scaffoldingPrompt}`;
+  }
+
+  return {
+    type: mathError.requiresIntervention ? 'intervention' : 'encouragement',
+    message,
+    nextAction,
+    difficultyAdjustment
+  };
+}
+
+function calculateConfidence(pattern: StudentResponsePattern): number {
   if (pattern === 'quick_correct') return 0.95;
   if (pattern === 'slow_correct') return 0.85;
   if (pattern === 'hesitant_correct') return 0.70;
@@ -362,18 +474,7 @@ function calculateConfidence(pattern: StudentResponsePattern, isCorrect: boolean
   return 0.50;
 }
 
-function shouldShowCheckpoint(stepsCompleted: number, consecutiveCorrect: number, timeSpent: number): boolean {
-  // Co 8-10 kroków
-  if (stepsCompleted > 0 && stepsCompleted % 8 === 0) return true;
-  // Po 5 z rzędu poprawnych odpowiedzi
-  if (consecutiveCorrect >= 5) return true;
-  // Po 15 minutach intensywnej nauki
-  if (timeSpent > 15 * 60 * 1000) return true;
-  return false;
-}
-
 function extractNumber(text: string): number | null {
-  const cleaned = text.replace(/[^\d.,\-]/g, '').replace(',', '.');
-  const num = parseFloat(cleaned);
-  return isNaN(num) ? null : num;
+  const match = text.match(/-?\d+\.?\d*/);
+  return match ? parseFloat(match[0]) : null;
 }

@@ -722,7 +722,19 @@ function getConsecutiveCorrect(steps: any[]): number {
   for (let i = steps.length - 1; i >= 0; i--) {
     if (steps[i].is_correct === true) {
       count++;
-    } else if (steps[i].is_correct === false) {
+    } else {
+      break;
+    }
+  }
+  return count;
+}
+
+function getConsecutiveIncorrect(steps: any[]): number {
+  let count = 0;
+  for (let i = steps.length - 1; i >= 0; i--) {
+    if (steps[i].is_correct === false) {
+      count++;
+    } else {
       break;
     }
   }
@@ -733,9 +745,31 @@ function calculateSessionTime(steps: any[]): number {
   if (steps.length === 0) return 0;
   const firstStep = steps[0];
   const lastStep = steps[steps.length - 1];
-  if (!firstStep.created_at || !lastStep.created_at) return 0;
+  return new Date(lastStep.created_at).getTime() - new Date(firstStep.created_at).getTime();
+}
+
+function determineLearningPhase(steps: any[]): string {
+  const totalSteps = steps.length;
+  const correctRate = steps.filter(s => s.is_correct).length / Math.max(totalSteps, 1);
   
-  const start = new Date(firstStep.created_at);
-  const end = new Date(lastStep.created_at);
-  return end.getTime() - start.getTime();
+  if (totalSteps < 3) return 'theory';
+  if (correctRate < 0.5) return 'guided_practice';
+  if (correctRate < 0.8) return 'independent_practice';
+  return 'assessment';
+}
+
+function calculateResponseVariability(steps: any[]): number {
+  if (steps.length < 3) return 0.5;
+  
+  const responseTimes = steps
+    .filter(s => s.response_time_ms)
+    .map(s => s.response_time_ms);
+    
+  if (responseTimes.length < 2) return 0.5;
+  
+  const mean = responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length;
+  const variance = responseTimes.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / responseTimes.length;
+  const stdDev = Math.sqrt(variance);
+  
+  return Math.min(1, stdDev / mean); // Coefficient of variation
 }
