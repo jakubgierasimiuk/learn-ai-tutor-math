@@ -8,7 +8,7 @@ import { AlertCircle, CheckCircle, Clock, HelpCircle, Lightbulb } from "lucide-r
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { PhaseProgress } from "./PhaseProgress";
-import { useConsolidatedLearning } from "@/hooks/useConsolidatedLearning";
+import { useUniversalLearning } from "@/hooks/useUniversalLearning";
 
 interface PhaseData {
   id: string;
@@ -56,8 +56,8 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
   const [startTime, setStartTime] = useState<number>(Date.now());
   const { toast } = useToast();
   
-  // Consolidated Learning Integration
-  const { processInteraction, learnerData, preferredDifficulty } = useConsolidatedLearning();
+  // Universal Learning Integration
+  const { processInteraction, userState, suggestedDifficulty } = useUniversalLearning();
 
   useEffect(() => {
     loadSkillData();
@@ -218,52 +218,38 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
     setResponseTime(currentResponseTime);
 
     try {
-      // Process with consolidated learning engine first
-      const decision = await processInteraction({
+      // Process with Universal Learning Engine (single call)
+      const result = await processInteraction({
         sessionType: 'study_learn',
         userResponse: userInput,
         responseTime: currentResponseTime,
-        currentSkill: skillId,
+        skillId: skillId,
         department: 'mathematics'
       });
 
-      // Call UNIFIED learning engine
-      const response = await supabase.functions.invoke('unified-learning-engine', {
-        body: {
-          action: 'study_interaction',
-          userMessage: userInput,
-          sessionType: 'study_learn',
-          sessionId: session.id,
-          skillId: skillId,
-          responseTime: currentResponseTime,
-          currentSkill: skillId,
-          department: 'mathematics'
-        }
-      });
-
-      if (response.error) {
-        throw response.error;
+      if (!result) {
+        throw new Error('No response from Universal Learning Engine');
       }
 
-      const data = response.data;
+      const { message: aiResponse, isCorrect, userState: updatedState } = result;
 
       // Add user message to chat
       setChatHistory(prev => [...prev, {
         role: 'user',
         content: userInput,
         timestamp: new Date().toISOString(),
-        isCorrect: data.isCorrect
+        isCorrect: isCorrect
       }]);
 
       // Add AI response to chat
       setChatHistory(prev => [...prev, {
         role: 'assistant',
-        content: data.message,
+        content: aiResponse,
         timestamp: new Date().toISOString()
       }]);
 
       // Update phase progress
-      await updatePhaseProgress(data.isCorrect);
+      await updatePhaseProgress(isCorrect);
 
       setUserInput("");
       setStartTime(Date.now());

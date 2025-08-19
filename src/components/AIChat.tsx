@@ -19,7 +19,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { logEvent, logError } from "@/lib/logger";
 import { normalizeMath } from "@/lib/markdown";
 import { EnhancedAIChatController } from "@/lib/EnhancedAIChatController";
-import { useConsolidatedLearning } from "@/hooks/useConsolidatedLearning";
+import { useUniversalLearning } from "@/hooks/useUniversalLearning";
 
 interface Message {
   id: string;
@@ -79,17 +79,23 @@ export const AIChat = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   
-  // Consolidated Learning System
+  // Universal Learning System
   const {
-    learnerData,
-    currentDecision,
-    isLoading: consolidatedLoading,
+    userState,
+    isLoading: universalLoading,
     processInteraction,
     cognitiveLoad,
     flowState,
     fatigueLevel,
-    preferredDifficulty
-  } = useConsolidatedLearning();
+    suggestedDifficulty,
+    recommendedContent,
+    explanationStyle,
+    needsBreak,
+    inFlowState,
+    highCognitiveLoad,
+    strugglingAreas,
+    refreshState
+  } = useUniversalLearning();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -181,13 +187,13 @@ export const AIChat = () => {
     if (!user) return;
 
     try {
-      // Initialize consolidated learning system
-      if (learnerData) {
+      // Initialize universal learning system
+      if (userState) {
         const nextProgress: UserProgress = {
-          recentTopics: learnerData.nextStruggleAreas || [],
-          averageScore: Math.round((learnerData.accuracyTrend[0] || 0) * 100),
-          weakAreas: learnerData.nextStruggleAreas || [],
-          totalLessons: Math.round(learnerData.optimalSessionLength / 15) || 0
+          recentTopics: userState.recentPerformance.recentTopics || [],
+          averageScore: Math.round(userState.recentPerformance.accuracy * 100),
+          weakAreas: userState.recentPerformance.strugglingAreas || [],
+          totalLessons: Math.round(userState.recommendations.estimatedSessionTime / 15) || 0
         };
         setUserProgress(nextProgress);
       }
@@ -296,55 +302,47 @@ export const AIChat = () => {
     const startTime = Date.now();
     
     try {
-      // Process with consolidated learning engine
-      const decision = await processInteraction({
+      // Process with Universal Learning Engine (single call)
+      const result = await processInteraction({
         sessionType: 'ai_chat',
-        userResponse: userInput,
+        userMessage: userInput,
         responseTime: Date.now() - startTime,
-        currentSkill: currentTopic,
+        skillId: currentTopic,
         department: 'mathematics'
       });
 
-      // Call UNIFIED learning engine 
-      const response = await supabase.functions.invoke('unified-learning-engine', {
-        body: {
-          action: 'chat_interaction',
-          userMessage: userInput,
-          sessionType: 'ai_chat',
-          responseTime: Date.now() - startTime,
-          currentSkill: currentTopic,
-          department: 'mathematics'
-        }
-      });
-
-      if (response.error) {
-        throw response.error;
+      if (!result) {
+        throw new Error('No response from Universal Learning Engine');
       }
 
-      const { message: aiResponse, insights, session, currentTask: responseTask } = response.data;
+      const { message: aiResponse, userState: updatedState, adaptations } = result;
       
       const newAIMessage: Message = {
         id: Date.now().toString(),
         role: "assistant",
         content: aiResponse,
         timestamp: new Date(),
-        insights: insights
+        insights: adaptations ? {
+          needsHelp: highCognitiveLoad,
+          topicMastery: `${Math.round((updatedState?.learningProfile.masteryLevel || 0) * 100)}%`,
+          suggestedActions: [adaptations.recommendedContent]
+        } : undefined
       };
       setMessages(prev => [...prev, newAIMessage]);
       
-      // Handle insights and recommendations from consolidated system
-      if (decision?.adaptations) {
-        if (decision.adaptations.nextAction === 'suggest_break') {
+      // Handle adaptive recommendations from Universal system
+      if (adaptations) {
+        if (adaptations.nextAction === 'take_break') {
           setShowUnderstanding(true);
         }
         
-        if (decision.adaptations.nextAction === 'maintain_flow') {
+        if (inFlowState) {
           setShowRecommendations(true);
         }
 
         // Update current topic based on struggle areas
-        if (learnerData?.nextStruggleAreas?.length > 0) {
-          setCurrentTopic(learnerData.nextStruggleAreas[0]);
+        if (strugglingAreas?.length > 0) {
+          setCurrentTopic(strugglingAreas[0]);
         }
       }
       
