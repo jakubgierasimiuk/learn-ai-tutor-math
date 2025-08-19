@@ -35,7 +35,10 @@ export class ContentTaskManager {
   private contentCache = new Map<string, SkillContent>();
   private isClient = typeof window !== 'undefined';
 
-  async getInitialTasks(skillId: string): Promise<TaskDefinition[]> {
+  /**
+   * Get initial tasks for a skill for AI Chat or Study & Learn
+   */
+  public async getInitialTasks(skillId: string, difficulty: number = 5): Promise<TaskDefinition[]> {
     try {
       const content = await this.fetchSkillContent(skillId);
       if (!content) return [];
@@ -77,6 +80,39 @@ export class ContentTaskManager {
       return tasks;
     } catch (error) {
       console.error('Failed to get initial tasks from content:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get tasks for edge functions (static method for use without instantiation)
+   */
+  public static async getTasksForEdgeFunction(skillId: string, difficulty: number = 5): Promise<any[]> {
+    try {
+      // Import supabase directly to avoid circular dependencies
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabaseUrl = 'https://rfcjhdxsczcwbpknudyy.supabase.co';
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmY2poZHhzY3pjd2Jwa251ZHl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwMjY5NDgsImV4cCI6MjA2ODYwMjk0OH0.Fljfz9HWi_N_hEZ4UKvk-PMKAWr4fbW_NJIE73dShoY';
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      // Try to get from task_definitions table
+      const { data: tasks, error } = await supabase
+        .from('task_definitions')
+        .select('*')
+        .eq('skill_id', skillId)
+        .gte('difficulty', difficulty - 1)
+        .lte('difficulty', difficulty + 1)
+        .eq('is_active', true)
+        .limit(5);
+
+      if (error) {
+        console.error('Error fetching tasks:', error);
+        return [];
+      }
+
+      return tasks || [];
+    } catch (error) {
+      console.error('Error in getTasksForEdgeFunction:', error);
       return [];
     }
   }

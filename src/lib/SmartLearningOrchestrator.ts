@@ -1,4 +1,4 @@
-import { UniversalLearningController } from './UniversalLearningController';
+import { UnifiedLearningController } from './UnifiedLearningController';
 import { UniversalDifficultyController } from './UniversalDifficultyController';
 import { MathTaskGenerator } from './generators/MathTaskGenerator';
 import { ContentTaskManager } from './ContentTaskManager';
@@ -40,7 +40,7 @@ export class SmartLearningOrchestrator {
   public async orchestrateLearning(context: LearningContext): Promise<AdaptationDecision> {
     try {
       // Get learner profile
-      const profile = await UniversalLearningController.getOrCreateProfile(context.userId);
+      const profile = await UnifiedLearningController.getOrCreateProfile(context.userId);
       if (!profile) {
         return this.getDefaultDecision(context);
       }
@@ -429,7 +429,7 @@ export class SmartLearningOrchestrator {
    */
   public async getLearningStatistics(userId: string): Promise<any> {
     try {
-      const profile = await UniversalLearningController.getOrCreateProfile(userId);
+      const profile = await UnifiedLearningController.getOrCreateProfile(userId);
       if (!profile) return null;
 
       // Get recent sessions
@@ -464,7 +464,7 @@ export class SmartLearningOrchestrator {
         },
         skill_breakdown: profile.skill_mastery_map,
         learning_trends: this.analyzeLearningTrends(sessions),
-        recommendations: await UniversalLearningController.getRecommendations(userId)
+        recommendations: await UnifiedLearningController.getRecommendations(userId)
       };
     } catch (error) {
       console.error('Error getting learning statistics:', error);

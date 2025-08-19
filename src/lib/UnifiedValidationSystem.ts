@@ -20,6 +20,7 @@ export class UnifiedValidationSystem {
       sessionType: 'ai_chat' | 'study_learn' | 'diagnostic';
       responseTime?: number;
       hints_used?: number;
+      sessionId?: string;
     }
   ): Promise<ValidationResult & {
     pedagogicalFeedback?: string;
@@ -54,7 +55,7 @@ export class UnifiedValidationSystem {
     };
 
     // Log validation for analytics (async, don't wait)
-    this.logValidation(result, context);
+    this.logValidation(result, context, task.id);
 
     return enhancedResult;
   }
@@ -121,7 +122,7 @@ export class UnifiedValidationSystem {
   /**
    * Log validation for learning analytics
    */
-  private async logValidation(result: ValidationResult, context: any): Promise<void> {
+  private async logValidation(result: ValidationResult, context: any, taskId?: string): Promise<void> {
     try {
       if (!context.userId) return;
 
@@ -134,7 +135,9 @@ export class UnifiedValidationSystem {
           confidence: result.confidence,
           response_time: context.responseTime,
           hints_used: context.hints_used || 0,
-          detected_misconception: result.detectedMisconception
+          detected_misconception: result.detectedMisconception,
+          task_id: taskId,
+          session_id: context.sessionId
         });
 
       if (error) {
