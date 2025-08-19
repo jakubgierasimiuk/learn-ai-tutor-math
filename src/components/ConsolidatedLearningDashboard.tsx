@@ -228,12 +228,12 @@ export const ConsolidatedLearningDashboard = () => {
           <CardContent>
             <div className="space-y-2">
               {Object.entries(learnerData.errorPatterns)
-                .sort(([_, a], [__, b]) => b - a)
+                .sort(([_, a], [__, b]) => (b as number) - (a as number))
                 .slice(0, 5)
                 .map(([pattern, count], index) => (
                   <div key={index} className="flex items-center justify-between">
                     <span className="text-sm">{pattern}</span>
-                    <Badge variant="outline">{count} times</Badge>
+                    <Badge variant="outline">{count as number} times</Badge>
                   </div>
                 ))}
             </div>
