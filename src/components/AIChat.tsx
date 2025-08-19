@@ -305,19 +305,14 @@ export const AIChat = () => {
         department: 'mathematics'
       });
 
-      // Enhanced AI Chat call with consolidated data
-      const response = await supabase.functions.invoke('ai-chat', {
+      // Call UNIFIED learning engine instead of separate ai-chat
+      const response = await supabase.functions.invoke('unified-learning-engine', {
         body: {
-          messages: [{
-            role: 'user',
-            content: userInput
-          }],
-          // Consolidated learning data
-          learnerData: learnerData,
-          adaptationDecision: decision?.adaptations,
-          cognitiveLoad: cognitiveLoad,
-          flowState: flowState,
-          preferredDifficulty: preferredDifficulty
+          userMessage: userInput,
+          sessionType: 'ai_chat',
+          responseTime: Date.now() - startTime,
+          currentSkill: currentTopic,
+          department: 'mathematics'
         }
       });
 

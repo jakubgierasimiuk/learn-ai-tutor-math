@@ -227,31 +227,24 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
         department: 'mathematics'
       });
 
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/study-tutor`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({
-          message: userInput,
+      // Call UNIFIED learning engine instead of study-tutor
+      const response = await supabase.functions.invoke('unified-learning-engine', {
+        body: {
+          userMessage: userInput,
+          sessionType: 'study_learn',
           sessionId: session.id,
           skillId: skillId,
           responseTime: currentResponseTime,
-          stepType: 'question',
-          currentPhase: currentPhase,
-          // Add consolidated learning data
-          learnerData: learnerData,
-          adaptations: decision?.adaptations,
-          preferredDifficulty: preferredDifficulty
-        }),
+          currentSkill: skillId,
+          department: 'mathematics'
+        }
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to send message');
+      if (response.error) {
+        throw response.error;
       }
 
-      const data = await response.json();
+      const data = response.data;
 
       // Add user message to chat
       setChatHistory(prev => [...prev, {
