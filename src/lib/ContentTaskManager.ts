@@ -1,4 +1,5 @@
 import { TaskDefinition } from './UniversalInterfaces';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ContentTask {
   id: string;
@@ -32,6 +33,7 @@ interface SkillContent {
 
 export class ContentTaskManager {
   private contentCache = new Map<string, SkillContent>();
+  private isClient = typeof window !== 'undefined';
 
   async getInitialTasks(skillId: string): Promise<TaskDefinition[]> {
     try {
@@ -113,26 +115,45 @@ export class ContentTaskManager {
     }
 
     try {
-      // This would typically fetch from Supabase, but we'll simulate it
-      // In real implementation, fetch from skills table content_data column
-      const response = await fetch(`/api/skills/${skillId}/content`).catch(() => null);
+      console.log(`Fetching content for skill: ${skillId}`);
       
-      if (!response) {
-        // Mock content structure for now
-        const mockContent: SkillContent = {
-          theory: {
-            sections: []
-          },
-          examples: {
-            solved: []
-          },
-          practiceExercises: []
-        };
-        return mockContent;
+      // For edge functions, we can't use the client directly, so return null
+      if (!this.isClient) {
+        console.log('Running in edge function context, returning null');
+        return null;
       }
 
-      const content = await response.json();
+      // Fetch from Supabase skills table content_data column
+      const { data: skill, error } = await supabase
+        .from('skills')
+        .select('content_data')
+        .eq('id', skillId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching skill from Supabase:', error);
+        return null;
+      }
+
+      if (!skill?.content_data) {
+        console.log(`No content_data found for skill ${skillId}`);
+        return {
+          theory: { sections: [] },
+          examples: { solved: [] },
+          practiceExercises: []
+        };
+      }
+
+      // Parse content_data as SkillContent with type checking
+      const content = skill.content_data as unknown as SkillContent;
       this.contentCache.set(skillId, content);
+      
+      console.log(`Successfully fetched content for skill ${skillId}:`, {
+        theorySections: content.theory?.sections?.length || 0,
+        solvedExamples: content.examples?.solved?.length || 0,
+        practiceExercises: content.practiceExercises?.length || 0
+      });
+
       return content;
     } catch (error) {
       console.error('Error fetching skill content:', error);
