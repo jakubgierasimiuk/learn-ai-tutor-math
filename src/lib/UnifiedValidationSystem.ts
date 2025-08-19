@@ -1,5 +1,6 @@
 import { UniversalAnswerValidator } from './UniversalAnswerValidator';
 import { TaskDefinition, ValidationResult } from './UniversalInterfaces';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Unified Validation System - Central validation for AI Chat and Study & Learn
@@ -118,20 +119,34 @@ export class UnifiedValidationSystem {
   }
 
   /**
-   * Log validation for learning analytics (simplified for now)
+   * Log validation for learning analytics
    */
   private async logValidation(result: ValidationResult, context: any): Promise<void> {
-    // Simplified logging - will be enhanced once database types are updated
-    console.log('Validation logged:', {
-      userId: context.userId,
-      sessionType: context.sessionType,
-      isCorrect: result.isCorrect,
-      confidence: result.confidence
-    });
+    try {
+      if (!context.userId) return;
+
+      const { error } = await supabase
+        .from('validation_logs')
+        .insert({
+          user_id: context.userId,
+          session_type: context.sessionType,
+          is_correct: result.isCorrect,
+          confidence: result.confidence,
+          response_time: context.responseTime,
+          hints_used: context.hints_used || 0,
+          detected_misconception: result.detectedMisconception
+        });
+
+      if (error) {
+        console.error('Error logging validation:', error);
+      }
+    } catch (error) {
+      console.error('Error in logValidation:', error);
+    }
   }
 
   /**
-   * Get validation statistics for user (simplified for now)
+   * Get validation statistics for user
    */
   public async getValidationStats(userId: string, days: number = 7): Promise<{
     accuracy: number;
@@ -139,13 +154,62 @@ export class UnifiedValidationSystem {
     commonMisconceptions: string[];
     improvement: number;
   }> {
-    // Simplified stats - will be enhanced once database types are updated
-    return {
-      accuracy: 0.8,
-      avgConfidence: 0.7,
-      commonMisconceptions: [],
-      improvement: 0.1
-    };
+    try {
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+
+      const { data: logs, error } = await supabase
+        .from('validation_logs')
+        .select('*')
+        .eq('user_id', userId)
+        .gte('created_at', startDate.toISOString())
+        .order('created_at', { ascending: false });
+
+      if (error || !logs) {
+        console.error('Error fetching validation stats:', error);
+        return { accuracy: 0, avgConfidence: 0, commonMisconceptions: [], improvement: 0 };
+      }
+
+      const accuracy = logs.length > 0 ? 
+        logs.filter(log => log.is_correct).length / logs.length : 0;
+      
+      const avgConfidence = logs.length > 0 ? 
+        logs.reduce((sum, log) => sum + (log.confidence || 0), 0) / logs.length : 0;
+
+      const misconceptions = logs
+        .filter(log => log.detected_misconception)
+        .reduce((acc, log) => {
+          const misconception = log.detected_misconception as string;
+          acc[misconception] = (acc[misconception] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+
+      const commonMisconceptions = Object.entries(misconceptions)
+        .sort(([,a], [,b]) => (b as number) - (a as number))
+        .slice(0, 3)
+        .map(([misconception]) => misconception);
+
+      // Calculate improvement (simplified)
+      const recentLogs = logs.slice(0, Math.floor(logs.length / 2));
+      const olderLogs = logs.slice(Math.floor(logs.length / 2));
+      
+      const recentAccuracy = recentLogs.length > 0 ? 
+        recentLogs.filter(log => log.is_correct).length / recentLogs.length : 0;
+      const olderAccuracy = olderLogs.length > 0 ? 
+        olderLogs.filter(log => log.is_correct).length / olderLogs.length : 0;
+      
+      const improvement = recentAccuracy - olderAccuracy;
+
+      return {
+        accuracy,
+        avgConfidence,
+        commonMisconceptions,
+        improvement
+      };
+    } catch (error) {
+      console.error('Error calculating validation stats:', error);
+      return { accuracy: 0, avgConfidence: 0, commonMisconceptions: [], improvement: 0 };
+    }
   }
 
   /**

@@ -123,10 +123,10 @@ export class ContentTaskManager {
         return null;
       }
 
-      // Fetch from Supabase skills table content_data column
+      // Fetch from Supabase skills table using new content_structure column
       const { data: skill, error } = await supabase
         .from('skills')
-        .select('content_data')
+        .select('content_structure, content_data')
         .eq('id', skillId)
         .single();
 
@@ -135,8 +135,10 @@ export class ContentTaskManager {
         return null;
       }
 
-      if (!skill?.content_data) {
-        console.log(`No content_data found for skill ${skillId}`);
+      // Use content_structure first, fallback to content_data
+      const contentSource = skill?.content_structure || skill?.content_data;
+      if (!contentSource) {
+        console.log(`No content found for skill ${skillId}`);
         return {
           theory: { sections: [] },
           examples: { solved: [] },
@@ -144,8 +146,8 @@ export class ContentTaskManager {
         };
       }
 
-      // Parse content_data as SkillContent with type checking
-      const content = skill.content_data as unknown as SkillContent;
+      // Parse content as SkillContent with type checking
+      const content = contentSource as unknown as SkillContent;
       this.contentCache.set(skillId, content);
       
       console.log(`Successfully fetched content for skill ${skillId}:`, {

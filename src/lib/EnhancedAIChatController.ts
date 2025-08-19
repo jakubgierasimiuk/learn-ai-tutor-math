@@ -3,6 +3,7 @@ import { UniversalAnswerValidator } from '@/lib/UniversalAnswerValidator';
 import { UniversalDifficultyController } from '@/lib/UniversalDifficultyController';
 import { TaskDefinition, TaskGenerationParams } from '@/lib/UniversalInterfaces';
 import { ContentTaskManager } from '@/lib/ContentTaskManager';
+import { TaskDefinitionManager } from '@/lib/TaskDefinitionManager';
 
 // Enhanced AI Chat integration with Universal Task System
 export class EnhancedAIChatController {
@@ -18,27 +19,54 @@ export class EnhancedAIChatController {
     skillId?: string;
     useContentFirst?: boolean;
   }): Promise<TaskDefinition> {
-    // Step 1: Try to use content from database first
-    if (params.useContentFirst && params.skillId) {
+    // Step 1: Try to use existing tasks from database first
+    if (params.useContentFirst || params.skillId) {
       try {
-        const contentTasks = await this.contentManager.getInitialTasks(params.skillId);
-        if (contentTasks.length > 0) {
-          console.log('Using content task from database');
-          return contentTasks[0];
+        // Look for existing tasks matching criteria
+        const existingTasks = await TaskDefinitionManager.findTasks({
+          department: params.department,
+          difficulty: params.difficulty,
+          skillId: params.skillId,
+          limit: 5
+        });
+
+        if (existingTasks.length > 0) {
+          console.log('Using existing task from database');
+          return existingTasks[0];
+        }
+
+        // Try content-based tasks if skill specified
+        if (params.skillId) {
+          const contentTasks = await this.contentManager.getInitialTasks(params.skillId);
+          if (contentTasks.length > 0) {
+            console.log('Using content task from database');
+            // Store it for future use
+            await TaskDefinitionManager.storeTask(contentTasks[0]);
+            return contentTasks[0];
+          }
         }
       } catch (error) {
-        console.error('Content fetch failed, falling back to generator:', error);
+        console.error('Database task fetch failed, falling back to generator:', error);
       }
     }
 
-    // Step 2: Fallback to generator
+    // Step 2: Generate new task
     const taskParams: TaskGenerationParams = {
       department: params.department,
       difficulty: params.difficulty,
       targetMisconception: params.targetMisconception
     };
 
-    return this.taskGenerator.generateTask(taskParams);
+    const newTask = this.taskGenerator.generateTask(taskParams);
+    
+    // Store the generated task for future use
+    try {
+      await TaskDefinitionManager.storeTask(newTask);
+    } catch (error) {
+      console.error('Failed to store generated task:', error);
+    }
+
+    return newTask;
   }
 
   public validateUserAnswer(userAnswer: string, task: TaskDefinition) {
