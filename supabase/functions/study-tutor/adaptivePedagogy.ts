@@ -1,6 +1,6 @@
 // Enhanced Adaptive Pedagogy with Mathematical Error Classification
-import { MathErrorClassifier, MathErrorType } from '../../../src/lib/MathErrorClassifier.ts';
-import { EducationalScaffolding, LearningPhase, StudentModel } from '../../../src/lib/EducationalScaffolding.ts';
+import { MathErrorClassifier, MathErrorType } from './MathErrorClassifier.ts';
+import { EducationalScaffolding, LearningPhase, StudentModel } from './EducationalScaffolding.ts';
 
 // Enhanced Student Response Patterns
 export type StudentResponsePattern = 
