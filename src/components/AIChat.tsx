@@ -101,7 +101,7 @@ export const AIChat = () => {
   const [moreOpen, setMoreOpen] = useState(false);
   
   // Enhanced AI Chat Controller for task generation
-  const aiChatController = useMemo(() => new EnhancedAIChatController(), []);
+  // Enhanced AI Chat Controller for task generation (static methods, no instance needed)
   useEffect(() => {
     if (!user) return;
     try {
@@ -311,7 +311,7 @@ export const AIChat = () => {
     const startTime = Date.now();
     
     try {
-      // Process learning step with unified system
+      // Process learning step with unified system and task generation
       const learningContext = {
         userId: user.id,
         currentSkill: currentTopic,
@@ -319,29 +319,40 @@ export const AIChat = () => {
         sessionType: 'ai_chat' as const,
         userResponse: userInput,
         responseTime: Date.now() - startTime,
-        confidence: 0.7 // Default confidence, could be enhanced with user input
+        confidence: 0.7, // Default confidence, could be enhanced with user input
+        hintsUsed: 0
       };
 
       const adaptationDecision = await processLearningStep(learningContext);
 
+      // Generate task using EnhancedAIChatController for consistency
+      let currentTask = null;
+      if (adaptationDecision?.nextTask) {
+        currentTask = adaptationDecision.nextTask;
+      } else {
+        // Fallback task generation
+        currentTask = await EnhancedAIChatController.generateTaskForChat({
+          department: 'mathematics',
+          difficulty: learnerProfile?.optimal_difficulty_range?.min || 5,
+          userId: user.id,
+          sessionType: 'ai_chat',
+          skillId: currentTopic,
+          useContentFirst: true
+        });
+      }
+
       // Enhanced AI Chat call with unified system data
       const response = await supabase.functions.invoke('ai-chat', {
         body: {
-          message: userInput,
-          topic: currentTopic,
-          level: userProgress?.averageScore ? 
-            (userProgress.averageScore >= 80 ? 'advanced' : 
-             userProgress.averageScore >= 60 ? 'intermediate' : 'beginner') 
-            : 'beginner',
-          userId: user.id,
-          sessionId: currentSessionId,
-          userProgress: userProgress,
-          weakAreas: userProgress?.weakAreas || [],
-          imageBase64: imageBase64 || null,
+          messages: [{
+            role: 'user',
+            content: userInput
+          }],
           // Enhanced unified system data
           unifiedSessionId: unifiedSession,
           learnerProfile: learnerProfile,
-          adaptationDecision: adaptationDecision
+          adaptationDecision: adaptationDecision,
+          currentTask: currentTask
         }
       });
 
@@ -349,7 +360,7 @@ export const AIChat = () => {
         throw response.error;
       }
 
-      const { response: aiResponse, insights } = response.data;
+      const { message: aiResponse, insights, session, currentTask: responseTask } = response.data;
       
       const newAIMessage: Message = {
         id: Date.now().toString(),
