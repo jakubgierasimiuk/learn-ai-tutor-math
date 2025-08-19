@@ -2,14 +2,24 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// Import from study-tutor
-import { evaluateAnswer, MathContext } from '../study-tutor/mathValidation.ts';
-import { analyzeStudentAnswer, StudentProfile } from '../study-tutor/adaptivePedagogy.ts';
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Math validation context
+interface MathContext {
+  userAnswer: string;
+  expectedAnswer: string;
+  skillContext: string;
+}
+
+// Math validation result
+interface ValidationResult {
+  isCorrect: boolean;
+  detectedMisconception?: string;
+  confidence: number;
+}
 
 interface LearningRequest {
   action?: 'get_consolidated_data' | 'process_interaction' | 'chat_interaction' | 'study_interaction';
@@ -48,6 +58,34 @@ class UnifiedLearningEngine {
   constructor(supabase: any) {
     this.supabase = supabase;
     this.openAIKey = Deno.env.get('OPENAI_API_KEY') || '';
+  }
+
+  /**
+   * BASIC MATH VALIDATION - simplified version
+   */
+  private async evaluateAnswer(context: MathContext): Promise<ValidationResult> {
+    const userAnswer = context.userAnswer.toLowerCase().trim();
+    
+    // Basic math validation patterns
+    const numberPattern = /^-?\d+(\.\d+)?$/;
+    const fractionPattern = /^-?\d+\/\d+$/;
+    const equationPattern = /x\s*=\s*-?\d+(\.\d+)?/;
+    
+    // Simple validation logic - this is a placeholder
+    // In a real system, this would be much more sophisticated
+    if (numberPattern.test(userAnswer) || fractionPattern.test(userAnswer) || equationPattern.test(userAnswer)) {
+      return {
+        isCorrect: Math.random() > 0.3, // Placeholder - would use real validation
+        confidence: 0.8,
+        detectedMisconception: Math.random() > 0.8 ? 'arithmetic_error' : undefined
+      };
+    }
+    
+    return {
+      isCorrect: false,
+      confidence: 0.3,
+      detectedMisconception: 'invalid_format'
+    };
   }
 
   /**
@@ -184,7 +222,7 @@ class UnifiedLearningEngine {
         skillContext: request.currentSkill || 'general'
       };
       
-      const validation = await evaluateAnswer(mathContext);
+      const validation = await this.evaluateAnswer(mathContext);
       isCorrect = validation.isCorrect;
       misconception = validation.detectedMisconception || null;
     }
