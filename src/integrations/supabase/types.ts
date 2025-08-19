@@ -1756,6 +1756,194 @@ export type Database = {
         }
         Relationships: []
       }
+      unified_learning_sessions: {
+        Row: {
+          ai_model_used: string | null
+          completed_at: string | null
+          concepts_learned: Json | null
+          context_switches: number | null
+          correct_answers: number | null
+          created_at: string
+          department: string | null
+          difficulty_adjustments: Json | null
+          difficulty_level: number | null
+          engagement_score: number | null
+          explanation_style_used: string | null
+          frustration_incidents: number | null
+          hints_used: number | null
+          id: string
+          learning_momentum: number | null
+          learning_path: Json | null
+          misconceptions_addressed: Json | null
+          next_session_recommendations: Json | null
+          profile_id: string
+          session_type: string
+          skill_focus: string | null
+          started_at: string
+          tasks_completed: number | null
+          total_response_time_ms: number | null
+          total_tokens_used: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_model_used?: string | null
+          completed_at?: string | null
+          concepts_learned?: Json | null
+          context_switches?: number | null
+          correct_answers?: number | null
+          created_at?: string
+          department?: string | null
+          difficulty_adjustments?: Json | null
+          difficulty_level?: number | null
+          engagement_score?: number | null
+          explanation_style_used?: string | null
+          frustration_incidents?: number | null
+          hints_used?: number | null
+          id?: string
+          learning_momentum?: number | null
+          learning_path?: Json | null
+          misconceptions_addressed?: Json | null
+          next_session_recommendations?: Json | null
+          profile_id: string
+          session_type?: string
+          skill_focus?: string | null
+          started_at?: string
+          tasks_completed?: number | null
+          total_response_time_ms?: number | null
+          total_tokens_used?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_model_used?: string | null
+          completed_at?: string | null
+          concepts_learned?: Json | null
+          context_switches?: number | null
+          correct_answers?: number | null
+          created_at?: string
+          department?: string | null
+          difficulty_adjustments?: Json | null
+          difficulty_level?: number | null
+          engagement_score?: number | null
+          explanation_style_used?: string | null
+          frustration_incidents?: number | null
+          hints_used?: number | null
+          id?: string
+          learning_momentum?: number | null
+          learning_path?: Json | null
+          misconceptions_addressed?: Json | null
+          next_session_recommendations?: Json | null
+          profile_id?: string
+          session_type?: string
+          skill_focus?: string | null
+          started_at?: string
+          tasks_completed?: number | null
+          total_response_time_ms?: number | null
+          total_tokens_used?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unified_learning_sessions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "universal_learner_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      universal_learner_profiles: {
+        Row: {
+          class_level: number | null
+          concepts_mastered: number | null
+          created_at: string
+          current_learning_context: Json | null
+          diagnostic_summary: Json | null
+          difficulty_multiplier: number | null
+          engagement_triggers: Json | null
+          error_patterns: Json | null
+          frustration_threshold: number | null
+          id: string
+          last_diagnostic_at: string | null
+          last_interaction_summary: Json | null
+          learning_style: Json | null
+          learning_velocity: number | null
+          micro_skill_strengths: Json | null
+          next_recommended_action: Json | null
+          optimal_difficulty_range: Json | null
+          preferred_explanation_style: string | null
+          prerequisite_gaps: Json | null
+          response_patterns: Json | null
+          retention_rate: number | null
+          sessions_completed: number | null
+          skill_mastery_map: Json | null
+          total_learning_time_minutes: number | null
+          track: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          class_level?: number | null
+          concepts_mastered?: number | null
+          created_at?: string
+          current_learning_context?: Json | null
+          diagnostic_summary?: Json | null
+          difficulty_multiplier?: number | null
+          engagement_triggers?: Json | null
+          error_patterns?: Json | null
+          frustration_threshold?: number | null
+          id?: string
+          last_diagnostic_at?: string | null
+          last_interaction_summary?: Json | null
+          learning_style?: Json | null
+          learning_velocity?: number | null
+          micro_skill_strengths?: Json | null
+          next_recommended_action?: Json | null
+          optimal_difficulty_range?: Json | null
+          preferred_explanation_style?: string | null
+          prerequisite_gaps?: Json | null
+          response_patterns?: Json | null
+          retention_rate?: number | null
+          sessions_completed?: number | null
+          skill_mastery_map?: Json | null
+          total_learning_time_minutes?: number | null
+          track?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          class_level?: number | null
+          concepts_mastered?: number | null
+          created_at?: string
+          current_learning_context?: Json | null
+          diagnostic_summary?: Json | null
+          difficulty_multiplier?: number | null
+          engagement_triggers?: Json | null
+          error_patterns?: Json | null
+          frustration_threshold?: number | null
+          id?: string
+          last_diagnostic_at?: string | null
+          last_interaction_summary?: Json | null
+          learning_style?: Json | null
+          learning_velocity?: number | null
+          micro_skill_strengths?: Json | null
+          next_recommended_action?: Json | null
+          optimal_difficulty_range?: Json | null
+          preferred_explanation_style?: string | null
+          prerequisite_gaps?: Json | null
+          response_patterns?: Json | null
+          retention_rate?: number | null
+          sessions_completed?: number | null
+          skill_mastery_map?: Json | null
+          total_learning_time_minutes?: number | null
+          track?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_achievements: {
         Row: {
           achievement_id: number
