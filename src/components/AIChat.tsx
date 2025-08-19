@@ -17,6 +17,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { logEvent, logError } from "@/lib/logger";
 import { normalizeMath } from "@/lib/markdown";
 import { EnhancedAIChatController } from "@/lib/EnhancedAIChatController";
+import { useUnifiedLearning } from "@/hooks/useUnifiedLearning";
 
 interface Message {
   id: string;
@@ -75,6 +76,17 @@ export const AIChat = () => {
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  
+  // Unified Learning System Integration
+  const {
+    learnerProfile,
+    currentSession: unifiedSession,
+    isLoading: unifiedLoading,
+    startSession,
+    processLearningStep,
+    completeSession,
+    getRecommendations
+  } = useUnifiedLearning();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -165,80 +177,40 @@ export const AIChat = () => {
   const initializeChat = async () => {
     if (!user) return;
 
-    let nextProgress: UserProgress | null = null;
-
-    // Fetch user's learning context
     try {
-      // Get recent lesson progress
-      const { data: recentProgress } = await supabase
-        .from("user_lesson_progress")
-        .select(`
-          score,
-          lessons!inner(title, difficulty_level),
-          topics!inner(name)
-        `)
-        .eq("user_id", user.id)
-        .eq("status", "completed")
-        .order("completed_at", { ascending: false })
-        .limit(10);
+      // Start unified learning session for AI Chat
+      const sessionId = await startSession('ai_chat', undefined, 'mathematics');
+      if (sessionId) {
+        setCurrentSessionId(parseInt(sessionId));
+        logEvent('unified_ai_chat_session_started', { session_id: sessionId });
+      }
 
-      if (recentProgress) {
-        const topics = [...new Set(recentProgress.map(p => p.topics.name))];
-        const avgScore = recentProgress.reduce((sum, p) => sum + (p.score || 0), 0) / recentProgress.length;
-        const weakAreas = recentProgress
-          .filter(p => (p.score || 0) < 70)
-          .map(p => p.topics.name);
+      // Get user progress from unified system
+      if (learnerProfile) {
+        const topics = learnerProfile.recent_skills || [];
+        const avgScore = learnerProfile.average_performance || 0;
+        const weakAreas = learnerProfile.struggling_skills || [];
 
-        nextProgress = {
-          recentTopics: topics,
-          averageScore: Math.round(avgScore),
-          weakAreas: [...new Set(weakAreas)],
-          totalLessons: recentProgress.length
+        const nextProgress: UserProgress = {
+          recentTopics: topics.map((skill: any) => skill.name),
+          averageScore: Math.round(avgScore * 100),
+          weakAreas: weakAreas.map((skill: any) => skill.name),
+          totalLessons: learnerProfile.total_learning_time_minutes / 15 || 0
         };
         setUserProgress(nextProgress);
 
-        // Set topic based on most recent lesson
+        // Set topic based on current focus
         if (topics.length > 0) {
-          setCurrentTopic(topics[0]);
+          setCurrentTopic(topics[0].name);
         }
       }
 
-      // Ensure we have a valid topic id for the session
-      const { data: firstTopic } = await supabase
-        .from('topics')
-        .select('id, name')
-        .eq('is_active', true)
-        .order('created_at', { ascending: true })
-        .limit(1)
-        .maybeSingle();
-
-      let createdSession: { id: number } | null = null;
-      if (firstTopic?.id) {
-        const { data: inserted } = await supabase
-          .from('lesson_sessions')
-          .insert({
-            user_id: user.id,
-            topic_id: firstTopic.id,
-            status: 'in_progress'
-          })
-          .select()
-          .maybeSingle();
-        createdSession = inserted as any;
-      } else {
-        console.warn('No active topics found; skipping session creation');
-      }
-
-      if (createdSession) {
-        setCurrentSessionId(createdSession.id);
-        logEvent('ai_chat_session_started', { session_id: createdSession.id, topic: firstTopic?.name });
-      }
-
-      // Generate personalized welcome message
-      const welcomeMessage = await generateWelcomeMessage(nextProgress);
+      // Generate personalized welcome message based on unified profile
+      const welcomeMessage = await generateWelcomeMessage(userProgress);
       setMessages([welcomeMessage]);
       
     } catch (error) {
-      console.error("Error initializing chat:", error);
+      console.error("Error initializing unified chat:", error);
       // Fallback welcome message
       setMessages([{
         id: '1',
@@ -334,8 +306,23 @@ export const AIChat = () => {
     }
 
     setIsTyping(true);
+    const startTime = Date.now();
     
     try {
+      // Process learning step with unified system
+      const learningContext = {
+        userId: user.id,
+        currentSkill: currentTopic,
+        department: 'mathematics',
+        sessionType: 'ai_chat' as const,
+        userResponse: userInput,
+        responseTime: Date.now() - startTime,
+        confidence: 0.7 // Default confidence, could be enhanced with user input
+      };
+
+      const adaptationDecision = await processLearningStep(learningContext);
+
+      // Enhanced AI Chat call with unified system data
       const response = await supabase.functions.invoke('ai-chat', {
         body: {
           message: userInput,
@@ -348,7 +335,11 @@ export const AIChat = () => {
           sessionId: currentSessionId,
           userProgress: userProgress,
           weakAreas: userProgress?.weakAreas || [],
-          imageBase64: imageBase64 || null
+          imageBase64: imageBase64 || null,
+          // Enhanced unified system data
+          unifiedSessionId: unifiedSession,
+          learnerProfile: learnerProfile,
+          adaptationDecision: adaptationDecision
         }
       });
 
@@ -366,21 +357,25 @@ export const AIChat = () => {
         insights: insights
       };
       setMessages(prev => [...prev, newAIMessage]);
-      // persisted in server-side logs (chat_logs)
       
-      // Handle insights and recommendations
-      if (insights) {
-        if (insights.needsHelp) {
+      // Handle insights and recommendations from unified system
+      if (adaptationDecision) {
+        if (adaptationDecision.recommendedAction === 'review') {
           setShowUnderstanding(true);
         }
         
-        if (insights.suggestedActions.includes('Przejdź do praktycznych ćwiczeń')) {
+        if (adaptationDecision.recommendedAction === 'advance') {
           setShowRecommendations(true);
+        }
+
+        // Update current topic if adaptation suggests it
+        if (adaptationDecision.nextTask?.skillName) {
+          setCurrentTopic(adaptationDecision.nextTask.skillName);
         }
       }
       
     } catch (error) {
-      console.error('Error calling AI chat:', error);
+      console.error('Error calling unified AI chat:', error);
       toast.error("Wystąpił błąd podczas komunikacji z AI");
       
       // Fallback response

@@ -13,6 +13,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
+import { useUnifiedLearning } from "@/hooks/useUnifiedLearning";
 
 interface PhaseData {
   id: string;
@@ -69,6 +70,17 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
   const [showSmartResume, setShowSmartResume] = useState(true);
   const [skillProgress, setSkillProgress] = useState<any>(null);
   const { toast } = useToast();
+
+  // Unified Learning System Integration
+  const {
+    learnerProfile,
+    currentSession: unifiedSession,
+    isLoading: unifiedLoading,
+    startSession,
+    processLearningStep,
+    completeSession,
+    getRecommendations
+  } = useUnifiedLearning();
 
   useEffect(() => {
     loadSkillData();
@@ -195,7 +207,10 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
 
   const initializeSession = async () => {
     try {
-      // Check for existing active session
+      // Start unified learning session for Study & Learn
+      const unifiedSessionId = await startSession('study_learn', skillId, 'mathematics');
+      
+      // Check for existing active session in legacy table
       const { data: existingSessions, error: sessionError } = await supabase
         .from('study_sessions')
         .select('*')
@@ -233,20 +248,18 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
 
       setSession(sessionData);
 
-      // Load phase progress
-      const { data: progressData, error: progressError } = await supabase
-        .from('learning_phase_progress')
-        .select('*')
-        .eq('skill_id', skillId);
-
-      if (progressError) {
-        console.error('Error loading phase progress:', progressError);
-      } else {
-        const progressMap = (progressData || []).reduce((acc, progress) => {
-          acc[progress.phase_number] = progress;
-          return acc;
-        }, {} as Record<number, any>);
-        setPhaseProgress(progressMap);
+      // Load phase progress using unified system
+      if (learnerProfile) {
+        const skillProgress = learnerProfile.skill_mastery_map?.[skillId];
+        if (skillProgress) {
+          setPhaseProgress({
+            [currentPhase]: {
+              progress_percentage: skillProgress.mastery_level,
+              attempts_count: skillProgress.total_attempts,
+              correct_attempts: skillProgress.correct_attempts
+            }
+          });
+        }
       }
 
       // Load chat history if session exists
@@ -255,7 +268,7 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
       }
 
     } catch (error) {
-      console.error('Error initializing session:', error);
+      console.error('Error initializing unified session:', error);
       toast({
         title: "Błąd",
         description: "Nie udało się zainicjować sesji",
@@ -389,6 +402,21 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
     setResponseTime(currentResponseTime);
 
     try {
+      // Process learning step with unified system
+      const learningContext = {
+        userId: session.user_id,
+        currentSkill: skillId,
+        department: 'mathematics',
+        sessionType: 'study_learn' as const,
+        userResponse: userInput,
+        responseTime: currentResponseTime,
+        confidence: 0.7, // Could be enhanced with user input
+        isCorrect: undefined // Will be determined by AI
+      };
+
+      // Process through unified system first
+      const adaptationDecision = await processLearningStep(learningContext);
+
       const response = await supabase.functions.invoke('study-tutor', {
         body: {
           message: userInput,
@@ -396,7 +424,11 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
           skillId: skillId,
           responseTime: currentResponseTime,
           stepType: 'question',
-          currentPhase: currentPhase
+          currentPhase: currentPhase,
+          // Enhanced unified system data
+          unifiedSessionId: unifiedSession,
+          learnerProfile: learnerProfile,
+          adaptationDecision: adaptationDecision
         }
       });
 
@@ -421,14 +453,23 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
         timestamp: new Date().toISOString()
       }]);
 
-      // Update phase progress
+      // Update phase progress with unified system
       await updatePhaseProgress(data.isCorrect);
+
+      // Apply adaptation decisions
+      if (adaptationDecision) {
+        if (adaptationDecision.recommendedAction === 'advance' && currentPhase < phases.length) {
+          setCurrentPhase(prev => prev + 1);
+        } else if (adaptationDecision.recommendedAction === 'review' && currentPhase > 1) {
+          setCurrentPhase(prev => prev - 1);
+        }
+      }
 
       setUserInput("");
       setStartTime(Date.now());
 
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Error sending unified message:', error);
       toast({
         title: "Błąd",
         description: "Nie udało się wysłać wiadomości",
