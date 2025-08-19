@@ -14,7 +14,7 @@ export class EnhancedAIChatController {
   private static taskGenerator = new MathTaskGenerator();
   private static validator = new UniversalAnswerValidator();
   private static contentManager = new ContentTaskManager();
-  private static orchestrator = new SmartLearningOrchestrator();
+  private static orchestrator = SmartLearningOrchestrator.getInstance();
 
   /**
    * Generate task using SmartLearningOrchestrator for consistent decision-making

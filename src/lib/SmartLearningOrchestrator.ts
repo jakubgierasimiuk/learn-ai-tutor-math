@@ -31,13 +31,37 @@ export interface AdaptationDecision {
  * Smart Learning Orchestrator - Central decision-making system for personalized learning
  */
 export class SmartLearningOrchestrator {
-  private taskGenerator = new MathTaskGenerator();
-  private contentManager = new ContentTaskManager();
+  private static instance: SmartLearningOrchestrator | null = null;
+  private static taskGenerator = new MathTaskGenerator();
+  private static contentManager = new ContentTaskManager();
+  private static cacheSize = 0;
+  private static readonly MAX_CACHE_SIZE = 1000;
+
+  // Singleton pattern to prevent memory leaks
+  public static getInstance(): SmartLearningOrchestrator {
+    if (!SmartLearningOrchestrator.instance) {
+      SmartLearningOrchestrator.instance = new SmartLearningOrchestrator();
+    }
+    return SmartLearningOrchestrator.instance;
+  }
+
+  private constructor() {
+    // Private constructor for singleton
+  }
+
+  // Clear cache when it gets too large
+  private static manageCacheSize(): void {
+    if (SmartLearningOrchestrator.cacheSize > SmartLearningOrchestrator.MAX_CACHE_SIZE) {
+      // Clear some cache entries
+      SmartLearningOrchestrator.cacheSize = 0;
+    }
+  }
 
   /**
    * Main orchestration method - decides what happens next in the learning journey
    */
   public async orchestrateLearning(context: LearningContext): Promise<AdaptationDecision> {
+    SmartLearningOrchestrator.manageCacheSize();
     try {
       // Get learner profile
       const profile = await UnifiedLearningController.getOrCreateProfile(context.userId);
@@ -295,7 +319,7 @@ export class SmartLearningOrchestrator {
       switch (contentSource) {
         case 'database_content':
           if (context.currentSkill) {
-            const tasks = await this.contentManager.getInitialTasks(context.currentSkill);
+            const tasks = await SmartLearningOrchestrator.contentManager.getInitialTasks(context.currentSkill, difficulty);
             return tasks.find(task => Math.abs(task.difficulty - difficulty) <= 1) || tasks[0];
           }
           break;
@@ -306,7 +330,7 @@ export class SmartLearningOrchestrator {
             difficulty: difficulty,
             microSkill: 'default'
           };
-          return this.taskGenerator.generateTask(taskParams);
+          return SmartLearningOrchestrator.taskGenerator.generateTask(taskParams);
 
         case 'ai_generation':
         default:

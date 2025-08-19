@@ -9,7 +9,7 @@ export const useUnifiedLearning = () => {
   const [learnerProfile, setLearnerProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const orchestrator = new SmartLearningOrchestrator();
+  const orchestrator = SmartLearningOrchestrator.getInstance();
 
   // Initialize learner profile
   useEffect(() => {
