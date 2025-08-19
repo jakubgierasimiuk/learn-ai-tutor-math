@@ -1462,6 +1462,7 @@ export type Database = {
           chapter_tag: string | null
           class_level: number
           content_data: Json | null
+          content_structure: Json | null
           created_at: string
           department: string
           description: string | null
@@ -1482,6 +1483,7 @@ export type Database = {
           chapter_tag?: string | null
           class_level?: number
           content_data?: Json | null
+          content_structure?: Json | null
           created_at?: string
           department: string
           description?: string | null
@@ -1502,6 +1504,7 @@ export type Database = {
           chapter_tag?: string | null
           class_level?: number
           content_data?: Json | null
+          content_structure?: Json | null
           created_at?: string
           department?: string
           description?: string | null
@@ -1683,6 +1686,59 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "study_sessions_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_definitions: {
+        Row: {
+          created_at: string
+          department: string
+          difficulty: number
+          expected_answer: string
+          id: string
+          is_active: boolean
+          latex_content: string
+          micro_skill: string
+          misconception_map: Json
+          skill_id: string | null
+          skill_name: string
+          source_type: string
+        }
+        Insert: {
+          created_at?: string
+          department: string
+          difficulty: number
+          expected_answer: string
+          id?: string
+          is_active?: boolean
+          latex_content: string
+          micro_skill: string
+          misconception_map?: Json
+          skill_id?: string | null
+          skill_name: string
+          source_type?: string
+        }
+        Update: {
+          created_at?: string
+          department?: string
+          difficulty?: number
+          expected_answer?: string
+          id?: string
+          is_active?: boolean
+          latex_content?: string
+          micro_skill?: string
+          misconception_map?: Json
+          skill_id?: string | null
+          skill_name?: string
+          source_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_definitions_skill_id_fkey"
             columns: ["skill_id"]
             isOneToOne: false
             referencedRelation: "skills"
@@ -2147,7 +2203,9 @@ export type Database = {
           id: string
           is_correct: boolean
           response_time: number | null
+          session_id: string | null
           session_type: string
+          task_id: string | null
           user_id: string
         }
         Insert: {
@@ -2158,7 +2216,9 @@ export type Database = {
           id?: string
           is_correct: boolean
           response_time?: number | null
+          session_id?: string | null
           session_type: string
+          task_id?: string | null
           user_id: string
         }
         Update: {
@@ -2169,10 +2229,27 @@ export type Database = {
           id?: string
           is_correct?: boolean
           response_time?: number | null
+          session_id?: string | null
           session_type?: string
+          task_id?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "validation_logs_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "unified_learning_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "validation_logs_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "task_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       weekly_summaries: {
         Row: {
@@ -2206,7 +2283,27 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      learning_analytics: {
+        Row: {
+          accuracy_rate: number | null
+          completed_at: string | null
+          correct_answers: number | null
+          department: string | null
+          difficulty_level: number | null
+          difficulty_multiplier: number | null
+          engagement_score: number | null
+          learning_momentum: number | null
+          learning_velocity: number | null
+          preferred_explanation_style: string | null
+          session_duration_minutes: number | null
+          session_type: string | null
+          started_at: string | null
+          tasks_completed: number | null
+          total_tokens_used: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       check_and_award_achievements: {
