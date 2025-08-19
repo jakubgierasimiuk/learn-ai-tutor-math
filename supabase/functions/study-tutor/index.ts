@@ -76,7 +76,7 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
-    // Get skill details
+    // Get skill details including content_data
     const { data: skill, error: skillError } = await supabaseClient
       .from('skills')
       .select('*')
@@ -87,6 +87,15 @@ serve(async (req) => {
       console.error('Error fetching skill:', skillError);
       throw skillError;
     }
+
+    // Extract content from skill for content-first approach
+    const skillContent = skill.content_data || {};
+    console.log('Skill content available:', {
+      hasTheory: !!skillContent.theory,
+      hasExamples: !!skillContent.examples,
+      hasExercises: !!skillContent.practiceExercises,
+      skillName: skill.name
+    });
 
     // Get current phase details
     const { data: phaseData, error: phaseError } = await supabaseClient
@@ -193,6 +202,18 @@ if (turnNumber > 1 && !currentEquation && previousSteps && previousSteps.length 
   currentEquation = equationMatch ? equationMatch[0].trim() : null;
 }
 
+// Prepare initial content for AI if this is the first message
+let contentContext = '';
+if (turnNumber === 1 && skillContent.practiceExercises) {
+  const initialExercises = skillContent.practiceExercises.slice(0, 2);
+  if (initialExercises.length > 0) {
+    contentContext = `\nZADANIA Z BAZY TREŚCI dla ${skill.name}:\n` +
+      initialExercises.map((ex, i) => 
+        `${i + 1}. ${ex.problem} (Odpowiedź: ${ex.answer})`
+      ).join('\n') + '\n\nUżyj jednego z powyższych zadań lub podobnego.';
+  }
+}
+
 const skillContext = {
   skill_id: skillId,
   skill_name: skill.name,
@@ -208,7 +229,9 @@ const skillContext = {
   phase_name: phaseData?.phase_name || 'Nieznana faza',
   phase_description: phaseData?.phase_description || '',
   phase_ai_instructions: phaseData?.ai_instructions || '',
-  phase_success_criteria: phaseData?.success_criteria || {}
+  phase_success_criteria: phaseData?.success_criteria || {},
+  content_context: contentContext,
+  has_content: !!skillContent.practiceExercises || !!skillContent.examples
 };
 
     // Add previous conversation
@@ -232,7 +255,11 @@ const skillContext = {
 // Add current user message with proper handling for lesson start
 let userMessage = message;
 if (message === "Rozpocznij lekcję" && previousSteps.length === 0) {
-  userMessage = `Pierwsza tura: podaj tylko dwie sekcje –\nZadanie: [zawiera konkretne liczby, dotyczy: ${skill.name}]\nPytanie: [jedno, konkretne]\nPoziom: szkoła średnia (${targetDifficulty}). Zero metatekstu. Nie dodawaj podpowiedzi.`;
+  const contentInstruction = contentContext ? 
+    `\n\nUżyj zadania z bazy treści powyżej jako podstawę dla pierwszego ćwiczenia.` : 
+    `\n\nBrak zadań w bazie treści - użyj generatora zadań.`;
+  
+  userMessage = `Pierwsza tura: podaj tylko dwie sekcje –\nZadanie: [zawiera konkretne liczby, dotyczy: ${skill.name}]\nPytanie: [jedno, konkretne]\nPoziom: szkoła średnia (${targetDifficulty}). Zero metatekstu. Nie dodawaj podpowiedzi.${contentInstruction}`;
 }
 
 // For now, just add the basic context (we'll analyze after getting AI response)

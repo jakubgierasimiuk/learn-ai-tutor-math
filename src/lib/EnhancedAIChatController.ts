@@ -2,18 +2,36 @@ import { MathTaskGenerator } from '@/lib/generators/MathTaskGenerator';
 import { UniversalAnswerValidator } from '@/lib/UniversalAnswerValidator';
 import { UniversalDifficultyController } from '@/lib/UniversalDifficultyController';
 import { TaskDefinition, TaskGenerationParams } from '@/lib/UniversalInterfaces';
+import { ContentTaskManager } from '@/lib/ContentTaskManager';
 
 // Enhanced AI Chat integration with Universal Task System
 export class EnhancedAIChatController {
   private taskGenerator = new MathTaskGenerator();
   private validator = new UniversalAnswerValidator();
+  private contentManager = new ContentTaskManager();
 
-  public generateTaskForChat(params: {
+  public async generateTaskForChat(params: {
     department: string;
     difficulty: number;
     userContext?: string;
     targetMisconception?: string;
-  }): TaskDefinition {
+    skillId?: string;
+    useContentFirst?: boolean;
+  }): Promise<TaskDefinition> {
+    // Step 1: Try to use content from database first
+    if (params.useContentFirst && params.skillId) {
+      try {
+        const contentTasks = await this.contentManager.getInitialTasks(params.skillId);
+        if (contentTasks.length > 0) {
+          console.log('Using content task from database');
+          return contentTasks[0];
+        }
+      } catch (error) {
+        console.error('Content fetch failed, falling back to generator:', error);
+      }
+    }
+
+    // Step 2: Fallback to generator
     const taskParams: TaskGenerationParams = {
       department: params.department,
       difficulty: params.difficulty,
@@ -53,7 +71,15 @@ export class EnhancedAIChatController {
     return this.taskGenerator.generateProgressiveTask(department, currentLevel);
   }
 
-  public generateMisconceptionTask(department: string, misconception: string): TaskDefinition {
+  public async generateMisconceptionTask(department: string, misconception: string): Promise<TaskDefinition> {
     return this.taskGenerator.generateMisconceptionTask(department, misconception);
+  }
+
+  public async getFallbackTask(skillId: string, targetDifficulty: number): Promise<TaskDefinition | null> {
+    return this.contentManager.getFallbackTask(skillId, targetDifficulty);
+  }
+
+  public async getContentForPhase(skillId: string, phase: number) {
+    return this.contentManager.getContentForPhase(skillId, phase);
   }
 }
