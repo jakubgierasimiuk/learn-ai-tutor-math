@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 import { logEvent, logError } from "@/lib/logger";
-import { EnhancedDiagnosticController } from "@/lib/EnhancedDiagnosticController";
+
 import { TaskDefinition } from "@/lib/UniversalInterfaces";
 
 // Question types

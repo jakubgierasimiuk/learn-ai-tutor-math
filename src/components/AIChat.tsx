@@ -5,8 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Brain, Send, ThumbsUp, ThumbsDown, RotateCcw, User, Bot, BookOpen, Target, Lightbulb, Volume2, Mic, MicOff, Loader2, Image as ImageIcon, MoreHorizontal } from "lucide-react";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { unifiedValidation } from '@/lib/UnifiedValidationSystem';
-import { TaskDefinitionManager } from '@/lib/TaskDefinitionManager';
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Link, useSearchParams } from "react-router-dom";
@@ -18,7 +16,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } f
 import { useIsMobile } from "@/hooks/use-mobile";
 import { logEvent, logError } from "@/lib/logger";
 import { normalizeMath } from "@/lib/markdown";
-import { EnhancedAIChatController } from "@/lib/EnhancedAIChatController";
+
 import { useUniversalLearning } from "@/hooks/useUniversalLearning";
 
 interface Message {

@@ -3,7 +3,7 @@ import { ProgressMiniBar } from "@/components/ProgressMiniBar";
 import { Hero } from "@/components/Hero";
 import { Features } from "@/components/Features";
 import { ReferralPromo } from "@/components/ReferralPromo";
-import { QuickStartPanel } from "@/components/QuickStartPanel";
+
 import { LandingPage } from "@/components/LandingPage";
 import { useAuth } from "@/hooks/useAuth";
 

@@ -20,7 +20,7 @@ export const useConsolidatedLearning = () => {
     
     try {
       setIsLoading(true);
-      const { data, error } = await supabase.functions.invoke('unified-learning-engine', {
+const { data, error } = await supabase.functions.invoke('universal-learning-engine', {
         body: {
           action: 'get_consolidated_data',
           userId: user.id
@@ -48,7 +48,7 @@ export const useConsolidatedLearning = () => {
 
     try {
       setIsLoading(true);
-      const { data, error } = await supabase.functions.invoke('unified-learning-engine', {
+const { data, error } = await supabase.functions.invoke('universal-learning-engine', {
         body: {
           action: 'process_interaction',
           userId: user.id,
