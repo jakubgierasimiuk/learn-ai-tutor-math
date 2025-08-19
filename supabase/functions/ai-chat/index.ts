@@ -48,6 +48,31 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } }
     });
 
+    // Use unified learning system for session management
+    let unifiedSession = null;
+    if (userId && !sessionId) {
+      // Start new unified session for AI chat
+      try {
+        const { data, error } = await supabase.functions.invoke('unified-learning', {
+          body: {
+            action: 'start_session',
+            context: {
+              userId,
+              sessionType: 'ai_chat',
+              department: topic || 'mathematics'
+            }
+          }
+        });
+        
+        if (!error && data?.sessionId) {
+          unifiedSession = data.sessionId;
+          console.log('Started unified session:', unifiedSession);
+        }
+      } catch (error) {
+        console.error('Failed to start unified session:', error);
+      }
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {

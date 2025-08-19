@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { UniversalLearningController } from '@/lib/UniversalLearningController';
+import { UnifiedLearningController } from '@/lib/UnifiedLearningController';
 import { SmartLearningOrchestrator, LearningContext, AdaptationDecision } from '@/lib/SmartLearningOrchestrator';
 import { useAuth } from './useAuth';
 
@@ -22,7 +22,7 @@ export const useUnifiedLearning = () => {
     if (!user?.id) return;
     
     try {
-      const profile = await UniversalLearningController.getOrCreateProfile(user.id);
+      const profile = await UnifiedLearningController.getOrCreateProfile(user.id);
       setLearnerProfile(profile);
     } catch (error) {
       console.error('Error loading learner profile:', error);
@@ -38,7 +38,7 @@ export const useUnifiedLearning = () => {
 
     try {
       setIsLoading(true);
-      const sessionId = await UniversalLearningController.startSession(
+      const sessionId = await UnifiedLearningController.startSession(
         user.id,
         sessionType,
         skillFocus,
@@ -63,7 +63,7 @@ export const useUnifiedLearning = () => {
       
       // Update current session if response provided
       if (currentSession && context.userResponse !== undefined) {
-        await UniversalLearningController.updateSession(currentSession, {
+        await UnifiedLearningController.updateSession(currentSession, {
           taskCompleted: true,
           isCorrect: context.isCorrect,
           responseTime: context.responseTime,
@@ -85,7 +85,7 @@ export const useUnifiedLearning = () => {
     if (!currentSession) return;
 
     try {
-      await UniversalLearningController.completeSession(currentSession);
+      await UnifiedLearningController.completeSession(currentSession);
       setCurrentSession(null);
       await loadLearnerProfile(); // Refresh profile
     } catch (error) {
@@ -97,7 +97,7 @@ export const useUnifiedLearning = () => {
     if (!user?.id) return null;
     
     try {
-      return await UniversalLearningController.getRecommendations(user.id);
+      return await UnifiedLearningController.getRecommendations(user.id);
     } catch (error) {
       console.error('Error getting recommendations:', error);
       return null;

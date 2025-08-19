@@ -41,7 +41,7 @@ class EdgeContentTaskManager {
       
       const { data: skill, error } = await supabaseClient
         .from('skills')
-        .select('content_data')
+        .select('content_structure, content_data')
         .eq('id', skillId)
         .single();
 

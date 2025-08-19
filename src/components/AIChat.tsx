@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Brain, Send, ThumbsUp, ThumbsDown, RotateCcw, User, Bot, BookOpen, Target, Lightbulb, Volume2, Mic, MicOff, Loader2, Image as ImageIcon, MoreHorizontal } from "lucide-react";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { unifiedValidation } from '@/lib/UnifiedValidationSystem';
+import { TaskDefinitionManager } from '@/lib/TaskDefinitionManager';
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Link, useSearchParams } from "react-router-dom";

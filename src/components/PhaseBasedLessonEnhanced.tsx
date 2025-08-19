@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertCircle, CheckCircle, Clock, HelpCircle, Lightbulb, BookOpen } from "lucide-react";
+import { unifiedValidation } from '@/lib/UnifiedValidationSystem';
+import { TaskDefinitionManager } from '@/lib/TaskDefinitionManager';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { PhaseProgress } from "./PhaseProgress";
