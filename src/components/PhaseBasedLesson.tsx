@@ -227,9 +227,10 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
         department: 'mathematics'
       });
 
-      // Call UNIFIED learning engine instead of study-tutor
+      // Call UNIFIED learning engine
       const response = await supabase.functions.invoke('unified-learning-engine', {
         body: {
+          action: 'study_interaction',
           userMessage: userInput,
           sessionType: 'study_learn',
           sessionId: session.id,

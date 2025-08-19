@@ -12,13 +12,16 @@ const corsHeaders = {
 };
 
 interface LearningRequest {
-  userMessage: string;
-  sessionType: 'ai_chat' | 'study_learn' | 'diagnostic';
+  action?: 'get_consolidated_data' | 'process_interaction' | 'chat_interaction' | 'study_interaction';
+  userMessage?: string;
+  sessionType?: 'ai_chat' | 'study_learn' | 'diagnostic';
   sessionId?: string;
   skillId?: string;
   responseTime?: number;
-  department: string;
+  department?: string;
   currentSkill?: string;
+  userId?: string;
+  context?: any;
 }
 
 interface ConsolidatedLearnerData {
@@ -144,6 +147,20 @@ class UnifiedLearningEngine {
         acc[skill.skill_id] = (skill.mastery_level || 0) / 100;
         return acc;
       }, {})
+    };
+  }
+
+  /**
+   * ADAPTIVE DECISION MAKING - for consolidated learning system
+   */
+  async makeAdaptiveDecision(userId: string, context: any) {
+    const learnerData = await this.getConsolidatedData(userId);
+    const adaptations = this.calculateAdaptations(learnerData, context.isCorrect);
+    
+    return {
+      consolidatedData: learnerData,
+      adaptations,
+      learnerData
     };
   }
 
@@ -354,9 +371,37 @@ serve(async (req) => {
     }
 
     const request: LearningRequest = await req.json();
-    
     const engine = new UnifiedLearningEngine(supabaseClient);
-    const result = await engine.processInteraction(request, user.id);
+    
+    let result;
+    
+    // Handle different action types
+    switch (request.action) {
+      case 'get_consolidated_data':
+        result = { consolidatedData: await engine.getConsolidatedData(request.userId || user.id) };
+        break;
+      
+      case 'process_interaction':
+        result = await engine.makeAdaptiveDecision(request.userId || user.id, request.context);
+        break;
+      
+      case 'chat_interaction':
+      case 'study_interaction':
+        result = await engine.processInteraction({
+          userMessage: request.userMessage!,
+          sessionType: request.sessionType!,
+          sessionId: request.sessionId,
+          skillId: request.skillId,
+          responseTime: request.responseTime,
+          department: request.department || 'mathematics',
+          currentSkill: request.currentSkill
+        }, user.id);
+        break;
+      
+      default:
+        // Legacy support - treat as processInteraction
+        result = await engine.processInteraction(request as any, user.id);
+    }
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

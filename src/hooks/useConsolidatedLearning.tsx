@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import { ConsolidatedLearningEngine } from '@/lib/ConsolidatedLearningEngine';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
 export const useConsolidatedLearning = () => {
   const { user } = useAuth();
-  const [engine] = useState(() => ConsolidatedLearningEngine.getInstance());
   const [learnerData, setLearnerData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [currentDecision, setCurrentDecision] = useState<any>(null);
@@ -21,8 +20,15 @@ export const useConsolidatedLearning = () => {
     
     try {
       setIsLoading(true);
-      const data = await engine.getConsolidatedLearnerData(user.id);
-      setLearnerData(data);
+      const { data, error } = await supabase.functions.invoke('unified-learning-engine', {
+        body: {
+          action: 'get_consolidated_data',
+          userId: user.id
+        }
+      });
+      
+      if (error) throw error;
+      setLearnerData(data.consolidatedData);
     } catch (error) {
       console.error('Error loading learner data:', error);
     } finally {
@@ -42,10 +48,18 @@ export const useConsolidatedLearning = () => {
 
     try {
       setIsLoading(true);
-      const decision = await engine.makeAdaptiveDecision(user.id, context);
-      setCurrentDecision(decision);
-      setLearnerData(decision.learnerData);
-      return decision;
+      const { data, error } = await supabase.functions.invoke('unified-learning-engine', {
+        body: {
+          action: 'process_interaction',
+          userId: user.id,
+          context
+        }
+      });
+      
+      if (error) throw error;
+      setCurrentDecision(data);
+      setLearnerData(data.consolidatedData);
+      return data;
     } catch (error) {
       console.error('Error processing interaction:', error);
       return null;

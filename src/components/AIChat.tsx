@@ -305,9 +305,10 @@ export const AIChat = () => {
         department: 'mathematics'
       });
 
-      // Call UNIFIED learning engine instead of separate ai-chat
+      // Call UNIFIED learning engine 
       const response = await supabase.functions.invoke('unified-learning-engine', {
         body: {
+          action: 'chat_interaction',
           userMessage: userInput,
           sessionType: 'ai_chat',
           responseTime: Date.now() - startTime,
