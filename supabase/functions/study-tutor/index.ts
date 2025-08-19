@@ -295,21 +295,50 @@ serve(async (req) => {
     const hasEnoughHistory = (previousSteps?.length || 0) >= 2;
     const isPseudoActivity = hasEnoughHistory && !isStartLike && responseTime > 0 && responseTime < minResponseTime;
 
-// Determine target difficulty (never below high-school medium)
+// Get user profile with diagnostic data and learner profile
 const { data: profile } = await supabaseClient
   .from('profiles')
-  .select('level')
+  .select('level, learner_profile')
   .eq('user_id', session.user_id)
   .single();
 
+// Get latest diagnostic session for user
+const { data: diagnosticSession } = await supabaseClient
+  .from('diagnostic_sessions')
+  .select('self_ratings, summary, class_level, track, meta')
+  .eq('user_id', session.user_id)
+  .eq('status', 'completed')
+  .order('completed_at', { ascending: false })
+  .limit(1)
+  .maybeSingle();
+
+// Determine target difficulty using diagnostic data
+
 const recent = (previousSteps || []).slice(-4).filter((s: any) => typeof s.is_correct === 'boolean');
 const correctCount = recent.filter((s: any) => s.is_correct).length;
+
+// Enhanced difficulty determination using diagnostic data
 let targetDifficulty: 'medium' | 'hard' = 'medium';
-if (profile?.level && profile.level >= 3) targetDifficulty = 'hard';
+
+// Start with diagnostic recommendations if available
+if (diagnosticSession?.summary?.recommendedDifficulty) {
+  targetDifficulty = diagnosticSession.summary.recommendedDifficulty >= 6 ? 'hard' : 'medium';
+} else if (profile?.level && profile.level >= 3) {
+  targetDifficulty = 'hard';
+}
+
+// Adjust based on recent performance
 if (recent.length >= 2) {
   const ratio = correctCount / recent.length;
   if (ratio >= 0.75) targetDifficulty = 'hard';
   if (ratio <= 0.25) targetDifficulty = 'medium';
+}
+
+// Consider learner profile settings
+if (profile?.learner_profile?.preferred_difficulty) {
+  const preferredDiff = profile.learner_profile.preferred_difficulty;
+  if (preferredDiff >= 7) targetDifficulty = 'hard';
+  else if (preferredDiff <= 3) targetDifficulty = 'medium';
 }
 
 // Build conversation history for OpenAI
@@ -380,7 +409,26 @@ const skillContext = {
   phase_ai_instructions: phaseData?.ai_instructions || '',
   phase_success_criteria: phaseData?.success_criteria || {},
   content_context: contentContext,
-  has_content: !!skillContent.practiceExercises || !!skillContent.examples
+  has_content: !!skillContent.practiceExercises || !!skillContent.examples,
+  // Enhanced diagnostic integration
+  diagnostic_profile: {
+    has_completed: !!diagnosticSession,
+    class_level: diagnosticSession?.class_level || null,
+    track: diagnosticSession?.track || 'basic',
+    motivation_type: diagnosticSession?.meta?.motivation_type || 'achievement',
+    learning_goals: diagnosticSession?.meta?.learning_goals || [],
+    self_ratings: diagnosticSession?.self_ratings || {},
+    struggled_areas: diagnosticSession?.summary?.struggledAreas || [],
+    mastered_skills: diagnosticSession?.summary?.masteredSkills || [],
+    recommended_difficulty: diagnosticSession?.summary?.recommendedDifficulty || 3
+  },
+  learner_profile: profile?.learner_profile || {
+    motivation_type: 'achievement',
+    preferred_difficulty: 3,
+    struggle_areas: [],
+    strength_areas: [],
+    learning_pace: 'normal'
+  }
 };
 
     // Add previous conversation

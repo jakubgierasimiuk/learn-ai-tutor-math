@@ -236,6 +236,8 @@ export default function EnhancedDiagnostic() {
   const [track, setTrack] = useState<string>("basic");
   const [lastGrade, setLastGrade] = useState<string>("");
   const [ratings, setRatings] = useState<SelfRatings>({ algebra: 2, geometry: 2, functions: 2 });
+  const [motivationType, setMotivationType] = useState<string>("strengthen_knowledge");
+  const [learningGoals, setLearningGoals] = useState<string[]>([]);
 
   // Phase 1
   const [qIndex, setQIndex] = useState(0);
@@ -285,7 +287,11 @@ export default function EnhancedDiagnostic() {
           class_level: classLevel && !isNaN(Number(classLevel)) ? Number(classLevel) : null,
           track,
           self_ratings,
-          meta: { started_from: "/quiz" },
+          meta: { 
+            started_from: "/quiz",
+            motivation_type: motivationType,
+            learning_goals: learningGoals
+          },
         })
         .select("id")
         .single();
@@ -557,8 +563,38 @@ export default function EnhancedDiagnostic() {
     if (!sessionId) return;
     try {
       setLoading(true);
-      await computeAndSaveSummary();
-      logEvent("diagnostic_session_complete", { sessionId });
+      const summary = await computeAndSaveSummary();
+      
+      // Update user learner profile with diagnostic data
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData.user && summary) {
+        const learnerProfileUpdate = {
+          diagnostic_data: {
+            last_completed: new Date().toISOString(),
+            class_level: classLevel,
+            track: track,
+            motivation_type: motivationType,
+            learning_goals: learningGoals,
+            self_ratings: ratings,
+            summary: summary
+          },
+          struggle_areas: summary.diagnostic_summary?.struggled || [],
+          strength_areas: summary.diagnostic_summary?.mastered || [],
+          preferred_difficulty: Math.max(3, Math.min(7, (summary.skills?.filter(s => s.status === 'mastered').length || 0) + 3)),
+          motivation_type: motivationType,
+          performance_patterns: {
+            last_diagnostic_score: summary.skills?.filter(s => s.status === 'mastered').length || 0,
+            fundamental_gaps: summary.diagnostic_summary?.fundamental_gaps || []
+          }
+        };
+
+        await (supabase as any)
+          .from("profiles")
+          .update({ learner_profile: learnerProfileUpdate })
+          .eq("user_id", userData.user.id);
+      }
+      
+      logEvent("diagnostic_session_complete", { sessionId, motivationType, learningGoals });
       setPhase(99);
     } catch (e) {
       logError(e, "EnhancedDiagnostic.completeSession");
@@ -623,21 +659,64 @@ export default function EnhancedDiagnostic() {
             </div>
 
             <Separator />
+            
+            <div className="space-y-4">
+              <div>
+                <Label>Jaki jest Twój główny cel nauki?</Label>
+                <Select value={motivationType} onValueChange={setMotivationType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Wybierz główny cel" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="improve_grade">💪 Chcę poprawić oceny i lepiej rozumieć</SelectItem>
+                    <SelectItem value="strengthen_knowledge">🎯 Chcę ugruntować swoją wiedzę</SelectItem>
+                    <SelectItem value="test_skills">🧪 Chcę przetestować swoje umiejętności</SelectItem>
+                    <SelectItem value="prepare_exams">🎓 Przygotowuję się do ważnych egzaminów</SelectItem>
+                    <SelectItem value="master_advanced">🚀 Chcę opanować tematy zaawansowane</SelectItem>
+                    <SelectItem value="fill_gaps">🔧 Wiem że mam luki do uzupełnienia</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Wybierz obszary, które Cię interesują (opcjonalnie)</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {["Równania", "Geometria", "Funkcje", "Statystyka", "Prawdopodobieństwo", "Trygonometria"].map((goal) => (
+                    <Button
+                      key={goal}
+                      variant={learningGoals.includes(goal) ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => {
+                        setLearningGoals(prev => 
+                          prev.includes(goal) 
+                            ? prev.filter(g => g !== goal)
+                            : [...prev, goal]
+                        );
+                      }}
+                    >
+                      {goal}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <Separator />
             <div className="grid gap-6 sm:grid-cols-3">
               <div>
-                <Label>Algebra – samoocena</Label>
+                <Label>Algebra – jak oceniasz swoje umiejętności?</Label>
                 <Slider value={[ratings.algebra]} min={1} max={4} step={1} onValueChange={(v) => setRatings((r) => ({ ...r, algebra: v[0] }))} />
-                <p className="text-xs opacity-70 mt-1">1=niepewny • 4=pewny</p>
+                <p className="text-xs opacity-70 mt-1">1=potrzebuję wsparcia • 4=czuję się pewnie</p>
               </div>
               <div>
-                <Label>Geometria – samoocena</Label>
+                <Label>Geometria – jak oceniasz swoje umiejętności?</Label>
                 <Slider value={[ratings.geometry]} min={1} max={4} step={1} onValueChange={(v) => setRatings((r) => ({ ...r, geometry: v[0] }))} />
-                <p className="text-xs opacity-70 mt-1">1=niepewny • 4=pewny</p>
+                <p className="text-xs opacity-70 mt-1">1=potrzebuję wsparcia • 4=czuję się pewnie</p>
               </div>
               <div>
-                <Label>Funkcje – samoocena</Label>
+                <Label>Funkcje – jak oceniasz swoje umiejętności?</Label>
                 <Slider value={[ratings.functions]} min={1} max={4} step={1} onValueChange={(v) => setRatings((r) => ({ ...r, functions: v[0] }))} />
-                <p className="text-xs opacity-70 mt-1">1=niepewny • 4=pewny</p>
+                <p className="text-xs opacity-70 mt-1">1=potrzebuję wsparcia • 4=czuję się pewnie</p>
               </div>
             </div>
 

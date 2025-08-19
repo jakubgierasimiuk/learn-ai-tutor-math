@@ -569,9 +569,11 @@ export type Database = {
           deadline: string | null
           goal_type: string
           id: number
+          motivation_message: string | null
           reminder_days_before: number
           reminder_enabled: boolean
           status: string
+          target_topic: string | null
           target_value: number
           updated_at: string
           user_id: string
@@ -582,9 +584,11 @@ export type Database = {
           deadline?: string | null
           goal_type: string
           id?: number
+          motivation_message?: string | null
           reminder_days_before?: number
           reminder_enabled?: boolean
           status?: string
+          target_topic?: string | null
           target_value: number
           updated_at?: string
           user_id: string
@@ -595,9 +599,11 @@ export type Database = {
           deadline?: string | null
           goal_type?: string
           id?: number
+          motivation_message?: string | null
           reminder_days_before?: number
           reminder_enabled?: boolean
           status?: string
+          target_topic?: string | null
           target_value?: number
           updated_at?: string
           user_id?: string
@@ -987,6 +993,7 @@ export type Database = {
           diagnosis_completed: boolean
           email: string
           id: string
+          learner_profile: Json | null
           level: number
           name: string | null
           total_points: number
@@ -998,6 +1005,7 @@ export type Database = {
           diagnosis_completed?: boolean
           email: string
           id?: string
+          learner_profile?: Json | null
           level?: number
           name?: string | null
           total_points?: number
@@ -1009,6 +1017,7 @@ export type Database = {
           diagnosis_completed?: boolean
           email?: string
           id?: string
+          learner_profile?: Json | null
           level?: number
           name?: string | null
           total_points?: number
