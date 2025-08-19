@@ -302,6 +302,14 @@ const { data: profile } = await supabaseClient
   .eq('user_id', session.user_id)
   .single();
 
+// Get skill progress for historical performance data
+const { data: skillProgress } = await supabaseClient
+  .from('skill_progress')
+  .select('*')
+  .eq('user_id', session.user_id)
+  .eq('skill_id', skillId)
+  .maybeSingle();
+
 // Get latest diagnostic session for user
 const { data: diagnosticSession } = await supabaseClient
   .from('diagnostic_sessions')
@@ -317,24 +325,42 @@ const { data: diagnosticSession } = await supabaseClient
 const recent = (previousSteps || []).slice(-4).filter((s: any) => typeof s.is_correct === 'boolean');
 const correctCount = recent.filter((s: any) => s.is_correct).length;
 
-// Enhanced difficulty determination using diagnostic data
+// Enhanced difficulty determination using diagnostic data AND skill progress
 let targetDifficulty: 'medium' | 'hard' = 'medium';
 
-// Start with diagnostic recommendations if available
-if (diagnosticSession?.summary?.recommendedDifficulty) {
-  targetDifficulty = diagnosticSession.summary.recommendedDifficulty >= 6 ? 'hard' : 'medium';
-} else if (profile?.level && profile.level >= 3) {
-  targetDifficulty = 'hard';
+// PRIORITY 1: Use historical skill progress if available
+if (skillProgress) {
+  const masteryLevel = skillProgress.mastery_level || 0;
+  const difficultyMultiplier = skillProgress.difficulty_multiplier || 1.0;
+  const consecutiveCorrect = skillProgress.consecutive_correct || 0;
+  
+  console.log(`[Difficulty] Using skill progress: mastery=${masteryLevel}%, multiplier=${difficultyMultiplier}, consecutive=${consecutiveCorrect}`);
+  
+  // If user is mastered or has high consecutive correct, use hard difficulty
+  if (skillProgress.is_mastered || consecutiveCorrect >= 5 || masteryLevel >= 80) {
+    targetDifficulty = 'hard';
+  } else if (masteryLevel >= 60 || difficultyMultiplier >= 1.3) {
+    targetDifficulty = 'hard';
+  } else if (masteryLevel < 40 || difficultyMultiplier < 0.8) {
+    targetDifficulty = 'medium';
+  }
+} else {
+  // PRIORITY 2: Use diagnostic recommendations if no skill progress
+  if (diagnosticSession?.summary?.recommendedDifficulty) {
+    targetDifficulty = diagnosticSession.summary.recommendedDifficulty >= 6 ? 'hard' : 'medium';
+  } else if (profile?.level && profile.level >= 3) {
+    targetDifficulty = 'hard';
+  }
 }
 
-// Adjust based on recent performance
+// PRIORITY 3: Adjust based on recent performance (can override previous)
 if (recent.length >= 2) {
   const ratio = correctCount / recent.length;
   if (ratio >= 0.75) targetDifficulty = 'hard';
   if (ratio <= 0.25) targetDifficulty = 'medium';
 }
 
-// Consider learner profile settings
+// PRIORITY 4: Consider learner profile preferences (final adjustment)
 if (profile?.learner_profile?.preferred_difficulty) {
   const preferredDiff = profile.learner_profile.preferred_difficulty;
   if (preferredDiff >= 7) targetDifficulty = 'hard';
@@ -428,6 +454,17 @@ const skillContext = {
     struggle_areas: [],
     strength_areas: [],
     learning_pace: 'normal'
+  },
+  // Historical skill progress data
+  skill_progress: {
+    has_history: !!skillProgress,
+    mastery_level: skillProgress?.mastery_level || 0,
+    total_attempts: skillProgress?.total_attempts || 0,
+    correct_attempts: skillProgress?.correct_attempts || 0,
+    consecutive_correct: skillProgress?.consecutive_correct || 0,
+    is_mastered: skillProgress?.is_mastered || false,
+    difficulty_multiplier: skillProgress?.difficulty_multiplier || 1.0,
+    last_reviewed: skillProgress?.last_reviewed_at || null
   }
 };
 
@@ -658,6 +695,9 @@ Jak podejdziemy do tego zadania?`;
 
     if (stepInsertError) {
       console.error('Error saving lesson step:', stepInsertError);
+    } else {
+      // CRITICAL: Update skill progress after saving step
+      await updateSkillProgress(supabaseClient, session.user_id, skillId, isCorrect, responseTime);
     }
 
     // Extract equation from AI response for first message
@@ -820,4 +860,73 @@ function calculateResponseVariability(steps: any[]): number {
   const stdDev = Math.sqrt(variance);
   
   return Math.min(1, stdDev / mean); // Coefficient of variation
+}
+
+// CRITICAL: Function to update skill progress after each step
+async function updateSkillProgress(supabaseClient: any, userId: string, skillId: string, isCorrect: boolean, responseTime: number) {
+  try {
+    console.log(`[SkillProgress] Updating progress for user ${userId}, skill ${skillId}, correct: ${isCorrect}`);
+    
+    // Get current skill progress
+    const { data: currentProgress, error: progressError } = await supabaseClient
+      .from('skill_progress')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('skill_id', skillId)
+      .maybeSingle();
+
+    if (progressError) {
+      console.error('[SkillProgress] Error fetching current progress:', progressError);
+      return;
+    }
+
+    // Calculate new values
+    const totalAttempts = (currentProgress?.total_attempts || 0) + 1;
+    const correctAttempts = (currentProgress?.correct_attempts || 0) + (isCorrect ? 1 : 0);
+    const consecutiveCorrect = isCorrect ? 
+      (currentProgress?.consecutive_correct || 0) + 1 : 0;
+    
+    // Calculate mastery level (percentage correct)
+    const masteryLevel = Math.round((correctAttempts / totalAttempts) * 100);
+    
+    // Calculate difficulty multiplier based on performance
+    let difficultyMultiplier = currentProgress?.difficulty_multiplier || 1.0;
+    if (isCorrect && consecutiveCorrect >= 3) {
+      difficultyMultiplier = Math.min(2.0, difficultyMultiplier + 0.1);
+    } else if (!isCorrect) {
+      difficultyMultiplier = Math.max(0.5, difficultyMultiplier - 0.05);
+    }
+    
+    // Determine if skill is mastered (80%+ accuracy with at least 5 attempts)
+    const isMastered = masteryLevel >= 80 && totalAttempts >= 5;
+    
+    const progressData = {
+      user_id: userId,
+      skill_id: skillId,
+      mastery_level: masteryLevel,
+      total_attempts: totalAttempts,
+      correct_attempts: correctAttempts,
+      consecutive_correct: consecutiveCorrect,
+      difficulty_multiplier: difficultyMultiplier,
+      is_mastered: isMastered,
+      last_reviewed_at: new Date().toISOString(),
+      next_review_at: new Date(Date.now() + (isMastered ? 7 : 1) * 24 * 60 * 60 * 1000).toISOString(), // 7 days if mastered, 1 day if not
+      updated_at: new Date().toISOString()
+    };
+
+    const { error: upsertError } = await supabaseClient
+      .from('skill_progress')
+      .upsert(progressData, {
+        onConflict: 'user_id,skill_id'
+      });
+
+    if (upsertError) {
+      console.error('[SkillProgress] Error updating skill progress:', upsertError);
+    } else {
+      console.log(`[SkillProgress] Updated: mastery=${masteryLevel}%, attempts=${totalAttempts}, consecutive=${consecutiveCorrect}, multiplier=${difficultyMultiplier.toFixed(2)}, mastered=${isMastered}`);
+    }
+
+  } catch (error) {
+    console.error('[SkillProgress] Unexpected error updating skill progress:', error);
+  }
 }

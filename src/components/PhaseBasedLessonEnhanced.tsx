@@ -8,6 +8,7 @@ import { AlertCircle, CheckCircle, Clock, HelpCircle, Lightbulb, BookOpen } from
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { PhaseProgress } from "./PhaseProgress";
+import { SmartResume } from "./SmartResume";
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -65,10 +66,13 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
   const [isLoading, setIsLoading] = useState(false);
   const [responseTime, setResponseTime] = useState<number>(0);
   const [startTime, setStartTime] = useState<number>(Date.now());
+  const [showSmartResume, setShowSmartResume] = useState(true);
+  const [skillProgress, setSkillProgress] = useState<any>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     loadSkillData();
+    checkSkillProgress();
   }, [skillId]);
 
   useEffect(() => {
@@ -128,6 +132,64 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
         description: "Nie udało się załadować danych umiejętności",
         variant: "destructive",
       });
+    }
+  };
+
+  const checkSkillProgress = async () => {
+    try {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData.user) return;
+
+      const { data: progress, error } = await supabase
+        .from('skill_progress')
+        .select('*')
+        .eq('user_id', userData.user.id)
+        .eq('skill_id', skillId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error loading skill progress:', error);
+        return;
+      }
+
+      setSkillProgress(progress);
+      
+      // If user has no progress or wants to see resume, show Smart Resume
+      setShowSmartResume(true);
+    } catch (error) {
+      console.error('Error checking skill progress:', error);
+    }
+  };
+
+  const handleResumeChoice = (startOver: boolean = false) => {
+    setShowSmartResume(false);
+    if (startOver && session) {
+      // Reset session progress if starting over
+      resetSession();
+    }
+  };
+
+  const resetSession = async () => {
+    if (!session) return;
+    
+    try {
+      // Mark current session as completed and create new one
+      await supabase
+        .from('study_sessions')
+        .update({ status: 'completed' })
+        .eq('id', session.id);
+      
+      // Reinitialize
+      await initializeSession();
+      setChatHistory([]);
+      setCurrentPhase(1);
+      
+      toast({
+        title: "Sesja zresetowana",
+        description: "Rozpoczynasz od początku",
+      });
+    } catch (error) {
+      console.error('Error resetting session:', error);
     }
   };
 
@@ -502,6 +564,20 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
 
   const currentPhaseData = getCurrentPhaseData();
   const teachingFlowPhase = getTeachingFlowPhase();
+
+  // Show Smart Resume before lesson starts
+  if (showSmartResume && skill) {
+    return (
+      <div className={`space-y-6 ${className}`}>
+        <SmartResume
+          skillId={skillId}
+          skillName={skill.name}
+          onContinue={() => handleResumeChoice(false)}
+          onStartOver={() => handleResumeChoice(true)}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={`space-y-6 ${className}`}>
