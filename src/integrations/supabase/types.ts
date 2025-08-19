@@ -199,6 +199,63 @@ export type Database = {
           },
         ]
       }
+      cognitive_load_profiles: {
+        Row: {
+          break_timing_preferences: Json | null
+          created_at: string | null
+          current_load_estimate: number | null
+          effective_load_reducers: Json | null
+          extraneous_load_sensitivity: number | null
+          germane_load_optimization: number | null
+          id: string
+          intrinsic_load_capacity: number | null
+          language_complexity_threshold: number | null
+          last_calibrated: string | null
+          optimal_load_range: Json | null
+          overload_warning_threshold: number | null
+          preferred_complexity_ramps: Json | null
+          step_chunking_preference: number | null
+          user_id: string
+          visual_information_limit: number | null
+        }
+        Insert: {
+          break_timing_preferences?: Json | null
+          created_at?: string | null
+          current_load_estimate?: number | null
+          effective_load_reducers?: Json | null
+          extraneous_load_sensitivity?: number | null
+          germane_load_optimization?: number | null
+          id?: string
+          intrinsic_load_capacity?: number | null
+          language_complexity_threshold?: number | null
+          last_calibrated?: string | null
+          optimal_load_range?: Json | null
+          overload_warning_threshold?: number | null
+          preferred_complexity_ramps?: Json | null
+          step_chunking_preference?: number | null
+          user_id: string
+          visual_information_limit?: number | null
+        }
+        Update: {
+          break_timing_preferences?: Json | null
+          created_at?: string | null
+          current_load_estimate?: number | null
+          effective_load_reducers?: Json | null
+          extraneous_load_sensitivity?: number | null
+          germane_load_optimization?: number | null
+          id?: string
+          intrinsic_load_capacity?: number | null
+          language_complexity_threshold?: number | null
+          last_calibrated?: string | null
+          optimal_load_range?: Json | null
+          overload_warning_threshold?: number | null
+          preferred_complexity_ramps?: Json | null
+          step_chunking_preference?: number | null
+          user_id?: string
+          visual_information_limit?: number | null
+        }
+        Relationships: []
+      }
       daily_stats: {
         Row: {
           average_accuracy: number | null
@@ -440,6 +497,152 @@ export type Database = {
           },
         ]
       }
+      emotional_learning_states: {
+        Row: {
+          baseline_return_time: number | null
+          content_adaptation_needed: Json | null
+          detected_at: string | null
+          detected_emotion: string | null
+          effective_feedback_style: Json | null
+          emotion_duration_seconds: number | null
+          emotion_intensity: number | null
+          emotion_transition_triggers: Json | null
+          emotional_resilience_score: number | null
+          id: string
+          interaction_id: string | null
+          learning_effectiveness_during_emotion: number | null
+          motivation_sustainability: number | null
+          optimal_interventions: Json | null
+          regulation_strategies_needed: Json | null
+          resolved_at: string | null
+          user_id: string
+        }
+        Insert: {
+          baseline_return_time?: number | null
+          content_adaptation_needed?: Json | null
+          detected_at?: string | null
+          detected_emotion?: string | null
+          effective_feedback_style?: Json | null
+          emotion_duration_seconds?: number | null
+          emotion_intensity?: number | null
+          emotion_transition_triggers?: Json | null
+          emotional_resilience_score?: number | null
+          id?: string
+          interaction_id?: string | null
+          learning_effectiveness_during_emotion?: number | null
+          motivation_sustainability?: number | null
+          optimal_interventions?: Json | null
+          regulation_strategies_needed?: Json | null
+          resolved_at?: string | null
+          user_id: string
+        }
+        Update: {
+          baseline_return_time?: number | null
+          content_adaptation_needed?: Json | null
+          detected_at?: string | null
+          detected_emotion?: string | null
+          effective_feedback_style?: Json | null
+          emotion_duration_seconds?: number | null
+          emotion_intensity?: number | null
+          emotion_transition_triggers?: Json | null
+          emotional_resilience_score?: number | null
+          id?: string
+          interaction_id?: string | null
+          learning_effectiveness_during_emotion?: number | null
+          motivation_sustainability?: number | null
+          optimal_interventions?: Json | null
+          regulation_strategies_needed?: Json | null
+          resolved_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emotional_learning_states_interaction_id_fkey"
+            columns: ["interaction_id"]
+            isOneToOne: false
+            referencedRelation: "learning_interactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flow_state_analytics: {
+        Row: {
+          anxiety_level: number | null
+          boredom_level: number | null
+          clear_goals_present: boolean | null
+          cognitive_overload: boolean | null
+          created_at: string | null
+          distraction_count: number | null
+          effective_feedback_timing: Json | null
+          ended_at: string | null
+          enjoyment_rating: number | null
+          flow_depth_score: number | null
+          flow_duration_seconds: number | null
+          flow_probability: number | null
+          id: string
+          immediate_feedback_available: boolean | null
+          learning_efficiency_during_flow: number | null
+          optimal_difficulty_range: Json | null
+          preferred_interaction_pace: number | null
+          retention_boost_from_flow: number | null
+          self_consciousness_level: number | null
+          session_id: string
+          skill_challenge_ratio: number | null
+          started_at: string | null
+          user_id: string
+        }
+        Insert: {
+          anxiety_level?: number | null
+          boredom_level?: number | null
+          clear_goals_present?: boolean | null
+          cognitive_overload?: boolean | null
+          created_at?: string | null
+          distraction_count?: number | null
+          effective_feedback_timing?: Json | null
+          ended_at?: string | null
+          enjoyment_rating?: number | null
+          flow_depth_score?: number | null
+          flow_duration_seconds?: number | null
+          flow_probability?: number | null
+          id?: string
+          immediate_feedback_available?: boolean | null
+          learning_efficiency_during_flow?: number | null
+          optimal_difficulty_range?: Json | null
+          preferred_interaction_pace?: number | null
+          retention_boost_from_flow?: number | null
+          self_consciousness_level?: number | null
+          session_id: string
+          skill_challenge_ratio?: number | null
+          started_at?: string | null
+          user_id: string
+        }
+        Update: {
+          anxiety_level?: number | null
+          boredom_level?: number | null
+          clear_goals_present?: boolean | null
+          cognitive_overload?: boolean | null
+          created_at?: string | null
+          distraction_count?: number | null
+          effective_feedback_timing?: Json | null
+          ended_at?: string | null
+          enjoyment_rating?: number | null
+          flow_depth_score?: number | null
+          flow_duration_seconds?: number | null
+          flow_probability?: number | null
+          id?: string
+          immediate_feedback_available?: boolean | null
+          learning_efficiency_during_flow?: number | null
+          optimal_difficulty_range?: Json | null
+          preferred_interaction_pace?: number | null
+          retention_boost_from_flow?: number | null
+          self_consciousness_level?: number | null
+          session_id?: string
+          skill_challenge_ratio?: number | null
+          started_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       goal_reminders: {
         Row: {
           active: boolean
@@ -523,6 +726,60 @@ export type Database = {
         }
         Relationships: []
       }
+      knowledge_nodes: {
+        Row: {
+          assessment_items: Json | null
+          cognitive_complexity: number | null
+          common_misconceptions: Json | null
+          concept_id: string
+          concept_name: string
+          created_at: string | null
+          domain: string
+          id: string
+          learning_progressions: Json | null
+          parent_concepts: string[] | null
+          prerequisite_concepts: string[] | null
+          related_concepts: string[] | null
+          representations: Json | null
+          transfer_difficulty: number | null
+          typical_learning_time_minutes: number | null
+        }
+        Insert: {
+          assessment_items?: Json | null
+          cognitive_complexity?: number | null
+          common_misconceptions?: Json | null
+          concept_id: string
+          concept_name: string
+          created_at?: string | null
+          domain: string
+          id?: string
+          learning_progressions?: Json | null
+          parent_concepts?: string[] | null
+          prerequisite_concepts?: string[] | null
+          related_concepts?: string[] | null
+          representations?: Json | null
+          transfer_difficulty?: number | null
+          typical_learning_time_minutes?: number | null
+        }
+        Update: {
+          assessment_items?: Json | null
+          cognitive_complexity?: number | null
+          common_misconceptions?: Json | null
+          concept_id?: string
+          concept_name?: string
+          created_at?: string | null
+          domain?: string
+          id?: string
+          learning_progressions?: Json | null
+          parent_concepts?: string[] | null
+          prerequisite_concepts?: string[] | null
+          related_concepts?: string[] | null
+          representations?: Json | null
+          transfer_difficulty?: number | null
+          typical_learning_time_minutes?: number | null
+        }
+        Relationships: []
+      }
       leaderboards: {
         Row: {
           challenges_won: number
@@ -559,6 +816,75 @@ export type Database = {
           total_points?: number
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      learner_intelligence: {
+        Row: {
+          attention_span_minutes: number | null
+          breakthrough_probability: number | null
+          cognitive_load_capacity: number | null
+          created_at: string | null
+          dropout_risk_score: number | null
+          emotional_state: Json | null
+          frustration_patterns: Json | null
+          id: string
+          learning_strategies: Json | null
+          learning_velocity: Json | null
+          mastery_acquisition_rate: number | null
+          metacognitive_skills: Json | null
+          motivation_drivers: Json | null
+          plateau_risk_score: number | null
+          processing_speed_percentile: number | null
+          retention_half_life: Json | null
+          self_regulation_score: number | null
+          updated_at: string | null
+          user_id: string
+          working_memory_span: number | null
+        }
+        Insert: {
+          attention_span_minutes?: number | null
+          breakthrough_probability?: number | null
+          cognitive_load_capacity?: number | null
+          created_at?: string | null
+          dropout_risk_score?: number | null
+          emotional_state?: Json | null
+          frustration_patterns?: Json | null
+          id?: string
+          learning_strategies?: Json | null
+          learning_velocity?: Json | null
+          mastery_acquisition_rate?: number | null
+          metacognitive_skills?: Json | null
+          motivation_drivers?: Json | null
+          plateau_risk_score?: number | null
+          processing_speed_percentile?: number | null
+          retention_half_life?: Json | null
+          self_regulation_score?: number | null
+          updated_at?: string | null
+          user_id: string
+          working_memory_span?: number | null
+        }
+        Update: {
+          attention_span_minutes?: number | null
+          breakthrough_probability?: number | null
+          cognitive_load_capacity?: number | null
+          created_at?: string | null
+          dropout_risk_score?: number | null
+          emotional_state?: Json | null
+          frustration_patterns?: Json | null
+          id?: string
+          learning_strategies?: Json | null
+          learning_velocity?: Json | null
+          mastery_acquisition_rate?: number | null
+          metacognitive_skills?: Json | null
+          motivation_drivers?: Json | null
+          plateau_risk_score?: number | null
+          processing_speed_percentile?: number | null
+          retention_half_life?: Json | null
+          self_regulation_score?: number | null
+          updated_at?: string | null
+          user_id?: string
+          working_memory_span?: number | null
         }
         Relationships: []
       }
@@ -606,6 +932,81 @@ export type Database = {
           target_topic?: string | null
           target_value?: number
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      learning_interactions: {
+        Row: {
+          cognitive_load_estimate: number | null
+          cognitive_strategies_used: Json | null
+          confidence_level: number | null
+          content_id: string | null
+          correctness_level: number | null
+          difficulty_level: number | null
+          engagement_score: number | null
+          flow_state_probability: number | null
+          frustration_indicators: Json | null
+          id: string
+          interaction_timestamp: string | null
+          interaction_type: string
+          keystroke_dynamics: Json | null
+          microsecond_timing: number | null
+          misconceptions_activated: Json | null
+          mouse_movement_patterns: Json | null
+          pause_locations: Json | null
+          response_time_ms: number | null
+          sequence_number: number | null
+          session_id: string
+          skills_demonstrated: Json | null
+          user_id: string
+        }
+        Insert: {
+          cognitive_load_estimate?: number | null
+          cognitive_strategies_used?: Json | null
+          confidence_level?: number | null
+          content_id?: string | null
+          correctness_level?: number | null
+          difficulty_level?: number | null
+          engagement_score?: number | null
+          flow_state_probability?: number | null
+          frustration_indicators?: Json | null
+          id?: string
+          interaction_timestamp?: string | null
+          interaction_type: string
+          keystroke_dynamics?: Json | null
+          microsecond_timing?: number | null
+          misconceptions_activated?: Json | null
+          mouse_movement_patterns?: Json | null
+          pause_locations?: Json | null
+          response_time_ms?: number | null
+          sequence_number?: number | null
+          session_id: string
+          skills_demonstrated?: Json | null
+          user_id: string
+        }
+        Update: {
+          cognitive_load_estimate?: number | null
+          cognitive_strategies_used?: Json | null
+          confidence_level?: number | null
+          content_id?: string | null
+          correctness_level?: number | null
+          difficulty_level?: number | null
+          engagement_score?: number | null
+          flow_state_probability?: number | null
+          frustration_indicators?: Json | null
+          id?: string
+          interaction_timestamp?: string | null
+          interaction_type?: string
+          keystroke_dynamics?: Json | null
+          microsecond_timing?: number | null
+          misconceptions_activated?: Json | null
+          mouse_movement_patterns?: Json | null
+          pause_locations?: Json | null
+          response_time_ms?: number | null
+          sequence_number?: number | null
+          session_id?: string
+          skills_demonstrated?: Json | null
           user_id?: string
         }
         Relationships: []
@@ -665,6 +1066,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      learning_predictions: {
+        Row: {
+          actual_outcome: Json | null
+          confidence_level: number | null
+          created_at: string | null
+          early_warning_signals: Json | null
+          id: string
+          model_version: string | null
+          predicted_event: Json | null
+          predicted_for: string
+          prediction_accuracy: number | null
+          prediction_horizon_hours: number | null
+          prediction_type: string
+          preventive_interventions: Json | null
+          resolved_at: string | null
+          risk_factors: Json | null
+          user_id: string
+        }
+        Insert: {
+          actual_outcome?: Json | null
+          confidence_level?: number | null
+          created_at?: string | null
+          early_warning_signals?: Json | null
+          id?: string
+          model_version?: string | null
+          predicted_event?: Json | null
+          predicted_for: string
+          prediction_accuracy?: number | null
+          prediction_horizon_hours?: number | null
+          prediction_type: string
+          preventive_interventions?: Json | null
+          resolved_at?: string | null
+          risk_factors?: Json | null
+          user_id: string
+        }
+        Update: {
+          actual_outcome?: Json | null
+          confidence_level?: number | null
+          created_at?: string | null
+          early_warning_signals?: Json | null
+          id?: string
+          model_version?: string | null
+          predicted_event?: Json | null
+          predicted_for?: string
+          prediction_accuracy?: number | null
+          prediction_horizon_hours?: number | null
+          prediction_type?: string
+          preventive_interventions?: Json | null
+          resolved_at?: string | null
+          risk_factors?: Json | null
+          user_id?: string
+        }
+        Relationships: []
       }
       lesson_sessions: {
         Row: {
@@ -862,6 +1317,66 @@ export type Database = {
         }
         Relationships: []
       }
+      metacognitive_development: {
+        Row: {
+          created_at: string | null
+          development_trajectory: Json | null
+          effective_prompts: Json | null
+          evaluation_skills: Json | null
+          help_seeking_appropriateness: number | null
+          id: string
+          impulse_control_score: number | null
+          last_assessed: string | null
+          monitoring_skills: Json | null
+          persistence_score: number | null
+          planning_skills: Json | null
+          reflection_preferences: Json | null
+          scaffolding_level_needed: number | null
+          strategy_effectiveness: Json | null
+          strategy_repertoire: Json | null
+          strategy_selection_accuracy: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          development_trajectory?: Json | null
+          effective_prompts?: Json | null
+          evaluation_skills?: Json | null
+          help_seeking_appropriateness?: number | null
+          id?: string
+          impulse_control_score?: number | null
+          last_assessed?: string | null
+          monitoring_skills?: Json | null
+          persistence_score?: number | null
+          planning_skills?: Json | null
+          reflection_preferences?: Json | null
+          scaffolding_level_needed?: number | null
+          strategy_effectiveness?: Json | null
+          strategy_repertoire?: Json | null
+          strategy_selection_accuracy?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          development_trajectory?: Json | null
+          effective_prompts?: Json | null
+          evaluation_skills?: Json | null
+          help_seeking_appropriateness?: number | null
+          id?: string
+          impulse_control_score?: number | null
+          last_assessed?: string | null
+          monitoring_skills?: Json | null
+          persistence_score?: number | null
+          planning_skills?: Json | null
+          reflection_preferences?: Json | null
+          scaffolding_level_needed?: number | null
+          strategy_effectiveness?: Json | null
+          strategy_repertoire?: Json | null
+          strategy_selection_accuracy?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       micro_skills: {
         Row: {
           created_at: string | null
@@ -906,6 +1421,69 @@ export type Database = {
           },
         ]
       }
+      misconception_networks: {
+        Row: {
+          connected_misconceptions: string[] | null
+          context_triggers: Json | null
+          correction_attempts: Json | null
+          created_at: string | null
+          downstream_impacts: string[] | null
+          evolution_pattern: Json | null
+          id: string
+          initial_manifestation: Json | null
+          interfering_knowledge: Json | null
+          intervention_history: Json | null
+          last_manifested: string | null
+          misconception_cluster_id: string
+          persistence: number | null
+          prerequisite_gaps: string[] | null
+          recommended_approach: Json | null
+          strength: number | null
+          successful_corrections: Json | null
+          user_id: string
+        }
+        Insert: {
+          connected_misconceptions?: string[] | null
+          context_triggers?: Json | null
+          correction_attempts?: Json | null
+          created_at?: string | null
+          downstream_impacts?: string[] | null
+          evolution_pattern?: Json | null
+          id?: string
+          initial_manifestation?: Json | null
+          interfering_knowledge?: Json | null
+          intervention_history?: Json | null
+          last_manifested?: string | null
+          misconception_cluster_id: string
+          persistence?: number | null
+          prerequisite_gaps?: string[] | null
+          recommended_approach?: Json | null
+          strength?: number | null
+          successful_corrections?: Json | null
+          user_id: string
+        }
+        Update: {
+          connected_misconceptions?: string[] | null
+          context_triggers?: Json | null
+          correction_attempts?: Json | null
+          created_at?: string | null
+          downstream_impacts?: string[] | null
+          evolution_pattern?: Json | null
+          id?: string
+          initial_manifestation?: Json | null
+          interfering_knowledge?: Json | null
+          intervention_history?: Json | null
+          last_manifested?: string | null
+          misconception_cluster_id?: string
+          persistence?: number | null
+          prerequisite_gaps?: string[] | null
+          recommended_approach?: Json | null
+          strength?: number | null
+          successful_corrections?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       misconception_patterns: {
         Row: {
           correction_strategy: string | null
@@ -944,6 +1522,80 @@ export type Database = {
           misconception_id?: string
         }
         Relationships: []
+      }
+      neural_repetition_schedule: {
+        Row: {
+          concept_id: string
+          consolidation_stage: string | null
+          context_variation_needed: boolean | null
+          created_at: string | null
+          difficulty_progression: Json | null
+          forgetting_curve_params: Json | null
+          id: string
+          interference_susceptibility: number | null
+          interval_history: Json | null
+          last_exposure: string | null
+          mastery_achieved: boolean | null
+          memory_strength: number | null
+          next_optimal_exposure: string | null
+          repetition_count: number | null
+          sleep_quality_impact: number | null
+          stress_vulnerability: number | null
+          updated_at: string | null
+          urgency_score: number | null
+          user_id: string
+        }
+        Insert: {
+          concept_id: string
+          consolidation_stage?: string | null
+          context_variation_needed?: boolean | null
+          created_at?: string | null
+          difficulty_progression?: Json | null
+          forgetting_curve_params?: Json | null
+          id?: string
+          interference_susceptibility?: number | null
+          interval_history?: Json | null
+          last_exposure?: string | null
+          mastery_achieved?: boolean | null
+          memory_strength?: number | null
+          next_optimal_exposure?: string | null
+          repetition_count?: number | null
+          sleep_quality_impact?: number | null
+          stress_vulnerability?: number | null
+          updated_at?: string | null
+          urgency_score?: number | null
+          user_id: string
+        }
+        Update: {
+          concept_id?: string
+          consolidation_stage?: string | null
+          context_variation_needed?: boolean | null
+          created_at?: string | null
+          difficulty_progression?: Json | null
+          forgetting_curve_params?: Json | null
+          id?: string
+          interference_susceptibility?: number | null
+          interval_history?: Json | null
+          last_exposure?: string | null
+          mastery_achieved?: boolean | null
+          memory_strength?: number | null
+          next_optimal_exposure?: string | null
+          repetition_count?: number | null
+          sleep_quality_impact?: number | null
+          stress_vulnerability?: number | null
+          updated_at?: string | null
+          urgency_score?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "neural_repetition_schedule_concept_id_fkey"
+            columns: ["concept_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       points_history: {
         Row: {
