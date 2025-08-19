@@ -36,6 +36,9 @@ export interface MathValidationResult {
   feedback?: string;
 }
 
+// Alias for consistency across the codebase
+export type ValidationResult = MathValidationResult;
+
 export class SeededRandom {
   private seed: number;
 

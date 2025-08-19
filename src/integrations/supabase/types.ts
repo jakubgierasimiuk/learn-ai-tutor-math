@@ -2138,6 +2138,42 @@ export type Database = {
         }
         Relationships: []
       }
+      validation_logs: {
+        Row: {
+          confidence: number
+          created_at: string
+          detected_misconception: string | null
+          hints_used: number | null
+          id: string
+          is_correct: boolean
+          response_time: number | null
+          session_type: string
+          user_id: string
+        }
+        Insert: {
+          confidence?: number
+          created_at?: string
+          detected_misconception?: string | null
+          hints_used?: number | null
+          id?: string
+          is_correct: boolean
+          response_time?: number | null
+          session_type: string
+          user_id: string
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          detected_misconception?: string | null
+          hints_used?: number | null
+          id?: string
+          is_correct?: boolean
+          response_time?: number | null
+          session_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       weekly_summaries: {
         Row: {
           created_at: string
