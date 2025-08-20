@@ -10,6 +10,7 @@ import { AutoImportExecutor } from "@/components/AutoImportExecutor";
 import { LandingPage } from "@/components/LandingPage";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { importAllContentPackages } from "@/utils/importContentDatabase";
 
 const HomePage = () => {
   const { user, loading } = useAuth();
@@ -18,8 +19,24 @@ const HomePage = () => {
   useEffect(() => {
     if (user) {
       loadProfile();
+      // Auto-import 8 advanced skills immediately when user is authenticated
+      executeAutoImport();
     }
   }, [user]);
+
+  const executeAutoImport = async () => {
+    try {
+      console.log('🚀 Auto-importing 8 advanced skills...');
+      const result = await importAllContentPackages();
+      if (result.success) {
+        console.log(`✅ Auto-import successful! Imported ${result.importedCount}/${result.totalSkills} skills`);
+      } else {
+        console.log('❌ Auto-import had some issues:', result.errors);
+      }
+    } catch (error) {
+      console.error('❌ Auto-import failed:', error);
+    }
+  };
 
   const loadProfile = async () => {
     if (!user) return;
