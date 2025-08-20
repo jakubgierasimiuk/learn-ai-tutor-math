@@ -29,7 +29,7 @@ import UXAuditPage from "./pages/UXAuditPage";
 import ProgressPage from "./pages/ProgressPage";
 import ContentManagerPage from "./pages/ContentManagerPage";
 import ImportAllContentPage from "./pages/ImportAllContentPage";
-import RealLearningPage from "./pages/RealLearningPage";
+import { RealLearningPage } from "./pages/RealLearningPage";
 import { OnboardingWelcome } from "@/components/onboarding/OnboardingWelcome";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 import { QuickDiagnostic } from "@/components/onboarding/QuickDiagnostic";

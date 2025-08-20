@@ -1,7 +1,7 @@
 import { RealLearningInterface } from "@/components/RealLearningInterface";
 import { Seo } from "@/components/Seo";
 
-const RealLearningPage = () => {
+export const RealLearningPage = () => {
   return (
     <>
       <Seo 
