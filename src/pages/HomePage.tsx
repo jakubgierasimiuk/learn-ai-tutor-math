@@ -1,3 +1,5 @@
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Seo } from "@/components/Seo";
 import { ProgressMiniBar } from "@/components/ProgressMiniBar";
 import { Hero } from "@/components/Hero";
@@ -6,9 +8,29 @@ import { ReferralPromo } from "@/components/ReferralPromo";
 
 import { LandingPage } from "@/components/LandingPage";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const HomePage = () => {
   const { user, loading } = useAuth();
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    if (user) {
+      loadProfile();
+    }
+  }, [user]);
+
+  const loadProfile = async () => {
+    if (!user) return;
+    
+    const { data } = await supabase
+      .from('profiles')
+      .select('onboarding_completed')
+      .eq('user_id', user.id)
+      .single();
+      
+    setProfile(data);
+  };
 
   // Show landing page for non-authenticated users
   if (!loading && !user) {
@@ -34,6 +56,21 @@ const HomePage = () => {
         />
         <LandingPage />
       </>
+    );
+  }
+
+  // Redirect to onboarding if not completed
+  if (!loading && user && profile && !profile.onboarding_completed) {
+    window.location.href = '/onboarding/welcome';
+    return null;
+  }
+
+  // Show loading while checking profile
+  if (loading || (user && !profile)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
     );
   }
 

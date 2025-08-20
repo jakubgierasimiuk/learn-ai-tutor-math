@@ -1735,9 +1735,12 @@ export type Database = {
           diagnosis_completed: boolean
           email: string
           id: string
+          initial_level: string | null
           learner_profile: Json | null
+          learning_goal: string | null
           level: number
           name: string | null
+          onboarding_completed: boolean | null
           total_points: number
           updated_at: string
           user_id: string
@@ -1747,9 +1750,12 @@ export type Database = {
           diagnosis_completed?: boolean
           email: string
           id?: string
+          initial_level?: string | null
           learner_profile?: Json | null
+          learning_goal?: string | null
           level?: number
           name?: string | null
+          onboarding_completed?: boolean | null
           total_points?: number
           updated_at?: string
           user_id: string
@@ -1759,9 +1765,12 @@ export type Database = {
           diagnosis_completed?: boolean
           email?: string
           id?: string
+          initial_level?: string | null
           learner_profile?: Json | null
+          learning_goal?: string | null
           level?: number
           name?: string | null
+          onboarding_completed?: boolean | null
           total_points?: number
           updated_at?: string
           user_id?: string

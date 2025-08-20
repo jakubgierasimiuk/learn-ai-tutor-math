@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -29,8 +30,10 @@ import ProgressPage from "./pages/ProgressPage";
 import ContentManagerPage from "./pages/ContentManagerPage";
 import ImportAllContentPage from "./pages/ImportAllContentPage";
 import RealLearningPage from "./pages/RealLearningPage";
-
-import { useEffect } from "react";
+import { OnboardingWelcome } from "@/components/onboarding/OnboardingWelcome";
+import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
+import { QuickDiagnostic } from "@/components/onboarding/QuickDiagnostic";
+import { GoalSelection } from "@/components/onboarding/GoalSelection";
 import { setupGlobalLogging, setupGlobalInteractionLogging, logEvent } from "@/lib/logger";
 import { Seo } from "@/components/Seo";
 import { supabase } from "@/integrations/supabase/client";
@@ -138,6 +141,30 @@ const App = () => (
           <RouteSeo />
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/auth" element={<AuthPage />} />
+            
+            {/* Onboarding routes - accessible to authenticated users */}
+            <Route path="/onboarding/welcome" element={
+              <AuthenticatedLayout>
+                <OnboardingWelcome />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/onboarding/checklist" element={
+              <AuthenticatedLayout>
+                <OnboardingChecklist />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/onboarding/quick-diagnostic" element={
+              <AuthenticatedLayout>
+                <QuickDiagnostic />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/onboarding/goal-selection" element={
+              <AuthenticatedLayout>
+                <GoalSelection />
+              </AuthenticatedLayout>
+            } />
+            
             <Route path="/lessons" element={
               <AuthenticatedLayout>
                 <LessonsPage />
@@ -151,6 +178,11 @@ const App = () => (
             <Route path="/lesson/:lessonId" element={
               <AuthenticatedLayout>
                 <LessonPage />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/lesson/start" element={
+              <AuthenticatedLayout>
+                <RealLearningPage />
               </AuthenticatedLayout>
             } />
             <Route path="/recommendations" element={
@@ -238,7 +270,6 @@ const App = () => (
                 <ImportAllContentPage />
               </AuthenticatedLayout>
             } />
-            <Route path="/auth" element={<AuthPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
