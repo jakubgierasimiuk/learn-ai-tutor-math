@@ -55,7 +55,7 @@ export const Navigation = () => {
             </Link>
             <Button asChild size="sm" className="shadow-primary" onClick={() => logEvent('cta_click', { source: 'nav' })}>
               <Link to="/chat">
-                <span className="inline-flex items-center"><MessageCircle className="w-4 h-4 mr-2" />AI Korepetytor</span>
+                <span className="inline-flex items-center"><MessageCircle className="w-4 h-4 mr-2" />AI Learning</span>
               </Link>
             </Button>
           </div>
@@ -106,7 +106,7 @@ export const Navigation = () => {
                 onClick={() => setIsOpen(false)}
               >
                 <MessageCircle className="w-4 h-4" />
-                AI Korepetytor
+                AI Learning
               </Link>
               <Link 
                 to="/content-manager" 
