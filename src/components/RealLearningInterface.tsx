@@ -114,7 +114,8 @@ export const RealLearningInterface = () => {
         body: {
           actionType: 'generate_task',
           sessionId: sessionId,
-          skillId: 'basic_math'
+          skillId: 'basic_math',
+          sessionType: sessionMode
         }
       });
 
@@ -130,6 +131,11 @@ export const RealLearningInterface = () => {
         });
         setFeedback('');
         setShowHints(false);
+        
+        // Update profile if cognitive data is returned
+        if (data.profile) {
+          setProfile(prev => ({ ...prev, ...data.profile }));
+        }
       }
     } catch (error) {
       toast({
@@ -151,6 +157,7 @@ export const RealLearningInterface = () => {
       setIsLoading(true);
       const { data, error } = await supabase.functions.invoke('study-tutor', {
         body: {
+          actionType: 'practice_answer',
           message: currentTask.userAnswer,
           sessionId: sessionId,
           skillId: 'basic_math',
@@ -167,12 +174,17 @@ export const RealLearningInterface = () => {
       if (data) {
         setFeedback(data.message || data.feedback || '');
         
+        // Update profile with real cognitive data from response
+        if (data.profile) {
+          setProfile(prev => ({ ...prev, ...data.profile }));
+        }
+        
         const isCorrect = data.isCorrect || data.correctAnswer || data.message?.includes('Poprawnie') || data.message?.includes('Świetnie');
         
         if (isCorrect) {
           toast({
             title: "Correct!",
-            description: "Great work! Ready for the next challenge?",
+            description: data.teachingMoment?.message || "Great work! Ready for the next challenge?",
           });
           
           // Auto-generate next task after a delay
@@ -181,10 +193,17 @@ export const RealLearningInterface = () => {
           }, 2000);
         } else {
           toast({
-            title: "Not quite right",
-            description: "Try again or ask for a hint",
-            variant: "destructive"
+            title: "Learning Opportunity",
+            description: data.teachingMoment?.message || "Try again or ask for a hint",
+            variant: "default"
           });
+          
+          // Show misconception feedback if detected
+          if (data.detectedMisconception) {
+            setTimeout(() => {
+              setFeedback(prev => prev + '\n\nDetected misconception: ' + data.detectedMisconception);
+            }, 1000);
+          }
         }
       }
     } catch (error) {
@@ -241,7 +260,7 @@ export const RealLearningInterface = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Cognitive Load</p>
                 <p className="text-lg font-semibold">
-                  {profile?.cognitive_profile?.cognitive_load_level || 'Optimal'}
+                  {profile?.cognitiveLoad ? `${Math.round(profile.cognitiveLoad * 100)}%` : 'Calculating...'}
                 </p>
               </div>
             </div>
@@ -255,7 +274,7 @@ export const RealLearningInterface = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Flow State</p>
                 <p className="text-lg font-semibold">
-                  {Math.round((profile?.current_flow_state?.engagement_level || 0.75) * 100)}%
+                  {profile?.flowState ? `${Math.round(profile.flowState * 100)}%` : 'Analyzing...'}
                 </p>
               </div>
             </div>
@@ -267,9 +286,9 @@ export const RealLearningInterface = () => {
             <div className="flex items-center space-x-2">
               <Target className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-sm text-muted-foreground">Self-Efficacy</p>
+                <p className="text-sm text-muted-foreground">Mastery Level</p>
                 <p className="text-lg font-semibold">
-                  {Math.round((profile?.cognitive_profile?.self_efficacy || 0.65) * 100)}%
+                  {profile?.masteryLevel ? `${Math.round(profile.masteryLevel * 100)}%` : 'Assessing...'}
                 </p>
               </div>
             </div>
@@ -281,9 +300,9 @@ export const RealLearningInterface = () => {
             <div className="flex items-center space-x-2">
               <Brain className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-sm text-muted-foreground">Cognitive Style</p>
+                <p className="text-sm text-muted-foreground">Learning Style</p>
                 <p className="text-lg font-semibold capitalize">
-                  {profile?.cognitive_profile?.cognitive_style || 'Balanced'}
+                  {profile?.pedagogicalStrategy || 'Adaptive'}
                 </p>
               </div>
             </div>

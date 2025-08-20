@@ -8,8 +8,6 @@ import { AlertCircle, CheckCircle, Clock, HelpCircle, Lightbulb } from "lucide-r
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { PhaseProgress } from "./PhaseProgress";
-import { useUniversalLearning } from "@/hooks/useUniversalLearning";
-
 interface PhaseData {
   id: string;
   phase_number: number;
@@ -55,9 +53,6 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
   const [responseTime, setResponseTime] = useState<number>(0);
   const [startTime, setStartTime] = useState<number>(Date.now());
   const { toast } = useToast();
-  
-  // Universal Learning Integration
-  const { processInteraction, userState, suggestedDifficulty } = useUniversalLearning();
 
   useEffect(() => {
     loadSkillData();
