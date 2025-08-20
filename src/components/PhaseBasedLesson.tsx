@@ -218,20 +218,24 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
     setResponseTime(currentResponseTime);
 
     try {
-      // Process with Universal Learning Engine (single call)
-      const result = await processInteraction({
-        sessionType: 'study_learn',
-        userResponse: userInput,
-        responseTime: currentResponseTime,
-        skillId: skillId,
-        department: 'mathematics'
+      // Process through enhanced study-tutor with cognitive analysis
+      const { data, error } = await supabase.functions.invoke('study-tutor', {
+        body: {
+          message: userInput,
+          sessionId: session.id,
+          skillId: skillId,
+          responseTime: currentResponseTime,
+          stepType: 'regular',
+          currentPhase,
+          sessionType: 'phase_based_lesson',
+          department: 'mathematics'
+        }
       });
 
-      if (!result) {
-        throw new Error('No response from Universal Learning Engine');
-      }
+      if (error) throw error;
 
-      const { message: aiResponse, isCorrect, userState: updatedState } = result;
+      const aiResponse = data.message || 'Przepraszam, wystąpił problem z odpowiedzią.';
+      const isCorrect = data.isCorrect || data.correctAnswer || aiResponse.includes('Poprawnie');
 
       // Add user message to chat
       setChatHistory(prev => [...prev, {

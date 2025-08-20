@@ -2,8 +2,19 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { evaluateAnswer, MathContext } from './mathValidation.ts';
-import { analyzeStudentAnswer, StudentProfile } from './adaptivePedagogy.ts';
+import { analyzeStudentAnswer, StudentProfile, TeachingMoment, FlowStateIndicators } from './adaptivePedagogy.ts';
 import { validateAIResponse, extractMathEquation } from './aiValidation.ts';
+import { 
+  calculateFlowState, 
+  calculateZPDAlignment, 
+  selectPedagogicalStrategy,
+  calculateDifficultyAdjustment,
+  shouldTakeMicroBreak,
+  calculateOptimalSessionLength 
+} from './cognitiveAnalysis.ts';
+import { buildCognitiveProfile } from './profileBuilder.ts';
+import { buildPedagogicalInstructions } from './instructionBuilder.ts';
+import { updateLearnerProfileWithCognition } from './profileUpdater.ts';
 
 // ContentTaskManager for edge functions (simplified version)
 interface SkillContent {
@@ -337,12 +348,15 @@ serve(async (req) => {
     const hasEnoughHistory = (previousSteps?.length || 0) >= 2;
     const isPseudoActivity = hasEnoughHistory && !isStartLike && responseTime > 0 && responseTime < minResponseTime;
 
-// Get user profile with diagnostic data and learner profile
+// Get enhanced user profile with cognitive data
 const { data: profile } = await supabaseClient
   .from('profiles')
   .select('level, learner_profile')
   .eq('user_id', session.user_id)
   .single();
+
+// Build enhanced cognitive profile from stored data
+const cognitiveProfile = buildCognitiveProfile(profile, skillProgress, diagnosticSession);
 
 // Get skill progress for historical performance data
 const { data: skillProgress } = await supabaseClient

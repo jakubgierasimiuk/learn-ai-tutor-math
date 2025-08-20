@@ -42,11 +42,15 @@ export const AIChat = () => {
     setIsLoading(true);
 
     try {
+      // Enhanced chat through unified study-tutor with cognitive profiling
       const { data, error } = await supabase.functions.invoke('study-tutor', {
         body: { 
           message: input.trim(),
           actionType: 'chat_message',
-          department: 'mathematics'
+          department: 'mathematics',
+          responseTime: Date.now() - new Date().getTime(), // Simple timing
+          sessionType: 'chat',
+          skillId: 'basic_math' // Default for chat
         }
       });
 

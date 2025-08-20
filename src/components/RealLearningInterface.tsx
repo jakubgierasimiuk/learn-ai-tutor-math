@@ -59,7 +59,7 @@ export const RealLearningInterface = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Get user profile from study-tutor
+      // Get enhanced cognitive profile from study-tutor  
       const { data, error } = await supabase.functions.invoke('study-tutor', {
         body: {
           actionType: 'get_profile'
@@ -156,7 +156,9 @@ export const RealLearningInterface = () => {
           skillId: 'basic_math',
           responseTime,
           userAnswer: currentTask.userAnswer,
-          expectedAnswer: currentTask.task.expectedAnswer
+          expectedAnswer: currentTask.task.expectedAnswer,
+          sessionType: sessionMode,
+          department: 'mathematics'
         }
       });
 
@@ -238,7 +240,9 @@ export const RealLearningInterface = () => {
               <Brain className="h-5 w-5 text-success" />
               <div>
                 <p className="text-sm text-muted-foreground">Cognitive Load</p>
-                <p className="text-lg font-semibold">Optimal</p>
+                <p className="text-lg font-semibold">
+                  {profile?.cognitive_profile?.cognitive_load_level || 'Optimal'}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -249,9 +253,9 @@ export const RealLearningInterface = () => {
             <div className="flex items-center space-x-2">
               <Zap className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-sm text-muted-foreground">Energy Level</p>
+                <p className="text-sm text-muted-foreground">Flow State</p>
                 <p className="text-lg font-semibold">
-                  {Math.round((profile?.current_energy_level || 0.75) * 100)}%
+                  {Math.round((profile?.current_flow_state?.engagement_level || 0.75) * 100)}%
                 </p>
               </div>
             </div>
@@ -263,9 +267,9 @@ export const RealLearningInterface = () => {
             <div className="flex items-center space-x-2">
               <Target className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-sm text-muted-foreground">Confidence</p>
+                <p className="text-sm text-muted-foreground">Self-Efficacy</p>
                 <p className="text-lg font-semibold">
-                  {Math.round((profile?.confidence_level || 0.65) * 100)}%
+                  {Math.round((profile?.cognitive_profile?.self_efficacy || 0.65) * 100)}%
                 </p>
               </div>
             </div>
@@ -275,10 +279,12 @@ export const RealLearningInterface = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
-              <RotateCcw className="h-5 w-5 text-primary" />
+              <Brain className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-sm text-muted-foreground">Due Reviews</p>
-                <p className="text-lg font-semibold">0</p>
+                <p className="text-sm text-muted-foreground">Cognitive Style</p>
+                <p className="text-lg font-semibold capitalize">
+                  {profile?.cognitive_profile?.cognitive_style || 'Balanced'}
+                </p>
               </div>
             </div>
           </CardContent>
