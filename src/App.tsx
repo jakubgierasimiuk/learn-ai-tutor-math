@@ -182,7 +182,7 @@ const App = () => (
             } />
             <Route path="/lesson/start" element={
               <AuthenticatedLayout>
-                <RealLearningPage />
+                <ChatPage />
               </AuthenticatedLayout>
             } />
             <Route path="/recommendations" element={
