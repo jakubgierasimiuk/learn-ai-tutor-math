@@ -214,9 +214,28 @@ serve(async (req) => {
       });
     }
 
-    const { message, sessionId, skillId, responseTime, stepType, currentPhase } = await req.json();
+    const { 
+      message, 
+      sessionId, 
+      skillId, 
+      responseTime, 
+      stepType, 
+      currentPhase,
+      actionType,
+      sessionType,
+      department,
+      userAnswer,
+      expectedAnswer
+    } = await req.json();
+
+    // Handle different action types with flexible validation
+    const isProfileAction = actionType === 'get_profile' || message === 'get_profile';
+    const isSessionAction = actionType === 'start_session' || message === 'start_session';
+    const isTaskAction = actionType === 'generate_task' || message === 'generate_task';
+    const isChatAction = actionType === 'chat_message' || (!sessionId && !skillId && message);
     
-    if (!message || !sessionId || !skillId) {
+    // Flexible validation based on action type
+    if (!isProfileAction && !isSessionAction && !isTaskAction && !isChatAction && (!message || !sessionId || !skillId)) {
       throw new Error('Missing required parameters');
     }
 
@@ -225,6 +244,29 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       { global: { headers: { Authorization: authHeader } } }
     );
+
+    // Get current user
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    if (userError || !user) {
+      throw new Error('User not authenticated');
+    }
+
+    // Handle different action types
+    if (isProfileAction) {
+      return await handleGetProfile(supabaseClient, user.id);
+    }
+    
+    if (isSessionAction) {
+      return await handleStartSession(supabaseClient, user.id, sessionType || 'adaptive_practice', skillId || 'basic_math');
+    }
+    
+    if (isTaskAction) {
+      return await handleGenerateTask(supabaseClient, sessionId, skillId || 'basic_math');
+    }
+    
+    if (isChatAction) {
+      return await handleChatMessage(supabaseClient, user.id, message, department || 'mathematics');
+    }
 
     // Get skill details including content_data
     const { data: skill, error: skillError } = await supabaseClient
@@ -803,6 +845,205 @@ Jak podejdziemy do tego zadania?`;
     });
   }
 });
+
+// Handler functions for different action types
+async function handleGetProfile(supabaseClient: any, userId: string) {
+  try {
+    console.log('[Profile] Getting user profile for:', userId);
+    
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('level, learner_profile')
+      .eq('user_id', userId)
+      .single();
+
+    return new Response(JSON.stringify({
+      profile: profile?.learner_profile || {},
+      level: profile?.level || 1,
+      current_energy_level: profile?.learner_profile?.current_energy_level || 0.75,
+      confidence_level: profile?.learner_profile?.confidence_level || 0.65
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('[Profile] Error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to load profile' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+}
+
+async function handleStartSession(supabaseClient: any, userId: string, sessionType: string, skillId: string) {
+  try {
+    console.log('[Session] Starting session for user:', userId, 'type:', sessionType, 'skill:', skillId);
+    
+    // Create new study session
+    const { data: session, error: sessionError } = await supabaseClient
+      .from('study_sessions')
+      .insert({
+        user_id: userId,
+        skill_id: skillId,
+        session_type: sessionType,
+        status: 'in_progress'
+      })
+      .select()
+      .single();
+
+    if (sessionError) throw sessionError;
+
+    return new Response(JSON.stringify({
+      sessionId: session.id,
+      message: `Started ${sessionType} session for ${skillId}`
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('[Session] Error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to start session' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+}
+
+async function handleGenerateTask(supabaseClient: any, sessionId: string, skillId: string) {
+  try {
+    console.log('[Task] Generating task for session:', sessionId, 'skill:', skillId);
+    
+    // Get content from skill
+    const skillContent = await contentManager.fetchSkillContent(supabaseClient, skillId);
+    
+    let task = null;
+    if (skillContent?.practiceExercises?.length) {
+      const exercise = skillContent.practiceExercises[Math.floor(Math.random() * skillContent.practiceExercises.length)];
+      task = {
+        id: `task_${Date.now()}`,
+        problem: exercise.problem,
+        expectedAnswer: exercise.answer,
+        difficulty: exercise.difficulty || 5,
+        estimatedTime: '5-10',
+        hints: exercise.hints || []
+      };
+    } else {
+      // Fallback task
+      task = {
+        id: `fallback_${Date.now()}`,
+        problem: "Rozwiąż równanie: $2x + 3 = 11$",
+        expectedAnswer: "4",
+        difficulty: 3,
+        estimatedTime: '3-5',
+        hints: ["Przenieś 3 na prawą stronę", "Podziel obie strony przez 2"]
+      };
+    }
+
+    return new Response(JSON.stringify({ task }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('[Task] Error:', error);
+    return new Response(JSON.stringify({ error: 'Failed to generate task' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+}
+
+async function handleChatMessage(supabaseClient: any, userId: string, message: string, department: string) {
+  try {
+    console.log('[Chat] Processing chat message for user:', userId);
+    
+    // Create or get chat session
+    let { data: session } = await supabaseClient
+      .from('study_sessions')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('session_type', 'chat')
+      .eq('status', 'in_progress')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!session) {
+      const { data: newSession } = await supabaseClient
+        .from('study_sessions')
+        .insert({
+          user_id: userId,
+          skill_id: 'basic_math', // Default for chat
+          session_type: 'chat',
+          status: 'in_progress'
+        })
+        .select()
+        .single();
+      session = newSession;
+    }
+
+    // Get user profile for context
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('level, learner_profile')
+      .eq('user_id', userId)
+      .single();
+
+    // Simple AI chat prompt
+    const chatPrompt = `Jesteś pomocnym korepetytorem matematyki. Odpowiadaj po polsku, konkretnie i pomocnie. 
+Poziom ucznia: ${profile?.level || 1}. 
+Pytanie ucznia: ${message}`;
+
+    // Call OpenAI for chat response
+    const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: chatPrompt },
+          { role: 'user', content: message }
+        ],
+        max_tokens: 300,
+        temperature: 0.7,
+      }),
+    });
+
+    let aiMessage = "Przepraszam, nie mogę odpowiedzieć w tej chwili. Spróbuj ponownie.";
+    
+    if (openAIResponse.ok) {
+      const aiResponse = await openAIResponse.json();
+      aiMessage = aiResponse.choices?.[0]?.message?.content || aiMessage;
+    }
+
+    // Save chat step
+    const { error: stepError } = await supabaseClient
+      .from('lesson_steps')
+      .insert({
+        session_id: session.id,
+        step_number: 1, // Simplified for chat
+        step_type: 'chat',
+        user_input: message,
+        ai_response: aiMessage
+      });
+
+    if (stepError) {
+      console.error('[Chat] Error saving step:', stepError);
+    }
+
+    return new Response(JSON.stringify({ 
+      message: aiMessage,
+      sessionId: session.id 
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('[Chat] Error:', error);
+    return new Response(JSON.stringify({ error: 'Chat failed' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+}
 
 // Helper functions for adaptive pedagogy
 function getConsecutiveCorrect(steps: any[]): number {

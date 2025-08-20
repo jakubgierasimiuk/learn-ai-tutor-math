@@ -45,8 +45,7 @@ export const AIChat = () => {
       const { data, error } = await supabase.functions.invoke('study-tutor', {
         body: { 
           message: input.trim(),
-          sessionId: null, // Chat mode doesn't need specific session
-          skillId: null, // Let the tutor determine skill focus
+          actionType: 'chat_message',
           department: 'mathematics'
         }
       });

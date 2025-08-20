@@ -62,9 +62,7 @@ export const RealLearningInterface = () => {
       // Get user profile from study-tutor
       const { data, error } = await supabase.functions.invoke('study-tutor', {
         body: {
-          message: 'get_profile',
-          sessionId: null,
-          skillId: null
+          actionType: 'get_profile'
         }
       });
 
@@ -81,10 +79,9 @@ export const RealLearningInterface = () => {
       setIsLoading(true);
       const { data, error } = await supabase.functions.invoke('study-tutor', {
         body: {
-          message: 'start_session',
-          sessionId: null,
-          skillId: 'basic_math', // Default skill
-          sessionType: sessionMode
+          actionType: 'start_session',
+          sessionType: sessionMode,
+          skillId: 'basic_math' // Default skill
         }
       });
 
@@ -115,10 +112,9 @@ export const RealLearningInterface = () => {
       setIsLoading(true);
       const { data, error } = await supabase.functions.invoke('study-tutor', {
         body: {
-          message: 'generate_task',
+          actionType: 'generate_task',
           sessionId: sessionId,
-          skillId: 'basic_math',
-          difficulty: 5
+          skillId: 'basic_math'
         }
       });
 
@@ -158,9 +154,9 @@ export const RealLearningInterface = () => {
           message: currentTask.userAnswer,
           sessionId: sessionId,
           skillId: 'basic_math',
+          responseTime,
           userAnswer: currentTask.userAnswer,
-          expectedAnswer: currentTask.task.expectedAnswer,
-          responseTime
+          expectedAnswer: currentTask.task.expectedAnswer
         }
       });
 
@@ -169,7 +165,7 @@ export const RealLearningInterface = () => {
       if (data) {
         setFeedback(data.message || data.feedback || '');
         
-        const isCorrect = data.isCorrect || data.message?.includes('Poprawnie') || data.message?.includes('Świetnie');
+        const isCorrect = data.isCorrect || data.correctAnswer || data.message?.includes('Poprawnie') || data.message?.includes('Świetnie');
         
         if (isCorrect) {
           toast({
