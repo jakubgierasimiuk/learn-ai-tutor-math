@@ -42,10 +42,12 @@ export const AIChat = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('ai-chat', {
+      const { data, error } = await supabase.functions.invoke('study-tutor', {
         body: { 
           message: input.trim(),
-          conversation_history: messages.slice(-10) // Last 10 messages for context
+          sessionId: null, // Chat mode doesn't need specific session
+          skillId: null, // Let the tutor determine skill focus
+          department: 'mathematics'
         }
       });
 
@@ -53,7 +55,7 @@ export const AIChat = () => {
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: data.response || 'Przepraszam, wystąpił problem z odpowiedzią.',
+        content: data.message || 'Przepraszam, wystąpił problem z odpowiedzią.',
         role: 'assistant',
         timestamp: new Date()
       };

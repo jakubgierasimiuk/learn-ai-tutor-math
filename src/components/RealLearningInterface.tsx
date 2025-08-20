@@ -18,7 +18,7 @@ import {
   Pause,
   RotateCcw
 } from 'lucide-react';
-import { useRealLearning } from '@/hooks/useRealLearning';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface TaskState {
@@ -30,67 +30,103 @@ interface TaskState {
 }
 
 export const RealLearningInterface = () => {
-  const {
-    profile,
-    currentSession,
-    dueReviews,
-    isLoading,
-    generateAdaptiveTask,
-    validateAnswer,
-    processLearningInteraction,
-    startLearningSession,
-    endLearningSession,
-    getRecommendations,
-    isReady,
-    hasActiveSession,
-    isHighCognitiveLoad,
-    needsBreak,
-    hasDueReviews,
-    dueReviewCount
-  } = useRealLearning();
-
   const { toast } = useToast();
   const [currentTask, setCurrentTask] = useState<TaskState | null>(null);
   const [feedback, setFeedback] = useState<string>('');
   const [showHints, setShowHints] = useState(false);
   const [sessionMode, setSessionMode] = useState<'adaptive_practice' | 'spaced_review' | 'mastery_check'>('adaptive_practice');
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasActiveSession, setHasActiveSession] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [profile, setProfile] = useState<any>(null);
 
-  const recommendations = getRecommendations();
+  const isReady = true; // Always ready with study-tutor
+
+  // Load user profile on mount
+  useEffect(() => {
+    loadProfile();
+  }, []);
 
   // Auto-generate first task when session starts
   useEffect(() => {
-    if (hasActiveSession && !currentTask && isReady) {
+    if (hasActiveSession && !currentTask) {
       generateNewTask();
     }
-  }, [hasActiveSession, currentTask, isReady]);
+  }, [hasActiveSession, currentTask]);
+
+  const loadProfile = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Get user profile from study-tutor
+      const { data, error } = await supabase.functions.invoke('study-tutor', {
+        body: {
+          message: 'get_profile',
+          sessionId: null,
+          skillId: null
+        }
+      });
+
+      if (!error && data) {
+        setProfile(data.profile || {});
+      }
+    } catch (error) {
+      console.error('Error loading profile:', error);
+    }
+  };
 
   const startNewSession = async () => {
     try {
-      const sessionId = await startLearningSession(sessionMode);
-      if (sessionId) {
-        toast({
-          title: "Session Started",
-          description: `Starting ${sessionMode.replace('_', ' ')} session`,
-        });
-        generateNewTask();
-      }
+      setIsLoading(true);
+      const { data, error } = await supabase.functions.invoke('study-tutor', {
+        body: {
+          message: 'start_session',
+          sessionId: null,
+          skillId: 'basic_math', // Default skill
+          sessionType: sessionMode
+        }
+      });
+
+      if (error) throw error;
+
+      setSessionId(data?.sessionId);
+      setHasActiveSession(true);
+      
+      toast({
+        title: "Session Started",
+        description: `Starting ${sessionMode.replace('_', ' ')} session`,
+      });
+      
+      generateNewTask();
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to start learning session",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const generateNewTask = async () => {
-    if (!isReady) return;
-
     try {
-      const task = await generateAdaptiveTask(5, 'basic_arithmetic');
-      if (task) {
+      setIsLoading(true);
+      const { data, error } = await supabase.functions.invoke('study-tutor', {
+        body: {
+          message: 'generate_task',
+          sessionId: sessionId,
+          skillId: 'basic_math',
+          difficulty: 5
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.task) {
         setCurrentTask({
-          task,
+          task: data.task,
           userAnswer: '',
           startTime: Date.now(),
           hints: 0,
@@ -105,6 +141,8 @@ export const RealLearningInterface = () => {
         description: "Failed to generate task",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -114,21 +152,26 @@ export const RealLearningInterface = () => {
     const responseTime = Date.now() - currentTask.startTime;
 
     try {
-      const result = await processLearningInteraction({
-        userAnswer: currentTask.userAnswer,
-        expectedAnswer: currentTask.task.expectedAnswer,
-        skillCode: currentTask.task.skillCode,
-        skillNodeId: currentTask.task.metadata?.skillNode || 'default',
-        sessionId: currentSession?.id || 'default',
-        difficulty: currentTask.task.difficulty,
-        responseTime,
-        revisionsCount: currentTask.revisions
+      setIsLoading(true);
+      const { data, error } = await supabase.functions.invoke('study-tutor', {
+        body: {
+          message: currentTask.userAnswer,
+          sessionId: sessionId,
+          skillId: 'basic_math',
+          userAnswer: currentTask.userAnswer,
+          expectedAnswer: currentTask.task.expectedAnswer,
+          responseTime
+        }
       });
 
-      if (result) {
-        setFeedback(result.feedback);
+      if (error) throw error;
+
+      if (data) {
+        setFeedback(data.message || data.feedback || '');
         
-        if (result.validation.isCorrect) {
+        const isCorrect = data.isCorrect || data.message?.includes('Poprawnie') || data.message?.includes('Świetnie');
+        
+        if (isCorrect) {
           toast({
             title: "Correct!",
             description: "Great work! Ready for the next challenge?",
@@ -152,11 +195,13 @@ export const RealLearningInterface = () => {
         description: "Failed to process answer",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const showHint = () => {
-    if (currentTask && currentTask.hints < currentTask.task.hints.length) {
+    if (currentTask && currentTask.task.hints && currentTask.hints < currentTask.task.hints.length) {
       setShowHints(true);
       setCurrentTask({
         ...currentTask,
@@ -176,7 +221,7 @@ export const RealLearningInterface = () => {
     }
   };
 
-  if (!isReady) {
+  if (isLoading && !hasActiveSession) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
@@ -194,12 +239,10 @@ export const RealLearningInterface = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
-              <Brain className={`h-5 w-5 ${isHighCognitiveLoad ? 'text-destructive' : 'text-success'}`} />
+              <Brain className="h-5 w-5 text-success" />
               <div>
                 <p className="text-sm text-muted-foreground">Cognitive Load</p>
-                <p className="text-lg font-semibold">
-                  {isHighCognitiveLoad ? 'High' : 'Optimal'}
-                </p>
+                <p className="text-lg font-semibold">Optimal</p>
               </div>
             </div>
           </CardContent>
@@ -212,7 +255,7 @@ export const RealLearningInterface = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Energy Level</p>
                 <p className="text-lg font-semibold">
-                  {Math.round((profile?.currentEnergyLevel || 0.5) * 100)}%
+                  {Math.round((profile?.current_energy_level || 0.75) * 100)}%
                 </p>
               </div>
             </div>
@@ -226,7 +269,7 @@ export const RealLearningInterface = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Confidence</p>
                 <p className="text-lg font-semibold">
-                  {Math.round((profile?.confidenceLevel || 0.5) * 100)}%
+                  {Math.round((profile?.confidence_level || 0.65) * 100)}%
                 </p>
               </div>
             </div>
@@ -239,27 +282,13 @@ export const RealLearningInterface = () => {
               <RotateCcw className="h-5 w-5 text-primary" />
               <div>
                 <p className="text-sm text-muted-foreground">Due Reviews</p>
-                <p className="text-lg font-semibold">{dueReviewCount}</p>
+                <p className="text-lg font-semibold">0</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Recommendations */}
-      {recommendations.length > 0 && (
-        <div className="space-y-2">
-          {recommendations.map((rec, index) => (
-            <Alert key={index} className={
-              rec.priority === 'high' ? 'border-destructive' : 
-              rec.priority === 'medium' ? 'border-warning' : 'border-info'
-            }>
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>{rec.message}</AlertDescription>
-            </Alert>
-          ))}
-        </div>
-      )}
 
       {/* Session Controls */}
       {!hasActiveSession ? (
@@ -279,16 +308,15 @@ export const RealLearningInterface = () => {
                 <span className="text-xs text-muted-foreground">AI-personalized tasks</span>
               </Button>
               
-              <Button
+                <Button
                 variant={sessionMode === 'spaced_review' ? 'default' : 'outline'}
                 onClick={() => setSessionMode('spaced_review')}
                 className="h-20 flex flex-col"
-                disabled={!hasDueReviews}
               >
                 <RotateCcw className="h-6 w-6 mb-2" />
                 <span>Spaced Review</span>
                 <span className="text-xs text-muted-foreground">
-                  {dueReviewCount} skills due
+                  0 skills due
                 </span>
               </Button>
               
@@ -317,7 +345,7 @@ export const RealLearningInterface = () => {
               <CardTitle>
                 {sessionMode.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} Session
               </CardTitle>
-              <Button variant="outline" onClick={endLearningSession}>
+              <Button variant="outline" onClick={() => setHasActiveSession(false)}>
                 <Pause className="h-4 w-4 mr-2" />
                 End Session
               </Button>
@@ -363,10 +391,10 @@ export const RealLearningInterface = () => {
                     <Button 
                       variant="outline" 
                       onClick={showHint}
-                      disabled={currentTask.hints >= currentTask.task.hints.length}
+                      disabled={!currentTask.task.hints || currentTask.hints >= currentTask.task.hints.length}
                     >
                       <Lightbulb className="h-4 w-4 mr-2" />
-                      Get Hint ({currentTask.hints}/{currentTask.task.hints.length})
+                      Get Hint ({currentTask.hints}/{currentTask.task.hints?.length || 0})
                     </Button>
                     
                     <Button variant="outline" onClick={generateNewTask}>
@@ -376,7 +404,7 @@ export const RealLearningInterface = () => {
                 </div>
 
                 {/* Hints */}
-                {showHints && currentTask.hints > 0 && (
+                {showHints && currentTask.hints > 0 && currentTask.task.hints && (
                   <Alert>
                     <Lightbulb className="h-4 w-4" />
                     <AlertDescription>
