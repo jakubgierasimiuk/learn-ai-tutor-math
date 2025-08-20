@@ -5,6 +5,7 @@ import { ProgressMiniBar } from "@/components/ProgressMiniBar";
 import { Hero } from "@/components/Hero";
 import { Features } from "@/components/Features";
 import { ReferralPromo } from "@/components/ReferralPromo";
+import { AutoImportExecutor } from "@/components/AutoImportExecutor";
 
 import { LandingPage } from "@/components/LandingPage";
 import { useAuth } from "@/hooks/useAuth";
@@ -104,6 +105,13 @@ const HomePage = () => {
           
           <div className="relative z-10 max-w-6xl mx-auto">
             <Hero />
+          </div>
+        </section>
+
+        {/* Auto Import Executor - Import 8 Advanced Skills */}
+        <section className="relative py-8 px-6">
+          <div className="max-w-6xl mx-auto">
+            <AutoImportExecutor />
           </div>
         </section>
 
