@@ -12,6 +12,7 @@ import TopicDetailPage from "./pages/TopicDetailPage";
 import LessonPage from "./pages/LessonPage";
 import QuizPage from "./pages/QuizPage";
 import DashboardPage from "./pages/DashboardPage";
+import ChatPage from "./pages/ChatPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import AuthPage from "./pages/AuthPage";
 import SmartRecommendations from "./pages/SmartRecommendations";
@@ -169,7 +170,7 @@ const App = () => (
             } />
             <Route path="/chat" element={
               <AuthenticatedLayout>
-                <RealLearningPage />
+                <ChatPage />
               </AuthenticatedLayout>
             } />
             <Route path="/materials" element={
@@ -214,6 +215,11 @@ const App = () => (
             } />
             <Route path="/study" element={
               <AuthenticatedLayout>
+                <StudyDashboard />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/real-learning" element={
+              <AuthenticatedLayout>
                 <RealLearningPage />
               </AuthenticatedLayout>
             } />
@@ -230,11 +236,6 @@ const App = () => (
             <Route path="/import-all-content" element={
               <AuthenticatedLayout>
                 <ImportAllContentPage />
-              </AuthenticatedLayout>
-            } />
-            <Route path="/real-learning" element={
-              <AuthenticatedLayout>
-                <RealLearningPage />
               </AuthenticatedLayout>
             } />
             <Route path="/auth" element={<AuthPage />} />
