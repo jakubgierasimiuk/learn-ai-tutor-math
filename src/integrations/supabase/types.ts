@@ -728,55 +728,46 @@ export type Database = {
       }
       knowledge_nodes: {
         Row: {
-          assessment_items: Json | null
-          cognitive_complexity: number | null
-          common_misconceptions: Json | null
-          concept_id: string
-          concept_name: string
+          bloom_taxonomy_level: number | null
+          cognitive_load_estimate: number | null
           created_at: string | null
-          domain: string
+          department: string
+          difficulty_level: number
+          estimated_mastery_time_hours: number | null
           id: string
-          learning_progressions: Json | null
-          parent_concepts: string[] | null
-          prerequisite_concepts: string[] | null
-          related_concepts: string[] | null
-          representations: Json | null
-          transfer_difficulty: number | null
-          typical_learning_time_minutes: number | null
+          misconception_patterns: Json | null
+          prerequisite_knowledge_required: string[] | null
+          real_world_applications: string[] | null
+          skill_code: string
+          skill_name: string
         }
         Insert: {
-          assessment_items?: Json | null
-          cognitive_complexity?: number | null
-          common_misconceptions?: Json | null
-          concept_id: string
-          concept_name: string
+          bloom_taxonomy_level?: number | null
+          cognitive_load_estimate?: number | null
           created_at?: string | null
-          domain: string
+          department?: string
+          difficulty_level: number
+          estimated_mastery_time_hours?: number | null
           id?: string
-          learning_progressions?: Json | null
-          parent_concepts?: string[] | null
-          prerequisite_concepts?: string[] | null
-          related_concepts?: string[] | null
-          representations?: Json | null
-          transfer_difficulty?: number | null
-          typical_learning_time_minutes?: number | null
+          misconception_patterns?: Json | null
+          prerequisite_knowledge_required?: string[] | null
+          real_world_applications?: string[] | null
+          skill_code: string
+          skill_name: string
         }
         Update: {
-          assessment_items?: Json | null
-          cognitive_complexity?: number | null
-          common_misconceptions?: Json | null
-          concept_id?: string
-          concept_name?: string
+          bloom_taxonomy_level?: number | null
+          cognitive_load_estimate?: number | null
           created_at?: string | null
-          domain?: string
+          department?: string
+          difficulty_level?: number
+          estimated_mastery_time_hours?: number | null
           id?: string
-          learning_progressions?: Json | null
-          parent_concepts?: string[] | null
-          prerequisite_concepts?: string[] | null
-          related_concepts?: string[] | null
-          representations?: Json | null
-          transfer_difficulty?: number | null
-          typical_learning_time_minutes?: number | null
+          misconception_patterns?: Json | null
+          prerequisite_knowledge_required?: string[] | null
+          real_world_applications?: string[] | null
+          skill_code?: string
+          skill_name?: string
         }
         Relationships: []
       }
@@ -1121,6 +1112,69 @@ export type Database = {
         }
         Relationships: []
       }
+      learning_profiles: {
+        Row: {
+          attention_span_minutes: number | null
+          cognitive_load_threshold: number | null
+          confidence_level: number | null
+          created_at: string | null
+          current_energy_level: number | null
+          ease_factor: number | null
+          frustration_level: number | null
+          id: string
+          initial_interval_hours: number | null
+          intrinsic_vs_extrinsic: number | null
+          optimal_challenge_level: number | null
+          optimal_session_length_minutes: number | null
+          processing_speed_percentile: number | null
+          sequential_vs_global_preference: number | null
+          updated_at: string | null
+          user_id: string
+          visual_vs_verbal_preference: number | null
+          working_memory_span: number | null
+        }
+        Insert: {
+          attention_span_minutes?: number | null
+          cognitive_load_threshold?: number | null
+          confidence_level?: number | null
+          created_at?: string | null
+          current_energy_level?: number | null
+          ease_factor?: number | null
+          frustration_level?: number | null
+          id?: string
+          initial_interval_hours?: number | null
+          intrinsic_vs_extrinsic?: number | null
+          optimal_challenge_level?: number | null
+          optimal_session_length_minutes?: number | null
+          processing_speed_percentile?: number | null
+          sequential_vs_global_preference?: number | null
+          updated_at?: string | null
+          user_id: string
+          visual_vs_verbal_preference?: number | null
+          working_memory_span?: number | null
+        }
+        Update: {
+          attention_span_minutes?: number | null
+          cognitive_load_threshold?: number | null
+          confidence_level?: number | null
+          created_at?: string | null
+          current_energy_level?: number | null
+          ease_factor?: number | null
+          frustration_level?: number | null
+          id?: string
+          initial_interval_hours?: number | null
+          intrinsic_vs_extrinsic?: number | null
+          optimal_challenge_level?: number | null
+          optimal_session_length_minutes?: number | null
+          processing_speed_percentile?: number | null
+          sequential_vs_global_preference?: number | null
+          updated_at?: string | null
+          user_id?: string
+          visual_vs_verbal_preference?: number | null
+          working_memory_span?: number | null
+        }
+        Relationships: []
+      }
       lesson_sessions: {
         Row: {
           completed_at: string | null
@@ -1421,6 +1475,50 @@ export type Database = {
           },
         ]
       }
+      misconception_database: {
+        Row: {
+          created_at: string | null
+          description: string
+          detection_accuracy: number | null
+          id: string
+          intervention_strategy: string
+          misconception_code: string
+          name: string
+          skill_node_id: string | null
+          trigger_patterns: Json
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          detection_accuracy?: number | null
+          id?: string
+          intervention_strategy: string
+          misconception_code: string
+          name: string
+          skill_node_id?: string | null
+          trigger_patterns: Json
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          detection_accuracy?: number | null
+          id?: string
+          intervention_strategy?: string
+          misconception_code?: string
+          name?: string
+          skill_node_id?: string | null
+          trigger_patterns?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "misconception_database_skill_node_id_fkey"
+            columns: ["skill_node_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       misconception_networks: {
         Row: {
           connected_misconceptions: string[] | null
@@ -1587,15 +1685,7 @@ export type Database = {
           urgency_score?: number | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "neural_repetition_schedule_concept_id_fkey"
-            columns: ["concept_id"]
-            isOneToOne: false
-            referencedRelation: "knowledge_nodes"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       points_history: {
         Row: {
@@ -2210,6 +2300,59 @@ export type Database = {
           requirement_value?: number
         }
         Relationships: []
+      }
+      spaced_repetition_cards: {
+        Row: {
+          created_at: string | null
+          ease_factor: number | null
+          id: string
+          interval_days: number | null
+          last_reviewed_at: string | null
+          mastery_level: number | null
+          next_review_at: string
+          predicted_retention: number | null
+          repetition_count: number | null
+          review_history: Json | null
+          skill_node_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          ease_factor?: number | null
+          id?: string
+          interval_days?: number | null
+          last_reviewed_at?: string | null
+          mastery_level?: number | null
+          next_review_at: string
+          predicted_retention?: number | null
+          repetition_count?: number | null
+          review_history?: Json | null
+          skill_node_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          ease_factor?: number | null
+          id?: string
+          interval_days?: number | null
+          last_reviewed_at?: string | null
+          mastery_level?: number | null
+          next_review_at?: string
+          predicted_retention?: number | null
+          repetition_count?: number | null
+          review_history?: Json | null
+          skill_node_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spaced_repetition_cards_skill_node_id_fkey"
+            columns: ["skill_node_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       study_group_members: {
         Row: {
