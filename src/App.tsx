@@ -28,6 +28,7 @@ import UXAuditPage from "./pages/UXAuditPage";
 import ProgressPage from "./pages/ProgressPage";
 import ContentManagerPage from "./pages/ContentManagerPage";
 import ImportAllContentPage from "./pages/ImportAllContentPage";
+import RealLearningPage from "./pages/RealLearningPage";
 
 import { useEffect } from "react";
 import { setupGlobalLogging, setupGlobalInteractionLogging, logEvent } from "@/lib/logger";
@@ -230,6 +231,11 @@ const App = () => (
             <Route path="/import-all-content" element={
               <AuthenticatedLayout>
                 <ImportAllContentPage />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/real-learning" element={
+              <AuthenticatedLayout>
+                <RealLearningPage />
               </AuthenticatedLayout>
             } />
             <Route path="/auth" element={<AuthPage />} />

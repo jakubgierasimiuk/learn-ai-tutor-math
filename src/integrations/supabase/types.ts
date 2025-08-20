@@ -3121,6 +3121,27 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_due_cards_for_user: {
+        Args: { target_user_id: string }
+        Returns: {
+          card_id: string
+          mastery_level: number
+          next_review_at: string
+          skill_node_id: string
+        }[]
+      }
+      get_user_learning_profile: {
+        Args: { target_user_id: string }
+        Returns: {
+          attention_span_minutes: number
+          cognitive_load_threshold: number
+          current_energy_level: number
+          optimal_session_length_minutes: number
+          processing_speed_percentile: number
+          user_id: string
+          working_memory_span: number
+        }[]
+      }
       get_weekly_benchmarks: {
         Args: Record<PropertyKey, never>
         Returns: Json
