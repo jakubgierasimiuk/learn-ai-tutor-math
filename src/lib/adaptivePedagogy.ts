@@ -9,12 +9,36 @@ export type StudentResponsePattern =
   | 'pseudo_activity';   // Pozorna aktywność
 
 export interface StudentProfile {
+  // Core metrics
   averageResponseTime: number;
-  correctAnswerRate: number;
+  correctnessRate: number;
   commonMistakes: string[];
   preferredExplanationStyle: 'visual' | 'verbal' | 'step_by_step';
   difficultyLevel: number; // 1-10
   knowledgeGaps: string[];
+  
+  // Enhanced cognitive metrics (from ChatGPT research)
+  workingMemoryCapacity: number; // 1-9 scale
+  processingSpeed: number; // percentile 1-99
+  attentionRegulationIndex: number; // 0-1 scale
+  inhibitoryControlIndex: number; // 0-1 scale  
+  selfEfficacy: number; // 0-1 confidence in abilities
+  persistenceIndex: number; // 1-5 attempts before giving up
+  cognitiveLoadThreshold: number; // max load before overload
+  
+  // Age-based calibration
+  ageGroup: 'elementary' | 'middle' | 'high_school';
+  cognitiveStyle: 'impulsive' | 'reflective' | 'persistent';
+  preferredPedagogyStyle: 'fading' | 'example-problem' | 'self-explanation' | 'interleaving' | 'contrasting';
+}
+
+export interface FlowStateIndicators {
+  responseTimeVariance: number; // 0-1, lower = more consistent attention
+  errorStabilityIndex: number; // 0-1, higher = fewer careless mistakes
+  selfCorrectionFrequency: number; // 0-1, higher = better metacognition
+  perceivedChallenge: number; // 1-10 difficulty rating
+  engagementLevel: number; // 0-1, calculated from multiple factors
+  frustrationLevel: number; // 0-1, higher = needs intervention
 }
 
 export interface TeachingMoment {
@@ -22,6 +46,9 @@ export interface TeachingMoment {
   message: string;
   nextAction: 'continue' | 'increase_difficulty' | 'practice_more' | 'review_basics';
   focusAreas?: string[];
+  pedagogicalStrategy?: 'fading' | 'example-problem' | 'self-explanation' | 'interleaving' | 'contrasting';
+  confidenceLevel?: number;
+  zpd_alignment?: number;
 }
 
 /**
@@ -279,4 +306,67 @@ export function generateCheckpointOptions(
   });
   
   return options;
+}
+
+/**
+ * Main analysis function that integrates with enhanced cognitive profiling
+ */
+export function analyzeStudentAnswer(
+  userAnswer: string,
+  expectedAnswer: string,
+  responseTime: number,
+  profile: StudentProfile,
+  context?: any
+): {
+  isCorrect: boolean;
+  responsePattern: StudentResponsePattern;
+  teachingMoment: TeachingMoment;
+  confidenceLevel: number;
+  detectedMisconception?: string;
+} {
+  // Determine correctness (simplified for integration)
+  const isCorrect = userAnswer.toLowerCase().trim() === expectedAnswer.toLowerCase().trim() ||
+                   Math.abs(parseFloat(userAnswer) - parseFloat(expectedAnswer)) < 0.001;
+
+  // Analyze response pattern
+  const responsePattern = analyzeResponsePattern(
+    userAnswer, 
+    expectedAnswer, 
+    responseTime, 
+    isCorrect, 
+    profile
+  );
+
+  // Generate teaching moment
+  const teachingMoment = detectTeachingMoment(
+    responsePattern,
+    userAnswer,
+    expectedAnswer,
+    responseTime,
+    profile
+  );
+
+  // Calculate confidence based on response pattern and profile
+  let confidenceLevel = 0.5;
+  if (responsePattern === 'quick_correct') confidenceLevel = 0.9;
+  else if (responsePattern === 'slow_correct') confidenceLevel = 0.7;
+  else if (responsePattern === 'computational_error') confidenceLevel = 0.6;
+  else if (responsePattern === 'method_error') confidenceLevel = 0.3;
+  else if (responsePattern === 'completely_lost') confidenceLevel = 0.1;
+
+  // Detect misconceptions (basic implementation)
+  let detectedMisconception: string | undefined;
+  if (!isCorrect && responsePattern === 'method_error') {
+    detectedMisconception = 'incorrect_method';
+  } else if (!isCorrect && responsePattern === 'computational_error') {
+    detectedMisconception = 'calculation_error';
+  }
+
+  return {
+    isCorrect,
+    responsePattern,
+    teachingMoment,
+    confidenceLevel,
+    detectedMisconception
+  };
 }

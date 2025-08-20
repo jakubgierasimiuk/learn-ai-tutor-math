@@ -348,16 +348,6 @@ serve(async (req) => {
     const hasEnoughHistory = (previousSteps?.length || 0) >= 2;
     const isPseudoActivity = hasEnoughHistory && !isStartLike && responseTime > 0 && responseTime < minResponseTime;
 
-// Get enhanced user profile with cognitive data
-const { data: profile } = await supabaseClient
-  .from('profiles')
-  .select('level, learner_profile')
-  .eq('user_id', session.user_id)
-  .single();
-
-// Build enhanced cognitive profile from stored data
-const cognitiveProfile = buildCognitiveProfile(profile, skillProgress, diagnosticSession);
-
 // Get skill progress for historical performance data
 const { data: skillProgress } = await supabaseClient
   .from('skill_progress')
@@ -375,6 +365,16 @@ const { data: diagnosticSession } = await supabaseClient
   .order('completed_at', { ascending: false })
   .limit(1)
   .maybeSingle();
+
+// Get enhanced user profile with cognitive data
+const { data: profile } = await supabaseClient
+  .from('profiles')
+  .select('level, learner_profile')
+  .eq('user_id', session.user_id)
+  .single();
+
+// Build enhanced cognitive profile from stored data
+const cognitiveProfile = buildCognitiveProfile(profile, skillProgress, diagnosticSession);
 
 // Determine target difficulty using diagnostic data
 
@@ -524,40 +524,157 @@ const skillContext = {
   }
 };
 
-    // Add previous conversation
-    if (previousSteps && previousSteps.length > 0) {
-      previousSteps.forEach(step => {
-        if (step.ai_response) {
-          messages.push({
-            role: 'assistant',
-            content: step.ai_response
-          });
-        }
-        if (step.user_input) {
-          messages.push({
-            role: 'user',
-            content: `${JSON.stringify(skillContext)}\n${step.user_input}`
-          });
-        }
-      });
+    // Add conversation history
+    previousSteps?.forEach((step) => {
+      if (step.ai_response) {
+        messages.push({
+          role: 'assistant',
+          content: step.ai_response
+        });
+      }
+      if (step.user_input) {
+        messages.push({
+          role: 'user',
+          content: step.user_input
+        });
+      }
+    });
+
+    // Add current message
+    messages.push({
+      role: 'user',
+      content: message
+    });
+
+    console.log('[StudyTutor] Calling OpenAI with message count:', messages.length);
+    console.log('[StudyTutor] Last user message:', message);
+    
+    // Build context for MathValidation
+    const mathContext: MathContext = {
+      currentEquation,
+      expectedAnswerType: 'number',
+      stepNumber: turnNumber,
+      previousSteps: previousSteps?.map(s => s.user_input).filter(Boolean) || []
+    };
+
+    let validationResult = null;
+    let analysisResult = null;
+    
+    // Enhanced analysis for math answers using unified system
+    const containsNumber = /\d/.test(message);
+    const isMathAnswer = containsNumber && currentEquation && !message.toLowerCase().includes('nie rozumiem');
+    
+    if (isMathAnswer) {
+      console.log('[StudyTutor] Validating math answer with unified analysis');
+      try {
+        // Math validation
+        validationResult = await evaluateAnswer(
+          message,
+          currentEquation,
+          mathContext
+        );
+        
+        // Enhanced cognitive analysis
+        analysisResult = analyzeStudentAnswer(
+          message,
+          validationResult?.normalizedAnswer || '',
+          responseTime || 0,
+          cognitiveProfile
+        );
+        
+        // Calculate flow state indicators
+        const recentSteps = previousSteps?.slice(-5) || [];
+        const flowState = calculateFlowState(responseTime || 0, cognitiveProfile);
+        
+        // Update learner profile with cognitive insights
+        await updateLearnerProfileWithCognition(supabaseClient, user.id, {
+          flowState,
+          cognitiveProfile,
+          sessionAnalytics: {
+            responseTime: responseTime || 0,
+            isCorrect: analysisResult.isCorrect,
+            pedagogicalStrategy: analysisResult.teachingMoment.pedagogicalStrategy,
+            difficultyAdjustment: 0 // Will be calculated by adaptive system
+          }
+        });
+        
+        console.log('[StudyTutor] Enhanced analysis complete:', {
+          mathValid: validationResult?.isCorrect,
+          cognitivePattern: analysisResult.responsePattern,
+          flowEngagement: flowState.engagementLevel,
+          teachingMoment: analysisResult.teachingMoment.type
+        });
+        
+      } catch (error) {
+        console.error('[StudyTutor] Enhanced analysis error:', error);
+        // Continue without enhanced analysis
+      }
     }
 
-// Add current user message with proper handling for lesson start
-let userMessage = message;
-if (message === "Rozpocznij lekcję" && previousSteps.length === 0) {
-  const contentInstruction = contentContext ? 
-    `\n\nUżyj zadania z bazy treści powyżej jako podstawę dla pierwszego ćwiczenia.` : 
-    `\n\nBrak zadań w bazie treści - użyj generatora zadań.`;
-  
-  userMessage = `Pierwsza tura: podaj tylko dwie sekcje –\nZadanie: [zawiera konkretne liczby, dotyczy: ${skill.name}]\nPytanie: [jedno, konkretne]\nPoziom: szkoła średnia (${targetDifficulty}). Zero metatekstu. Nie dodawaj podpowiedzi.${contentInstruction}`;
-}
+    // Build enhanced pedagogical instructions using unified system
+    let pedagogicalInstructions = '';
+    if (analysisResult && validationResult) {
+      // Use enhanced cognitive analysis results
+      const flowState = calculateFlowState(responseTime || 0, cognitiveProfile);
+      const zpd_alignment = calculateZPDAlignment(analysisResult.responsePattern, cognitiveProfile);
+      const pedagogicalStrategy = selectPedagogicalStrategy(analysisResult.responsePattern, cognitiveProfile);
+      const difficultyAdjustment = calculateDifficultyAdjustment(analysisResult.responsePattern, cognitiveProfile, flowState);
+      
+      pedagogicalInstructions = buildPedagogicalInstructions({
+        mathValidation: validationResult,
+        cognitiveAnalysis: analysisResult,
+        flowState,
+        cognitiveProfile,
+        sessionContext: {
+          turnNumber,
+          targetDifficulty,
+          isPseudoActivity,
+          isFirstMessage,
+          skillId,
+          department: department || 'mathematics'
+        },
+        adaptiveRecommendations: {
+          pedagogicalStrategy,
+          difficultyAdjustment,
+          zpd_alignment,
+          shouldTakeBreak: shouldTakeMicroBreak(
+            (responseTime || 0) / 1000 / 60, // convert to minutes
+            cognitiveProfile,
+            flowState
+          )
+        }
+      });
+    } else if (validationResult) {
+      // Fallback to basic instructions
+      pedagogicalInstructions = `
+INSTRUKCJE_PEDAGOGICZNE dla aktualnego kroku:
+- Odpowiedź ucznia: ${validationResult.isCorrect ? 'POPRAWNA' : 'NIEPOPRAWNA'}
+- Pewność walidacji: ${(validationResult.confidence * 100).toFixed(0)}%
+- Wykryte błędne rozumienie: ${validationResult.detectedMisconception || 'brak'}
+- Feedback dla ucznia: ${validationResult.feedback || 'standardowy'}
+- Trudność docelowa: ${targetDifficulty}
+- Pseudo-aktywność: ${isPseudoActivity ? 'TAK - zwróć uwagę na to!' : 'nie'}
 
-// For now, just add the basic context (we'll analyze after getting AI response)
-const currentContext = JSON.stringify({ ...skillContext, step_type: stepType || 'question', turn_number: turnNumber });
-messages.push({
-  role: 'user',
-  content: `${currentContext}\n${userMessage}`
-});
+REAKCJA: ${validationResult.isCorrect ? 
+  'Pochwal i przejdź do następnego kroku lub zwiększ trudność.' : 
+  'Skoryguj błąd, wyjaśnij problem i daj kolejną szansę.'}
+      `.trim();
+    } else {
+      pedagogicalInstructions = `
+INSTRUKCJE_PEDAGOGICZNE:
+- Trudność docelowa: ${targetDifficulty}
+- To ${turnNumber === 1 ? 'PIERWSZE' : 'kolejne'} pytanie
+- Pseudo-aktywność: ${isPseudoActivity ? 'TAK - zwróć uwagę na jakość odpowiedzi!' : 'nie'}
+      `.trim();
+    }
+
+    // Add pedagogical instructions to system context
+    if (pedagogicalInstructions) {
+      messages.push({
+        role: 'system',
+        content: pedagogicalInstructions
+      });
+    }
 
     // Limit conversation history to prevent token overflow
     const maxMessages = 15;
