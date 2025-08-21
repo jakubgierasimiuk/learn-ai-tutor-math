@@ -897,6 +897,7 @@ export type Database = {
       }
       learning_interactions: {
         Row: {
+          ai_response: string | null
           cognitive_load_estimate: number | null
           cognitive_strategies_used: Json | null
           confidence_level: number | null
@@ -918,9 +919,12 @@ export type Database = {
           sequence_number: number | null
           session_id: string
           skills_demonstrated: Json | null
+          tokens_estimate: number | null
           user_id: string
+          user_input: string | null
         }
         Insert: {
+          ai_response?: string | null
           cognitive_load_estimate?: number | null
           cognitive_strategies_used?: Json | null
           confidence_level?: number | null
@@ -942,9 +946,12 @@ export type Database = {
           sequence_number?: number | null
           session_id: string
           skills_demonstrated?: Json | null
+          tokens_estimate?: number | null
           user_id: string
+          user_input?: string | null
         }
         Update: {
+          ai_response?: string | null
           cognitive_load_estimate?: number | null
           cognitive_strategies_used?: Json | null
           confidence_level?: number | null
@@ -966,7 +973,9 @@ export type Database = {
           sequence_number?: number | null
           session_id?: string
           skills_demonstrated?: Json | null
+          tokens_estimate?: number | null
           user_id?: string
+          user_input?: string | null
         }
         Relationships: []
       }
@@ -2469,12 +2478,16 @@ export type Database = {
           hints_used: number | null
           id: string
           initialized: boolean | null
+          last_summarized_sequence: number | null
           mastery_score: number | null
           pseudo_activity_strikes: number | null
           session_type: string
           skill_id: string
           started_at: string
           status: string
+          summary_compact: string | null
+          summary_state: Json | null
+          summary_updated_at: string | null
           total_steps: number | null
           total_tokens_used: number | null
           user_id: string
@@ -2490,12 +2503,16 @@ export type Database = {
           hints_used?: number | null
           id?: string
           initialized?: boolean | null
+          last_summarized_sequence?: number | null
           mastery_score?: number | null
           pseudo_activity_strikes?: number | null
           session_type?: string
           skill_id: string
           started_at?: string
           status?: string
+          summary_compact?: string | null
+          summary_state?: Json | null
+          summary_updated_at?: string | null
           total_steps?: number | null
           total_tokens_used?: number | null
           user_id: string
@@ -2511,12 +2528,16 @@ export type Database = {
           hints_used?: number | null
           id?: string
           initialized?: boolean | null
+          last_summarized_sequence?: number | null
           mastery_score?: number | null
           pseudo_activity_strikes?: number | null
           session_type?: string
           skill_id?: string
           started_at?: string
           status?: string
+          summary_compact?: string | null
+          summary_state?: Json | null
+          summary_updated_at?: string | null
           total_steps?: number | null
           total_tokens_used?: number | null
           user_id?: string

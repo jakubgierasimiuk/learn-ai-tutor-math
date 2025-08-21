@@ -16,6 +16,296 @@ import { buildCognitiveProfile } from './profileBuilder.ts';
 import { buildPedagogicalInstructions } from './instructionBuilder.ts';
 import { updateLearnerProfileWithCognition } from './profileUpdater.ts';
 
+// Token estimation and budget control
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 4); // Rough approximation: 4 chars = 1 token
+}
+
+const INPUT_BUDGET = 1200;
+const RECENT_WINDOW_DEFAULT = 6;
+
+// Session Summary Types
+interface SessionSummaryState {
+  session_id: string;
+  student_id: string;
+  skill_focus: string[];
+  phase: string;
+  difficulty_pref: number;
+  last_difficulty: number;
+  progress: {
+    attempts: number;
+    correct_streak: number;
+    errors_total: number;
+    hint_uses: number;
+    early_reveal: number;
+  };
+  misconceptions: Array<{code: string, count: number}>;
+  mastered: string[];
+  struggled: string[];
+  spaced_repetition: {
+    due_cards: number;
+    review_ratio: number;
+  };
+  affect: {
+    pace: string;
+    pseudo_activity_strikes: number;
+  };
+  last_window_digest: string;
+  next_recommendation: {
+    skill_uuid: string;
+    rationale: string;
+  } | null;
+  updated_at: string;
+}
+
+interface MessagePair {
+  user?: string;
+  assistant?: string;
+  sequence: number;
+  tokens_estimate?: number;
+}
+
+// Session Summarization Functions
+async function needsResummarization(supabaseClient: any, sessionId: string): Promise<boolean> {
+  const { data: session } = await supabaseClient
+    .from('study_sessions')
+    .select('last_summarized_sequence, summary_updated_at')
+    .eq('id', sessionId)
+    .single();
+
+  const { data: interactions } = await supabaseClient
+    .from('learning_interactions')
+    .select('sequence_number')
+    .eq('session_id', sessionId)
+    .order('sequence_number', { ascending: false })
+    .limit(1);
+
+  const lastSequence = interactions?.[0]?.sequence_number || 0;
+  const lastSummarized = session?.last_summarized_sequence || 0;
+  const sequencesSince = lastSequence - lastSummarized;
+  
+  const summaryAge = session?.summary_updated_at ? 
+    Date.now() - new Date(session.summary_updated_at).getTime() : 
+    Infinity;
+
+  return sequencesSince >= 8 || summaryAge > 24 * 60 * 60 * 1000; // 8 turns or 24 hours
+}
+
+function detectMisconceptions(messages: Array<{role: string, content: string}>): Array<{code: string, count: number}> {
+  const codes: Record<string, number> = {};
+  const push = (c: string) => (codes[c] = (codes[c] || 0) + 1);
+  
+  for (const msg of messages) {
+    if (msg.role !== 'user') continue;
+    const text = msg.content.toLowerCase();
+    
+    if (/\bdelta\b|Δ|b\^2-4ac/.test(text)) push('discriminant_error');
+    if (/zmian[aey] znak|minus na plus|plus na minus/.test(text)) push('equation_sign_flip');
+    if (/pierwiastk|sqrt/.test(text) && /błąd|error/.test(text)) push('root_selection_error');
+  }
+  
+  return Object.entries(codes)
+    .map(([code, count]) => ({ code, count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+async function updateSessionSummary(supabaseClient: any, sessionId: string): Promise<void> {
+  console.log('[Summarization] Starting summary update for session:', sessionId);
+  
+  try {
+    const { data: session } = await supabaseClient
+      .from('study_sessions')
+      .select('*')
+      .eq('id', sessionId)
+      .single();
+
+    const { data: interactions } = await supabaseClient
+      .from('learning_interactions')
+      .select('*')
+      .eq('session_id', sessionId)
+      .gt('sequence_number', session?.last_summarized_sequence || 0)
+      .order('sequence_number', { ascending: true });
+
+    if (!interactions?.length) return;
+
+    // Build conversation pairs for analysis
+    const messages = interactions
+      .filter(i => i.user_input || i.ai_response)
+      .flatMap(i => [
+        i.user_input ? { role: 'user', content: i.user_input } : null,
+        i.ai_response ? { role: 'assistant', content: i.ai_response } : null
+      ])
+      .filter(Boolean);
+
+    // Detect misconceptions and calculate progress
+    const misconceptions = detectMisconceptions(messages);
+    const totalAttempts = interactions.filter(i => i.user_input).length;
+    const correctAttempts = interactions.filter(i => i.correctness_level === 1).length;
+    const hintUses = interactions.filter(i => i.interaction_type === 'hint_request').length;
+    
+    let correctStreak = 0;
+    for (let i = interactions.length - 1; i >= 0; i--) {
+      if (interactions[i].correctness_level === 1) correctStreak++;
+      else break;
+    }
+
+    // Build summary state
+    const summaryState: SessionSummaryState = {
+      session_id: sessionId,
+      student_id: session.user_id,
+      skill_focus: [session.skill_id],
+      phase: session.session_type || 'wprowadzenie_podstaw',
+      difficulty_pref: 3,
+      last_difficulty: 3,
+      progress: {
+        attempts: totalAttempts,
+        correct_streak: correctStreak,
+        errors_total: totalAttempts - correctAttempts,
+        hint_uses: hintUses,
+        early_reveal: session.early_reveals || 0
+      },
+      misconceptions,
+      mastered: [],
+      struggled: [],
+      spaced_repetition: { due_cards: 0, review_ratio: 0.0 },
+      affect: {
+        pace: 'normal',
+        pseudo_activity_strikes: session.pseudo_activity_strikes || 0
+      },
+      last_window_digest: `Ostatnie ${Math.min(interactions.length, 6)} interakcji w sesji.`,
+      next_recommendation: null,
+      updated_at: new Date().toISOString()
+    };
+
+    // Generate compact summary (5 lines)
+    const compactSummary = generateCompactSummary(summaryState);
+    
+    // Save summary to database
+    const lastSequence = interactions[interactions.length - 1]?.sequence_number || 0;
+    
+    await supabaseClient
+      .from('study_sessions')
+      .update({
+        summary_compact: compactSummary,
+        summary_state: summaryState,
+        last_summarized_sequence: lastSequence,
+        summary_updated_at: new Date().toISOString()
+      })
+      .eq('id', sessionId);
+
+    console.log('[Summarization] Summary updated successfully');
+  } catch (error) {
+    console.error('[Summarization] Error updating summary:', error);
+  }
+}
+
+function generateCompactSummary(state: SessionSummaryState): string {
+  const { progress, misconceptions, affect } = state;
+  const topMisconception = misconceptions[0]?.code || 'brak';
+  const accuracy = progress.attempts > 0 ? 
+    Math.round((progress.attempts - progress.errors_total) / progress.attempts * 100) : 0;
+
+  return [
+    `[SESJA] ${state.phase}, Focus: ${state.skill_focus[0] || 'nieznana umiejętność'}`,
+    `[UCZEŃ] Preferuje trudność ${state.difficulty_pref}, tempo: ${affect.pace}`,
+    `[POSTĘP] Próby ${progress.attempts}, streak ${progress.correct_streak}, celność ${accuracy}%, podpowiedzi ${progress.hint_uses}×`,
+    `[STATUS] Błędy: ${topMisconception}, pseudo-aktywność: ${affect.pseudo_activity_strikes}`,
+    `[DALEJ] Kontynuuj z trudnością ${state.last_difficulty}`
+  ].join('\n');
+}
+
+async function getRecentWindow(supabaseClient: any, sessionId: string, pairs: number = 6): Promise<MessagePair[]> {
+  const { data: interactions } = await supabaseClient
+    .from('learning_interactions')
+    .select('sequence_number, user_input, ai_response, tokens_estimate')
+    .eq('session_id', sessionId)
+    .not('user_input', 'is', null)
+    .or('ai_response.not.is.null')
+    .order('sequence_number', { ascending: false })
+    .limit(pairs);
+
+  return (interactions || [])
+    .reverse()
+    .map(i => ({
+      user: i.user_input,
+      assistant: i.ai_response,
+      sequence: i.sequence_number,
+      tokens_estimate: i.tokens_estimate || 0
+    }));
+}
+
+async function buildLayeredContext(supabaseClient: any, sessionId: string, userMessage: string): Promise<any[]> {
+  // Check if summarization is needed
+  if (await needsResummarization(supabaseClient, sessionId)) {
+    await updateSessionSummary(supabaseClient, sessionId);
+  }
+
+  // Get summary and recent window
+  const { data: session } = await supabaseClient
+    .from('study_sessions')
+    .select('summary_compact, summary_state')
+    .eq('id', sessionId)
+    .single();
+
+  let recentWindow = await getRecentWindow(supabaseClient, sessionId, RECENT_WINDOW_DEFAULT);
+
+  // Build layered messages
+  const messages: any[] = [
+    { role: 'system', content: SYSTEM_PROMPT },
+    { role: 'system', content: 'KONTEKST_UMIEJĘTNOŚCI: Matematyka - poziom licealny' },
+    { role: 'system', content: 'INSTRUKCJE_PEDAGOGICZNE: Dostosuj poziom do ucznia' }
+  ];
+
+  // Add compact summary if exists
+  if (session?.summary_compact) {
+    messages.push({
+      role: 'system',
+      content: `SESSION_SUMMARY:\n${session.summary_compact}`
+    });
+  }
+
+  // Add recent conversation window
+  for (const pair of recentWindow) {
+    if (pair.user) messages.push({ role: 'user', content: pair.user });
+    if (pair.assistant) messages.push({ role: 'assistant', content: pair.assistant });
+  }
+
+  // Add current user message
+  messages.push({ role: 'user', content: userMessage });
+
+  // Token budget control
+  while (estimateTokens(messages.map(m => m.content).join('\n')) > INPUT_BUDGET && recentWindow.length > 4) {
+    recentWindow = recentWindow.slice(1);
+    
+    // Rebuild with smaller window
+    const compactMessages = [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'system', content: 'KONTEKST_UMIEJĘTNOŚCI: Matematyka' },
+      { role: 'system', content: 'INSTRUKCJE_PEDAGOGICZNE: Standard' }
+    ];
+
+    if (session?.summary_compact) {
+      compactMessages.push({
+        role: 'system',
+        content: `SESSION_SUMMARY:\n${session.summary_compact.substring(0, 400)}`
+      });
+    }
+
+    for (const pair of recentWindow) {
+      if (pair.user) compactMessages.push({ role: 'user', content: pair.user });
+      if (pair.assistant) compactMessages.push({ role: 'assistant', content: pair.assistant });
+    }
+
+    compactMessages.push({ role: 'user', content: userMessage });
+    
+    if (estimateTokens(compactMessages.map(m => m.content).join('\n')) <= INPUT_BUDGET) {
+      return compactMessages;
+    }
+  }
+
+  return messages;
+}
+
 // ContentTaskManager for edge functions (simplified version)
 interface SkillContent {
   theory: {
@@ -530,16 +820,9 @@ Nie dawaj żadnej podpowiedzi.
 - Jeśli step_type === "hint": zastosuj „Politykę podpowiedzi (globalna)” ze sprawdzeniem znajomości metody i krótkim mikro‑wyjaśnieniem gdy trzeba.
 - Jeśli tura % 7 === 0, dodaj „Notatkę nauczyciela” (cel, trudność 1–5, następny krok).
 Stosuj politykę 2‑1‑0. Off‑topic → redirect do celu.`;
-    const messages = [
-      {
-        role: 'system',
-        content: SYSTEM_PROMPT
-      },
-      {
-        role: 'system',
-        content: runtimeDirectives
-      }
-    ];
+    // Build layered context with session summaries and token control
+    console.log('[LayeredContext] Building layered context for session:', sessionId);
+    const messages = await buildLayeredContext(supabaseClient, sessionId, message);
 
 // Handle session initialization and current equation tracking
 let currentEquation = session.current_equation || null;
@@ -620,89 +903,11 @@ const skillContext = {
   }
 };
 
-    // Add skill context as system message
-    messages.push({
-      role: 'system', 
-      content: `KONTEKST UMIEJĘTNOŚCI I SESJI:
-
-UMIEJĘTNOŚĆ: ${skillContext.skill_name} (${skillContext.department})
-- Poziom: ${skillContext.class_level || skillContext.level}
-- Opis: ${skillContext.description || 'Brak opisu'}
-- Trudność docelowa: ${skillContext.target_difficulty}
-- Faza: ${skillContext.phase_name} (${skillContext.current_phase})
-- ${skillContext.phase_description ? `Opis fazy: ${skillContext.phase_description}` : ''}
-
-PROFIL UCZNIA:
-- Poziom motywacji: ${skillContext.diagnostic_profile.motivation_type || skillContext.learner_profile.motivation_type}
-- Preferowana trudność: ${skillContext.diagnostic_profile.recommended_difficulty || skillContext.learner_profile.preferred_difficulty}
-- Obszary trudności: ${skillContext.diagnostic_profile.struggled_areas.join(', ') || skillContext.learner_profile.struggle_areas.join(', ') || 'brak danych'}
-- Opanowane umiejętności: ${skillContext.diagnostic_profile.mastered_skills.join(', ') || skillContext.learner_profile.strength_areas.join(', ') || 'brak danych'}
-
-POSTĘP W UMIEJĘTNOŚCI:
-- Poziom opanowania: ${skillContext.skill_progress.mastery_level}/10
-- Próby: ${skillContext.skill_progress.correct_attempts}/${skillContext.skill_progress.total_attempts}
-- Kolejne poprawne: ${skillContext.skill_progress.consecutive_correct}
-- Status: ${skillContext.skill_progress.is_mastered ? 'OPANOWANE' : 'W TRAKCIE NAUKI'}
-
-${skillContext.content_context || ''}
-${skillContext.phase_ai_instructions ? `INSTRUKCJE FAZY: ${skillContext.phase_ai_instructions}` : ''}
-${skillContext.current_equation ? `AKTUALNE RÓWNANIE: ${skillContext.current_equation}` : ''}
-
-KROK SESJI: ${skillContext.step_number}
-`
-    });
-
-    // Add real conversation history from learning_interactions 
-    if (previousSteps && previousSteps.length > 0) {
-      // Get last 8 interactions to save tokens but provide context
-      const recentSteps = previousSteps.slice(-8);
-      
-      // Group interactions by sequence number to reconstruct conversation
-      const conversationPairs = new Map();
-      
-      recentSteps.forEach(step => {
-        const seqNum = step.sequence_number || step.step_number || 0;
-        if (!conversationPairs.has(seqNum)) {
-          conversationPairs.set(seqNum, { user: null, assistant: null });
-        }
-        
-        const pair = conversationPairs.get(seqNum);
-        if (step.user_input && step.user_input.trim()) {
-          pair.user = step.user_input.trim();
-        }
-        if (step.ai_response && step.ai_response.trim()) {
-          pair.assistant = step.ai_response.trim();
-        }
-      });
-      
-      // Add conversation in chronological order
-      Array.from(conversationPairs.keys()).sort((a, b) => a - b).forEach(seqNum => {
-        const pair = conversationPairs.get(seqNum);
-        
-        if (pair.user) {
-          messages.push({
-            role: 'user',
-            content: pair.user
-          });
-        }
-        
-        if (pair.assistant) {
-          messages.push({
-            role: 'assistant', 
-            content: pair.assistant
-          });
-        }
-      });
-    }
-
-    // Add current message
-    messages.push({
-      role: 'user',
-      content: message
-    });
-
-    console.log('[StudyTutor] Calling OpenAI with message count:', messages.length);
-    console.log('[StudyTutor] Last user message:', message);
+    // Add tokens estimation for the current interaction
+    const currentTokens = estimateTokens(message);
+    
+    console.log('[LayeredContext] Built context with', messages.length, 'messages');
+    console.log('[LayeredContext] Estimated tokens for current message:', currentTokens);
     
     // Build context for MathValidation
     const mathContext: MathContext = {
@@ -834,21 +1039,7 @@ ${turnNumber === 1 ?
       `.trim();
     }
 
-    // Add pedagogical instructions to system context BEFORE conversation history
-    if (pedagogicalInstructions) {
-      messages.push({
-        role: 'system',
-        content: pedagogicalInstructions
-      });
-    }
-
-    // Limit conversation history to prevent token overflow
-    const maxMessages = 15;
-    if (messages.length > maxMessages) {
-      const systemMessage = messages[0];
-      const recentMessages = messages.slice(-(maxMessages - 1));
-      messages.splice(0, messages.length, systemMessage, ...recentMessages);
-    }
+    // Layered context already handles message limits and pedagogical instructions
 
     // CRITICAL DEBUGGING: Log complete context being sent to AI
     console.log('[AI CONTEXT DEBUG] Complete message structure:');
