@@ -3336,3 +3336,166 @@ export async function importPolynomialEquationsSkill() {
 
   return await importSingleSkillFromJSON(skillData);
 };
+
+export async function importPlaneGeometrySkill() {
+  const skillData = {
+    skillName: "Planimetria – wielokąty i okręgi",
+    class_level: 2,
+    department: "geometria",
+    generator_params: {
+      microSkill: "plane_geometry_polygons_circles",
+      difficultyRange: [2, 5],
+      fallbackTrigger: "use_basic_geometry_patterns"
+    },
+    teaching_flow: {
+      phase1: { name: "Wprowadzenie", duration: 1500, activities: ["theory", "guided_examples"] },
+      phase2: { name: "Ćwiczenia", duration: 2400, activities: ["practice", "feedback"] },
+      phase3: { name: "Utrwalanie", duration: 1200, activities: ["mastery_tasks", "assessment"] }
+    },
+    content: {
+      theory: {
+        theory_text: "Planimetria bada własności figur płaskich: wielokątów (trójkąty, czworokąty, wielokąty foremne) oraz figur krzywoliniowych, przede wszystkim okręgu i koła. Kluczowe kompetencje licealne obejmują: obliczanie obwodów i pól, rozpoznawanie i stosowanie podobieństwa, pracę z kątami w wielokątach, własnościami okręgu (kąty wpisane i środkowe, styczne, cięciwy), a także wykorzystanie twierdzeń Ptolemeusza, Talesa, Pitagorasa i zależności trygonometrycznych w trójkątach. Wielokąty: suma kątów wewnętrznych n-kąta wynosi (n−2)·180°, a kąt wewnętrzny w n-kącie foremnym ma miarę ((n−2)·180°)/n. Kąty zewnętrzne w dowolnym wielokącie sumują się do 360°. W trójkącie suma kątów to 180°, wysokości przecinają się w ortocentrum, symetralne boków w środku okręgu opisanego, a dwusieczne w środku okręgu wpisanego. Pole trójkąta najczęściej liczymy ze wzoru S=(1/2)·a·h_a lub z Herona, gdy znamy boki. W prostokątnym trójkącie działa twierdzenie Pitagorasa a^2+b^2=c^2 oraz zależności na promienie okręgów wpisanego i opisanego. Dla czworokątów: pole równoległoboku to S=a·h lub S=|u×v| interpretowane geometrycznie, pole trapezu S=((a+b)/2)·h, a pole rombu S=(e·f)/2 (e,f – przekątne). Podobieństwo: figury podobne mają zgodne kąty i boki w stałym stosunku k. Obwody skalują się jak k, pola jak k^2. Podobieństwo jest podstawą wielu obliczeń pośrednich: gdy nie znamy bezpośrednio długości, ale możemy zbudować trójkąty podobne, wyznaczymy niewiadome przez proporcje. Okrąg i koło: okrąg to zbiór punktów w równej odległości r od środka; koło to obszar wewnętrzny. Długość okręgu to 2πr, pole koła πr^2. Długość łuku o kącie środkowym α (w stopniach) wynosi l=(α/360°)·2πr, a pole wycinka S=(α/360°)·πr^2. Promień jest prostopadły do stycznej w punkcie styczności. Cięciwa łączy dwa punkty okręgu; średnica jest najdłuższą cięciwą. Kąt środkowy oparty na tym samym łuku jest dwa razy większy od kąta wpisanego: ∠środkowy = 2·∠wpisany. Kąt między styczną a cięciwą równy jest kątowi wpisanemu opartemu na tym samym łuku. Potęga punktu: dla punktu P i dwóch cięciw przecinających okrąg w A,B oraz C,D zachodzi PA·PB=PC·PD. Dla stycznej PT i cięciwy przez P: PT^2=PA·PB. Te zależności pozwalają obliczać długości bez bezpośredniego mierzenia. Twierdzenie Talesa: jeśli punkty A,B,C leżą na okręgu, a AB to średnica, to ∠ACB=90°. W praktyce ułatwia to rozpoznawanie trójkątów prostokątnych wpisanych w okrąg. Z kolei dla trójkątów równoramiennych (a=b) kąty przy podstawie są równe; w równobocznym każdy kąt ma 60°, wysokość jest jednocześnie dwusieczną i symetralną. Strategie rozwiązywania: (1) Narysuj czytelny szkic z oznaczeniami. (2) Zidentyfikuj informacje o kątach (sumy w wielokątach, równości w figurach szczególnych). (3) Sprawdź możliwość podobieństwa (AAA, bądź kombinacje bok–kąt). (4) Przy okręgu sprawdź relacje: kąt wpisany–środkowy, styczna–promień, potęga punktu. (5) W obliczeniach pól zdecyduj o najwygodniejszym wzorze (wysokość, przekątne, Heron, rozbicie na proste figury). (6) Kontroluj jednostki i sens wyniku (pole >0, długości dodatnie). Typowe pułapki: mylenie kątów wpisanych opartych na różnych łukach (szczególnie położonych po drugiej stronie cięciwy), zapominanie o przeliczeniu stopni na radiany w zadaniach łączonych z analizą, niewłaściwe podstawienie do Herona (p – semiperimetr, nie obwód), błędna identyfikacja podobieństwa (zbieżność jednego kąta nie wystarcza), nieuwzględnienie krotności rozwiązań (np. dwa możliwe trójkąty przy danych bokach i kącie). W praktyce egzaminacyjnej dominują zadania wielokrokowe: najpierw wykazujemy pewne własności (np. prostopadłość stycznej i promienia), potem stosujemy podobieństwo, a na końcu obliczamy żądaną długość, kąt lub pole. Precyzyjny rysunek, konsekwentne oznaczenia i świadome korzystanie z podstawowych twierdzeń to klucz do sukcesu.",
+        key_formulas: [
+          "$\\sum \\alpha_{\\text{wew}}=(n-2)\\cdot180^\\circ$",
+          "$\\alpha_{\\text{foremny}}=\\tfrac{(n-2)\\cdot180^\\circ}{n}$",
+          "$P_{\\text{koła}}=\\pi r^2$",
+          "$L_{\\text{okr}}=2\\pi r$",
+          "$l=\\tfrac{\\alpha}{360^\\circ}\\cdot2\\pi r$",
+          "$S_{\\text{wyc}}=\\tfrac{\\alpha}{360^\\circ}\\cdot\\pi r^2$",
+          "$a^2+b^2=c^2$",
+          "$S_{\\triangle}=\\tfrac12 a h_a$",
+          "$S_{\\text{trapez}}=\\tfrac{a+b}{2}\\cdot h$",
+          "$S_{\\text{romb}}=\\tfrac{e\\cdot f}{2}$",
+          "$S_{\\triangle}=\\sqrt{p(p-a)(p-b)(p-c)}$",
+          "$k=\\tfrac{a'}{a},\\ P' = kP,\\ S' = k^2 S$",
+          "$\\angle_{\\text{wpis}}=\\tfrac12\\,\\angle_{\\text{środk}}$",
+          "$PT^2=PA\\cdot PB$",
+          "$PA\\cdot PB=PC\\cdot PD$",
+          "$\\text{Tales: } AB\\text{ średnica }\\Rightarrow \\angle ACB=90^\\circ$"
+        ],
+        time_estimate: 600,
+        difficulty_level: 4
+      },
+      examples: [
+        {
+          example_code: "PLAN_001",
+          problem_statement: "Trójkąt ma bok $a=10\\,\\text{cm}$ i wysokość $h_a=6\\,\\text{cm}$. Oblicz pole.",
+          solution_steps: [
+            { step: "Wybór wzoru", latex: "$S=\\tfrac12 a h_a$", explanation: "Pole trójkąta jako połowa iloczynu boku i odpowiadającej mu wysokości." },
+            { step: "Podstawienie", latex: "$S=\\tfrac12\\cdot10\\cdot6$", explanation: "Podstaw wartości z zadania." },
+            { step: "Obliczenie", latex: "$S=30\\,\\text{cm}^2$", explanation: "Prosty rachunek." }
+          ],
+          final_answer: "$30\\,\\text{cm}^2$",
+          explanation: "Najprostszy wzór na pole trójkąta przy znanych $a$ i $h_a$.",
+          time_estimate: 280,
+          difficulty_level: 3
+        },
+        {
+          example_code: "PLAN_002",
+          problem_statement: "W trójkącie prostokątnym przyprostokątne mają $3$ i $4$. Oblicz przeciwprostokątną i obwód.",
+          solution_steps: [
+            { step: "Twierdzenie Pitagorasa", latex: "$c=\\sqrt{3^2+4^2}$", explanation: "Zależność $a^2+b^2=c^2$." },
+            { step: "Obliczenie $c$", latex: "$c=\\sqrt{9+16}=5$", explanation: "Klasyczny trójkąt 3–4–5." },
+            { step: "Obwód", latex: "$O=3+4+5=12$", explanation: "Suma długości boków." }
+          ],
+          final_answer: "$c=5$, $O=12$",
+          explanation: "Bezpośrednie użycie Pitagorasa i definicji obwodu.",
+          time_estimate: 300,
+          difficulty_level: 3
+        }
+      ],
+      practice_exercises: [
+        {
+          exercise_code: "EX_PLAN_001",
+          problem_statement: "Oblicz sumę kątów wewnętrznych siedmiokąta.",
+          expected_answer: "$(7-2)\\cdot180^\\circ=900^\\circ$",
+          difficulty_level: 3,
+          time_estimate: 300,
+          misconception_map: {
+            "incorrect_answer_1": { type: "wrong_formula", feedback: "Użyj $(n-2)\\cdot180^\\circ$, nie $n\\cdot180^\\circ$." },
+            "incorrect_answer_2": { type: "arithmetic_error", feedback: "Policz $5\\cdot180^\\circ=900^\\circ$ uważnie." }
+          }
+        },
+        {
+          exercise_code: "EX_PLAN_002",
+          problem_statement: "Wielokąt foremny ma kąt wewnętrzny $150^\\circ$. Wyznacz liczbę boków $n$.",
+          expected_answer: "$150=\\tfrac{(n-2)\\cdot180}{n}\\Rightarrow n=12$",
+          difficulty_level: 3,
+          time_estimate: 310,
+          misconception_map: {
+            "incorrect_answer_1": { type: "invert_fraction", feedback: "Pomnóż obustronnie przez $n$, a dopiero potem rozwiązuj równanie." },
+            "incorrect_answer_2": { type: "angle_misuse", feedback: "Nie używaj $360^\\circ/n$ – to kąt środkowy, nie wewnętrzny." }
+          }
+        }
+      ]
+    },
+    misconception_patterns: [
+      {
+        pattern_code: "GEO_INNER_ANGLE_SUM",
+        description: "Stosowanie błędnej sumy kątów w wielokącie (np. $n\\cdot180^\\circ$).",
+        intervention_strategy: "Zawsze rysuj podział na $(n-2)$ trójkąty i stosuj $(n-2)\\cdot180^\\circ$."
+      },
+      {
+        pattern_code: "GEO_SIMILARITY_CONFUSION", 
+        description: "Mylenie zgodności jednego kąta z podobieństwem całych trójkątów.",
+        intervention_strategy: "Wymagaj co najmniej AAA; zaznacz odpowiadające sobie wierzchołki i sprawdź proporcje boków."
+      }
+    ],
+    real_world_applications: [
+      {
+        context: "Architektura i budownictwo",
+        problem_description: "Dobór promienia łuku i długości stycznych w sklepieniach i mostach.",
+        age_group: "liceum/studia",
+        connection_explanation: "Długości łuków i wycinków oraz potęga punktu modelują relacje w łukach i podporach."
+      }
+    ],
+    pedagogical_notes: {
+      common_mistakes: [
+        "Użycie złych wzorów na kąty wewnętrzne i zewnętrzne.",
+        "Mylenie wzorów na łuk i wycinek koła.",
+        "Błędne parowanie odcinków w potędze punktu.",
+        "Niepoprawne rozpoznanie podobieństwa i ról odpowiadających sobie boków.",
+        "Pomyłki rachunkowe w Heronie (semiperimetr vs obwód)."
+      ],
+      teaching_tips: [
+        "Zawsze zaczynaj od rysunku i oznaczeń – jasne schematy minimalizują błędy.",
+        "Stosuj kolorowanie odpowiadających sobie kątów/boków przy podobieństwie.",
+        "Twórz tabele wzorów: obwody/pola figur, łuk/wycinek, potęga punktu – z przykładem liczbowym.",
+        "Ucz rozkładania figur na prostsze (trójkąty, trapezy) i sumowania pól.",
+        "Ćwicz krótkie dowody własności okręgu, by świadomie używać twierdzeń."
+      ],
+      prerequisites: [
+        "Algebra: proporcje, rozwiązywanie równań liniowych i prostych równań kwadratowych",
+        "Trygonometria podstawowa w trójkącie",
+        "Umiejętność pracy z jednostkami i przybliżeniami liczbowymi"
+      ],
+      estimated_time: 5100,
+      difficulty_progression: "Start: obwody i pola podstawowych figur oraz suma kątów (poziom 3). Dalej: okrąg – kąty wpisane/środkowe, łuki i wycinki, potęga punktu (poziom 4). Finał: zadania z podobieństwem i łączeniem wielu własności w jednym rozwiązaniu (poziom 5)."
+    },
+    assessment_rubric: {
+      scope: "Ocena kompetencji w planimetrii: obwody, pola, własności okręgu i podobieństwo.",
+      criteria: [
+        {
+          skill: "Obwody i pola figur",
+          beginner: "Stosuje podstawowe wzory dla trójkąta, koła i trapezu.",
+          intermediate: "Dobiera właściwy wzór do sytuacji i poprawnie podstawia dane.",
+          advanced: "Rozbija figury złożone na proste i sumuje pola, kontrolując jednostki."
+        },
+        {
+          skill: "Własności okręgu",
+          beginner: "Rozpoznaje kąty wpisane i środkowe oraz ich relację.",
+          intermediate: "Stosuje styczność, potęgę punktu i relacje cięciw.",
+          advanced: "Łączy kilka własności w jednym zadaniu dowodowym/obliczeniowym."
+        }
+      ]
+    }
+  };
+
+  try {
+    console.log('Starting import for Planimetria – wielokąty i okręgi...');
+    return await importSingleSkillFromJSON(skillData);
+  } catch (error) {
+    console.error('Error importing Planimetria – wielokąty i okręgi:', error);
+    throw error;
+  }
+};

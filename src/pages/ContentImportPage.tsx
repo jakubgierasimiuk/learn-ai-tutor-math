@@ -6,6 +6,7 @@ import {
   importLimitsFunctionsSkill, 
   importDerivativeFunctionSkill,
   importPolynomialEquationsSkill,
+  importPlaneGeometrySkill,
   autoImportNewBatch,
   importSingleSkillFromJSON,
   importLinearInequalitiesSkill,
@@ -86,6 +87,10 @@ export const ContentImportPage = () => {
   // State for Polynomial Equations import
   const [importingPolynomial, setImportingPolynomial] = useState(false);
   const [polynomialResult, setPolynomialResult] = useState<any>(null);
+
+  // State for Plane Geometry import
+  const [importingPlaneGeometry, setImportingPlaneGeometry] = useState(false);
+  const [planeGeometryResult, setPlaneGeometryResult] = useState<any>(null);
 
   const handleImport = async () => {
     setImporting(true);
@@ -576,6 +581,38 @@ export const ContentImportPage = () => {
       });
     } finally {
       setImportingPolynomial(false);
+    }
+  };
+
+  const handlePlaneGeometryImport = async () => {
+    setImportingPlaneGeometry(true);
+    setPlaneGeometryResult(null);
+
+    try {
+      const result = await importPlaneGeometrySkill();
+      setPlaneGeometryResult(result);
+      
+      if (result.result.success) {
+        toast({
+          title: "Plane Geometry Imported!",
+          description: `Successfully imported: ${result.skillName}`,
+        });
+      } else {
+        toast({
+          title: "Import Failed",
+          description: result.result.error || "Unknown error",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      toast({
+        title: "Import Failed",
+        description: "Failed to import plane geometry skill",
+        variant: "destructive"
+      });
+    } finally {
+      setImportingPlaneGeometry(false);
     }
   };
 
@@ -1274,6 +1311,42 @@ export const ContentImportPage = () => {
                 <p className={`text-sm ${polynomialResult.result.success ? 'text-green-600' : 'text-red-600'}`}>
                   Status: {polynomialResult.result.success ? 'Success' : 'Failed'}
                   {polynomialResult.result.error && ` - ${polynomialResult.result.error}`}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Plane Geometry - HIGH PRIORITY */}
+        <Card className="border-2 border-primary">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              ⭐ PRIORYTET WYSOKI: Planimetria – wielokąty i okręgi
+            </CardTitle>
+            <CardDescription>
+              Import "Planimetria – wielokąty i okręgi" skill for class 2 (geometria) - HIGH PRIORITY
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button 
+              onClick={handlePlaneGeometryImport}
+              disabled={importingPlaneGeometry}
+              className="w-full"
+              variant="default"
+            >
+              {importingPlaneGeometry && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Import Planimetria – wielokąty i okręgi (PRIORYTET WYSOKI)
+            </Button>
+            
+            {planeGeometryResult && (
+              <div className="mt-4 p-3 rounded-md bg-muted/50">
+                <p className="text-sm font-medium">Import Result:</p>
+                <p className="text-sm text-muted-foreground">
+                  Skill: {planeGeometryResult.skillName}
+                </p>
+                <p className={`text-sm ${planeGeometryResult.result.success ? 'text-green-600' : 'text-red-600'}`}>
+                  Status: {planeGeometryResult.result.success ? 'Success' : 'Failed'}
+                  {planeGeometryResult.result.error && ` - ${planeGeometryResult.result.error}`}
                 </p>
               </div>
             )}
