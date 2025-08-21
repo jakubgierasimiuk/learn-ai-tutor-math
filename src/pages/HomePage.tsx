@@ -10,6 +10,7 @@ import { ReferralPromo } from "@/components/ReferralPromo";
 import { LandingPage } from "@/components/LandingPage";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import AutoImportRunner from "@/components/AutoImportRunner";
 
 const HomePage = () => {
   const { user, loading } = useAuth();
@@ -55,7 +56,12 @@ const HomePage = () => {
           description="Ucz się matematyki z AI Tutorem 24/7. Dopasowane lekcje, quizy i pełna podstawa programowa liceum. Darmowy okres próbny 7 dni."
           jsonLd={landingJsonLd}
         />
-        <LandingPage />
+        <div className="space-y-8">
+          <div className="container mx-auto py-8">
+            <AutoImportRunner />
+          </div>
+          <LandingPage />
+        </div>
       </>
     );
   }
