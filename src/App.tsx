@@ -229,11 +229,7 @@ const App = () => (
                 <RealLearningPage />
               </AuthenticatedLayout>
             } />
-            <Route path="/content-manager" element={
-              <AuthenticatedLayout>
-                <ContentImportPage />
-              </AuthenticatedLayout>
-            } />
+            <Route path="/content-manager" element={<ContentImportPage />} />
             <Route path="/study/lesson/:skillId" element={
               <AuthenticatedLayout>
                 <StudyLesson />

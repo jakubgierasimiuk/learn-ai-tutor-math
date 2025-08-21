@@ -1,4 +1,4 @@
-import { BookOpen, GraduationCap, Layers, HelpCircle, Sparkles, Users, Trophy } from "lucide-react";
+import { BookOpen, GraduationCap, Layers, HelpCircle, Sparkles, Users, Trophy, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-education.jpg";
@@ -142,6 +142,37 @@ export function LandingPage() {
                 <span className="text-primary-foreground font-semibold">98% zadowolenia</span>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Content Import Section */}
+      <section className="py-16 px-6 text-center bg-gradient-to-br from-muted/20 to-primary/5">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-gradient-to-br from-card to-card/50 rounded-3xl p-8 shadow-lg border border-border/50 backdrop-blur-sm">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary to-primary-glow rounded-2xl mb-6 shadow-lg">
+              <Database className="w-8 h-8 text-primary-foreground" />
+            </div>
+            
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Zarządzanie treścią
+            </h2>
+            
+            <p className="text-lg mb-6 text-muted-foreground leading-relaxed">
+              Importuj nowe umiejętności i treści edukacyjne do systemu AI Tutora.
+              Dodaj materiały dla różnych poziomów i klas.
+            </p>
+            
+            <Button 
+              asChild 
+              variant="outline"
+              className="bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105"
+              onClick={() => handleCtaClick('content_import')}
+            >
+              <Link to="/content-manager">
+                Zarządzaj treścią
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
