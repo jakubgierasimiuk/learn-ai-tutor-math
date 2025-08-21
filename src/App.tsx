@@ -25,6 +25,7 @@ import MaterialsPage from "./pages/MaterialsPage";
 import UXAuditPage from "./pages/UXAuditPage";
 import ProgressPage from "./pages/ProgressPage";
 import { RealLearningPage } from "./pages/RealLearningPage";
+import { ContentImportPage } from "./pages/ContentImportPage";
 import { OnboardingWelcome } from "@/components/onboarding/OnboardingWelcome";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 import { QuickDiagnostic } from "@/components/onboarding/QuickDiagnostic";
@@ -226,6 +227,11 @@ const App = () => (
             <Route path="/real-learning" element={
               <AuthenticatedLayout>
                 <RealLearningPage />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/content-manager" element={
+              <AuthenticatedLayout>
+                <ContentImportPage />
               </AuthenticatedLayout>
             } />
             <Route path="/study/lesson/:skillId" element={
