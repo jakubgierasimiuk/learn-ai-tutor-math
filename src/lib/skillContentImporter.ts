@@ -29,24 +29,64 @@ async function importSkillWithContent(skill: SkillContent) {
   try {
     console.log(`Importing skill: ${skill.skillName}`);
     
-    // Insert into skills table (let database generate UUID)
-    const { data: skillData, error: skillError } = await supabase
+    // Check if skill already exists
+    const { data: existingSkill } = await supabase
       .from('skills')
-      .insert([{
-        name: skill.skillName,
-        class_level: skill.class_level,
-        department: skill.department,
-        generator_params: skill.generatorParams || {},
-        teaching_flow: skill.teachingFlow?.phase1 ? [
-          skill.teachingFlow.phase1.activities,
-          skill.teachingFlow.phase2?.activities || [],
-          skill.teachingFlow.phase3?.activities || []
-        ].flat() : ["theory", "example", "guided_practice", "independent_practice"],
-        content_data: skill.content || {},
-        description: skill.content?.theory?.introduction || skill.skillName
-      }])
-      .select()
+      .select('id')
+      .eq('name', skill.skillName)
       .single();
+
+    let skillData;
+    let skillError;
+
+    if (existingSkill) {
+      console.log(`Skill ${skill.skillName} already exists, updating...`);
+      // Update existing skill
+      const { data, error } = await supabase
+        .from('skills')
+        .update({
+          class_level: skill.class_level,
+          department: skill.department,
+          generator_params: skill.generatorParams || {},
+          teaching_flow: skill.teachingFlow?.phase1 ? [
+            skill.teachingFlow.phase1.activities,
+            skill.teachingFlow.phase2?.activities || [],
+            skill.teachingFlow.phase3?.activities || []
+          ].flat() : ["theory", "example", "guided_practice", "independent_practice"],
+          content_data: skill.content || {},
+          description: skill.content?.theory?.introduction || skill.skillName,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existingSkill.id)
+        .select()
+        .single();
+      
+      skillData = data;
+      skillError = error;
+    } else {
+      console.log(`Creating new skill: ${skill.skillName}`);
+      // Insert new skill
+      const { data, error } = await supabase
+        .from('skills')
+        .insert([{
+          name: skill.skillName,
+          class_level: skill.class_level,
+          department: skill.department,
+          generator_params: skill.generatorParams || {},
+          teaching_flow: skill.teachingFlow?.phase1 ? [
+            skill.teachingFlow.phase1.activities,
+            skill.teachingFlow.phase2?.activities || [],
+            skill.teachingFlow.phase3?.activities || []
+          ].flat() : ["theory", "example", "guided_practice", "independent_practice"],
+          content_data: skill.content || {},
+          description: skill.content?.theory?.introduction || skill.skillName
+        }])
+        .select()
+        .single();
+      
+      skillData = data;
+      skillError = error;
+    }
 
     if (skillError) {
       console.error(`Error inserting skill ${skill.skillName}:`, skillError);
