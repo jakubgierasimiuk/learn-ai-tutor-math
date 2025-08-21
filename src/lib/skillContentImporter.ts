@@ -764,4 +764,310 @@ export async function importLinearInequalitiesSkill(): Promise<SkillImportResult
   };
 
   return await importSingleSkillFromJSON(fixedJsonData);
-}
+};
+
+// Absolute value skill import function
+export const importAbsoluteValueSkill = async (): Promise<SkillImportResult> => {
+  const skill = {
+    skillId: "absolute-value-definition-cl1",
+    skillName: "Wartość bezwzględna - definicja i własności",
+    department: "algebra",
+    class_level: 1,
+    estimated_duration: 2700,
+    generator_params: {
+      microSkill: "default",
+      difficultyRange: [1, 4],
+      fallbackTrigger: "use_basic_absolute_patterns"
+    },
+    theory: {
+      theory_text: "Wartość bezwzględna liczby to jej odległość od zera na osi liczbowej. Zawsze jest nieujemna: $|a|\\geq 0$, przy czym $|a|=|-a|$. Dla liczb $a,b$ zachodzi $|ab|=|a||b|$. Definicja kawałkowa: $|x|=x$ dla $x\\geq 0$ oraz $|x|=-x$ dla $x<0$. Graficznie: liczby o tej samej odległości od zera mają tę samą wartość bezwzględną, np. $|-3|=|3|=3$.",
+      key_formulas: ["$|a|\\geq 0$", "$|ab|=|a||b|$", "$|x|=x\\ (x\\geq0)$", "$|x|=-x\\ (x<0)$"],
+      time_estimate: 300,
+      difficulty_level: 1
+    },
+    examples: [
+      {
+        example_code: "ABS_001",
+        problem_statement: "Oblicz: $|5|$, $|-3|$, $|0|$.",
+        solution_steps: [
+          { step: "Zastosuj definicję odległości od zera", latex: "$|5|=5$", explanation: "Pięć jest 5 jednostek od zera." },
+          { step: "Zastosuj symetrię względem zera", latex: "$|-3|=3$", explanation: "Odległość $-3$ od zera wynosi 3." },
+          { step: "Zauważ, że zero jest w punkcie 0", latex: "$|0|=0$", explanation: "Odległość zera od zera to 0." }
+        ],
+        final_answer: "$|5|=5$, $|-3|=3$, $|0|=0$",
+        explanation: "Wartość bezwzględna jest nieujemna i oznacza odległość od 0.",
+        time_estimate: 120,
+        difficulty_level: 1
+      },
+      {
+        example_code: "ABS_002",
+        problem_statement: "Oblicz: $|2-5|$ oraz $|\\pi-4|$.",
+        solution_steps: [
+          { step: "Uprość wyrażenie wewnątrz kreski", latex: "$2-5=-3$", explanation: "Najpierw licz w środku." },
+          { step: "Weź wartość bezwzględną", latex: "$|-3|=3$", explanation: "Odległość od 0 to 3." },
+          { step: "Oceń znak $\\pi-4$", latex: "$\\pi-4<0$", explanation: "Bo $\\pi\\approx3{,}14$." },
+          { step: "Zapisz bezwzględną w formie dodatniej", latex: "$|\\pi-4|=4-\\pi$", explanation: "Przeciwieństwo liczby ujemnej." }
+        ],
+        final_answer: "$|2-5|=3$, $|\\pi-4|=4-\\pi$",
+        explanation: "Najpierw licz wewnątrz, potem stosuj definicję $|x|$.",
+        time_estimate: 150,
+        difficulty_level: 2
+      },
+      {
+        example_code: "ABS_003",
+        problem_statement: "Zapisz $|x-2|$ w postaci kawałkowej.",
+        solution_steps: [
+          { step: "Ustal warunki znaku", latex: "$x-2\\geq0\\Leftrightarrow x\\geq2$", explanation: "Dla $x\\geq2$ wyrażenie nieujemne." },
+          { step: "Zastosuj definicję dla $x\\geq2$", latex: "$|x-2|=x-2$", explanation: "Nie zmieniamy znaku." },
+          { step: "Dla $x<2$ wyrażenie ujemne", latex: "$|x-2|=2-x$", explanation: "Przeciwny znak usuwa minus." }
+        ],
+        final_answer: "$|x-2|=\\begin{cases}x-2,&x\\geq2\\\\2-x,&x<2\\end{cases}$",
+        explanation: "Definicja kawałkowa zależy od znaku $x-2$.",
+        time_estimate: 160,
+        difficulty_level: 2
+      },
+      {
+        example_code: "ABS_004",
+        problem_statement: "Wykorzystaj własność $|ab|=|a||b|$ dla $a=-3$, $b=4$.",
+        solution_steps: [
+          { step: "Policz iloczyn", latex: "$ab=-12$", explanation: "Iloczyn liczb o przeciwnych znakach." },
+          { step: "Weź wartość bezwzględną iloczynu", latex: "$|-12|=12$", explanation: "Odległość 12 od 0 to 12." },
+          { step: "Porównaj z iloczynem wartości", latex: "$|a||b|=3\\cdot4=12$", explanation: "Zgadza się z $|ab|$." }
+        ],
+        final_answer: "$|-12|=|{-3}\\cdot4|=|{-3}|\\cdot|4|=12$",
+        explanation: "Własność $|ab|=|a||b|$ ułatwia obliczenia.",
+        time_estimate: 130,
+        difficulty_level: 2
+      },
+      {
+        example_code: "ABS_005",
+        problem_statement: "Porównaj $|-7|$ i $|5|$.",
+        solution_steps: [
+          { step: "Oblicz wartości bezwzględne", latex: "$|-7|=7$", explanation: "Odległość 7 od zera." },
+          { step: "Oblicz drugą wartość", latex: "$|5|=5$", explanation: "Odległość 5 od zera." },
+          { step: "Porównaj liczby", latex: "$7>5$", explanation: "Wynika $|-7|>|5|$." }
+        ],
+        final_answer: "$|-7|>|5|$",
+        explanation: "Większa odległość od zera oznacza większą wartość bezwzględną.",
+        time_estimate: 120,
+        difficulty_level: 1
+      }
+    ],
+    practice_exercises: [
+      {
+        exercise_code: "ABS_EX_001",
+        problem_statement: "Oblicz: $|-12|$, $|0|$, $|7|$.",
+        expected_answer: "12, 0, 7",
+        difficulty_level: 1,
+        time_estimate: 150,
+        misconception_map: [
+          {
+            incorrect_answer: "-12, 0, 7",
+            misconception_type: "sign_confusion",
+            feedback: "Wartość bezwzględna jest nieujemna: $|-12|=12$."
+          },
+          {
+            incorrect_answer: "12, undefined, 7",
+            misconception_type: "zero_confusion",
+            feedback: "$|0|=0$, bo odległość zera od zera to 0."
+          }
+        ]
+      },
+      {
+        exercise_code: "ABS_EX_002",
+        problem_statement: "Oblicz: $|3-10|$ oraz $|4-\\pi|$.",
+        expected_answer: "7, $4-\\pi$",
+        difficulty_level: 2,
+        time_estimate: 170,
+        misconception_map: [
+          {
+            incorrect_answer: "-7, $\\pi-4$",
+            misconception_type: "order_error",
+            feedback: "Najpierw policz w środku: $3-10=-7$, więc $|-7|=7$."
+          },
+          {
+            incorrect_answer: "7, $\\pi-4$",
+            misconception_type: "sign_confusion",
+            feedback: "Ponieważ $4>\\pi$, to $|4-\\pi|=4-\\pi$ (liczba dodatnia)."
+          }
+        ]
+      },
+      {
+        exercise_code: "ABS_EX_003",
+        problem_statement: "Zapisz bez wartości bezwzględnej: $|x-3|$.",
+        expected_answer: "$x-3$ dla $x\\geq3$, $3-x$ dla $x<3$",
+        difficulty_level: 2,
+        time_estimate: 180,
+        misconception_map: [
+          {
+            incorrect_answer: "$x-3$",
+            misconception_type: "piecewise_missing",
+            feedback: "Podaj dwa przypadki w zależności od znaku $x-3$."
+          },
+          {
+            incorrect_answer: "$x-3$ dla $x\\geq3$, $x-3$ dla $x<3$",
+            misconception_type: "sign_flip",
+            feedback: "Dla $x<3$ masz $x-3<0$, więc $|x-3|=-(x-3)=3-x$."
+          }
+        ]
+      },
+      {
+        exercise_code: "ABS_EX_004",
+        problem_statement: "Rozwiąż nierówność: $|x|\\leq5$.",
+        expected_answer: "$-5\\leq x\\leq 5$",
+        difficulty_level: 3,
+        time_estimate: 200,
+        misconception_map: [
+          {
+            incorrect_answer: "$x\\leq5$",
+            misconception_type: "interval_error",
+            feedback: "$|x|\\leq5$ oznacza odległość od 0 nie większą niż 5, czyli przedział domknięty."
+          },
+          {
+            incorrect_answer: "$-5< x< 5$",
+            misconception_type: "strict_non_strict",
+            feedback: "Znak $\\leq$ obejmuje równość, więc $x=\\pm5$ też spełnia."
+          }
+        ]
+      },
+      {
+        exercise_code: "ABS_EX_005",
+        problem_statement: "Rozwiąż: $|x-2|<3$.",
+        expected_answer: "$-1<x<5$",
+        difficulty_level: 3,
+        time_estimate: 220,
+        misconception_map: [
+          {
+            incorrect_answer: "$x<5$",
+            misconception_type: "two_sided_setup",
+            feedback: "Ustaw nierówność podwójną: $-3<x-2<3$, a potem dodaj 2."
+          },
+          {
+            incorrect_answer: "$-1\\leq x\\leq 5$",
+            misconception_type: "strict_non_strict",
+            feedback: "Znak $<$ daje przedział otwarty: końce $-1$ i $5$ nie należą."
+          }
+        ]
+      },
+      {
+        exercise_code: "ABS_EX_006",
+        problem_statement: "Uprość wyrażenie: $|{-2}x|$.",
+        expected_answer: "$2|x|$",
+        difficulty_level: 2,
+        time_estimate: 160,
+        misconception_map: [
+          {
+            incorrect_answer: "$-2|x|$",
+            misconception_type: "product_property",
+            feedback: "Użyj $|ab|=|a||b|$: $|{-2}x|=|{-2}||x|=2|x|$."
+          },
+          {
+            incorrect_answer: "$2x$",
+            misconception_type: "drop_abs",
+            feedback: "Nie wolno usuwać kresek bez analizy znaku: $|x|\\neq x$ dla $x<0$."
+          }
+        ]
+      }
+    ],
+    misconception_patterns: [
+      {
+        pattern_code: "ABS_SIGN_NEG",
+        description: "Błędne przekonanie, że $|{-a}|=-|a|$",
+        example_error: "$|-7|=-7$",
+        intervention_strategy: "Wracamy do definicji odległości od 0 i przykładów symetrycznych: $|-7|=7$."
+      },
+      {
+        pattern_code: "ABS_SUM_ALWAYS",
+        description: "Założenie, że $|a+b|=|a|+|b|$ zawsze",
+        example_error: "$|2+(-3)|=|2|+|{-3}|$",
+        intervention_strategy: "Kontrprzykład: $|2-3|=1$, lecz $|2|+|{-3}|=5$."
+      },
+      {
+        pattern_code: "ABS_EQUALS_X",
+        description: "Mylenie $|x|$ z $x$ dla $x<0$",
+        example_error: "$|x|=x$ dla wszystkich $x$",
+        intervention_strategy: "Wprowadź definicję kawałkową i liczby ujemne jako kontrprzykłady."
+      },
+      {
+        pattern_code: "ABS_DISTANCE_ZERO",
+        description: "Brak rozumienia odległości od zera",
+        example_error: "$|-3|<0$",
+        intervention_strategy: "Wizualizacja na osi: odległość nie może być ujemna."
+      }
+    ],
+    real_world_applications: [
+      {
+        context: "Temperatura i odchylenia",
+        problem_description: "Różnica temperatury od 0°C: dzień zimniejszy o 7°C ma odchylenie 7.",
+        age_group: "liceum",
+        connection_explanation: "Odległość od 0: $|{-7}|=7$ stopni."
+      },
+      {
+        context: "Błąd pomiaru w fizyce",
+        problem_description: "Wynik $x$ z niepewnością $\\pm0{,}2$ m.",
+        age_group: "liceum",
+        connection_explanation: "Błąd zapiszemy jako $|x-x_0|\\leq0{,}2$."
+      },
+      {
+        context: "GPS i odległość na osi",
+        problem_description: "Pozycja auta na prostej drodze względem punktu 0.",
+        age_group: "liceum",
+        connection_explanation: "Odległość od punktu 0: $|x|$ km."
+      },
+      {
+        context: "Kontrola jakości",
+        problem_description: "Długość śruby ma być w granicach $10\\pm0{,}1$ mm.",
+        age_group: "liceum",
+        connection_explanation: "Warunek jakości: $|x-10|\\leq0{,}1$."
+      }
+    ],
+    pedagogical_notes: {
+      common_mistakes: [
+        "Traktowanie $|{-a}|$ jako $-{|a|}$",
+        "Pomijanie przypadku ujemnego w definicji kawałkowej",
+        "Zakładanie $|a+b|=|a|+|b|$ bez warunków",
+        "Błędna interpretacja odległości na osi jako liczby ze znakiem"
+      ],
+      teaching_tips: [
+        "Zaczynaj od intuicji odległości i osi liczbowej.",
+        "Ćwicz definicję kawałkową krótkimi zadaniami na progi.",
+        "Dawaj kontrprzykłady dla własności sumy.",
+        "Proś ucznia o werbalny opis: \"jak daleko od zera?\""
+      ],
+      prerequisites: ["Działania na liczbach rzeczywistych", "Porządek liczb na osi liczbowej"],
+      estimated_time: 2700,
+      difficulty_progression: "Start: obliczanie $|a|$; dalej: wyrażenia $|u(a)|$; następnie definicja kawałkowa $|x-c|$; proste nierówności z $|x|$."
+    },
+    assessment_rubric: {
+      scope: "Ocena zestawu 10 zadań z wartości bezwzględnej (poziom klasa 1)",
+      criteria: [
+        {
+          skill: "Obliczanie wartości bezwzględnych",
+          beginner: "Poprawnie oblicza $|a|$ dla $a\\in\\{-10..10\\}$ w 6/10 przypadków.",
+          intermediate: "Poprawnie oblicza $|u|$ dla prostych wyrażeń w 8/10 przypadków.",
+          advanced: "Bez błędów i z uzasadnieniem porównuje $|a|$, $|b|$ oraz ocenia znaki."
+        },
+        {
+          skill: "Definicja kawałkowa",
+          beginner: "Częściowo rozróżnia przypadki dla $|x-c|$.",
+          intermediate: "Poprawnie tworzy dwa przypadki i przechodzi między formami.",
+          advanced: "Sprawnie stosuje definicję w zadaniach z progami i nierównościami."
+        },
+        {
+          skill: "Interpretacja geometryczna",
+          beginner: "Rysuje punkt na osi, ale myli odległość ze znakiem.",
+          intermediate: "Poprawnie odczytuje odległość od 0 i progu $c$.",
+          advanced: "Samodzielnie modeluje sytuacje praktyczne jako $|x-c|\\leq r$."
+        },
+        {
+          skill: "Własności",
+          beginner: "Używa $|a|\\geq0$ i $|a|=|-a|$ w prostych przykładach.",
+          intermediate: "Stosuje $|ab|=|a||b|$ oraz poprawnie upraszcza wyrażenia.",
+          advanced: "Rozpoznaje, kiedy własności sumy nie działają; podaje kontrprzykłady."
+        }
+      ]
+    }
+  };
+
+  return await importSingleSkillFromJSON(skill);
+};

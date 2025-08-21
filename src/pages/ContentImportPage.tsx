@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { importAllSkillContent, contentDatabase, autoImportNewBatch, newBatchContentDatabase, importSingleSkillFromJSON, importLinearInequalitiesSkill } from '@/lib/skillContentImporter';
+import { importAllSkillContent, contentDatabase, autoImportNewBatch, newBatchContentDatabase, importSingleSkillFromJSON, importLinearInequalitiesSkill, importAbsoluteValueSkill } from '@/lib/skillContentImporter';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle, AlertCircle, Clock, Upload } from 'lucide-react';
@@ -27,6 +27,10 @@ export const ContentImportPage = () => {
   // Linear inequalities import
   const [importingInequalities, setImportingInequalities] = useState(false);
   const [inequalitiesResult, setInequalitiesResult] = useState<any>(null);
+  
+  // Absolute value import
+  const [importingAbsoluteValue, setImportingAbsoluteValue] = useState(false);
+  const [absoluteValueResult, setAbsoluteValueResult] = useState<any>(null);
 
   const handleImport = async () => {
     setImporting(true);
@@ -167,6 +171,39 @@ export const ContentImportPage = () => {
       });
     } finally {
       setImportingInequalities(false);
+    }
+  };
+
+  const handleAbsoluteValueImport = async () => {
+    setImportingAbsoluteValue(true);
+    setAbsoluteValueResult(null);
+
+    try {
+      const result = await importAbsoluteValueSkill();
+      setAbsoluteValueResult(result);
+      
+      if (result.result.success) {
+        toast({
+          title: "Absolute Value Skill Imported!",
+          description: `Successfully imported: ${result.skillName}`,
+        });
+      } else {
+        toast({
+          title: "Import Failed",
+          description: result.result.error || "Unknown error",
+          variant: "destructive"
+        });
+      }
+
+    } catch (error) {
+      console.error('Import error:', error);
+      toast({
+        title: "Import Failed", 
+        description: "Failed to import absolute value skill",
+        variant: "destructive"
+      });
+    } finally {
+      setImportingAbsoluteValue(false);
     }
   };
 
@@ -423,10 +460,67 @@ export const ContentImportPage = () => {
 
           <Button 
             onClick={handleInequalitiesImport} 
-            disabled={importing || importingNewBatch || importingJson || importingInequalities}
+            disabled={importing || importingNewBatch || importingJson || importingInequalities || importingAbsoluteValue}
             className="w-full"
           >
             {importingInequalities ? 'Importing...' : 'Import Linear Inequalities Skill'}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Quick Absolute Value Import */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            📊 Quick Import: Absolute Value Skill
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="text-sm text-muted-foreground">
+            Import the pre-configured "Wartość bezwzględna - definicja i własności" skill with complete content.
+          </div>
+
+          {importingAbsoluteValue && (
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 animate-spin" />
+              <span>Importing absolute value skill...</span>
+            </div>
+          )}
+
+          {absoluteValueResult && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                {absoluteValueResult.result.success ? (
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-red-500" />
+                )}
+                <span className={absoluteValueResult.result.success ? "text-green-700" : "text-red-700"}>
+                  {absoluteValueResult.skillName}
+                </span>
+              </div>
+
+              {absoluteValueResult.result.success && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <span className="font-semibold text-green-800">Skill Successfully Imported!</span>
+                  </div>
+                  <p className="text-green-700 mt-1">
+                    Skill ID: {absoluteValueResult.result.skillId}<br />
+                    Now available in Study-Tutor system with complete content.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          <Button 
+            onClick={handleAbsoluteValueImport} 
+            disabled={importing || importingNewBatch || importingJson || importingInequalities || importingAbsoluteValue}
+            className="w-full"
+          >
+            {importingAbsoluteValue ? 'Importing...' : 'Import Absolute Value Skill'}
           </Button>
         </CardContent>
       </Card>
