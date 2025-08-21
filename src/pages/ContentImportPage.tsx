@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { autoImportNewBatch, importSingleSkillFromJSON, importLinearInequalitiesSkill, importAbsoluteValueSkill, importQuadraticInequalitiesSkill, importAbsoluteValueEquationsSkill, importDefiniteIntegralApplicationsSkill, newBatchContentDatabase } from '@/lib/skillContentImporter';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { autoImportNewBatch, importSingleSkillFromJSON, importLinearInequalitiesSkill, importAbsoluteValueSkill, importQuadraticInequalitiesSkill, importAbsoluteValueEquationsSkill, importDefiniteIntegralApplicationsSkill, importDefiniteIntegralBasicsSkill } from '@/lib/skillContentImporter';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, AlertCircle, Clock, Upload, Calculator } from 'lucide-react';
+import { CheckCircle, AlertCircle, Clock, Upload, Calculator, Loader2 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import SkillGapDashboard from '@/components/SkillGapDashboard';
 
@@ -40,6 +40,10 @@ export const ContentImportPage = () => {
   const [importingAbsoluteValueEquations, setImportingAbsoluteValueEquations] = useState(false);
   const [absoluteValueEquationsResult, setAbsoluteValueEquationsResult] = useState<any>(null);
   
+  // State for Definite Integral Basics import
+  const [importingDefiniteIntegralBasics, setImportingDefiniteIntegralBasics] = useState(false);
+  const [definiteIntegralBasicsResult, setDefiniteIntegralBasicsResult] = useState<any>(null);
+
   // State for Definite Integral Applications import
   const [importingDefiniteIntegral, setImportingDefiniteIntegral] = useState(false);
   const [definiteIntegralResult, setDefiniteIntegralResult] = useState<any>(null);
@@ -277,6 +281,39 @@ export const ContentImportPage = () => {
       });
     } finally {
       setImportingAbsoluteValueEquations(false);
+    }
+  };
+
+  const handleDefiniteIntegralBasicsImport = async () => {
+    setImportingDefiniteIntegralBasics(true);
+    setDefiniteIntegralBasicsResult(null);
+
+    try {
+      const result = await importDefiniteIntegralBasicsSkill();
+      setDefiniteIntegralBasicsResult(result);
+      
+      if (result.result.success) {
+        toast({
+          title: "Definite Integral Basics Imported!",
+          description: `Successfully imported: ${result.skillName}`,
+        });
+      } else {
+        toast({
+          title: "Import Failed",
+          description: result.result.error || "Unknown error",
+          variant: "destructive"
+        });
+      }
+
+    } catch (error) {
+      console.error('Import error:', error);
+      toast({
+        title: "Import Failed",
+        description: "Failed to import definite integral basics skill",
+        variant: "destructive"
+      });
+    } finally {
+      setImportingDefiniteIntegralBasics(false);
     }
   };
 
@@ -743,7 +780,39 @@ export const ContentImportPage = () => {
       </Card>
 
       {/* Definite Integral Applications Import */}
-      <Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Definite Integral Basics Import</CardTitle>
+            <CardDescription>
+              Import "Całka oznaczona - definicja i obliczanie" skill for class 3 (analiza matematyczna)
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button 
+              onClick={handleDefiniteIntegralBasicsImport}
+              disabled={importingDefiniteIntegralBasics}
+              className="w-full"
+            >
+              {importingDefiniteIntegralBasics && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Import Definite Integral Basics Skill
+            </Button>
+            
+            {definiteIntegralBasicsResult && (
+              <div className="mt-4 p-3 rounded-md bg-muted/50">
+                <p className="text-sm font-medium">Import Result:</p>
+                <p className="text-sm text-muted-foreground">
+                  Skill: {definiteIntegralBasicsResult.skillName}
+                </p>
+                <p className={`text-sm ${definiteIntegralBasicsResult.result.success ? 'text-green-600' : 'text-red-600'}`}>
+                  Status: {definiteIntegralBasicsResult.result.success ? 'Success' : 'Failed'}
+                  {definiteIntegralBasicsResult.result.error && ` - ${definiteIntegralBasicsResult.result.error}`}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calculator className="w-5 h-5" />

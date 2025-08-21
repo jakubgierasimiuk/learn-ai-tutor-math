@@ -1761,3 +1761,322 @@ export const importDefiniteIntegralApplicationsSkill = async () => {
 
   return await importSingleSkillFromJSON(skillData);
 };
+
+// Import "Definite Integral Basics" skill
+export const importDefiniteIntegralBasicsSkill = async () => {
+  const skillData = {
+    "skillName": "Całka oznaczona - definicja i obliczanie",
+    "class_level": 3,
+    "department": "analiza_matematyczna",
+    "generator_params": {
+      "microSkill": "definite_integral_basics",
+      "difficultyRange": [3, 5],
+      "fallbackTrigger": "use_basic_integration_patterns"
+    },
+    "teaching_flow": {
+      "phase1": { "name": "Wprowadzenie", "duration": 1500, "activities": ["theory", "guided_examples"] },
+      "phase2": { "name": "Ćwiczenia", "duration": 2400, "activities": ["practice", "feedback"] },
+      "phase3": { "name": "Utrwalanie", "duration": 1200, "activities": ["mastery_tasks", "assessment"] }
+    },
+    "content": {
+      "theory": {
+        "theory_text": "Całka oznaczona ∫_a^b f(x) dx to granica sum Riemanna, czyli granica sum wartości funkcji na małych podprzedziałach pomnożonych przez ich długości, gdy maksymalna długość podprzedziału dąży do zera. Intuicyjnie jest to uogólnione pole pod wykresem funkcji f między x=a i x=b (z uwzględnieniem znaków: obszary poniżej osi OX dają ujemny wkład). Fundamentalne powiązanie różniczkowania i całkowania daje wzór Leibniza–Newtona: jeśli F jest dowolną pierwotną funkcji f na [a,b], to ∫_a^b f(x) dx = F(b) − F(a). Własności: liniowość względem funkcji (stałe można wyciągać przed znak całki, całkowanie sum rozkłada się na sumę), addytywność względem przedziału (∫_a^c = ∫_a^b + ∫_b^c), zmiana orientacji (∫_a^a = 0, ∫_a^b = −∫_b^a). Różnica między całką nieoznaczoną a oznaczoną: całka nieoznaczona to rodzina pierwotnych F(x)+C, a całka oznaczona to konkretna liczba zależna od f i granic a,b. Warunki istnienia: każda funkcja ciągła na przedziale domkniętym jest całkowalna (w sensie Riemanna); funkcje ograniczone z niewieloma punktami nieciągłości także są całkowalne. W praktyce obliczamy całki oznaczone, znajdując pierwotną i stosując wzór F(b)−F(a), ewentualnie używając własności, symetrii, podziału przedziału lub podstawienia zmiennej. Kluczowe kroki: dobór metody, poprawne granice i orientacja, weryfikacja wyniku (jednostki, znak, oszacowanie wielkości).",
+        "key_formulas": [
+          "$\\int_a^b f(x) dx = F(b) − F(a)$",
+          "$\\int_a^b [\\alpha f(x) + \\beta g(x)] dx = \\alpha \\int_a^b f(x) dx + \\beta \\int_a^b g(x) dx$",
+          "$\\int_a^c f(x) dx = \\int_a^b f(x) dx + \\int_b^c f(x) dx$",
+          "$\\int_a^a f(x) dx = 0$",
+          "$\\int_a^b f(x) dx = −\\int_b^a f(x) dx$",
+          "Jeśli f ciągła na [a,b], to $\\int_a^b f(x) dx$ istnieje"
+        ],
+        "time_estimate": 600,
+        "difficulty_level": 4
+      },
+      "examples": [
+        {
+          "example_code": "INT_DEF_001",
+          "problem_statement": "Oblicz $\\int_0^1 x^2 dx$.",
+          "solution_steps": [
+            { "step": "Pierwotna", "latex": "$F(x) = \\frac{x^3}{3}$", "explanation": "Pierwotna x² to x³/3." },
+            { "step": "Zastosuj wzór", "latex": "$F(1) − F(0) = \\frac{1}{3} − 0$", "explanation": "Wzór Leibniza–Newtona." },
+            { "step": "Wynik", "latex": "$\\frac{1}{3}$", "explanation": "Pole pod rosnącą funkcją na [0,1]." }
+          ],
+          "final_answer": "$\\frac{1}{3}$",
+          "explanation": "Bezpośrednie całkowanie potęgowe i podstawienie granic.",
+          "time_estimate": 260,
+          "difficulty_level": 3
+        },
+        {
+          "example_code": "INT_DEF_002",
+          "problem_statement": "Oblicz $\\int_0^{\\pi/2} \\sin x dx$.",
+          "solution_steps": [
+            { "step": "Pierwotna", "latex": "$F(x) = −\\cos x$", "explanation": "Pochodna cos x to −sin x, więc pierwotna sin x to −cos x." },
+            { "step": "Podstaw granice", "latex": "$F(\\pi/2) − F(0) = (−\\cos(\\pi/2)) − (−\\cos 0)$", "explanation": "cos(π/2)=0, cos 0=1." },
+            { "step": "Wynik", "latex": "$0 − (−1) = 1$", "explanation": "Pole dodatnie na [0,π/2]." }
+          ],
+          "final_answer": "$1$",
+          "explanation": "Całka trygonometryczna przez pierwotną −cos x.",
+          "time_estimate": 280,
+          "difficulty_level": 3
+        },
+        {
+          "example_code": "INT_DEF_003",
+          "problem_statement": "Oblicz $\\int_0^2 (3x^2 − 2x + 1) dx$, używając liniowości.",
+          "solution_steps": [
+            { "step": "Rozdziel całkę", "latex": "$3\\int_0^2 x^2 dx − 2\\int_0^2 x dx + \\int_0^2 1 dx$", "explanation": "Liniowość i stałe przed całką." },
+            { "step": "Oblicz składowe", "latex": "$3 \\cdot \\frac{8}{3} − 2 \\cdot 2 + 2$", "explanation": "∫₀² x² = 8/3, ∫₀² x = 2, ∫₀² 1 = 2." },
+            { "step": "Zsumuj", "latex": "$8 − 4 + 2 = 6$", "explanation": "Dodaj wyniki składowych." }
+          ],
+          "final_answer": "$6$",
+          "explanation": "Liniowość upraszcza obliczenia na sumie wielomianów.",
+          "time_estimate": 300,
+          "difficulty_level": 3
+        },
+        {
+          "example_code": "INT_DEF_004",
+          "problem_statement": "Pokaż addytywność: oblicz $\\int_0^3 (x − 1) dx$, dzieląc w punkcie 1.",
+          "solution_steps": [
+            { "step": "Podział przedziału", "latex": "$\\int_0^1 (x−1) dx + \\int_1^3 (x−1) dx$", "explanation": "Addytywność względem przedziału." },
+            { "step": "Pierwotna", "latex": "$F(x)=\\frac{x^2}{2} − x$", "explanation": "Pierwotna (x−1)." },
+            { "step": "Wartości", "latex": "$[F(1)−F(0)] + [F(3)−F(1)]$", "explanation": "Podstaw granice w obu częściach." },
+            { "step": "Oblicz", "latex": "$(\\frac{1}{2}−1) − 0 + (\\frac{9}{2}−3) − (\\frac{1}{2}−1) = \\frac{3}{2}$", "explanation": "Suma części daje 3/2." }
+          ],
+          "final_answer": "$\\frac{3}{2}$",
+          "explanation": "Podział przedziału nie zmienia wartości całki.",
+          "time_estimate": 320,
+          "difficulty_level": 3
+        },
+        {
+          "example_code": "INT_DEF_005",
+          "problem_statement": "Zinterpretuj znak: oblicz $\\int_0^2 (−x − 1) dx$.",
+          "solution_steps": [
+            { "step": "Pierwotna", "latex": "$F(x)= −\\frac{x^2}{2} − x$", "explanation": "Całka z −x i −1." },
+            { "step": "Podstaw granice", "latex": "$F(2) − F(0) = (−2 − 2) − 0$", "explanation": "Wartość ujemna, bo wykres poniżej OX." },
+            { "step": "Wynik", "latex": "$−4$", "explanation": "Ujemna \"pole-zorientowane\" odpowiada obszarowi pod osią." }
+          ],
+          "final_answer": "$−4$",
+          "explanation": "Obszary poniżej osi OX wnoszą ujemny wkład do całki.",
+          "time_estimate": 280,
+          "difficulty_level": 3
+        },
+        {
+          "example_code": "INT_DEF_006",
+          "problem_statement": "Oblicz $\\int_0^1 2x \\cdot \\cos(x^2) dx$, stosując podstawienie.",
+          "solution_steps": [
+            { "step": "Podstawienie", "latex": "$u = x^2, du = 2x dx$", "explanation": "Zastępcza zmienna upraszcza całkę." },
+            { "step": "Granice w u", "latex": "$x: 0→1 ⇒ u: 0→1$", "explanation": "Zmień granice zgodnie z u." },
+            { "step": "Całka w u", "latex": "$\\int_0^1 \\cos u du = \\sin u |_0^1$", "explanation": "Pierwotna cos u to sin u." },
+            { "step": "Wynik", "latex": "$\\sin 1 − 0 = \\sin 1$", "explanation": "Wartość liczbowa w radianach." }
+          ],
+          "final_answer": "$\\sin 1$",
+          "explanation": "Klasyczny przykład podstawienia u = x² i zmiany granic.",
+          "time_estimate": 340,
+          "difficulty_level": 4
+        }
+      ],
+      "practice_exercises": [
+        {
+          "exercise_code": "INT_DEF_EX_001",
+          "problem_statement": "Oblicz $\\int_0^2 x dx$.",
+          "expected_answer": "$2$",
+          "difficulty_level": 3,
+          "time_estimate": 300,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "wrong_antiderivative", "feedback": "Pierwotna x to x²/2, nie x². Zastosuj F(2)−F(0)." },
+            "incorrect_answer_2": { "type": "bounds_order_error", "feedback": "Granice mają kolejność 0→2. Nie odwracaj bez zmiany znaku." }
+          }
+        },
+        {
+          "exercise_code": "INT_DEF_EX_002",
+          "problem_statement": "Oblicz $\\int_0^\\pi \\sin x dx$.",
+          "expected_answer": "$2$",
+          "difficulty_level": 3,
+          "time_estimate": 320,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "sign_area_confusion", "feedback": "Na [0,π] sin x ≥ 0, więc wynik dodatni. Użyj pierwotnej −cos x." },
+            "incorrect_answer_2": { "type": "eval_error", "feedback": "Oblicz: (−cos π) − (−cos 0) = 1 − (−1) = 2." }
+          }
+        },
+        {
+          "exercise_code": "INT_DEF_EX_003",
+          "problem_statement": "Oblicz $\\int_1^e \\frac{1}{x} dx$.",
+          "expected_answer": "$1$",
+          "difficulty_level": 4,
+          "time_estimate": 340,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "log_rules_error", "feedback": "Pierwotna 1/x to ln|x|. Wynik: ln e − ln 1 = 1 − 0." },
+            "incorrect_answer_2": { "type": "constant_drop", "feedback": "Stała całkowania nie pojawia się w całce oznaczonej po podstawieniu granic." }
+          }
+        },
+        {
+          "exercise_code": "INT_DEF_EX_004",
+          "problem_statement": "Oblicz $\\int_0^{\\pi/2} (2 \\sin x − \\cos x) dx$.",
+          "expected_answer": "$1$",
+          "difficulty_level": 4,
+          "time_estimate": 340,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "linearity_misuse", "feedback": "Rozdziel: 2∫ sin x − ∫ cos x. Policz każdą całkę osobno." },
+            "incorrect_answer_2": { "type": "trig_eval_error", "feedback": "∫₀^(π/2) sin x = 1, ∫₀^(π/2) cos x = 1, więc 2·1 − 1 = 1." }
+          }
+        },
+        {
+          "exercise_code": "INT_DEF_EX_005",
+          "problem_statement": "Oblicz $\\int_{-1}^1 x^3 dx$.",
+          "expected_answer": "$0$",
+          "difficulty_level": 3,
+          "time_estimate": 300,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "symmetry_ignored", "feedback": "Funkcja nieparzysta na [−a,a] całkuje się do 0. Ewentualnie policz F(x)=x⁴/4 i podstaw granice." },
+            "incorrect_answer_2": { "type": "sign_mistake", "feedback": "Pamiętaj: F(−1) = 1/4, F(1) = 1/4. Różnica daje 0." }
+          }
+        },
+        {
+          "exercise_code": "INT_DEF_EX_006",
+          "problem_statement": "Oblicz $\\int_0^1 (3x^2 + 4x) dx$.",
+          "expected_answer": "$3$",
+          "difficulty_level": 3,
+          "time_estimate": 300,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "coeff_omitted", "feedback": "Stałe 3 i 4 przenosimy przed całkę. Całkuj składniki oddzielnie." },
+            "incorrect_answer_2": { "type": "power_rule_error", "feedback": "∫ x² = x³/3, ∫ x = x²/2. Podstaw granice." }
+          }
+        },
+        {
+          "exercise_code": "INT_DEF_EX_007",
+          "problem_statement": "Oblicz $\\int_0^1 \\frac{x}{1 + x^2} dx$ (podstawienie).",
+          "expected_answer": "$\\frac{1}{2} \\ln 2$",
+          "difficulty_level": 5,
+          "time_estimate": 380,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "substitution_limits", "feedback": "Użyj u = 1 + x², du = 2x dx i zmień granice: u: 1→2." },
+            "incorrect_answer_2": { "type": "log_rules_error", "feedback": "Po całkowaniu otrzymasz (1/2) ln(1 + x²) |₀¹ = (1/2) ln 2." }
+          }
+        },
+        {
+          "exercise_code": "INT_DEF_EX_008",
+          "problem_statement": "Oblicz $\\int_0^3 (x − 1) dx$, porównując z podziałem w x=1.",
+          "expected_answer": "$\\frac{3}{2}$",
+          "difficulty_level": 4,
+          "time_estimate": 320,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "additivity_ignored", "feedback": "Możesz policzyć bezpośrednio lub jako sumę ∫₀¹ i ∫₁³. Wynik musi być spójny." },
+            "incorrect_answer_2": { "type": "evaluation_error", "feedback": "F(x)=x²/2 − x. Oblicz F(3) − F(0) poprawnie." }
+          }
+        }
+      ]
+    },
+    "misconception_patterns": [
+      {
+        "pattern_code": "INT_WRONG_ANTIDERIVATIVE",
+        "description": "Błędny dobór pierwotnej (np. ∫ x dx = x² zamiast x²/2).",
+        "intervention_strategy": "Przypomnij regułę potęgową i sprawdzaj przez różniczkowanie F'(x)=f(x)."
+      },
+      {
+        "pattern_code": "INT_BOUNDS_ORDER",
+        "description": "Zamiana kolejności granic bez zmiany znaku (∫ᵦᵃ = −∫ₐᵦ).",
+        "intervention_strategy": "Zaznacz orientację na osi i stosuj własność ∫ₐᵦ = −∫ᵦₐ."
+      },
+      {
+        "pattern_code": "INT_LINEARITY_MISUSE",
+        "description": "Niewłaściwe użycie liniowości (gubienie współczynników, brak rozdzielenia).",
+        "intervention_strategy": "Wyciągaj stałe przed całkę i rozpisz sumę na osobne całki."
+      },
+      {
+        "pattern_code": "INT_SIGN_AREA",
+        "description": "Mylenie znaku wyniku z \"polem dodatnim\" dla części poniżej OX.",
+        "intervention_strategy": "Rozróżnij pole zorientowane od pola geometrycznego; szkicuj wykres."
+      },
+      {
+        "pattern_code": "INT_SUBSTITUTION_LIMITS",
+        "description": "Brak zmiany granic po podstawieniu zmiennej.",
+        "intervention_strategy": "Zawsze przelicz granice w nowej zmiennej lub wróć do x przed podstawieniem."
+      },
+      {
+        "pattern_code": "INT_SYMMETRY_IGNORED",
+        "description": "Ignorowanie symetrii dla funkcji parzystych/nieparzystych na [−a,a].",
+        "intervention_strategy": "Rozpoznawaj parzystość/nieparzystość i stosuj odpowiednie skróty obliczeń."
+      }
+    ],
+    "real_world_applications": [
+      {
+        "context": "Fizyka",
+        "problem_description": "Droga jako pole pod wykresem prędkości v(t) na przedziale czasu.",
+        "age_group": "liceum/studia",
+        "connection_explanation": "s = ∫_{t1}^{t2} v(t) dt; analogicznie praca z siły zmiennej w(t) = ∫ F dx."
+      },
+      {
+        "context": "Geometria",
+        "problem_description": "Pole obszaru ograniczonego wykresem funkcji i osią OX.",
+        "age_group": "liceum/studia",
+        "connection_explanation": "Pole zorientowane to ∫ₐᵦ f(x) dx; dla pola geometrycznego uwzględnij moduł."
+      },
+      {
+        "context": "Ekonomia",
+        "problem_description": "Przychód skumulowany jako całka z funkcji przychodu w czasie.",
+        "age_group": "liceum/studia",
+        "connection_explanation": "Przychód całkowity R = ∫ r(t) dt na danym okresie."
+      },
+      {
+        "context": "Inżynieria",
+        "problem_description": "Bilans ciepła/masy przez całkowanie strumienia po czasie.",
+        "age_group": "liceum/studia",
+        "connection_explanation": "Ilość zgromadzona Q = ∫ q(t) dt; sprawdzenie jednostek zapewnia poprawność."
+      }
+    ],
+    "pedagogical_notes": {
+      "common_mistakes": [
+        "Błędne pierwotne i pomijanie sprawdzenia przez różniczkowanie.",
+        "Zamiana granic bez zmiany znaku całki.",
+        "Niepoprawne użycie liniowości i gubienie współczynników.",
+        "Brak rozróżnienia między polem zorientowanym a geometrycznym.",
+        "Niezmienione granice po podstawieniu zmiennej.",
+        "Ignorowanie własności symetrii dla funkcji parzystych/nieparzystych."
+      ],
+      "teaching_tips": [
+        "Zawsze szkicuj wykres i oceniaj znak funkcji przed obliczeniami.",
+        "Po wyznaczeniu wyniku zrób kontrolę sensu: znak, jednostki, przybliżone oszacowanie.",
+        "Ucz systematycznego zapisu: pierwotna → podstawienie granic → wynik.",
+        "W podstawieniach natychmiast zamieniaj granice lub wracaj do zmiennej x przed oceną.",
+        "Wykorzystuj symetrię, by skracać obliczenia na [−a,a]."
+      ],
+      "prerequisites": [
+        "Różniczkowanie funkcji elementarnych",
+        "Własności funkcji (ciągłość, parzystość/nieparzystość)",
+        "Algebra symboliczna i przekształcenia wyrażeń"
+      ],
+      "estimated_time": 5100,
+      "difficulty_progression": "Start: proste całki potęgowe i trygonometryczne (poziom 3). Dalej: własności (liniowość, addytywność) i ocena znaku (poziom 4). Finał: technika podstawienia i wykorzystanie symetrii (poziom 5)."
+    },
+    "assessment_rubric": {
+      "scope": "Ocena 10 zadań z całki oznaczonej (definicja i obliczanie).",
+      "criteria": [
+        {
+          "skill": "Dobór metody i pierwotnej",
+          "beginner": "Dobiera pierwotną dla prostych funkcji z pomocą, popełnia drobne błędy.",
+          "intermediate": "Samodzielnie dobiera pierwotne i poprawnie podstawia granice.",
+          "advanced": "Sprawnie rozwiązuje złożone całki i weryfikuje wynik przez różniczkowanie."
+        },
+        {
+          "skill": "Własności całki i operacje na przedziale",
+          "beginner": "Zna liniowość w prostych przypadkach.",
+          "intermediate": "Stosuje liniowość i addytywność do upraszczania obliczeń.",
+          "advanced": "Elastycznie wykorzystuje własności (orientacja, podział, symetria) w złożonych zadaniach."
+        },
+        {
+          "skill": "Podstawienie i granice",
+          "beginner": "Wykonuje podstawienie, ale myli granice.",
+          "intermediate": "Poprawnie zmienia granice lub wraca do x przed oceą.",
+          "advanced": "Dobiera skuteczne podstawienia i kontroluje poprawność granic."
+        },
+        {
+          "skill": "Interpretacja i weryfikacja",
+          "beginner": "Rzadko ocenia sens wyniku.",
+          "intermediate": "Sprawdza znak i przybliżoną wielkość wyniku.",
+          "advanced": "Łączy interpretację geometryczną z rachunkiem i wykrywa niespójności."
+        }
+      ]
+    }
+  };
+
+  return await importSingleSkillFromJSON(skillData);
+};
