@@ -3211,3 +3211,128 @@ Strategia rozwiązywania: (1) Rozpoznaj typ wyrażenia i wybierz odpowiednie reg
 
   return await importSingleSkillFromJSON(skillData);
 };
+
+export async function importPolynomialEquationsSkill() {
+  console.log('Starting import for Równania i nierówności wielomianowe...');
+  
+  const skillData = {
+    skillName: "Równania i nierówności wielomianowe",
+    class_level: 2,
+    department: "algebra",
+    generator_params: {
+      microSkill: "polynomial_equations_inequalities",
+      difficultyRange: [2, 5],
+      fallbackTrigger: "use_basic_polynomial_patterns"
+    },
+    teaching_flow: {
+      phase1: { name: "Wprowadzenie", duration: 1500, activities: ["theory", "guided_examples"] },
+      phase2: { name: "Ćwiczenia", duration: 2400, activities: ["practice", "feedback"] },
+      phase3: { name: "Utrwalanie", duration: 1200, activities: ["mastery_tasks", "assessment"] }
+    },
+    content: {
+      theory: {
+        theory_text: "Wielomian to wyrażenie postaci P(x)=a_n*x^n+...+a_1*x+a_0 (gdzie a_n≠0), określone dla wszystkich x∈R. Podstawowe zadania licealne obejmują: rozwiązywanie równań wielomianowych P(x)=0 oraz nierówności wielomianowych P(x)>0, P(x)<0, P(x)≥0, P(x)≤0. Kluczowa idea: dla równań szukamy miejsc zerowych wielomianu (pierwiastków), dla nierówności badamy znak wielomianu na przedziałach wyznaczonych przez te miejsca zerowe. Najczęściej wykorzystujemy rozkład na czynniki, własność iloczynu równego zeru oraz tablicę znaków (metodę przedziałów). Równanie wielomianowe zaczynamy od uporządkowania i faktoryzacji. W praktyce: (1) wyłącz wspólny czynnik (np. x), (2) użyj wzorów skróconego mnożenia (x²-y²=(x-y)(x+y), (x±a)²=x²±2ax+a²), (3) dla kwadratowych zastosuj deltę Δ=b²-4ac i wzory x₁,₂=(-b±√Δ)/(2a), (4) przy sześciennych spróbuj grupować składniki lub sprawdzić racjonalne pierwiastki. Gdy znajdziesz pierwiastek x₀, możesz podzielić wielomian przez (x-x₀) by obniżyć stopień. Nierówności wielomianowe rozwiązujemy przez: (A) przeniesienie wszystkich składników na jedną stronę, (B) faktoryzację P(x), (C) wyznaczenie miejsc zerowych z krotnością, (D) analizę znaku na przedziałach. Reguła zmiany znaku: gdy przechodzimy przez pierwiastek o krotności nieparzystej, znak iloczynu zmienia się; przy krotności parzystej – nie zmienia. W metodzie przedziałów sprowadź do postaci P(x)>0 lub P(x)<0 i korzystaj z tabeli znaków. Dla rozstrzygnięcia o włączeniu końców przedziałów pamiętaj: przy nierównościach ostrych (>,<) pierwiastków nie włączamy; przy nieostrych (≥,≤) pierwiastki należą do rozwiązania.",
+        key_formulas: [
+          "$ab=0\\iff a=0\\vee b=0$",
+          "$x^2-y^2=(x-y)(x+y)$",
+          "$\\Delta=b^2-4ac$",
+          "$x_{1,2}=\\tfrac{-b\\pm\\sqrt\\Delta}{2a}$",
+          "$P(x)\\,\\square\\,0\\Rightarrow P(x)=\\prod (x-a_i)^{k_i}$",
+          "$k\\text{ parz.}\\Rightarrow\\text{brak zmiany znaku}$",
+          "$k\\text{ nieparz.}\\Rightarrow\\text{zmiana znaku}$",
+          "$t=x^2\\ \\text{(podstawienie)}$",
+          "$P>0:\\ \\text{nad osią},\\ P<0:\\ \\text{pod osią}$",
+          "$x^4-y^4=(x^2-y^2)(x^2+y^2)$"
+        ],
+        time_estimate: 600,
+        difficulty_level: 4
+      },
+      examples: [
+        {
+          example_code: "POLYINEQ_001",
+          problem_statement: "Rozwiąż równanie $x^2-5x+6=0$.",
+          solution_steps: [
+            { step: "Wzór skróconego mnożenia", latex: "$x^2-5x+6=(x-2)(x-3)$", explanation: "Szukamy dwóch liczb o sumie 5 i iloczynie 6." },
+            { step: "Iloczyn równy zeru", latex: "$(x-2)(x-3)=0$", explanation: "Co najmniej jeden czynnik musi być zerem." },
+            { step: "Rozwiązania", latex: "$x=2\\ \\vee\\ x=3$", explanation: "Odczytujemy pierwiastki z liniowych czynników." }
+          ],
+          final_answer: "$\\{2,3\\}$",
+          explanation: "Faktoryzacja kwadratowa i własność iloczynu równego zeru.",
+          time_estimate: 280,
+          difficulty_level: 3
+        },
+        {
+          example_code: "POLYINEQ_002", 
+          problem_statement: "Rozwiąż równanie $x^3-x^2-x+1=0$.",
+          solution_steps: [
+            { step: "Grupowanie", latex: "$x^2(x-1)-(x-1)$", explanation: "Wyłączamy wspólny czynnik $(x-1)$." },
+            { step: "Rozkład", latex: "$(x-1)(x^2-1)$", explanation: "Drugi czynnik to różnica kwadratów." },
+            { step: "Dalszy rozkład", latex: "$(x-1)^2(x+1)$", explanation: "$x^2-1=(x-1)(x+1)$." },
+            { step: "Pierwiastki i krotności", latex: "$x=1\\ (k=2),\\ x=-1\\ (k=1)$", explanation: "Krotność 2 przy $x=1$." }
+          ],
+          final_answer: "$\\{-1,1\\}$",
+          explanation: "Równanie ma pierwiastki $-1$ i $1$ (ten drugi podwójny).",
+          time_estimate: 300,
+          difficulty_level: 3
+        }
+      ],
+      practice_exercises: [
+        {
+          exercise_code: "EX_POLY_001",
+          problem_statement: "Rozwiąż równanie $x(x-4)=0$.",
+          expected_answer: "$\\{0,4\\}$",
+          difficulty_level: 3,
+          time_estimate: 300,
+          misconception_map: {
+            "incorrect_answer_1": { type: "zero_product_miss", feedback: "Użyj $ab=0\\iff a=0\\vee b=0$: sprawdź oba czynniki." },
+            "incorrect_answer_2": { type: "lost_root", feedback: "Nie pomijaj $x=0$ – to pełnoprawne rozwiązanie." }
+          }
+        }
+      ]
+    },
+    misconception_patterns: [
+      {
+        pattern_code: "POLY_MOVE_ONE_SIDE",
+        description: "Analiza bez przeniesienia wszystkiego na jedną stronę (P(x)=0).",
+        intervention_strategy: "Zawsze sprowadzaj do P(x)=0, dopiero potem rozkładaj i analizuj znak."
+      }
+    ],
+    real_world_applications: [
+      {
+        context: "Fizyka – rzut pionowy",
+        problem_description: "Dla modelu h(t)=-gt^2+v_0t+h_0 wyznacz czasy, gdy h(t)≥H.",
+        age_group: "liceum/studia",
+        connection_explanation: "Nierówność kwadratowa w czasie decyduje o przedziale, gdy wysokość jest powyżej progu."
+      }
+    ],
+    pedagogical_notes: {
+      common_mistakes: [
+        "Brak sprowadzenia do P(x)=0 przed analizą.",
+        "Błędna faktoryzacja i pomijanie wspólnych czynników.",
+        "Mylenie ostrych i nieostrych nierówności przy włączaniu końców."
+      ],
+      teaching_tips: [
+        "Ucz schematu: przenieś → rozłóż → wypisz korzenie z krotnościami → tablica znaków → odczyt."
+      ],
+      prerequisites: [
+        "Wzory skróconego mnożenia i faktoryzacja trójmianu kwadratowego",
+        "Rozwiązywanie równań liniowych i kwadratowych"
+      ],
+      estimated_time: 5100,
+      difficulty_progression: "Start: równania i proste nierówności kwadratowe (poziom 3). Dalej: iloczyny z krotnościami i układy korzeni (poziom 4). Finał: wyższe stopnie, podstawienia i parametry (poziom 5)."
+    },
+    assessment_rubric: {
+      scope: "Ocena biegłości w rozwiązywaniu równań i nierówności wielomianowych z użyciem faktoryzacji i metody przedziałów.",
+      criteria: [
+        {
+          skill: "Faktoryzacja i identyfikacja",
+          beginner: "Rozpoznaje wzory skróconego mnożenia i wyłącza wspólne czynniki.",
+          intermediate: "Sprawnie rozkłada trójmian i proste wielomiany wyższych stopni.",
+          advanced: "Stosuje grupowanie, podstawienia i Hornera do systematycznej faktoryzacji."
+        }
+      ]
+    }
+  };
+
+  return await importSingleSkillFromJSON(skillData);
+};

@@ -5,6 +5,7 @@ import {
   importTrigonometricFunctionsSkill, 
   importLimitsFunctionsSkill, 
   importDerivativeFunctionSkill,
+  importPolynomialEquationsSkill,
   autoImportNewBatch,
   importSingleSkillFromJSON,
   importLinearInequalitiesSkill,
@@ -81,6 +82,10 @@ export const ContentImportPage = () => {
   // State for Derivative Function import
   const [importingDerivative, setImportingDerivative] = useState(false);
   const [derivativeResult, setDerivativeResult] = useState<any>(null);
+
+  // State for Polynomial Equations import
+  const [importingPolynomial, setImportingPolynomial] = useState(false);
+  const [polynomialResult, setPolynomialResult] = useState<any>(null);
 
   const handleImport = async () => {
     setImporting(true);
@@ -539,6 +544,38 @@ export const ContentImportPage = () => {
       });
     } finally {
       setImportingDerivative(false);
+    }
+  };
+
+  const handlePolynomialImport = async () => {
+    setImportingPolynomial(true);
+    setPolynomialResult(null);
+
+    try {
+      const result = await importPolynomialEquationsSkill();
+      setPolynomialResult(result);
+      
+      if (result.result.success) {
+        toast({
+          title: "Polynomial Equations Imported!",
+          description: `Successfully imported: ${result.skillName}`,
+        });
+      } else {
+        toast({
+          title: "Import Failed",
+          description: result.result.error || "Unknown error",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      toast({
+        title: "Import Failed",
+        description: "Failed to import polynomial equations skill",
+        variant: "destructive"
+      });
+    } finally {
+      setImportingPolynomial(false);
     }
   };
 
@@ -1201,6 +1238,42 @@ export const ContentImportPage = () => {
                 <p className={`text-sm ${derivativeResult.result.success ? 'text-green-600' : 'text-red-600'}`}>
                   Status: {derivativeResult.result.success ? 'Success' : 'Failed'}
                   {derivativeResult.result.error && ` - ${derivativeResult.result.error}`}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Polynomial Equations - HIGH PRIORITY */}
+        <Card className="border-2 border-primary">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              ⭐ PRIORYTET WYSOKI: Równania i nierówności wielomianowe
+            </CardTitle>
+            <CardDescription>
+              Import "Równania i nierówności wielomianowe" skill for class 2 (algebra) - HIGH PRIORITY
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button 
+              onClick={handlePolynomialImport}
+              disabled={importingPolynomial}
+              className="w-full"
+              variant="default"
+            >
+              {importingPolynomial && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Import Polynomial Equations (PRIORYTET WYSOKI)
+            </Button>
+            
+            {polynomialResult && (
+              <div className="mt-4 p-3 rounded-md bg-muted/50">
+                <p className="text-sm font-medium">Import Result:</p>
+                <p className="text-sm text-muted-foreground">
+                  Skill: {polynomialResult.skillName}
+                </p>
+                <p className={`text-sm ${polynomialResult.result.success ? 'text-green-600' : 'text-red-600'}`}>
+                  Status: {polynomialResult.result.success ? 'Success' : 'Failed'}
+                  {polynomialResult.result.error && ` - ${polynomialResult.result.error}`}
                 </p>
               </div>
             )}
