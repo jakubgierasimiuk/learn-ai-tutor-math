@@ -2870,3 +2870,332 @@ export async function importTrigonometricFunctionsSkill() {
     throw error;
   }
 };
+
+export const importDerivativeFunctionSkill = async () => {
+  const skillData = {
+    skillName: "Pochodna funkcji",
+    class_level: 3,
+    department: "analiza_matematyczna",
+    generator_params: {
+      microSkill: "derivative_basics",
+      difficultyRange: [2, 5],
+      fallbackTrigger: "use_basic_derivative_patterns"
+    },
+    teaching_flow: {
+      phase1: { name: "Wprowadzenie", duration: 1500, activities: ["theory", "guided_examples"] },
+      phase2: { name: "Ćwiczenia", duration: 2400, activities: ["practice", "feedback"] },
+      phase3: { name: "Utrwalanie", duration: 1200, activities: ["mastery_tasks", "assessment"] }
+    },
+    content: {
+      theory: {
+        theory_text: "Pochodna funkcji opisuje chwilową szybkość zmiany wartości funkcji względem argumentu oraz nachylenie stycznej do wykresu. Intuicyjnie, jeśli f(x) przedstawia położenie ciała w czasie x, to f′(x) jest prędkością chwilową, a f″(x) przyspieszeniem. Definicja graniczna pochodnej w punkcie a to granica ilorazu różnicowego: porównujemy średnie tempo zmian na coraz mniejszych przedziałach i badamy, do jakiej liczby dąży. W praktyce licealnej korzystamy zarówno z definicji, jak i z reguł rachunkowych, które pozwalają obliczać pochodne szybko i niezawodnie. Pochodna istnieje, gdy granica jest skończona i funkcja nie ma w punkcie „ostrza" ani pionowej stycznej. Pojęcia te łączą się z ciągłością: jeśli funkcja jest różniczkowalna w a, to jest też ciągła w a, lecz odwrotność nie zawsze zachodzi. \n\nInterpretacja geometryczna: f′(a) to współczynnik kierunkowy prostej stycznej do wykresu y=f(x) w punkcie (a,f(a)). Jeśli f′(a)>0, wykres lokalnie rośnie; jeśli f′(a)<0, maleje; jeśli f′(a)=0, mamy punkt krytyczny (kandydat na ekstremum lokalne lub punkt przegięcia poziomego). Analiza znaku pochodnej na przedziałach prowadzi do wniosków o monotoniczności. Dalsza analiza z f″ (drugą pochodną) pozwala opisać wypukłość: gdy f″>0 na przedziale, wykres jest wypukły w górę (uśmiechnięty), a gdy f″<0 – wypukły w dół. Punkt, w którym zmienia się znak f″, to kandydat na punkt przegięcia. \n\nRachunkowe reguły: liniowość pochodnej (pochodna sumy i wielokrotności), reguła iloczynu, ilorazu i łańcuchowa. Dzięki nim obliczamy pochodne złożonych wyrażeń bez wracania do definicji granicznej. W połączeniu z tablicą pochodnych funkcji elementarnych (potęgowe, wykładnicze, logarytmiczne, trygonometryczne) otrzymujemy kompletny zestaw narzędzi. Warto zapamiętać najczęstsze pochodne: (x^n)′=n x^{n−1}, (e^x)′=e^x, (a^x)′=a^x ln a, (ln x)′=1/x dla x>0, (sin x)′=cos x, (cos x)′=−sin x, (tan x)′=1/\cos^2 x. Reguła łańcuchowa pozwala obliczać pochodne złożeń, np. (\sin(x^2))′=\cos(x^2)·2x. \n\nZwiązek z ekstremami: aby znaleźć ekstrema lokalne, wyznaczamy punkty krytyczne (f′=0 lub brak pochodnej przy ciągłości) i badamy znak pochodnej po obu stronach punktu albo stosujemy test drugiej pochodnej: jeśli f′(a)=0 i f″(a)>0, mamy minimum lokalne; jeśli f″(a)<0, maksimum lokalne; gdy f″(a)=0, test nie rozstrzyga. W zastosowaniach optymalizacyjnych dodatkowo uwzględniamy krańce dziedziny (np. przedziału domkniętego) i porównujemy wartości funkcji. Pochodna pozwala także wyznaczać równania stycznych: mając f′(a) i f(a), piszemy y=f′(a)(x−a)+f(a). \n\nAspekty praktyczne i typowe pułapki: po pierwsze, zawsze kontrolujemy dziedzinę (np. (ln x)′ dotyczy x>0). Po drugie, przy trygonometrii pracujemy w radianach – tylko wtedy wzory pochodnych przyjmują podane proste postacie. Po trzecie, ostrożnie stosujemy reguły – najczęstsze błędy to mylenie iloczynu z ilorazem lub „wchłanianie" pochodnej do potęg bez zastosowania łańcuchowej. Pamiętamy, że pochodna stałej wynosi 0, a pochodna funkcji liniowej ax+b jest stałą a. Przy funkcjach wymiernych korzystamy z ilorazu i prostych rozkładów na czynniki; przy funkcjach mieszanych (np. wielomian razy \sin) używamy reguły iloczynu; przy złożeniach – łańcuchowej. \n\nZwiązki z innymi działami: pochodna jest formalnie zdefiniowana przez granicę, więc opanowanie rachunku granic jest kluczowe. Pochodna wiąże się z monotonicznością i ekstremami (badanie przebiegu zmienności), a także z całką (twierdzenie Newtona–Leibniza). W zadaniach z fizyki pochodna to prędkość/tempo zmian; w ekonomii – koszt/marginalny zysk; w geometrii analitycznej – nachylenie stycznej i normalnej. \n\nStrategia rozwiązywania: (1) Rozpoznaj typ wyrażenia i wybierz odpowiednie reguły (linowość, iloczyn, iloraz, łańcuch). (2) Wypisz pochodne funkcji elementarnych wchodzących w skład złożenia. (3) Zadbaj o kolejność działań i nawiasy; przy łańcuchowej pamiętaj o mnożniku pochodnej „wnętrza". (4) Po obliczeniu uprość wyrażenie i – jeśli to potrzebne – wyznacz miejsca zerowe pochodnej dla analizy ekstremów. (5) Zapisz równanie stycznej, jeśli jest wymagane. Stosuj kontrolę sensowności: np. dla funkcji rosnącej oczekujemy dodatniego f′ na danym przedziale; porównuj też jednostki w kontekstach fizycznych.",
+        key_formulas: [
+          "$f'(a)=\\lim_{h\\to0}\\tfrac{f(a+h)-f(a)}{h}$",
+          "$\\dfrac{d}{dx}(c)=0$",
+          "$\\dfrac{d}{dx}(x^n)=n x^{n-1}$",
+          "$\\dfrac{d}{dx}(e^x)=e^x$",
+          "$\\dfrac{d}{dx}(a^x)=a^x\\ln a$",
+          "$\\dfrac{d}{dx}(\\ln x)=\\tfrac{1}{x}$",
+          "$\\dfrac{d}{dx}(\\sin x)=\\cos x$",
+          "$\\dfrac{d}{dx}(\\cos x)=-\\sin x$",
+          "$\\dfrac{d}{dx}(\\tan x)=\\tfrac{1}{\\cos^2 x}$",
+          "$(fg)'=f'g+fg'$",
+          "$\\left(\\tfrac{f}{g}\\right)'=\\tfrac{f'g-fg'}{g^2}$",
+          "$\\dfrac{d}{dx}f(g(x))=f'(g(x))\\cdot g'(x)$",
+          "$y_{\\text{stycz}}=f'(a)(x-a)+f(a)$",
+          "$f'(x)=0\\ \\Rightarrow\\ \\text{punkt krytyczny}$",
+          "$f''(a)>0\\Rightarrow\\min,\\ f''(a)<0\\Rightarrow\\max$"
+        ],
+        time_estimate: 600,
+        difficulty_level: 4
+      },
+      examples: [
+        {
+          example_code: "DER_001",
+          problem_statement: "Oblicz pochodną $f(x)=3x^4-5x+2$.",
+          solution_steps: [
+            { step: "Zastosuj liniowość", latex: "$(au+bv)'=a\\,u'+b\\,v'$", explanation: "Pochodna sumy to suma pochodnych, stałe wyciągamy." },
+            { step: "Pochodne składników", latex: "$(x^4)'=4x^3$, $(x)'=1$, $(2)'=0$", explanation: "Wzór potęgowy i podstawowe pochodne." },
+            { step: "Złóż wynik", latex: "$f'(x)=3\\cdot4x^3-5\\cdot1+0$", explanation: "Mnożymy przez stałe współczynniki." },
+            { step: "Uprość", latex: "$f'(x)=12x^3-5$", explanation: "Postać ostateczna." }
+          ],
+          final_answer: "$f'(x)=12x^3-5$",
+          explanation: "Prosty rachunek z użyciem reguły potęgowej i liniowości.",
+          time_estimate: 280,
+          difficulty_level: 3
+        },
+        {
+          example_code: "DER_002",
+          problem_statement: "Wyznacz pochodną $f(x)=(2x-1)\\sin x$.",
+          solution_steps: [
+            { step: "Reguła iloczynu", latex: "$(fg)'=f'g+fg'$", explanation: "Użyj dla $f(x)=2x-1$, $g(x)=\\sin x$." },
+            { step: "Pochodne czynników", latex: "$(2x-1)'=2$, $(\\sin x)'=\\cos x$", explanation: "Podstawowe pochodne." },
+            { step: "Złóż", latex: "$f'(x)=2\\sin x+(2x-1)\\cos x$", explanation: "Wstaw do wzoru i uporządkuj." }
+          ],
+          final_answer: "$f'(x)=2\\sin x+(2x-1)\\cos x$",
+          explanation: "Iloczyn wymaga zsumowania dwóch składników z reguły produktu.",
+          time_estimate: 300,
+          difficulty_level: 3
+        },
+        {
+          example_code: "DER_003",
+          problem_statement: "Oblicz pochodną $f(x)=\\dfrac{\\ln x}{x^2}$ dla $x>0$.",
+          solution_steps: [
+            { step: "Reguła ilorazu", latex: "$(f/g)'=\\tfrac{f'g-fg'}{g^2}$", explanation: "Nie mnożymy „osobno" – używamy wzoru." },
+            { step: "Pochodne", latex: "$(\\ln x)'=\\tfrac{1}{x}$, $(x^2)'=2x$", explanation: "Standardowe pochodne." },
+            { step: "Wstaw do wzoru", latex: "$f'(x)=\\tfrac{\\tfrac{1}{x}\\cdot x^2-\\ln x\\cdot2x}{x^4}$", explanation: "Zastosuj definicję ilorazu." },
+            { step: "Uprość", latex: "$f'(x)=\\tfrac{x-2x\\ln x}{x^4}=\\tfrac{1-2\\ln x}{x^3}$", explanation: "Skróć wspólny czynnik x." }
+          ],
+          final_answer: "$f'(x)=\\dfrac{1-2\\ln x}{x^3}$",
+          explanation: "Uważne uproszczenie po podstawieniu do reguły ilorazu.",
+          time_estimate: 320,
+          difficulty_level: 4
+        },
+        {
+          example_code: "DER_004",
+          problem_statement: "Policz pochodną $f(x)=\\sin(x^2+1)$.",
+          solution_steps: [
+            { step: "Rozpoznaj złożenie", latex: "$f(x)=\\sin(u)$, $u=x^2+1$", explanation: "Potrzebna reguła łańcuchowa." },
+            { step: "Zastosuj łańcuchową", latex: "$f'=\\cos(u)\\cdot u'$", explanation: "Pochodna sinusa razy pochodna wnętrza." },
+            { step: "Policz $u'$", latex: "$(x^2+1)'=2x$", explanation: "Pochodna wielomianu." },
+            { step: "Podstaw", latex: "$f'(x)=\\cos(x^2+1)\\cdot2x$", explanation: "Wynik końcowy." }
+          ],
+          final_answer: "$f'(x)=2x\\cos(x^2+1)$",
+          explanation: "Klasyczne złożenie funkcji: sinus z kwadratem.",
+          time_estimate: 320,
+          difficulty_level: 4
+        },
+        {
+          example_code: "DER_005",
+          problem_statement: "Wyznacz pochodną $f(x)=e^{3x}\\cdot\\cos x$.",
+          solution_steps: [
+            { step: "Iloczyn funkcji", latex: "$(fg)'=f'g+fg'$", explanation: "Użyj iloczynu dla $e^{3x}$ i $\\cos x$." },
+            { step: "Pochodne składników", latex: "$(e^{3x})'=3e^{3x}$, $(\\cos x)'=-\\sin x$", explanation: "Reguła łańcuchowa i podstawowa pochodna cos." },
+            { step: "Złóż", latex: "$f'=3e^{3x}\\cos x+e^{3x}(-\\sin x)$", explanation: "Zastosuj wzór produktu." },
+            { step: "Wspólny czynnik", latex: "$f'=e^{3x}(3\\cos x-\\sin x)$", explanation: "Uproszczenie ułatwia dalsze użycie." }
+          ],
+          final_answer: "$f'(x)=e^{3x}(3\\cos x-\\sin x)$",
+          explanation: "Połączenie reguły łańcuchowej i iloczynu.",
+          time_estimate: 330,
+          difficulty_level: 4
+        },
+        {
+          example_code: "DER_006",
+          problem_statement: "Znajdź równanie stycznej do wykresu $y=\\ln(x^2+1)$ w punkcie o argumencie $x=0$.",
+          solution_steps: [
+            { step: "Wartość funkcji", latex: "$y_0=\\ln(0^2+1)=0$", explanation: "Punkt styczności to (0,0)." },
+            { step: "Pochodna funkcji", latex: "$y'=\\tfrac{1}{x^2+1}\\cdot2x$", explanation: "Reguła łańcuchowa dla ln." },
+            { step: "Nachylenie", latex: "$m=y'(0)=0$", explanation: "Podstaw $x=0$ do pochodnej." },
+            { step: "Równanie stycznej", latex: "$y=m(x-0)+y_0=0$", explanation: "Styczna: $y=0$ (oś OX)." }
+          ],
+          final_answer: "$y=0$",
+          explanation: "Styczna ma nachylenie 0, więc pokrywa się z osią OX.",
+          time_estimate: 340,
+          difficulty_level: 5
+        }
+      ],
+      practice_exercises: [
+        {
+          exercise_code: "EX_DER_001",
+          problem_statement: "Oblicz $\\dfrac{d}{dx}(5x^3-2x+7)$.",
+          expected_answer: "$15x^2-2$",
+          difficulty_level: 3,
+          time_estimate: 300,
+          misconception_map: {
+            incorrect_answer_1: { type: "constant_rule", feedback: "Pamiętaj, że pochodna stałej jest 0, więc 7 znika." },
+            incorrect_answer_2: { type: "power_rule_error", feedback: "Zastosuj $\\dfrac{d}{dx}x^3=3x^2$, a potem pomnóż przez 5." }
+          }
+        },
+        {
+          exercise_code: "EX_DER_002",
+          problem_statement: "Wyznacz pochodną $f(x)=(x^2-1)(x+4)$.",
+          expected_answer: "$f'(x)=2x(x+4)+(x^2-1)$",
+          difficulty_level: 3,
+          time_estimate: 310,
+          misconception_map: {
+            incorrect_answer_1: { type: "product_as_sum", feedback: "To iloczyn, nie suma. Użyj $(fg)'=f'g+fg'$." },
+            incorrect_answer_2: { type: "algebra_simplify", feedback: "Możesz też najpierw wymnożyć i zróżniczkować, ale zachowaj poprawność rachunkową." }
+          }
+        },
+        {
+          exercise_code: "EX_DER_003",
+          problem_statement: "Policz $\\dfrac{d}{dx}\\left(\\dfrac{\\sin x}{x}\\right)$ dla $x\\neq0$.",
+          expected_answer: "$\\dfrac{x\\cos x-\\sin x}{x^2}$",
+          difficulty_level: 3,
+          time_estimate: 320,
+          misconception_map: {
+            incorrect_answer_1: { type: "quotient_missing", feedback: "Nie różnicz licznika i mianownika osobno. Użyj wzoru na iloraz." },
+            incorrect_answer_2: { type: "sign_error", feedback: "Uważaj na kolejność $f'g-fg'$ w liczniku." }
+          }
+        },
+        {
+          exercise_code: "EX_DER_004",
+          problem_statement: "Oblicz $y'$ dla $y=\\ln(3x-2)$.",
+          expected_answer: "$y'=\\dfrac{3}{3x-2}$",
+          difficulty_level: 4,
+          time_estimate: 330,
+          misconception_map: {
+            incorrect_answer_1: { type: "chain_rule_miss", feedback: "Stosuj łańcuchową: $(\\ln u)'=u'/u$ z $u=3x-2$." },
+            incorrect_answer_2: { type: "domain_check", feedback: "Pamiętaj o dziedzinie: $3x-2>0$." }
+          }
+        },
+        {
+          exercise_code: "EX_DER_005",
+          problem_statement: "Wyznacz pochodną $f(x)=e^{2x}\\tan x$.",
+          expected_answer: "$f'(x)=e^{2x}(2\\tan x+\\tfrac{1}{\\cos^2 x})$",
+          difficulty_level: 4,
+          time_estimate: 350,
+          misconception_map: {
+            incorrect_answer_1: { type: "product_chain_mix", feedback: "Użyj $(fg)'=f'g+fg'$, a $(e^{2x})'=2e^{2x}$." },
+            incorrect_answer_2: { type: "trig_derivative_error", feedback: "$(\\tan x)'=1/\\cos^2 x$, nie $\\cos x$ ani $\\sin x$." }
+          }
+        },
+        {
+          exercise_code: "EX_DER_006",
+          problem_statement: "Dla $f(x)=x^3-3x$ znajdź punkty krytyczne i określ ich typ.",
+          expected_answer: "Punkty: $x=-1,1$; $f''(x)=6x$, więc w $-1$ maksimum, w $1$ minimum",
+          difficulty_level: 4,
+          time_estimate: 360,
+          misconception_map: {
+            incorrect_answer_1: { type: "critical_points_find", feedback: "Policz $f'(x)=3x^2-3$ i rozwiąż $f'(x)=0$." },
+            incorrect_answer_2: { type: "second_derivative_test", feedback: "Zastosuj test: $f''(-1)=-6<0$ (max), $f''(1)=6>0$ (min)." }
+          }
+        },
+        {
+          exercise_code: "EX_DER_007",
+          problem_statement: "Napisz równanie stycznej do $y=\\sqrt{x}$ w punkcie $x=4$.",
+          expected_answer: "$y=\\tfrac{1}{4}(x-4)+2$",
+          difficulty_level: 5,
+          time_estimate: 370,
+          misconception_map: {
+            incorrect_answer_1: { type: "chain_derivative_root", feedback: "$(\\sqrt{x})'=\\tfrac{1}{2\\sqrt{x}}$. Podstaw $x=4$." },
+            incorrect_answer_2: { type: "tangent_formula", feedback: "Użyj $y=f'(a)(x-a)+f(a)$ z $a=4$, $f(4)=2$, $f'(4)=1/4$." }
+          }
+        },
+        {
+          exercise_code: "EX_DER_008",
+          problem_statement: "Dla $g(x)=\\ln x - x/2$ znajdź przedziały monotoniczności.",
+          expected_answer: "g'(x)=1/x-1/2; rośnie na $(0,2)$, maleje na $(2,\\infty)$",
+          difficulty_level: 5,
+          time_estimate: 380,
+          misconception_map: {
+            incorrect_answer_1: { type: "sign_table_error", feedback: "Zaznacz miejsce zerowe $g'(x)=0\\Rightarrow x=2$ i zrób tabelę znaków." },
+            incorrect_answer_2: { type: "domain_ignore", feedback: "Dziedzina to $x>0$; nie rozpatruj wartości nie-dodatnich." }
+          }
+        }
+      ],
+      misconception_patterns: [
+        {
+          pattern_code: "DER_PRODUCT_AS_SIMPLE",
+          description: "Mylenie reguły iloczynu z „różniczkowaniem każdego czynnika osobno".",
+          intervention_strategy: "Utrwal $(fg)'=f'g+fg'$ na prostych przykładach i kontrprzykładach liczbowych."
+        },
+        {
+          pattern_code: "DER_QUOTIENT_AS_SIMPLE",
+          description: "Różniczkowanie ilorazu bez wzoru lub z błędną kolejnością $f'g-fg'$.",
+          intervention_strategy: "Stale zapisuj licznik jako $f'g-fg'$ i ćwicz kontrolę znaku oraz nawiasów."
+        },
+        {
+          pattern_code: "DER_CHAIN_RULE_MISS",
+          description: "Brak mnożnika od pochodnej wewnętrznej funkcji w złożeniach.",
+          intervention_strategy: "Wprowadź substytucję $u=g(x)$, policz $f'(u)\\cdot u'$ i dopiero wróć do x."
+        },
+        {
+          pattern_code: "DER_TRIG_RADIANS",
+          description: "Stosowanie stopni zamiast radianów w pochodnych trygonometrycznych.",
+          intervention_strategy: "Przypominaj, że wzory obowiązują w radianach; w razie potrzeby zamień jednostki."
+        },
+        {
+          pattern_code: "DER_DOMAIN_IGNORED",
+          description: "Ignorowanie dziedziny (np. $\\ln x$ dla $x\\le0$) przy analizie pochodnych i monotoniczności.",
+          intervention_strategy: "Zawsze wypisz warunki dziedziny przed obliczeniami i analizą znaków."
+        },
+        {
+          pattern_code: "DER_SECOND_TEST_MISUSE",
+          description: "Błędna interpretacja testu drugiej pochodnej lub użycie przy $f''=0$.",
+          intervention_strategy: "Gdy $f''(a)=0$, test nie rozstrzyga – użyj badania znaku $f'$ lub wyższych pochodnych."
+        }
+      ],
+      real_world_applications: [
+        {
+          context: "Fizyka – ruch prostoliniowy",
+          problem_description: "Wyznacz prędkość i przyspieszenie z położenia $s(t)$.",
+          age_group: "liceum/studia",
+          connection_explanation: "Pochodna $s'(t)$ to prędkość, a $s''(t)$ to przyspieszenie."
+        },
+        {
+          context: "Ekonomia – koszt i zysk krańcowy",
+          problem_description: "Określ marginalne zmiany kosztu przy produkcji o 1 jednostkę więcej.",
+          age_group: "liceum/studia",
+          connection_explanation: "Pochodna funkcji kosztu $C'(q)$ przybliża przyrost kosztu na jednostkę."
+        },
+        {
+          context: "Inżynieria – optymalizacja",
+          problem_description: "Minimalizacja zużycia materiału przy zadanych ograniczeniach geometrycznych.",
+          age_group: "liceum/studia",
+          connection_explanation: "Ekstrema lokalne wyznaczamy z równań $f'(x)=0$ i porównania wartości."
+        },
+        {
+          context: "Biologia – tempo wzrostu",
+          problem_description: "Analiza chwilowego tempa wzrostu populacji lub biomasy.",
+          age_group: "liceum/studia",
+          connection_explanation: "Pochodna modelu wzrostu daje szybkość zmian w czasie."
+        }
+      ],
+      pedagogical_notes: {
+        common_mistakes: [
+          "Mylenie reguł: iloczyn/iloraz/łańcuchowa.",
+          "Brak uwzględnienia dziedziny przed analizą pochodnej.",
+          "Pominięcie mnożnika wewnętrznego w regule łańcuchowej.",
+          "Stosowanie stopni zamiast radianów przy pochodnych trygonometrycznych.",
+          "Niewłaściwe wnioski z testu drugiej pochodnej przy $f''=0$."
+        ],
+        teaching_tips: [
+          "Twórz mapy myśli: wybór reguły w zależności od struktury wyrażenia.",
+          "Ćwicz krótkie substytucje $u=g(x)$ przy każdym złożeniu.",
+          "Po obliczeniu pochodnej wykonuj kontrolę: znak, dziedzina, sens fizyczny.",
+          "Wprowadzaj zadania mieszane (wielomiany z trygonometrią/wykładniczą) by automatyzować wybór reguł.",
+          "Wykorzystuj równanie stycznej do interpretacji graficznej wyniku."
+        ],
+        prerequisites: [
+          "Rachunek granic (formy nieoznaczone i techniki)",
+          "Funkcje elementarne i ich własności",
+          "Algebra: przekształcenia, ułamki algebraiczne"
+        ],
+        estimated_time: 5100,
+        difficulty_progression: "Start: pochodne funkcji elementarnych i liniowość (poziom 3). Dalej: reguła iloczynu/ilorazu i pierwsze złożenia (poziom 4). Finał: analiza ekstremów, styczne i zadania aplikacyjne (poziom 5)."
+      },
+      assessment_rubric: {
+        scope: "Ocena opanowania pochodnej: obliczanie, interpretacja, ekstremum i styczna.",
+        criteria: [
+          {
+            skill: "Rachunek pochodnych",
+            beginner: "Liczy pochodne funkcji potęgowych i prostych sum.",
+            intermediate: "Stosuje reguły iloczynu, ilorazu i łańcuchową w zadaniach standardowych.",
+            advanced: "Sprawnie łączy reguły w złożonych wyrażeniach i upraszcza wynik."
+          },
+          {
+            skill: "Analiza przebiegu zmienności",
+            beginner: "Wskazuje punkty krytyczne z równania $f'(x)=0$.",
+            intermediate: "Tworzy tabelę znaków $f'$ i wyznacza monotoniczność.",
+            advanced: "Diagnozuje typy ekstremów z użyciem $f''$ i analizuje przegięcia."
+          },
+          {
+            skill: "Interpretacja geometryczna i fizyczna",
+            beginner: "Zapisuje równanie stycznej w danym punkcie.",
+            intermediate: "Łączy pochodną z prędkością i nachyleniem wykresu.",
+            advanced: "Modeluje proste problemy optymalizacyjne i interpretuje wynik w kontekście."
+          },
+          {
+            skill: "Precyzja i kontrola",
+            beginner: "Popełnia drobne błędy w znakach lub nawiasach.",
+            intermediate: "Sprawdza dziedzinę i jednostki, koryguje błędy rachunkowe.",
+            advanced: "Uzasadnia każdy krok i weryfikuje sens końcowego wyrażenia."
+          }
+        ]
+      }
+    }
+  };
+
+  return await importSkillWithContent(skillData);
+};
