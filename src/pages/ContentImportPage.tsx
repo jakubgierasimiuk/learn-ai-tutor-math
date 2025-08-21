@@ -7,6 +7,7 @@ import {
   importDerivativeFunctionSkill,
   importPolynomialEquationsSkill,
   importPlaneGeometrySkill,
+  importSolidGeometrySkill,
   autoImportNewBatch,
   importSingleSkillFromJSON,
   importLinearInequalitiesSkill,
@@ -91,6 +92,10 @@ export const ContentImportPage = () => {
   // State for Plane Geometry import
   const [importingPlaneGeometry, setImportingPlaneGeometry] = useState(false);
   const [planeGeometryResult, setPlaneGeometryResult] = useState<any>(null);
+
+  // State for Solid Geometry import
+  const [importingSolidGeometry, setImportingSolidGeometry] = useState(false);
+  const [solidGeometryResult, setSolidGeometryResult] = useState<any>(null);
 
   const handleImport = async () => {
     setImporting(true);
@@ -613,6 +618,38 @@ export const ContentImportPage = () => {
       });
     } finally {
       setImportingPlaneGeometry(false);
+    }
+  };
+
+  const handleSolidGeometryImport = async () => {
+    setImportingSolidGeometry(true);
+    setSolidGeometryResult(null);
+
+    try {
+      const result = await importSolidGeometrySkill();
+      setSolidGeometryResult(result);
+      
+      if (result.result.success) {
+        toast({
+          title: "Solid Geometry Imported!",
+          description: `Successfully imported: ${result.skillName}`,
+        });
+      } else {
+        toast({
+          title: "Import Failed",
+          description: result.result.error || "Unknown error",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      toast({
+        title: "Import Failed",
+        description: "Failed to import solid geometry skill",
+        variant: "destructive"
+      });
+    } finally {
+      setImportingSolidGeometry(false);
     }
   };
 
@@ -1352,6 +1389,42 @@ export const ContentImportPage = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Solid Geometry - HIGH PRIORITY */}
+        <Card className="border-2 border-primary">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              ⭐ PRIORYTET WYSOKI: Stereometria – bryły
+            </CardTitle>
+            <CardDescription>
+              Import "Stereometria – bryły" skill for class 3 (geometria) - HIGH PRIORITY
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button 
+              onClick={handleSolidGeometryImport}
+              disabled={importingSolidGeometry}
+              className="w-full"
+              variant="default"
+            >
+              {importingSolidGeometry && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Import Stereometria – bryły (PRIORYTET WYSOKI)
+            </Button>
+            
+            {solidGeometryResult && (
+              <div className="mt-4 p-3 rounded-md bg-muted/50">
+                <p className="text-sm font-medium">Import Result:</p>
+                <p className="text-sm text-muted-foreground">
+                  Skill: {solidGeometryResult.skillName}
+                </p>
+                <p className={`text-sm ${solidGeometryResult.result.success ? 'text-green-600' : 'text-red-600'}`}>
+                  Status: {solidGeometryResult.result.success ? 'Success' : 'Failed'}
+                  {solidGeometryResult.result.error && ` - ${solidGeometryResult.result.error}`}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     );
-};
+  };

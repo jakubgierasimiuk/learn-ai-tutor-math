@@ -3499,3 +3499,154 @@ export async function importPlaneGeometrySkill() {
     throw error;
   }
 };
+
+// Import function for Stereometria – bryły
+export const importSolidGeometrySkill = async (): Promise<SkillImportResult> => {
+  const skillData = {
+    skillName: "Stereometria – bryły",
+    class_level: 3,
+    department: "geometria",
+    generatorParams: {
+      microSkill: "solid_geometry_solids",
+      difficultyRange: [2, 5],
+      fallbackTrigger: "use_basic_geometry_patterns"
+    },
+    teachingFlow: {
+      phase1: { name: "Wprowadzenie", duration: 1500, activities: ["theory", "guided_examples"] },
+      phase2: { name: "Ćwiczenia", duration: 2400, activities: ["practice", "feedback"] },
+      phase3: { name: "Utrwalanie", duration: 1200, activities: ["mastery_tasks", "assessment"] }
+    },
+    content: {
+      theory: {
+        introduction: "Stereometria bada figury w przestrzeni: bryły wielościenne (graniastosłupy, ostrosłupy) oraz obrotowe (walec, stożek, kula). Kluczowe kompetencje na poziomie liceum obejmują: rozumienie pojęcia przekroju, obliczanie pola powierzchni całkowitej i bocznej, objętości, zależności skali (podobieństwo w 3D), a także proste zagadnienia metryczne w prostopadłościanie (przekątna przestrzenna). Centralna idea: objętość mierzy „ile przestrzeni zajmuje bryła", a pole powierzchni – „ile materiału potrzeba na jej pokrycie". W bryłach o podstawie wielokąta istotne są wielkości: pole podstawy Pp, obwód podstawy op, wysokość H (odległość między płaszczyznami podstaw), wysokości ścian bocznych i apotemy (w ostrosłupach i stożkach oznaczane zwykle l). Graniastosłup prosty ma ściany boczne prostopadłe do podstawy; jego objętość to V=Pp·H, a pole boczne Sbok=op·H (suma pól prostokątów), zaś pole całkowite S=2Pp+Sbok. Dla prostopadłościanu o krawędziach a,b,c przekątna przestrzenna wynosi d=√(a²+b²+c²); w sześcianie d=a√3. Ostrosłup (o podstawie dowolnego wielokąta) ma V=(1/3)Pp·H. Pole boczne ostrosłupa prawidłowego (podstawa foremna, wierzchołek nad środkiem) można ująć jako Sbok=(1/2)·op·l, gdzie l to wysokość ściany bocznej (apotema). Bryły obrotowe powstają przez obrót figury płaskiej wokół prostej: walec – obrót prostokąta wokół boku, stożek – obrót trójkąta prostokątnego, kula – obrót półokręgu. Dla walca o promieniu r i wysokości H mamy: objętość V=πr²H, pole boczne Sbok=2πrH, pole całkowite S=2πr²+2πrH. Stożek o promieniu podstawy r, wysokości H i tworzącej l=√(r²+H²) ma V=(1/3)πr²H, Sbok=πrl, S=πr²+πrl. Ścięty stożek o promieniach R (większym) i r (mniejszym) oraz wysokości H: V=(1/3)πH(R²+Rr+r²), Sbok=π(R+r)l (z l – tworzącą ściętego stożka). Kula: V=(4/3)πr³ i S=4πr². Przekroje brył (cięcia płaszczyzną) pozwalają ujawnić zależności metryczne i często upraszczają obliczenia: przekrój osiowy walca lub stożka to prostokąt lub trójkąt, w których można zastosować Pitagorasa; przekroje w prostopadłościanie prowadzą do trójkątów prostokątnych ujawniających przekątne i odległości. Podobieństwo w przestrzeni: jeśli dwie bryły są podobne ze skalą k (np. dwa podobne ostrosłupy/walce), to odpowiednie długości skalują się jak k, pola powierzchni jak k², a objętości jak k³. Ta reguła jest kluczowa w zadaniach o skalowaniu modeli, optymalizacji materiałowej i szacowaniu kosztów (np. farba vs. objętość betonu). W praktyce egzaminacyjnej typowe zadania obejmują: (1) „czyste" obliczenia V i S przy podanych wymiarach; (2) wynajdywanie brakującego parametru z innego (np. z pola bocznego stożka oblicz l, a potem H); (3) rozwiązywanie zadań złożonych (bryły złożone, odejmowanie brył, wypełnienia), (4) przekroje i zastosowanie Pitagorasa w 3D, (5) podobieństwo i skalowanie. Zawsze sprawdzaj jednostki (cm² vs cm³) i sens liczbowy (pole/objętość dodatnia). Częste pułapki to mylenie promienia z średnicą, mieszanie pola bocznego i całkowitego, zapominanie o czynniku 1/3 w ostrosłupach i stożkach oraz podstawianie tworzącej l w miejsce wysokości H. Strategia rozwiązywania: (1) Zidentyfikuj bryłę i wypisz znane parametry. (2) Wybierz odpowiedni wzór (V, Sbok, S) i sprawdź, czy potrzebujesz H czy l – jeśli brakuje, użyj przekroju i Pitagorasa. (3) Dla brył złożonych rozbij problem na składniki i sumuj/odejmuj pola lub objętości. (4) Przy skalowaniu zidentyfikuj k i zastosuj prawa k²/k³. (5) Kontroluj jednostki i wykonaj test przybliżeniowy, by uniknąć błędów rzędu wielkości. Dodatkowo, dla wielościanów wypukłych obowiązuje wzór Eulera V−E+F=2 (V – liczba wierzchołków, E – krawędzi, F – ścian). Pozwala on sprawdzać spójność danych w zadaniach konstrukcyjnych i teoretycznych. W zastosowaniach technicznych umiejętność liczenia objętości i pól przekłada się na koszty materiałów (beton, blacha, farba), czasu napełniania zbiorników (walce, ścięte stożki – silosy) oraz projektowania opakowań (minimalizacja materiału przy zadanej objętości).",
+        keyConceptsLaTex: [
+          "$V_{\\text{gr}}=P_p\\cdot H$",
+          "$S_{\\text{bok gr}}=o_p\\cdot H$", 
+          "$S_{\\text{cał gr}}=2P_p+o_pH$",
+          "$d_{\\text{prostop}}=\\sqrt{a^2+b^2+c^2}$",
+          "$V_{\\text{ost}}=\\tfrac{1}{3}P_pH$",
+          "$S_{\\text{bok ost}}=\\tfrac{1}{2}o_p\\,l$",
+          "$V_{\\text{wal}}=\\pi r^2H$",
+          "$S_{\\text{bok wal}}=2\\pi rH$",
+          "$V_{\\text{sto}}=\\tfrac{1}{3}\\pi r^2H$",
+          "$S_{\\text{bok sto}}=\\pi rl$",
+          "$l=\\sqrt{r^2+H^2}$",
+          "$V_{\\text{kuli}}=\\tfrac{4}{3}\\pi r^3$",
+          "$S_{\\text{kuli}}=4\\pi r^2$",
+          "$V_{\\text{sto ścięty}}=\\tfrac{1}{3}\\pi H(R^2+Rr+r^2)$",
+          "$S':S=k^2:1,\\ V':V=k^3:1$",
+          "$V-E+F=2$"
+        ],
+        timeEstimate: 600
+      },
+      examples: [
+        {
+          title: "STEREO_001",
+          problem: "Prostopadłościan ma krawędzie $a=3$, $b=4$, $c=12$. Oblicz przekątną przestrzenną i pole powierzchni całkowitej.",
+          solution: {
+            steps: [
+              { step: "Przekątna przestrzenna", latex: "$d=\\sqrt{a^2+b^2+c^2}$", explanation: "Twierdzenie Pitagorasa w 3D." },
+              { step: "Podstaw", latex: "$d=\\sqrt{3^2+4^2+12^2}=\\sqrt{9+16+144}$", explanation: "Sumujemy kwadraty krawędzi." },
+              { step: "Wynik d", latex: "$d=\\sqrt{169}=13$", explanation: "Pierwiastek z 169." },
+              { step: "Pole całkowite", latex: "$S=2(ab+bc+ac)$", explanation: "Suma pól par przeciwległych ścian." },
+              { step: "Podstaw i policz", latex: "$S=2(12+48+36)=2\\cdot96=192$", explanation: "Pola w jednostkach kwadratowych." }
+            ],
+            final_answer: "$d=13$, $S=192$"
+          },
+          expectedAnswer: "$d=13$, $S=192$",
+          maturaConnection: "Zastosowano wzory na przekątną prostopadłościanu i pole całkowite.",
+          timeEstimate: 300
+        },
+        {
+          title: "STEREO_002", 
+          problem: "Walec ma promień $r=5$ i wysokość $H=10$. Oblicz pole boczne i objętość.",
+          solution: {
+            steps: [
+              { step: "Pole boczne", latex: "$S_{bok}=2\\pi rH$", explanation: "Prostokąt o bokach $2\\pi r$ i $H$ po rozwinięciu." },
+              { step: "Objętość", latex: "$V=\\pi r^2H$", explanation: "Pole podstawy razy wysokość." },
+              { step: "Podstawienia", latex: "$S_{bok}=2\\pi\\cdot5\\cdot10=100\\pi$", explanation: "Łatwe mnożenie." },
+              { step: "Policz V", latex: "$V=\\pi\\cdot25\\cdot10=250\\pi$", explanation: "Kwadrat promienia razy wysokość." }
+            ],
+            final_answer: "$S_{bok}=100\\pi$, $V=250\\pi$"
+          },
+          expectedAnswer: "$S_{bok}=100\\pi$, $V=250\\pi$",
+          maturaConnection: "Standardowe wzory walca.",
+          timeEstimate: 280
+        }
+      ],
+      practiceExercises: [
+        {
+          exerciseId: "EX_STEREO_001",
+          difficulty: 3,
+          problem: "Graniastosłup prawidłowy sześciokątny ma $P_p=54\\sqrt{3}$ i $H=7$. Oblicz objętość.",
+          expectedAnswer: "$V=378\\sqrt{3}$",
+          hints: [],
+          timeEstimate: 320
+        },
+        {
+          exerciseId: "EX_STEREO_002", 
+          difficulty: 3,
+          problem: "Sześcian ma objętość $V=343$. Oblicz pole powierzchni całkowitej.",
+          expectedAnswer: "$S=294$",
+          hints: [],
+          timeEstimate: 330
+        }
+      ]
+    },
+    pedagogicalNotes: {
+      commonMistakes: [
+        "Mylone wzory na pola boczne i całkowite.",
+        "Zamiana promienia ze średnicą w obliczeniach.",
+        "Brak czynnika 1/3 przy stożku i ostrosłupie.",
+        "Podstawianie l zamiast H w stożku.",
+        "Błędne skalowanie pól i objętości przy podobieństwie."
+      ],
+      teachingTips: [
+        "Zawsze wykonuj przekrój pomocniczy i podpisz wszystkie wielkości (r,H,l).",
+        "Twórz tabelę wzorów (V, S_bok, S) dla każdej bryły z jednostkami.",
+        "Dawaj zadania porównawcze: dwie bryły podobne – jak zmienia się S i V.",
+        "Stosuj zadania złożone (sumy/różnice brył), by utrwalać rozbijanie problemu.",
+        "Weryfikuj wyniki przez oszacowanie: czy rząd wielkości ma sens?"
+      ],
+      prerequisites: ["Planimetria: pola wielokątów i koła", "Twierdzenie Pitagorasa, trygonometria w trójkącie", "Operacje na potęgach i pierwiastkach"],
+      estimatedTime: 5100,
+      difficultyProgression: "Start: podstawowe wzory V i S dla walca/graniastosłupa (poziom 3). Dalej: stożek, ostrosłup, przekroje i zależności l,H,r (poziom 4). Finał: bryły złożone, ścięte, podobieństwo z k²/k³ (poziom 5)."
+    },
+    misconceptionPatterns: [
+      {
+        pattern: "STEREO_SIDE_TOTAL_MIX",
+        description: "Mylenie pola bocznego z całkowitym (dodawanie/odejmowanie pól podstaw).",
+        feedback: "Zapisz osobno S_bok i S_cał; podkreśl kiedy dodajemy 2P_p (graniastosłup/walec).",
+        remediation: "Zadania porównawcze z i bez podstaw.",
+        prerequisiteGap: "Rozróżnianie powierzchni bocznej i całkowitej"
+      }
+    ],
+    realWorldApplications: [
+      {
+        context: "Inżynieria lądowa",
+        example: "Obliczanie ilości betonu potrzebnego do słupa (walec) i fundamentu (prostopadłościan).",
+        practicalUse: "Objętości brył bezpośrednio przekładają się na zapotrzebowanie materiału.",
+        careerConnection: "Budownictwo, architektura"
+      }
+    ],
+    assessmentRubric: {
+      scope: "Ocena biegłości w stereometrii: pola, objętości, przekroje i podobieństwo w 3D.",
+      criteria: [
+        {
+          skill: "Obliczanie pól i objętości",
+          podstawowy: "Stosuje podstawowe wzory dla graniastosłupa i walca przy kompletnych danych.",
+          rozszerzony: "Wyznacza brakujące parametry (np. l) i liczy pola/objętości stożka, kuli, ostrosłupa.",
+          uniwersytecki: "Rozwiązuje zadania z bryłami złożonymi i ściętymi, łączy kilka wzorów."
+        }
+      ]
+    }
+  };
+
+  try {
+    console.log('Starting import for Stereometria – bryły...');
+    return await importSingleSkillFromJSON(skillData);
+  } catch (error) {
+    console.error('Error importing Stereometria – bryły:', error);
+    throw error;
+  }
+};
