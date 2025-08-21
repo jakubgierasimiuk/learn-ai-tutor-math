@@ -85,15 +85,16 @@ export const Dashboard = () => {
         .eq("user_id", user?.id)
         .maybeSingle();
 
-      // Fetch lesson completion stats
-      const { data: lessonStats } = await supabase
-        .from("user_lesson_progress")
+      // Fetch skill progress stats
+      const { data: skillStats } = await supabase
+        .from("skill_progress")
         .select(`
-          lesson_id,
-          topic_id,
-          score,
-          status,
-          completed_at
+          skill_id,
+          mastery_level,
+          total_attempts,
+          correct_attempts,
+          is_mastered,
+          updated_at
         `)
         .eq("user_id", user?.id);
 
@@ -121,27 +122,30 @@ export const Dashboard = () => {
         .order("unlocked_at", { ascending: false })
         .limit(5);
 
-      // Fetch recent activity
+      // Fetch recent learning sessions as activity
       const { data: activity } = await supabase
-        .from("user_lesson_progress")
+        .from("unified_learning_sessions")
         .select(`
-          score,
           completed_at,
-          lessons!inner(
-            title,
-            topics!inner(name)
-          )
+          tasks_completed,
+          correct_answers,
+          engagement_score,
+          skill_focus,
+          department
         `)
         .eq("user_id", user?.id)
-        .eq("status", "completed")
+        .not("completed_at", "is", null)
         .order("completed_at", { ascending: false })
         .limit(5);
 
       // Process data
-      const completedLessons = lessonStats?.filter(l => l.status === 'completed') || [];
-      const topicsStarted = new Set(lessonStats?.map(l => l.topic_id) || []).size;
-      const averageScore = completedLessons.length > 0
-        ? completedLessons.reduce((sum, lesson) => sum + (lesson.score || 0), 0) / completedLessons.length
+      const masteredSkills = skillStats?.filter(s => s.is_mastered) || [];
+      const skillsStarted = skillStats?.length || 0;
+      const averageScore = skillStats && skillStats.length > 0
+        ? skillStats.reduce((sum, skill) => {
+            const accuracy = skill.total_attempts > 0 ? (skill.correct_attempts / skill.total_attempts) * 100 : 0;
+            return sum + accuracy;
+          }, 0) / skillStats.length
         : 0;
 
       const processedAchievements = achievements?.map(ua => ({
@@ -154,17 +158,17 @@ export const Dashboard = () => {
       })) || [];
 
       const processedActivity = activity?.map(a => ({
-        lesson_title: a.lessons.title,
-        topic_name: a.lessons.topics.name,
-        score: a.score || 0,
+        lesson_title: `Learning Session`,
+        topic_name: (a.department || 'matematyka').replace('_', ' '),
+        score: a.tasks_completed > 0 ? Math.round((a.correct_answers / a.tasks_completed) * 100) : 0,
         completed_at: a.completed_at!,
-        points_earned: Math.round((a.score || 0) * 0.5) + 10 // Estimate based on scoring logic
+        points_earned: Math.round((a.engagement_score || 0.5) * 20) + 10 // Estimate based on engagement
       })) || [];
 
       setStats({
         total_points: profile?.total_points || 0,
-        lessons_completed: completedLessons.length,
-        topics_started: topicsStarted,
+        lessons_completed: masteredSkills.length,
+        topics_started: skillsStarted,
         current_streak: streakData?.current_streak || 0,
         longest_streak: streakData?.longest_streak || 0,
         average_score: Math.round(averageScore),
@@ -235,12 +239,12 @@ export const Dashboard = () => {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-sm font-medium">
                 <BookOpen className="w-4 h-4 text-blue-500" />
-                Lekcje
+                Umiejętności
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-primary">{stats?.lessons_completed || 0}</div>
-              <p className="text-xs text-muted-foreground">Ukończone lekcje</p>
+              <p className="text-xs text-muted-foreground">Opanowane umiejętności</p>
             </CardContent>
           </Card>
 
@@ -301,7 +305,7 @@ export const Dashboard = () => {
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
                   <Award className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>Ukończ pierwszą lekcję, aby zdobyć osiągnięcia!</p>
+                  <p>Ukończ pierwszą sesję nauki, aby zdobyć osiągnięcia!</p>
                 </div>
               )}
             </CardContent>
@@ -314,7 +318,7 @@ export const Dashboard = () => {
                 <Calendar className="w-5 h-5 text-blue-500" />
                 Ostatnia aktywność
               </CardTitle>
-              <CardDescription>Twoje najnowsze ukończone lekcje</CardDescription>
+              <CardDescription>Twoje najnowsze sesje nauki</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {recentActivity.length ? (
@@ -336,7 +340,7 @@ export const Dashboard = () => {
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
                   <BookOpen className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>Rozpocznij pierwszą lekcję!</p>
+                  <p>Rozpocznij pierwszą sesję nauki!</p>
                 </div>
               )}
             </CardContent>
@@ -354,12 +358,12 @@ export const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Link to="/lessons">
+              <Link to="/study-dashboard">
                 <Button className="w-full h-auto p-4 flex-col gap-2">
                   <BookOpen className="w-6 h-6" />
                   <div className="text-center">
-                    <div className="font-medium">Przeglądaj lekcje</div>
-                    <div className="text-xs opacity-80">Wybierz nowy temat</div>
+                    <div className="font-medium">Przeglądaj umiejętności</div>
+                    <div className="text-xs opacity-80">Wybierz nową umiejętność</div>
                   </div>
                 </Button>
               </Link>

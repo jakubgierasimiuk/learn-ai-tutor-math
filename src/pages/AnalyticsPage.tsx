@@ -84,19 +84,19 @@ export default function AnalyticsPage() {
 
       // Fetch topic mastery
       const { data: masteryData } = await supabase
-        .from('skill_mastery')
+        .from('skill_progress')
         .select(`
-          mastery_percentage,
-          topic_id,
-          topics (name)
+          mastery_level,
+          skill_id,
+          is_mastered
         `)
         .eq('user_id', user?.id);
 
       if (masteryData) {
         const processedMastery = masteryData.map(item => ({
-          topic_name: item.topics?.name || 'Unknown',
-          mastery_percentage: item.mastery_percentage,
-          lessons_completed: 0,
+          topic_name: `Skill ${item.skill_id.slice(0, 8)}...`,
+          mastery_percentage: item.mastery_level * 10 || 0,
+          lessons_completed: item.is_mastered ? 1 : 0,
           time_spent: 0
         }));
         setTopicMastery(processedMastery);
@@ -135,10 +135,10 @@ export default function AnalyticsPage() {
         .maybeSingle();
 
       const { data: progressData } = await supabase
-        .from('user_lesson_progress')
+        .from('unified_learning_sessions')
         .select('*')
         .eq('user_id', user?.id)
-        .eq('status', 'completed');
+        .not('completed_at', 'is', null);
 
       const totalLessons = progressData?.length || 0;
       const totalHours = dailyData?.reduce((sum, day) => sum + (day.total_time_minutes || 0), 0) / 60 || 0;

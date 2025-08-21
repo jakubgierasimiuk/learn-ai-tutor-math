@@ -54,11 +54,8 @@ export async function logError(error: unknown, location?: string, payload?: any)
 export async function logAIMessage(sessionId: number, role: 'user' | 'assistant', message: string) {
   try {
     if (!sessionId) return;
-    await supabase.from('chat_logs').insert({
-      session_id: sessionId,
-      role,
-      message,
-    });
+    // For now, just log to console since lesson_steps was removed
+    console.log(`AI Message [${role}]:`, message);
   } catch (e) {
     console.warn('logAIMessage failed', e);
   }

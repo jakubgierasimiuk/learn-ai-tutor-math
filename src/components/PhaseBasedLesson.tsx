@@ -171,35 +171,16 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
 
   const loadChatHistory = async (sessionId: string) => {
     try {
-      const { data: steps, error } = await supabase
-        .from('lesson_steps')
-        .select('*')
-        .eq('session_id', sessionId)
-        .order('step_number');
-
-      if (error) throw error;
-
-      const history = (steps || []).flatMap(step => {
-        const messages = [];
-        if (step.ai_response) {
-          messages.push({
-            role: 'assistant',
-            content: step.ai_response,
-            timestamp: step.created_at
-          });
+      // For now, start with empty chat history since lesson_steps table was removed
+      // In a real implementation, you might want to store chat history in a different way
+      // or use the learning_interactions table for this purpose
+      setChatHistory([
+        {
+          role: 'assistant',
+          content: 'Witaj! Jestem Twoim AI tutorem. Napisz "Rozpocznij lekcję" aby zacząć naukę tej umiejętności.',
+          timestamp: new Date().toISOString()
         }
-        if (step.user_input) {
-          messages.push({
-            role: 'user',
-            content: step.user_input,
-            timestamp: step.created_at,
-            isCorrect: step.is_correct
-          });
-        }
-        return messages;
-      });
-
-      setChatHistory(history);
+      ]);
     } catch (error) {
       console.error('Error loading chat history:', error);
     }
