@@ -29,7 +29,7 @@ async function importSkillWithContent(skill: SkillContent) {
   try {
     console.log(`Importing skill: ${skill.skillName}`);
     
-    // Insert into skills table (without pedagogical_notes - it's a separate table)
+    // Insert into skills table (corrected column mapping)
     const { data: skillData, error: skillError } = await supabase
       .from('skills')
       .upsert([{
@@ -38,7 +38,13 @@ async function importSkillWithContent(skill: SkillContent) {
         class_level: skill.class_level,
         department: skill.department,
         generator_params: skill.generatorParams || {},
-        teaching_flow: skill.teachingFlow || {}
+        teaching_flow: skill.teachingFlow?.phase1 ? [
+          skill.teachingFlow.phase1.activities,
+          skill.teachingFlow.phase2?.activities || [],
+          skill.teachingFlow.phase3?.activities || []
+        ].flat() : ["theory", "example", "guided_practice", "independent_practice"],
+        content_data: skill.content || {},
+        description: skill.content?.theory?.introduction || skill.skillName
       }])
       .select()
       .single();
@@ -104,7 +110,7 @@ async function importSkillWithContent(skill: SkillContent) {
             solution_steps: example.solution?.steps || [],
             example_code: example.title || '',
             explanation: example.maturaConnection || '',
-            final_answer: example.expectedAnswer || '',
+            final_answer: example.solution?.final_answer || example.expectedAnswer || '',
             time_estimate: example.timeEstimate || 0
           }]);
 
@@ -114,11 +120,27 @@ async function importSkillWithContent(skill: SkillContent) {
       }
     }
 
-    // Import exercises - skip if table doesn't exist
-    console.log('Skipping exercises import - table not available');
+    // Import exercises to practice exercises table  
+    if (skill.content?.practiceExercises) {
+      for (const exercise of skill.content.practiceExercises) {
+        const { error: exerciseError } = await supabase
+          .from('skill_practice_exercises')
+          .upsert([{
+            skill_id: skillId,
+            exercise_code: exercise.exerciseId || '',
+            difficulty_level: exercise.difficulty || 1,
+            problem_statement: exercise.problem || '',
+            expected_answer: exercise.expectedAnswer || '',
+            hints: exercise.hints || [],
+            misconception_map: {},
+            time_estimate: exercise.timeEstimate || 0
+          }]);
 
-    // Import misconception patterns - skip if table doesn't exist  
-    console.log('Skipping misconceptions import - table not available');
+        if (exerciseError) {
+          console.error(`Error inserting exercise for ${skill.skillName}:`, exerciseError);
+        }
+      }
+    }
 
     // Import real world applications
     if (skill.realWorldApplications) {
