@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { autoImportNewBatch, importSingleSkillFromJSON, importLinearInequalitiesSkill, importAbsoluteValueSkill, importQuadraticInequalitiesSkill, importAbsoluteValueEquationsSkill } from '@/lib/skillContentImporter';
+import { autoImportNewBatch, importSingleSkillFromJSON, importLinearInequalitiesSkill, importAbsoluteValueSkill, importQuadraticInequalitiesSkill, importAbsoluteValueEquationsSkill, newBatchContentDatabase } from '@/lib/skillContentImporter';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle, AlertCircle, Clock, Upload } from 'lucide-react';
@@ -46,25 +46,20 @@ export const ContentImportPage = () => {
     setResults([]);
 
     try {
-      const totalSkills = contentDatabase.contentDatabase.length;
+      const totalSkills = 0; // Legacy content database disabled
       
-      for (let i = 0; i < totalSkills; i++) {
-        const skillData = contentDatabase.contentDatabase[i];
-        setProgress(((i + 1) / totalSkills) * 100);
-
-        const { importSkillContent } = await import('@/lib/skillContentImporter');
-        const result = await importSkillContent(skillData);
-        
-        setResults(prev => [...prev, {
-          skillName: skillData.skillName,
-          success: result.success,
-          error: result.error
-        }]);
+      if (totalSkills === 0) {
+        toast({
+          title: "Import Disabled",
+          description: "Legacy content database is disabled. Use the new batch import instead.",
+          variant: "destructive"
+        });
+        return;
       }
 
       toast({
         title: "Import Complete",
-        description: `Successfully imported ${results.filter(r => r.success).length} skills`,
+        description: "Legacy import is disabled",
       });
 
     } catch (error) {
@@ -293,8 +288,7 @@ export const ContentImportPage = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="text-sm text-muted-foreground">
-            This will import {contentDatabase.contentDatabase.length} skills with their theory, examples, 
-            practice exercises, and misconception patterns into the database.
+            Legacy content database import is disabled. Use the new batch import or single skill import instead.
           </div>
 
           {importing && (
@@ -346,11 +340,10 @@ export const ContentImportPage = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="text-sm text-muted-foreground">
-            Import {newBatchContentDatabase.contentDatabase.length} new advanced mathematics skills for class 2 liceum:
+            Import 2 new advanced mathematics skills for class 3 liceum:
             <ul className="mt-2 ml-4 list-disc">
-              {newBatchContentDatabase.contentDatabase.map((skill, index) => (
-                <li key={index}>{skill.skillName}</li>
-              ))}
+              <li>Rozkłady prawdopodobieństwa — dyskretne i ciągłe</li>
+              <li>Równania różniczkowe — podstawy (separowalne i liniowe)</li>
             </ul>
           </div>
 

@@ -1237,7 +1237,7 @@ export const importQuadraticInequalitiesSkill = async (): Promise<SkillImportRes
     "misconception_patterns": [
       {
         "pattern_code": "QUAD_LEADING_SIGN",
-        "description": "Pomijanie znaku współczynnika przy $x^2$ i błędny wybór "wewnątrz" vs "na zewnątrz".",
+        "description": "Pomijanie znaku współczynnika przy $x^2$ i błędny wybór \"wewnątrz\" vs \"na zewnątrz\".",
         "example_error": "Dla $-x^2+4x-3>0$ podanie $(-\\infty,1)\\cup(3,\\infty)$ zamiast $(1,3)$.",
         "intervention_strategy": "Narysuj szkic paraboli dla $a<0$ (ramiona w dół); podkreśl, że dodatnie wartości są między pierwiastkami."
       },
@@ -1295,19 +1295,19 @@ export const importQuadraticInequalitiesSkill = async (): Promise<SkillImportRes
     "pedagogical_notes": {
       "common_mistakes": [
         "Nieodróżnianie roli znaku $a$ (ramiona paraboli).",
-        "Pominięcie równości w $≤,\\ ≥$ i błędne końce przedziałów.",
-        "Zamiana "wewnątrz" i "na zewnątrz" dla $a>0$/$a<0$.",
-        "Błędy w $Δ$ i w obliczaniu pierwiastków."
+        "Pominięcie równości w $\\leq,\\ \\geq$ i błędne końce przedziałów.",
+        "Zamiana \"wewnątrz\" i \"na zewnątrz\" dla $a>0$/$a<0$.",
+        "Błędy w $\\Delta$ i w obliczaniu pierwiastków."
       ],
       "teaching_tips": [
         "Zawsze zaczynaj od szkicu paraboli i tablicy znaków.",
         "Po wyznaczeniu pierwiastków użyj punktu testowego w każdym przedziale.",
-        "Ucz kontrprzykładów: $Δ<0$ z $a>0$ $\\Rightarrow$ brak rozwiązań dla $<0$, ale $>0$ dla wszystkich $x$.",
-        "Podkreślaj różnicę między $>$/$<$ a $≥$/$≤$ (otwarte vs domknięte końce)."
+        "Ucz kontrprzykładów: $\\Delta<0$ z $a>0$ $\\Rightarrow$ brak rozwiązań dla $<0$, ale $>0$ dla wszystkich $x$.",
+        "Podkreślaj różnicę między $>$/$<$ a $\\geq$/$\\leq$ (otwarte vs domknięte końce)."
       ],
-      "prerequisites": ["Równania kwadratowe i $Δ$", "Rozkład na czynniki", "Nierówności liniowe i zapis przedziałów"],
+      "prerequisites": ["Równania kwadratowe i $\\Delta$", "Rozkład na czynniki", "Nierówności liniowe i zapis przedziałów"],
       "estimated_time": 3900,
-      "difficulty_progression": "Start: rozpoznawanie znaku dla $Δ<0/==0/>0$; dalej: iloczynowa i tablica znaków; finał: przekształcenia do trójmianu i zadania aplikacyjne."
+      "difficulty_progression": "Start: rozpoznawanie znaku dla $\\Delta<0/==0/>0$; dalej: iloczynowa i tablica znaków; finał: przekształcenia do trójmianu i zadania aplikacyjne."
     },
     "assessment_rubric": {
       "scope": "Ocena zestawu 10 zadań z nierówności kwadratowych (klasa 1).",
@@ -1322,7 +1322,7 @@ export const importQuadraticInequalitiesSkill = async (): Promise<SkillImportRes
           "skill": "Obliczanie pierwiastków i użycie $Δ$",
           "beginner": "Liczy $Δ$ z drobnymi błędami rachunkowymi.",
           "intermediate": "Poprawnie wyznacza pierwiastki i kolejność $x_1<x_2$.",
-          "advanced": "Sprawnie rozpoznaje przypadki $Δ≤0$ i wyciąga wnioski o zbiorze rozwiązań."
+          "advanced": "Sprawnie rozpoznaje przypadki $\\Delta\\leq0$ i wyciąga wnioski o zbiorze rozwiązań."
         },
         {
           "skill": "Zapis rozwiązań i granice",
