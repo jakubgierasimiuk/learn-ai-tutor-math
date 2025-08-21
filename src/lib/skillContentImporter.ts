@@ -1884,10 +1884,287 @@ export async function importAllSkillContent() {
   return results;
 }
 
-// Auto-import function for immediate execution
+// New batch content for class 2 liceum - Funkcja wykładnicza/logarytmiczna & Geometria analityczna
+export const newBatchContentDatabase = {
+  "contentDatabase": [
+    {
+      "skillId": "skill_006",
+      "skillName": "Funkcja wykładnicza i logarytmiczna",
+      "class_level": 2,
+      "department": "mathematics",
+      "generatorParams": {
+        "microSkill": "exponential_logarithmic",
+        "difficultyRange": [3, 8],
+        "fallbackTrigger": "use_canonical_when_generator_fails"
+      },
+      "teachingFlow": {
+        "phase1": {
+          "name": "Wprowadzenie teoretyczne",
+          "duration": 1800,
+          "activities": ["theory", "formal_definitions", "guided_examples"]
+        },
+        "phase2": {
+          "name": "Ćwiczenia i zastosowania",
+          "duration": 2400,
+          "activities": ["practice", "problem_solving", "feedback"]
+        },
+        "phase3": {
+          "name": "Przygotowanie maturalne",
+          "duration": 1200,
+          "activities": ["exam_tasks", "complex_problems", "assessment"]
+        }
+      },
+      "content": {
+        "theory": {
+          "introduction": "Funkcja wykładnicza ma postać $f(x)=a^x$ dla $a>0$, $a\\neq1$. Funkcja logarytmiczna $f(x)=\\log_a(x)$ jest odwrotnością funkcji wykładniczej. Obie funkcje mają kluczowe znaczenie w matematyce, fizyce, ekonomii i informatyce.",
+          "keyConceptsLaTex": ["$f(x)=a^x$", "$f(x)=\\log_a(x)$"],
+          "formalDefinitions": [
+            "Funkcja wykładnicza: odwzorowanie zbioru liczb rzeczywistych w liczby dodatnie, dla którego $f(x)=a^x$ przy $a>0$ i $a\\neq1$.",
+            "Funkcja logarytmiczna: odwrotność funkcji wykładniczej, definiowana dla $x>0$ jako $\\log_a(x)=y$ wtedy i tylko wtedy, gdy $a^y=x$."
+          ],
+          "theorems": [
+            {
+              "name": "Monotoniczność",
+              "statement": "Dla $a>1$ funkcja $a^x$ jest rosnąca, dla $0<a<1$ jest malejąca.",
+              "proof_outline": "Rozważ pochodną $f(x)=a^x$ równą $f'(x)=a^x\\ln a$. Ponieważ $a^x>0$, znak pochodnej zależy od $\\ln a$. Dla $a>1$, $\\ln a>0$ → funkcja rosnąca. Dla $0<a<1$, $\\ln a<0$ → funkcja malejąca."
+            }
+          ],
+          "timeEstimate": 1800
+        },
+        "examples": [
+          {
+            "title": "Rozwiązywanie równania wykładniczego",
+            "problem": "Rozwiąż równanie $2^x=16$",
+            "solution": {
+              "steps": [
+                {
+                  "step": "Zapisz $16$ jako potęgę liczby $2$",
+                  "latex": "$16=2^4$",
+                  "explanation": "Rozpoznaj, że 16 jest potęgą liczby 2.",
+                  "justification": "Podstawowe własności potęg."
+                },
+                {
+                  "step": "Porównaj wykładniki",
+                  "latex": "$x=4$",
+                  "explanation": "Jeżeli $2^x=2^4$, to $x=4$.",
+                  "justification": "Jednoznaczność zapisu w postaci wykładniczej."
+                }
+              ]
+            },
+            "maturaConnection": "Typowe równanie na maturze podstawowej, sprawdza znajomość własności potęg.",
+            "timeEstimate": 300
+          }
+        ],
+        "practiceExercises": [
+          {
+            "exerciseId": "ex6_1",
+            "difficulty": 4,
+            "examLevel": "podstawowy",
+            "problem": "Oblicz $\\log_2(32)$",
+            "expectedAnswer": "5",
+            "hints": [
+              {
+                "level": 1,
+                "hint": "Znajdź potęgę $2$, która daje $32$.",
+                "timeEstimate": 120
+              }
+            ],
+            "timeEstimate": 480
+          }
+        ]
+      },
+      "pedagogicalNotes": {
+        "commonMistakes": ["Uczeń myli podstawę logarytmu z wykładnikiem.", "Brak świadomości, że logarytm nie jest zdefiniowany dla liczb ujemnych."],
+        "teachingTips": ["Pokaż wizualnie wykresy $a^x$ i $\\log_a(x)$.", "Użyj przykładów z procentami składanymi i wzrostem populacji."],
+        "prerequisites": ["skill_013", "skill_014"],
+        "estimatedTime": 5400,
+        "maturaPreparation": "Na maturze rozszerzonej często pojawiają się zadania z logarytmami i przekształceniami wykładniczymi.",
+        "universityConnection": "Logarytmy i funkcje wykładnicze są fundamentem rachunku różniczkowego i teorii informacji."
+      },
+      "misconceptionPatterns": [
+        {
+          "pattern": "log_of_negative",
+          "description": "Uczeń próbuje obliczyć $\\log_a(-x)$",
+          "feedback": "Logarytm z liczby ujemnej nie istnieje w zbiorze liczb rzeczywistych.",
+          "remediation": "Wprowadź pojęcie logarytmu zespolonego lub ogranicz domenę.",
+          "prerequisiteGap": "Znajomość dziedziny funkcji logarytmicznej."
+        }
+      ],
+      "realWorldApplications": [
+        {
+          "context": "Ekonomia i finanse",
+          "example": "Obliczanie czasu potrzebnego na podwojenie kapitału przy stałej stopie procentowej.",
+          "practicalUse": "Wzór na procent składany wykorzystuje funkcje wykładnicze i logarytmy.",
+          "careerConnection": "Bankowość, ekonomia, analityka danych."
+        }
+      ],
+      "assessmentRubric": {
+        "scope": "Ocena przygotowania maturalnego - 15 zadań różnego poziomu",
+        "criteria": [
+          {
+            "skill": "Rozwiązywanie równań wykładniczych i logarytmicznych",
+            "podstawowy": "Uczeń rozpoznaje proste równania wykładnicze.",
+            "rozszerzony": "Uczeń rozwiązuje zadania złożone z logarytmami.",
+            "uniwersytecki": "Uczeń analizuje asymptoty i granice funkcji wykładniczych i logarytmicznych."
+          }
+        ]
+      }
+    },
+    {
+      "skillId": "skill_007",
+      "skillName": "Geometria analityczna – okrąg i parabola",
+      "class_level": 2,
+      "department": "mathematics",
+      "generatorParams": {
+        "microSkill": "conic_sections",
+        "difficultyRange": [3, 8],
+        "fallbackTrigger": "use_canonical_examples"
+      },
+      "teachingFlow": {
+        "phase1": {
+          "name": "Wprowadzenie teoretyczne",
+          "duration": 1800,
+          "activities": ["theory", "formal_definitions", "guided_examples"]
+        },
+        "phase2": {
+          "name": "Ćwiczenia i zastosowania",
+          "duration": 2400,
+          "activities": ["practice", "problem_solving", "feedback"]
+        },
+        "phase3": {
+          "name": "Przygotowanie maturalne",
+          "duration": 1200,
+          "activities": ["exam_tasks", "complex_problems", "assessment"]
+        }
+      },
+      "content": {
+        "theory": {
+          "introduction": "Okrąg i parabola są podstawowymi krzywymi stożkowymi w geometrii analitycznej. Okrąg ma równanie $(x-a)^2+(y-b)^2=r^2$, a parabola równanie $y=ax^2+bx+c$. Ich własności i zastosowania są kluczowe w wielu dziedzinach matematyki i fizyki.",
+          "keyConceptsLaTex": ["$(x-a)^2+(y-b)^2=r^2$", "$y=ax^2+bx+c$"],
+          "formalDefinitions": [
+            "Okrąg: zbiór punktów równoodległych od jednego punktu, zwanego środkiem.",
+            "Parabola: zbiór punktów równoodległych od prostej i punktu nieleżącego na niej."
+          ],
+          "theorems": [
+            {
+              "name": "Ogniskowa paraboli",
+              "statement": "Dla paraboli $y=ax^2$ ognisko ma współrzędne $(0,\\frac{1}{4a})$.",
+              "proof_outline": "Korzystając z definicji paraboli jako zbioru punktów równoodległych od ogniska i kierownicy, wyznacz współrzędne ogniska przy pomocy geometrii analitycznej."
+            }
+          ],
+          "timeEstimate": 1800
+        },
+        "examples": [
+          {
+            "title": "Równanie okręgu",
+            "problem": "Znajdź równanie okręgu o środku w $(2,3)$ i promieniu $5$.",
+            "solution": {
+              "steps": [
+                {
+                  "step": "Podstaw wzór ogólny okręgu.",
+                  "latex": "$(x-a)^2+(y-b)^2=r^2$",
+                  "explanation": "Wzór ogólny opisuje każdy okrąg w płaszczyźnie.",
+                  "justification": "Definicja okręgu."
+                },
+                {
+                  "step": "Podstaw wartości $a=2$, $b=3$, $r=5$.",
+                  "latex": "$(x-2)^2+(y-3)^2=25$",
+                  "explanation": "Podstawienie danych do wzoru.",
+                  "justification": "Podstawienie liczb."
+                }
+              ]
+            },
+            "maturaConnection": "Często spotykane zadanie w geometrii analitycznej na maturze.",
+            "timeEstimate": 360
+          }
+        ],
+        "practiceExercises": [
+          {
+            "exerciseId": "ex7_1",
+            "difficulty": 5,
+            "examLevel": "rozszerzony",
+            "problem": "Wyznacz wierzchołek paraboli $y=2x^2-4x+1$",
+            "expectedAnswer": "$(1,-1)$",
+            "hints": [
+              {
+                "level": 1,
+                "hint": "Skorzystaj z wzoru na wierzchołek $(-b/2a, f(-b/2a))$.",
+                "timeEstimate": 180
+              }
+            ],
+            "timeEstimate": 600
+          }
+        ]
+      },
+      "pedagogicalNotes": {
+        "commonMistakes": ["Mylenie równania ogólnego okręgu z równaniem kanonicznym.", "Błędne obliczanie wierzchołka paraboli."],
+        "teachingTips": ["Wizualizuj wykresy na siatce współrzędnych.", "Ćwicz przekształcanie równań do postaci kanonicznej."],
+        "prerequisites": ["skill_009"],
+        "estimatedTime": 5400,
+        "maturaPreparation": "Umiejętność wyznaczania równań krzywych stożkowych i ich własności.",
+        "universityConnection": "Podstawa geometrii analitycznej i algebry liniowej."
+      },
+      "misconceptionPatterns": [
+        {
+          "pattern": "sign_error",
+          "description": "Uczeń myli znak w równaniu okręgu $(x-a)^2+(y-b)^2=r^2$.",
+          "feedback": "Zwróć uwagę na poprawne podstawianie współrzędnych środka.",
+          "remediation": "Ćwicz podstawianie na prostych przykładach.",
+          "prerequisiteGap": "Podstawy działań algebraicznych."
+        }
+      ],
+      "realWorldApplications": [
+        {
+          "context": "Fizyka i inżynieria",
+          "example": "Trajektoria pocisku balistycznego przy braku oporu powietrza jest parabolą.",
+          "practicalUse": "Analiza ruchu w polu grawitacyjnym.",
+          "careerConnection": "Balistyka, inżynieria, mechanika."
+        }
+      ],
+      "assessmentRubric": {
+        "scope": "Ocena przygotowania maturalnego - 15 zadań różnego poziomu",
+        "criteria": [
+          {
+            "skill": "Wyznaczanie równań okręgu i paraboli",
+            "podstawowy": "Uczeń potrafi podać równanie okręgu dla prostych danych.",
+            "rozszerzony": "Uczeń oblicza własności paraboli i okręgu w zadaniach maturalnych.",
+            "uniwersytecki": "Uczeń analizuje uogólnione równania krzywych stożkowych."
+          }
+        ]
+      }
+    }
+  ]
+};
+
+// Function to import only new batch content
+export async function importNewBatchContent() {
+  const results = [];
+  
+  for (let i = 0; i < newBatchContentDatabase.contentDatabase.length; i++) {
+    const skillData = newBatchContentDatabase.contentDatabase[i];
+    const result = await importSkillContent(skillData);
+    results.push({ 
+      skillName: skillData.skillName, 
+      result,
+      progress: ((i + 1) / newBatchContentDatabase.contentDatabase.length) * 100
+    });
+  }
+  
+  return results;
+}
+
+// Auto-import function for immediate execution (legacy - all skills)
 export async function autoImportSkills() {
   console.log('Starting auto-import of all skills...');
   const results = await importAllSkillContent();
   console.log('Import completed:', results);
+  return results;
+}
+
+// Auto-import function for new batch
+export async function autoImportNewBatch() {
+  console.log('Starting auto-import of new batch skills (class 2 liceum)...');
+  const results = await importNewBatchContent();
+  console.log('New batch import completed:', results);
   return results;
 }
