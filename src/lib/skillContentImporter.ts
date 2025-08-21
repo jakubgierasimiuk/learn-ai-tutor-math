@@ -620,3 +620,148 @@ export async function autoImportNewBatch(): Promise<SkillImportResult[]> {
   console.log('New batch import completed:', results);
   return results;
 }
+
+// Import linear inequalities skill
+export async function importLinearInequalitiesSkill(): Promise<SkillImportResult> {
+  const fixedJsonData = {
+    "skillId": "inequalities-linear-one-variable-cl1",
+    "skillName": "Nierówności liniowe z jedną niewiadomą",
+    "class_level": 1,
+    "department": "algebra",
+    "generator_params": {
+      "microSkill": "linear_equations",
+      "difficultyRange": [1, 5],
+      "fallbackTrigger": "use_basic_linear_patterns"
+    },
+    "teaching_flow": {
+      "phase1": {
+        "name": "Wprowadzenie",
+        "duration": 900,
+        "activities": ["theory", "guided_examples"]
+      },
+      "phase2": {
+        "name": "Ćwiczenia", 
+        "duration": 1200,
+        "activities": ["practice", "feedback"]
+      },
+      "phase3": {
+        "name": "Utrwalanie",
+        "duration": 600,
+        "activities": ["mastery_tasks", "assessment"]
+      }
+    },
+    "content": {
+      "theory": {
+        "theory_text": "Nierówność to porównanie dwóch wyrażeń, np. $x>2$, które określa zbiór liczb spełniających warunek. Działania: można dodawać lub odejmować tę samą liczbę po obu stronach bez zmiany znaku. Przy mnożeniu lub dzieleniu przez liczbę dodatnią znak się nie zmienia, a przy liczbie ujemnej znak nierówności należy odwrócić. Rozwiązania przedstawiamy symbolem i na osi liczbowej: kółko otwarte dla $>$ lub $<$, zamknięte dla $\\geq$ lub $\\leq$, ze strzałką w odpowiednią stronę. Zawsze warto sprawdzić wynik, podstawiając wartość graniczną i liczbę z wnętrza zbioru.",
+        "key_formulas": ["$x > a$", "$x \\leq b$", "$ax + b > c$"],
+        "time_estimate": 240,
+        "difficulty_level": 1
+      },
+      "examples": [
+        {
+          "example_code": "IEQ_001",
+          "problem_statement": "Rozwiąż nierówność: $x + 3 > 7$",
+          "solution_steps": [
+            {
+              "step": "Odejmujemy 3 od obu stron",
+              "latex": "$x + 3 - 3 > 7 - 3$",
+              "explanation": "Usuwamy stałą po lewej, wykonując tę samą operację po obu stronach."
+            },
+            {
+              "step": "Upraszczamy",
+              "latex": "$x > 4$", 
+              "explanation": "Otrzymujemy zbiór wszystkich liczb większych od 4."
+            }
+          ],
+          "final_answer": "$x > 4$",
+          "explanation": "Na osi liczbowej kółko otwarte w 4 i strzałka w prawo.",
+          "time_estimate": 120,
+          "difficulty_level": 1
+        },
+        {
+          "example_code": "IEQ_002",
+          "problem_statement": "Rozwiąż nierówność: $2x - 1 \\leq 5$",
+          "solution_steps": [
+            {
+              "step": "Dodajemy 1 do obu stron",
+              "latex": "$2x \\leq 5 + 1$",
+              "explanation": "Przenosimy $-1$ na prawą stronę jako $+1$."
+            },
+            {
+              "step": "Dzielimy przez 2 (liczba dodatnia)",
+              "latex": "$x \\leq 3$",
+              "explanation": "Znak nierówności pozostaje bez zmian."
+            }
+          ],
+          "final_answer": "$x \\leq 3$",
+          "explanation": "Kółko zamknięte w 3 i strzałka w lewo.",
+          "time_estimate": 140,
+          "difficulty_level": 2
+        }
+      ],
+      "practice_exercises": [
+        {
+          "exercise_code": "IEQ_EX_001",
+          "problem_statement": "Rozwiąż: $3x - 5 \\geq 10$",
+          "expected_answer": "$x \\geq 5$",
+          "difficulty_level": 2,
+          "time_estimate": 180,
+          "misconception_map": {
+            "$x \\geq -5$": {
+              "type": "sign_error",
+              "feedback": "Przenosząc $-5$ na prawą stronę, dodaj 5: $3x \\geq 15$, nie $3x \\geq 10-(-5)$."
+            },
+            "$x > 5$": {
+              "type": "boundary_confusion", 
+              "feedback": "Symbol $\\geq$ oznacza także równość; punkt 5 należy do rozwiązania."
+            }
+          }
+        },
+        {
+          "exercise_code": "IEQ_EX_002",
+          "problem_statement": "Rozwiąż: $5 - 2x < 9$", 
+          "expected_answer": "$x > -2$",
+          "difficulty_level": 3,
+          "time_estimate": 200,
+          "misconception_map": {
+            "$x < -2$": {
+              "type": "sign_flip_missing",
+              "feedback": "Po podzieleniu przez $-2$ znak powinien się odwrócić."
+            }
+          }
+        }
+      ]
+    },
+    "misconception_patterns": [
+      {
+        "pattern_code": "INEQ_SIGN_FLIP",
+        "description": "Zapomnienie o odwróceniu znaku przy mnożeniu/dzieleniu przez liczbę ujemną",
+        "example_error": "$-2x < 4 \\Rightarrow x < -2$",
+        "intervention_strategy": "Podkreśl regułę odwracania znaku i pokaż przykład krok po kroku."
+      }
+    ],
+    "real_world_applications": [
+      {
+        "context": "Budżet domowy",
+        "problem_description": "Ile maksymalnie można wydać na rozrywkę, jeśli dochód to 3000 zł, a wydatki stałe to 2200 zł?",
+        "age_group": "liceum", 
+        "connection_explanation": "Nierówność: wydatki_stałe + rozrywka $\\leq$ dochód."
+      }
+    ],
+    "pedagogical_notes": {
+      "common_mistakes": [
+        "Brak odwrócenia znaku przy dzieleniu przez liczbę ujemną",
+        "Błędne przenoszenie składników na drugą stronę"
+      ],
+      "teaching_tips": [
+        "Używaj osi liczbowej do wizualizacji rozwiązań",
+        "Zawsze sprawdzaj wartość graniczną i przykład ze środka zbioru"
+      ],
+      "prerequisites": ["Rozwiązywanie równań liniowych", "Działania na liczbach rzeczywistych"],
+      "estimated_time": 2700,
+      "difficulty_progression": "Start: $x>a$; dalej: $ax>b$; finał: $ax+b>c$, także z liczbami ujemnymi."
+    }
+  };
+
+  return await importSingleSkillFromJSON(fixedJsonData);
+}

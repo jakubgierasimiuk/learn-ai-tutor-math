@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { importAllSkillContent, contentDatabase, autoImportNewBatch, newBatchContentDatabase, importSingleSkillFromJSON } from '@/lib/skillContentImporter';
+import { importAllSkillContent, contentDatabase, autoImportNewBatch, newBatchContentDatabase, importSingleSkillFromJSON, importLinearInequalitiesSkill } from '@/lib/skillContentImporter';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle, AlertCircle, Clock, Upload } from 'lucide-react';
@@ -23,6 +23,10 @@ export const ContentImportPage = () => {
   const [jsonContent, setJsonContent] = useState('');
   const [importingJson, setImportingJson] = useState(false);
   const [jsonResult, setJsonResult] = useState<any>(null);
+  
+  // Linear inequalities import
+  const [importingInequalities, setImportingInequalities] = useState(false);
+  const [inequalitiesResult, setInequalitiesResult] = useState<any>(null);
 
   const handleImport = async () => {
     setImporting(true);
@@ -130,6 +134,39 @@ export const ContentImportPage = () => {
       });
     } finally {
       setImportingJson(false);
+    }
+  };
+
+  const handleInequalitiesImport = async () => {
+    setImportingInequalities(true);
+    setInequalitiesResult(null);
+
+    try {
+      const result = await importLinearInequalitiesSkill();
+      setInequalitiesResult(result);
+      
+      if (result.result.success) {
+        toast({
+          title: "Linear Inequalities Imported!",
+          description: `Successfully imported: ${result.skillName}`,
+        });
+      } else {
+        toast({
+          title: "Import Failed",
+          description: result.result.error || "Unknown error",
+          variant: "destructive"
+        });
+      }
+
+    } catch (error) {
+      console.error('Import error:', error);
+      toast({
+        title: "Import Failed",
+        description: "Failed to import linear inequalities skill",
+        variant: "destructive"
+      });
+    } finally {
+      setImportingInequalities(false);
     }
   };
 
@@ -333,6 +370,63 @@ export const ContentImportPage = () => {
             className="w-full"
           >
             {importingJson ? 'Importing JSON...' : 'Import Single Skill from JSON'}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Quick Linear Inequalities Import */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            📐 Quick Import: Linear Inequalities Skill
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="text-sm text-muted-foreground">
+            Import the pre-configured "Nierówności liniowe z jedną niewiadomą" skill with fixed JSON format.
+          </div>
+
+          {importingInequalities && (
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 animate-spin" />
+              <span>Importing linear inequalities skill...</span>
+            </div>
+          )}
+
+          {inequalitiesResult && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                {inequalitiesResult.result.success ? (
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-red-500" />
+                )}
+                <span className={inequalitiesResult.result.success ? "text-green-700" : "text-red-700"}>
+                  {inequalitiesResult.skillName}
+                </span>
+              </div>
+
+              {inequalitiesResult.result.success && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <span className="font-semibold text-green-800">Skill Successfully Imported!</span>
+                  </div>
+                  <p className="text-green-700 mt-1">
+                    Skill ID: {inequalitiesResult.result.skillId}<br />
+                    Now available in Study-Tutor system with complete content.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          <Button 
+            onClick={handleInequalitiesImport} 
+            disabled={importing || importingNewBatch || importingJson || importingInequalities}
+            className="w-full"
+          >
+            {importingInequalities ? 'Importing...' : 'Import Linear Inequalities Skill'}
           </Button>
         </CardContent>
       </Card>
