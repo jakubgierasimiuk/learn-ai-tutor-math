@@ -526,6 +526,80 @@ async function importNewBatchContent(): Promise<SkillImportResult[]> {
   return results;
 }
 
+// Single JSON import function
+export async function importSingleSkillFromJSON(jsonData: any): Promise<SkillImportResult> {
+  try {
+    // Map JSON structure to our internal format
+    const mappedSkill: SkillContent = {
+      skillId: jsonData.skillId,
+      skillName: jsonData.skillName,
+      class_level: jsonData.class_level,
+      department: jsonData.department,
+      generatorParams: jsonData.generator_params,
+      teachingFlow: jsonData.teaching_flow,
+      content: {
+        theory: {
+          introduction: jsonData.content?.theory?.theory_text || '',
+          keyConceptsLaTex: jsonData.content?.theory?.key_formulas || [],
+          timeEstimate: jsonData.content?.theory?.time_estimate || 0
+        },
+        examples: jsonData.content?.examples?.map((ex: any) => ({
+          title: ex.example_code || '',
+          problem: ex.problem_statement || '',
+          solution: {
+            steps: ex.solution_steps || [],
+            final_answer: ex.final_answer || ''
+          },
+          expectedAnswer: ex.final_answer || '',
+          maturaConnection: ex.explanation || '',
+          timeEstimate: ex.time_estimate || 0
+        })) || [],
+        practiceExercises: jsonData.content?.practice_exercises?.map((ex: any) => ({
+          exerciseId: ex.exercise_code || '',
+          difficulty: ex.difficulty_level || 1,
+          problem: ex.problem_statement || '',
+          expectedAnswer: ex.expected_answer || '',
+          hints: ex.hints || [],
+          timeEstimate: ex.time_estimate || 0
+        })) || []
+      },
+      pedagogicalNotes: {
+        commonMistakes: jsonData.pedagogical_notes?.common_mistakes || [],
+        teachingTips: jsonData.pedagogical_notes?.teaching_tips || [],
+        prerequisites: jsonData.pedagogical_notes?.prerequisites || [],
+        estimatedTime: jsonData.pedagogical_notes?.estimated_time || 3600,
+        maturaPreparation: jsonData.pedagogical_notes?.difficulty_progression || ''
+      },
+      misconceptionPatterns: jsonData.misconception_patterns || [],
+      realWorldApplications: jsonData.real_world_applications?.map((app: any) => ({
+        context: app.context || '',
+        example: app.problem_description || '',
+        practicalUse: app.connection_explanation || '',
+        careerConnection: app.age_group || ''
+      })) || [],
+      assessmentRubric: jsonData.assessment_rubric || {}
+    };
+
+    // Use existing import function
+    const result = await importSkillWithContent(mappedSkill);
+    
+    return {
+      skillName: jsonData.skillName,
+      result: result
+    };
+
+  } catch (error) {
+    console.error('Failed to import JSON skill:', error);
+    return {
+      skillName: jsonData.skillName || 'Unknown',
+      result: {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      }
+    };
+  }
+}
+
 // Export data for compatibility
 export const contentDatabase = { contentDatabase: [] };
 export const newBatchContentDatabase = newBatchSkills;
