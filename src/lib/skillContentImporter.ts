@@ -2630,11 +2630,9 @@ export async function importTrigonometricFunctionsSkill() {
       }
     };
 
-    await importSingleSkillFromJSON(skillData);
-    console.log('Trigonometric Functions skill imported successfully');
-    return { success: true, message: 'Trigonometric Functions skill imported successfully' };
+    return await importSingleSkillFromJSON(skillData);
   } catch (error) {
     console.error('Error importing Trigonometric Functions skill:', error);
-    return { success: false, message: `Error importing skill: ${error.message}` };
+    throw error;
   }
 };

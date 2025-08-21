@@ -393,6 +393,38 @@ export const ContentImportPage = () => {
     }
   };
 
+  const handleSequencesImport = async () => {
+    setImportingSequences(true);
+    setSequencesResult(null);
+
+    try {
+      const result = await importNumberSequencesSkill();
+      setSequencesResult(result);
+      
+      if (result.result.success) {
+        toast({
+          title: "Number Sequences Imported!",
+          description: `Successfully imported: ${result.skillName}`,
+        });
+      } else {
+        toast({
+          title: "Import Failed",
+          description: result.result.error || "Unknown error",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      toast({
+        title: "Import Failed",
+        description: "Failed to import number sequences skill",
+        variant: "destructive"
+      });
+    } finally {
+      setImportingSequences(false);
+    }
+  };
+
   const handleTrigonometricImport = async () => {
     setImportingTrigonometric(true);
     setTrigonometricResult(null);
