@@ -29,11 +29,10 @@ async function importSkillWithContent(skill: SkillContent) {
   try {
     console.log(`Importing skill: ${skill.skillName}`);
     
-    // Insert into skills table (corrected column mapping)
+    // Insert into skills table (let database generate UUID)
     const { data: skillData, error: skillError } = await supabase
       .from('skills')
-      .upsert([{
-        id: skill.skillId,
+      .insert([{
         name: skill.skillName,
         class_level: skill.class_level,
         department: skill.department,
