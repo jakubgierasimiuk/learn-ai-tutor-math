@@ -2189,3 +2189,115 @@ export const importExponentialLogarithmicFunctionsSkill = async (): Promise<Skil
   
   return await importSingleSkillFromJSON(skillData);
 };
+
+export const importNumberSequencesSkill = async (): Promise<SkillImportResult> => {
+  const skillData = {
+    "skillId": "number-sequences-cl2",
+    "skillName": "Ciągi liczbowe",
+    "class_level": 2,
+    "department": "algebra",
+    "generator_params": {
+      "microSkill": "sequences_basics",
+      "difficultyRange": [2, 5],
+      "fallbackTrigger": "use_basic_sequences_patterns"
+    },
+    "teaching_flow": {
+      "phase1": { "name": "Wprowadzenie", "duration": 1500, "activities": ["theory", "guided_examples"] },
+      "phase2": { "name": "Ćwiczenia", "duration": 2400, "activities": ["practice", "feedback"] },
+      "phase3": { "name": "Utrwalanie", "duration": 1200, "activities": ["mastery_tasks", "assessment"] }
+    },
+    "content": {
+      "theory": {
+        "theory_text": "Ciąg liczbowy to funkcja określona na zbiorze liczb naturalnych dodatnich (czasem z zerem), której wartości nazywamy wyrazami ciągu. Zapisujemy go najczęściej jako $(a_n)$ lub $(a_n)_{n∈ℕ}$, gdzie $a_n$ oznacza n-ty wyraz. Istnieją dwa podstawowe sposoby definiowania ciągów: jawnie (przez wzór na wyraz ogólny $a_n$) oraz rekurencyjnie (każdy wyraz określony na podstawie poprzednich, np. $a_{n+1}=f(a_n)$ wraz z warunkiem początkowym). Już na poziomie liceum kluczowe są dwa szczególne rodzaje ciągów: arytmetyczne i geometryczne.\n\nCiąg arytmetyczny to taki, w którym różnica dowolnych dwóch kolejnych wyrazów jest stała. Jeśli $r$ oznacza różnicę ciągu, to $a_{n+1}-a_n=r$ dla każdego $n$. Najważniejszy jest wzór na wyraz ogólny: $a_n=a_1+(n-1)r$. Wynika on z wielokrotnego dodawania różnicy: $a_2=a_1+r$, $a_3=a_1+2r$, itd. Dodatkowo korzystamy z wzoru na sumę $n$ pierwszych wyrazów: $S_n=a_1+a_2+\\ldots+a_n=\\frac{n}{2}(a_1+a_n)$, co po podstawieniu $a_n=a_1+(n-1)r$ daje drugą użyteczną postać $S_n=\\frac{n}{2}[2a_1+(n-1)r]$.\n\nCiąg geometryczny charakteryzuje stały iloraz kolejnych wyrazów: istnieje $q≠0$, takie że $\\frac{a_{n+1}}{a_n}=q$. Wówczas wyraz ogólny ma postać $a_n=a_1\\,q^{\\,n-1}$. Suma $n$ pierwszych wyrazów (dla $q≠1$) to $S_n=a_1\\,\\frac{1-q^n}{1-q}$; dla $q=1$ suma jest po prostu $S_n=na_1$. Jeśli $|q|<1$ i chcemy zsumować nieskończenie wiele wyrazów od $a_1$, istnieje granica sum częściowych równa $S_∞=\\frac{a_1}{1-q}$ (warunek bezwzględnie konieczny i wystarczający: $|q|<1$).",
+        "key_formulas": [
+          "$a_n=a_1+(n-1)r$",
+          "$S_n=\\frac{n}{2}(a_1+a_n)$",
+          "$S_n=\\frac{n}{2}[2a_1+(n-1)r]$",
+          "$a_n=a_1\\,q^{\\,n-1}$",
+          "$S_n=a_1\\frac{1-q^n}{1-q}$",
+          "$S_∞=\\frac{a_1}{1-q}$",
+          "$r=\\frac{a_m-a_k}{m-k}$",
+          "$S_n=na_1 \\text{ dla } q=1$"
+        ],
+        "time_estimate": 600,
+        "difficulty_level": 4
+      },
+      "examples": [
+        {
+          "example_code": "SEQ_001",
+          "problem_statement": "Dany jest ciąg arytmetyczny o $a_1=3$ i $r=2$. Oblicz $a_{10}$ oraz $S_{10}$.",
+          "solution_steps": [
+            { "step": "Wyraz ogólny", "expression": "$a_n=a_1+(n-1)r$", "explanation": "Definicja ciągu arytmetycznego." },
+            { "step": "Oblicz $a_{10}$", "expression": "$a_{10}=3+9\\cdot2=21$", "explanation": "Dodajemy różnicę 9 razy." },
+            { "step": "Suma 10 wyrazów", "expression": "$S_{10}=\\frac{10}{2}(a_1+a_{10})$", "explanation": "Klasyczny wzór na sumę." },
+            { "step": "Wynik $S_{10}$", "expression": "$S_{10}=5\\cdot(3+21)=120$", "explanation": "Mnożenie daje 120." }
+          ],
+          "final_answer": "$a_{10}=21$, $S_{10}=120$",
+          "explanation": "Zastosowano wzory na $a_n$ i $S_n$ dla ciągu arytmetycznego.",
+          "time_estimate": 280,
+          "difficulty_level": 3
+        },
+        {
+          "example_code": "SEQ_002",
+          "problem_statement": "W ciągu arytmetycznym $a_3=5$ i $a_8=20$. Wyznacz $r$ i $a_1$.",
+          "solution_steps": [
+            { "step": "Różnica z dwóch wyrazów", "expression": "$a_8-a_3=(8-3)r$", "explanation": "Różnice między dalekimi wyrazami sumują się do $(m-k)r$." },
+            { "step": "Oblicz $r$", "expression": "$20-5=5r\\Rightarrow r=3$", "explanation": "Prosty rachunek liniowy." },
+            { "step": "Wyznacz $a_1$", "expression": "$a_3=a_1+2r$", "explanation": "Podstaw $a_3=5$, $r=3$." },
+            { "step": "Wynik $a_1$", "expression": "$5=a_1+6\\Rightarrow a_1=-1$", "explanation": "Odejmujemy 6 od obu stron." }
+          ],
+          "final_answer": "$r=3$, $a_1=-1$",
+          "explanation": "Skorzystano z liniowej struktury różnic i wzoru na $a_n$.",
+          "time_estimate": 300,
+          "difficulty_level": 3
+        }
+      ],
+      "practice_exercises": [
+        {
+          "exercise_code": "SEQ_EX_001",
+          "problem_statement": "W arytmetycznym $a_1=7$, $r=-2$. Oblicz $a_{15}$.",
+          "expected_answer": "$a_{15}=7+14\\cdot(-2)=-21$",
+          "difficulty_level": 3,
+          "time_estimate": 300,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "index_shift", "feedback": "Użyj $a_{15}=a_1+14r$, nie $a_1+15r$." },
+            "incorrect_answer_2": { "type": "sign_error", "feedback": "Pamiętaj, że $r=-2$: dodajesz liczbę ujemną 14 razy." }
+          }
+        },
+        {
+          "exercise_code": "SEQ_EX_002", 
+          "problem_statement": "Ciąg geometryczny: $a_1=-3$, $q=-\\frac{1}{2}$. Oblicz $a_6$.",
+          "expected_answer": "$a_6=-3\\cdot(-\\frac{1}{2})^{5}=\\frac{3}{32}$",
+          "difficulty_level": 3,
+          "time_estimate": 320,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "parity_sign", "feedback": "Nieparzysty wykładnik potęgi ujemnej daje wynik ujemny – tu wykładnik 5, ale całość z $-3$ zmienia znak." },
+            "incorrect_answer_2": { "type": "index_shift", "feedback": "Użyj potęgi $q^{n-1}$: dla $n=6$ jest $q^5$." }
+          }
+        }
+      ]
+    },
+    "misconception_patterns": [
+      {
+        "pattern_code": "SEQ_R_VS_Q_CONFUSION",
+        "description": "Mylenie różnicy $r$ z ilorazem $q$ i stosowanie niewłaściwych wzorów.",
+        "intervention_strategy": "Najpierw identyfikuj typ ciągu; przygotuj tabelę: arytmetyczny → $a_n=a_1+(n-1)r$, geometryczny → $a_n=a_1q^{n-1}$."
+      },
+      {
+        "pattern_code": "SEQ_INDEX_SHIFT",
+        "description": "Błąd o jeden w wykładniku $(n-1)$ lub w liczbie składników przy sumie.",
+        "intervention_strategy": "Rozpisz pierwsze wyrazy i sprawdź: dla $n=1$ masz $a_1$; w sumie $S_n$ jest dokładnie $n$ składników."
+      }
+    ],
+    "real_world_applications": [
+      {
+        "context": "Finanse osobiste",
+        "problem_description": "Kapitalizacja roczna i raty rosnące: oblicz wartość konta po $n$ latach lub sumę wpłat.",
+        "age_group": "liceum/studia",
+        "connection_explanation": "Wzrost procentowy to ciąg geometryczny; raty rosną o stałą kwotę – ciąg arytmetyczny."
+      }
+    ]
+  };
+  
+  return await importSingleSkillFromJSON(skillData);
+};

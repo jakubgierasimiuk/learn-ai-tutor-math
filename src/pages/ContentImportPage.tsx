@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { autoImportNewBatch, importSingleSkillFromJSON, importLinearInequalitiesSkill, importAbsoluteValueSkill, importQuadraticInequalitiesSkill, importAbsoluteValueEquationsSkill, importDefiniteIntegralApplicationsSkill, importDefiniteIntegralBasicsSkill, importExponentialLogarithmicFunctionsSkill } from '@/lib/skillContentImporter';
+import { autoImportNewBatch, importSingleSkillFromJSON, importLinearInequalitiesSkill, importAbsoluteValueSkill, importQuadraticInequalitiesSkill, importAbsoluteValueEquationsSkill, importDefiniteIntegralApplicationsSkill, importDefiniteIntegralBasicsSkill, importExponentialLogarithmicFunctionsSkill, importNumberSequencesSkill } from '@/lib/skillContentImporter';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle, AlertCircle, Clock, Upload, Calculator, Loader2 } from 'lucide-react';
@@ -51,6 +51,10 @@ export const ContentImportPage = () => {
   // State for Exponential/Logarithmic Functions import  
   const [importingExpLog, setImportingExpLog] = useState(false);
   const [expLogResult, setExpLogResult] = useState<any>(null);
+
+  // State for Number Sequences import
+  const [importingSequences, setImportingSequences] = useState(false);
+  const [sequencesResult, setSequencesResult] = useState<any>(null);
 
   const handleImport = async () => {
     setImporting(true);
@@ -382,6 +386,38 @@ export const ContentImportPage = () => {
       });
     } finally {
       setImportingExpLog(false);
+    }
+  };
+
+  const handleSequencesImport = async () => {
+    setImportingSequences(true);
+    setSequencesResult(null);
+
+    try {
+      const result = await importNumberSequencesSkill();
+      setSequencesResult(result);
+      
+      if (result.result.success) {
+        toast({
+          title: "Number Sequences Imported!",
+          description: `Successfully imported: ${result.skillName}`,
+        });
+      } else {
+        toast({
+          title: "Import Failed",
+          description: result.result.error || "Unknown error",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      toast({
+        title: "Import Failed",
+        description: "Failed to import number sequences skill",
+        variant: "destructive"
+      });
+    } finally {
+      setImportingSequences(false);
     }
   };
 
@@ -900,6 +936,42 @@ export const ContentImportPage = () => {
                 <p className={`text-sm ${expLogResult.result.success ? 'text-green-600' : 'text-red-600'}`}>
                   Status: {expLogResult.result.success ? 'Success' : 'Failed'}
                   {expLogResult.result.error && ` - ${expLogResult.result.error}`}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Number Sequences - HIGH PRIORITY */}
+        <Card className="border-2 border-primary">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              ⭐ PRIORYTET WYSOKI: Ciągi liczbowe
+            </CardTitle>
+            <CardDescription>
+              Import "Ciągi liczbowe" skill for class 2 (algebra) - HIGH PRIORITY
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button 
+              onClick={handleSequencesImport}
+              disabled={importingSequences}
+              className="w-full"
+              variant="default"
+            >
+              {importingSequences && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Import Number Sequences (PRIORYTET WYSOKI)
+            </Button>
+            
+            {sequencesResult && (
+              <div className="mt-4 p-3 rounded-md bg-muted/50">
+                <p className="text-sm font-medium">Import Result:</p>
+                <p className="text-sm text-muted-foreground">
+                  Skill: {sequencesResult.skillName}
+                </p>
+                <p className={`text-sm ${sequencesResult.result.success ? 'text-green-600' : 'text-red-600'}`}>
+                  Status: {sequencesResult.result.success ? 'Success' : 'Failed'}
+                  {sequencesResult.result.error && ` - ${sequencesResult.result.error}`}
                 </p>
               </div>
             )}
