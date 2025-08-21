@@ -1653,3 +1653,111 @@ export const importAbsoluteValueEquationsSkill = async (): Promise<SkillImportRe
 
   return await importSingleSkillFromJSON(skillData);
 };
+
+// Import "Definite Integral Applications" skill
+export const importDefiniteIntegralApplicationsSkill = async () => {
+  const skillData = {
+    "skillId": "applications-definite-integral-cl3",
+    "skillName": "Zastosowania całki oznaczonej (pola, objętości)",
+    "class_level": 3,
+    "department": "analiza_matematyczna",
+    "generatorParams": {
+      "microSkill": "definite_integral_applications",
+      "difficultyRange": [3, 5],
+      "fallbackTrigger": "use_basic_area_volume_patterns"
+    },
+    "teachingFlow": {
+      "phase1": { "name": "Wprowadzenie", "duration": 1500, "activities": ["theory", "guided_examples"] },
+      "phase2": { "name": "Ćwiczenia", "duration": 2400, "activities": ["practice", "feedback"] },
+      "phase3": { "name": "Utrwalanie", "duration": 1200, "activities": ["mastery_tasks", "assessment"] }
+    },
+    "content": {
+      "theory": {
+        "theory_text": "Całka oznaczona modeluje wielkości geometryczne i fizyczne. Pole obszaru między krzywymi na przedziale to całka z różnicy funkcji górnej i dolnej. W układzie parametrycznym pole obliczamy przez całkę z iloczynu y(t) i pochodnej x'(t). Objętość bryły obrotowej wyznaczamy metodą krążków lub pierścieni. Dla przekrojów poprzecznych objętość to całka z pola przekroju A(x). Długość łuku funkcji różniczkowalnej to całka ze sqrt(1+f'(x)^2). We wszystkich zastosowaniach kluczowe są poprawne granice całkowania, właściwa funkcja górna/dolna, dobór metody i kontrola jednostek.",
+        "key_formulas": [
+          "A=∫|f-g|dx",
+          "A=∫y(t)x'(t)dt", 
+          "V=π∫f(x)²dx",
+          "V=π∫(R²-r²)dx",
+          "V=∫A(x)dx",
+          "L=∫√{1+f'(x)²}dx"
+        ],
+        "time_estimate": 600,
+        "difficulty_level": 4
+      },
+      "examples": [
+        {
+          "example_code": "INT_APP_001",
+          "problem_statement": "Oblicz pole obszaru między y=x² i y=x+2.",
+          "solution_steps": [
+            { "step": "Punkty przecięcia", "latex": "x²=x+2", "explanation": "Rozwiąż x²-x-2=0 → x=-1,2." },
+            { "step": "Funkcja górna/dolna", "latex": "x+2≥x²", "explanation": "Na [-1,2] prosta leży wyżej (np. w 0: 2>0)." },
+            { "step": "Całka pola", "latex": "A=∫(x+2-x²)dx", "explanation": "Różnica górna–dolna na wspólnym przedziale." },
+            { "step": "Oblicz całkę", "latex": "A=9/2", "explanation": "Po całkowaniu i podstawieniu granic wychodzi 9/2." }
+          ],
+          "final_answer": "9/2",
+          "explanation": "Pole to całka z różnicy prosta–parabola od -1 do 2.",
+          "time_estimate": 280,
+          "difficulty_level": 3
+        }
+      ],
+      "practice_exercises": [
+        {
+          "exercise_code": "INT_EX_001",
+          "problem_statement": "Pole pod y=sin x nad OX na [0,π].",
+          "expected_answer": "2",
+          "difficulty_level": 3,
+          "time_estimate": 320,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "integration_bounds_error", "feedback": "Upewnij się, że granice to 0 i π; całkuj sin x." }
+          }
+        }
+      ]
+    },
+    "misconceptionPatterns": [
+      {
+        "pattern_code": "INT_BOUNDS_ERROR",
+        "description": "Błędny wybór lub kolejność granic całkowania.",
+        "example_error": "Błędne granice dla pola między krzywymi.",
+        "intervention_strategy": "Zaznacz obszar na rysunku, wypisz punkty przecięcia i ustaw granice rosnąco."
+      }
+    ],
+    "realWorldApplications": [
+      {
+        "context": "Inżynieria",
+        "problem_description": "Wyznacz objętość zbiornika obrotowego o profilu y=f(x).",
+        "age_group": "liceum/studia",
+        "connection_explanation": "Zastosuj V=π∫f(x)²dx dla odpowiednich granic."
+      }
+    ],
+    "pedagogicalNotes": {
+      "common_mistakes": [
+        "Niepoprawne granice całkowania i brak podziału przedziału.",
+        "Mylenie metod: krążki vs pierścienie."
+      ],
+      "teaching_tips": [
+        "Zawsze zaczynaj od rysunku i punktu testowego dla znaku/rzędu funkcji.",
+        "Decyzję o metodzie (krążki/pierścienie) podejmuj po szkicu przekroju."
+      ],
+      "prerequisites": [
+        "Całka oznaczona i podstawowe techniki całkowania",
+        "Pochodna i interpretacja geometryczna"
+      ],
+      "estimated_time": 5100,
+      "difficulty_progression": "Start: pola i proste bryły (krążki). Środek: pierścienie i przekroje. Finał: długość łuku i ujęcia parametryczne."
+    },
+    "assessmentRubric": {
+      "scope": "Ocena 10 zadań z zastosowań całki oznaczonej (klasa 3/studia).",
+      "criteria": [
+        {
+          "skill": "Pola między krzywymi",
+          "beginner": "Poprawnie ustala granice i funkcję górną/dolną w 5/10.",
+          "intermediate": "Dzieli przedział w punktach przecięcia, poprawnie całkuje.",
+          "advanced": "Sprawnie rozwiązuje złożone obszary z podziałem i modułem."
+        }
+      ]
+    }
+  };
+
+  return await importSingleSkillFromJSON(skillData);
+};

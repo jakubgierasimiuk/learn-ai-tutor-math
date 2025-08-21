@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { autoImportNewBatch, importSingleSkillFromJSON, importLinearInequalitiesSkill, importAbsoluteValueSkill, importQuadraticInequalitiesSkill, importAbsoluteValueEquationsSkill, newBatchContentDatabase } from '@/lib/skillContentImporter';
+import { autoImportNewBatch, importSingleSkillFromJSON, importLinearInequalitiesSkill, importAbsoluteValueSkill, importQuadraticInequalitiesSkill, importAbsoluteValueEquationsSkill, importDefiniteIntegralApplicationsSkill, newBatchContentDatabase } from '@/lib/skillContentImporter';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, AlertCircle, Clock, Upload } from 'lucide-react';
+import { CheckCircle, AlertCircle, Clock, Upload, Calculator } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import SkillGapDashboard from '@/components/SkillGapDashboard';
 
@@ -39,6 +39,10 @@ export const ContentImportPage = () => {
   // State for Absolute Value Equations import
   const [importingAbsoluteValueEquations, setImportingAbsoluteValueEquations] = useState(false);
   const [absoluteValueEquationsResult, setAbsoluteValueEquationsResult] = useState<any>(null);
+  
+  // State for Definite Integral Applications import
+  const [importingDefiniteIntegral, setImportingDefiniteIntegral] = useState(false);
+  const [definiteIntegralResult, setDefiniteIntegralResult] = useState<any>(null);
 
   const handleImport = async () => {
     setImporting(true);
@@ -273,6 +277,38 @@ export const ContentImportPage = () => {
       });
     } finally {
       setImportingAbsoluteValueEquations(false);
+    }
+  };
+
+  const handleDefiniteIntegralImport = async () => {
+    setImportingDefiniteIntegral(true);
+    setDefiniteIntegralResult(null);
+
+    try {
+      const result = await importDefiniteIntegralApplicationsSkill();
+      setDefiniteIntegralResult(result);
+      
+      if (result.result.success) {
+        toast({
+          title: "Definite Integral Applications Imported!",
+          description: `Successfully imported: ${result.skillName}`,
+        });
+      } else {
+        toast({
+          title: "Import Failed", 
+          description: result.result.error || "Unknown error",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      toast({
+        title: "Import Failed",
+        description: "Failed to import definite integral applications skill",
+        variant: "destructive"
+      });
+    } finally {
+      setImportingDefiniteIntegral(false);
     }
   };
 
@@ -702,6 +738,29 @@ export const ContentImportPage = () => {
             className="w-full"
           >
             {importingAbsoluteValueEquations ? 'Importing...' : 'Import Absolute Value Equations'}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Definite Integral Applications Import */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calculator className="w-5 h-5" />
+            Import Definite Integral Applications (Class 3)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="text-sm text-muted-foreground">
+            Import "Zastosowania całki oznaczonej (pola, objętości)" skill for Class 3 with complete content.
+          </div>
+
+          <Button 
+            onClick={handleDefiniteIntegralImport} 
+            disabled={importing || importingNewBatch || importingJson || importingInequalities || importingAbsoluteValue || importingQuadraticInequalities || importingAbsoluteValueEquations || importingDefiniteIntegral}
+            className="w-full"
+          >
+            {importingDefiniteIntegral ? 'Importing...' : 'Import Definite Integral Applications'}
           </Button>
         </CardContent>
       </Card>
