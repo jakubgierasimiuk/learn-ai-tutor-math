@@ -165,24 +165,95 @@ class EdgeContentTaskManager {
 
 const contentManager = new EdgeContentTaskManager();
 
-// Helper function to get default skill
+// Helper function to get skill ID from skill code  
+async function getSkillIdFromCode(supabaseClient: any, skillCode: string): Promise<string> {
+  try {
+    // Try to find skill by name or department first
+    const { data: skills, error } = await supabaseClient
+      .from('skills')
+      .select('id, name, department')
+      .eq('is_active', true)
+      .or(`name.ilike.%${skillCode}%, department.eq.${skillCode}`);
+    
+    if (error) {
+      console.error('Error fetching skill by code:', error);
+      return await getDefaultSkill(supabaseClient);
+    }
+    
+    if (skills && skills.length > 0) {
+      return skills[0].id;
+    }
+    
+    // Fallback to default skill
+    return await getDefaultSkill(supabaseClient);
+  } catch (error) {
+    console.error('Error in getSkillIdFromCode:', error);
+    return await getDefaultSkill(supabaseClient);
+  }
+}
+
 async function getDefaultSkill(supabaseClient: any): Promise<string> {
   try {
     const { data: skills, error } = await supabaseClient
       .from('skills')
-      .select('id')
+      .select('id, name')
       .eq('is_active', true)
+      .eq('department', 'real_numbers')
       .limit(1);
     
     if (error || !skills || skills.length === 0) {
-      console.warn('No skills found, using fallback');
+      console.warn('No active skills found, using fallback');
       return 'default_skill';
     }
     
     return skills[0].id;
   } catch (error) {
-    console.error('Error getting default skill:', error);
+    console.error('Error fetching skills:', error);
     return 'default_skill';
+  }
+}
+
+// Get skill content from new tables
+async function getSkillContent(supabaseClient: any, skillId: string) {
+  try {
+    // Get theory content
+    const { data: theory } = await supabaseClient
+      .from('skill_theory_content')
+      .select('*')
+      .eq('skill_id', skillId)
+      .eq('is_active', true)
+      .single();
+
+    // Get examples  
+    const { data: examples } = await supabaseClient
+      .from('skill_examples')
+      .select('*')
+      .eq('skill_id', skillId)
+      .eq('is_active', true);
+
+    // Get practice exercises
+    const { data: exercises } = await supabaseClient
+      .from('skill_practice_exercises')
+      .select('*')
+      .eq('skill_id', skillId)
+      .eq('is_active', true);
+
+    // Get misconception patterns
+    const { data: misconceptions } = await supabaseClient
+      .from('skill_misconception_patterns')
+      .select('*')
+      .eq('skill_id', skillId)
+      .eq('is_active', true);
+
+    return {
+      theory,
+      examples: examples || [],
+      exercises: exercises || [],
+      misconceptions: misconceptions || []
+    };
+  } catch (error) {
+    console.error('Error fetching skill content:', error);
+    return null;
   }
 }
 
