@@ -25,13 +25,51 @@ const HomePage = () => {
   const loadProfile = async () => {
     if (!user) return;
     
-    const { data } = await supabase
-      .from('profiles')
-      .select('onboarding_completed')
-      .eq('user_id', user.id)
-      .single();
+    console.log('HomePage: Loading profile for user', user.id);
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('onboarding_completed')
+        .eq('user_id', user.id)
+        .single();
       
-    setProfile(data);
+      if (error) {
+        console.error('HomePage: Profile fetch error:', error);
+        // If profile doesn't exist, create it
+        if (error.code === 'PGRST116') {
+          console.log('HomePage: Creating missing profile');
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert({
+              user_id: user.id,
+              email: user.email || '',
+              name: user.user_metadata?.name || '',
+              level: 1,
+              total_points: 0,
+              diagnosis_completed: false,
+              onboarding_completed: false
+            })
+            .select('onboarding_completed')
+            .single();
+            
+          if (createError) {
+            console.error('HomePage: Profile creation failed:', createError);
+            setProfile({ onboarding_completed: false }); // Fallback
+          } else {
+            setProfile(newProfile);
+          }
+        } else {
+          setProfile({ onboarding_completed: false }); // Fallback
+        }
+      } else {
+        console.log('HomePage: Profile loaded:', data);
+        setProfile(data);
+      }
+    } catch (err) {
+      console.error('HomePage: Unexpected error loading profile:', err);
+      setProfile({ onboarding_completed: false }); // Fallback
+    }
   };
 
   // Show landing page for non-authenticated users
