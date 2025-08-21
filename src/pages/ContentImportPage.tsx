@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { autoImportNewBatch, importSingleSkillFromJSON, importLinearInequalitiesSkill, importAbsoluteValueSkill, importQuadraticInequalitiesSkill, importAbsoluteValueEquationsSkill, importDefiniteIntegralApplicationsSkill, importDefiniteIntegralBasicsSkill, importExponentialLogarithmicFunctionsSkill, importNumberSequencesSkill, importTrigonometricFunctionsSkill } from '@/lib/skillContentImporter';
+import { autoImportNewBatch, importSingleSkillFromJSON, importLinearInequalitiesSkill, importAbsoluteValueSkill, importQuadraticInequalitiesSkill, importAbsoluteValueEquationsSkill, importDefiniteIntegralApplicationsSkill, importDefiniteIntegralBasicsSkill, importExponentialLogarithmicFunctionsSkill, importNumberSequencesSkill, importTrigonometricFunctionsSkill, importLimitsFunctionsSkill } from '@/lib/skillContentImporter';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle, AlertCircle, Clock, Upload, Calculator, Loader2 } from 'lucide-react';
@@ -59,6 +59,10 @@ export const ContentImportPage = () => {
   // State for Trigonometric Functions import
   const [importingTrigonometric, setImportingTrigonometric] = useState(false);
   const [trigonometricResult, setTrigonometricResult] = useState<any>(null);
+
+  // State for Limits Functions import
+  const [importingLimits, setImportingLimits] = useState(false);
+  const [limitsResult, setLimitsResult] = useState<any>(null);
 
   const handleImport = async () => {
     setImporting(true);
@@ -450,10 +454,41 @@ export const ContentImportPage = () => {
       toast({
         title: "Import Failed",
         description: "Failed to import trigonometric functions skill",
-        variant: "destructive"
       });
     } finally {
       setImportingTrigonometric(false);
+    }
+  };
+
+  const handleLimitsImport = async () => {
+    setImportingLimits(true);
+    setLimitsResult(null);
+
+    try {
+      const result = await importLimitsFunctionsSkill();
+      setLimitsResult(result);
+      
+      if (result.result.success) {
+        toast({
+          title: "Limits Functions Imported!",
+          description: `Successfully imported: ${result.skillName}`,
+        });
+      } else {
+        toast({
+          title: "Import Failed",
+          description: result.result.error || "Unknown error",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      toast({
+        title: "Import Failed",
+        description: "Failed to import limits functions skill",
+        variant: "destructive"
+      });
+    } finally {
+      setImportingLimits(false);
     }
   };
 
@@ -1049,6 +1084,42 @@ export const ContentImportPage = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Limits Functions - HIGH PRIORITY */}
+        <Card className="border-2 border-primary">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              ⭐ PRIORYTET WYSOKI: Granice funkcji
+            </CardTitle>
+            <CardDescription>
+              Import "Granice funkcji" skill for class 3 (analiza matematyczna) - HIGH PRIORITY
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button 
+              onClick={handleLimitsImport}
+              disabled={importingLimits}
+              className="w-full"
+              variant="default"
+            >
+              {importingLimits && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Import Limits Functions (PRIORYTET WYSOKI)
+            </Button>
+            
+            {limitsResult && (
+              <div className="mt-4 p-3 rounded-md bg-muted/50">
+                <p className="text-sm font-medium">Import Result:</p>
+                <p className="text-sm text-muted-foreground">
+                  Skill: {limitsResult.skillName}
+                </p>
+                <p className={`text-sm ${limitsResult.result.success ? 'text-green-600' : 'text-red-600'}`}>
+                  Status: {limitsResult.result.success ? 'Success' : 'Failed'}
+                  {limitsResult.result.error && ` - ${limitsResult.result.error}`}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     );
-  };
+};

@@ -2340,6 +2340,200 @@ export const importNumberSequencesSkill = async (): Promise<SkillImportResult> =
   };
   
   return await importSingleSkillFromJSON(skillData);
+}
+
+export async function importLimitsFunctionsSkill(): Promise<SkillImportResult> {
+  const skillData = {
+    "skillId": "limits-functions-cl3",
+    "skillName": "Granice funkcji",
+    "class_level": 3,
+    "department": "analiza_matematyczna",
+    "generator_params": {
+      "microSkill": "limits_functions",
+      "difficultyRange": [2, 5],
+      "fallbackTrigger": "use_basic_limits_patterns"
+    },
+    "teaching_flow": {
+      "phase1": { "name": "Wprowadzenie", "duration": 1500, "activities": ["theory", "guided_examples"] },
+      "phase2": { "name": "Ćwiczenia", "duration": 2400, "activities": ["practice", "feedback"] },
+      "phase3": { "name": "Utrwalanie", "duration": 1200, "activities": ["mastery_tasks", "assessment"] }
+    },
+    "content": {
+      "theory": {
+        "theory_text": "Granica funkcji opisuje zachowanie wartości funkcji, gdy argument zbliża się do pewnej liczby (lub do nieskończoności). Intuicyjnie mówimy, że granica funkcji f(x) w punkcie a wynosi L, jeśli wartości f(x) dają się dowolnie przybliżyć przez L, gdy x jest dostatecznie blisko a. Formalna definicja (ε–δ) bywa używana na studiach, lecz w liceum koncentrujemy się na rachunku granic poprzez prawa działań na granicach, przekształcenia algebraiczne i znane granice wzorcowe. Ważne rozróżnienie: granica funkcji w punkcie a jest pojęciem niezależnym od wartości f(a); funkcja może nie być zdefiniowana w a, a granica może istnieć (tzw. nieciągłość usuwalna).",
+        "key_formulas": [
+          "$\\lim_{x\\to a}(f\\pm g)=\\lim f\\pm\\lim g$",
+          "$\\lim(fg)=(\\lim f)(\\lim g)$",
+          "$\\lim \\frac{f}{g}=\\frac{\\lim f}{\\lim g}\\ (\\lim g\\neq0)$",
+          "$\\lim_{x\\to0}\\frac{\\sin x}{x}=1$",
+          "$\\lim_{x\\to0}\\frac{1-\\cos x}{x^2}=\\frac12$",
+          "$\\lim_{x\\to0}\\frac{e^x-1}{x}=1$",
+          "$\\lim_{x\\to0}\\frac{\\ln(1+x)}{x}=1$",
+          "$y=y_0\\iff \\lim_{x\\to\\pm\\infty}f(x)=y_0$",
+          "$x=a\\iff \\lim_{x\\to a}f(x)=\\pm\\infty$"
+        ],
+        "time_estimate": 600,
+        "difficulty_level": 4
+      },
+      "examples": [
+        {
+          "example_code": "LIM_001",
+          "problem_statement": "Oblicz $\\lim_{x\\to2}(3x^2-5x+1)$.",
+          "solution_steps": [
+            { "step": "Ciągłość wielomianu", "latex": "$\\lim f(x)=f(2)$", "explanation": "Wielomiany są ciągłe w całej dziedzinie." },
+            { "step": "Podstawienie", "latex": "$3\\cdot2^2-5\\cdot2+1$", "explanation": "Wstaw bezpośrednio $x=2$." },
+            { "step": "Wynik", "latex": "$12-10+1=3$", "explanation": "Prosty rachunek arytmetyczny." }
+          ],
+          "final_answer": "$3$",
+          "explanation": "Dla funkcji ciągłych granica równa jest wartości w punkcie.",
+          "time_estimate": 260,
+          "difficulty_level": 3
+        },
+        {
+          "example_code": "LIM_002",
+          "problem_statement": "Oblicz $\\lim_{x\\to1}\\frac{x^2-1}{x-1}$.",
+          "solution_steps": [
+            { "step": "Rozpoznaj $0/0$", "latex": "$x\\to1\\Rightarrow 0/0$", "explanation": "Forma nieoznaczona – trzeba przekształcić." },
+            { "step": "Rozkład", "latex": "$x^2-1=(x-1)(x+1)$", "explanation": "Użyj wzoru skróconego mnożenia." },
+            { "step": "Skrócenie", "latex": "$\\frac{(x-1)(x+1)}{x-1}=x+1$", "explanation": "Dla $x\\neq1$ funkcje równoważne." },
+            { "step": "Granica", "latex": "$\\lim_{x\\to1}(x+1)=2$", "explanation": "Teraz już funkcja ciągła." }
+          ],
+          "final_answer": "$2$",
+          "explanation": "Usunięto nieciągłość przez rozkład i skrócenie.",
+          "time_estimate": 300,
+          "difficulty_level": 3
+        },
+        {
+          "example_code": "LIM_003",
+          "problem_statement": "Oblicz $\\lim_{x\\to0}\\frac{\\sqrt{1+x}-1}{x}$.",
+          "solution_steps": [
+            { "step": "Sprzężenie", "latex": "\\cdot\\frac{\\sqrt{1+x}+1}{\\sqrt{1+x}+1}", "explanation": "Usuwa pierwiastek z licznika." },
+            { "step": "Uproszczenie", "latex": "$\\frac{(1+x)-1}{x(\\sqrt{1+x}+1)}$", "explanation": "Różnica kwadratów w liczniku." },
+            { "step": "Skróć $x$", "latex": "$\\frac{1}{\\sqrt{1+x}+1}$", "explanation": "Dla $x\\neq0$ skrócenie jest poprawne." },
+            { "step": "Granica", "latex": "$\\frac{1}{1+1}=\\frac12$", "explanation": "Podstaw $x\\to0$ po uproszczeniu." }
+          ],
+          "final_answer": "$\\frac{1}{2}$",
+          "explanation": "Mnożenie przez sprzężenie likwiduje formę $0/0$.",
+          "time_estimate": 320,
+          "difficulty_level": 4
+        }
+      ],
+      "practice_exercises": [
+        {
+          "exercise_code": "LIM_EX_001",
+          "problem_statement": "Oblicz $\\lim_{x\\to-1}(2x^3+x^2-5)$.",
+          "expected_answer": "$-6$",
+          "difficulty_level": 3,
+          "time_estimate": 300,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "substitution_arithmetic", "feedback": "Podstaw $x=-1$ starannie: $2(-1)^3+(-1)^2-5=-2+1-5=-6$." },
+            "incorrect_answer_2": { "type": "method_confusion", "feedback": "To wielomian – wystarczy podstawienie, bez dodatkowych sztuczek." }
+          }
+        },
+        {
+          "exercise_code": "LIM_EX_002",
+          "problem_statement": "Oblicz $\\lim_{x\\to3}\\frac{x^2-9}{x-3}$.",
+          "expected_answer": "$6$",
+          "difficulty_level": 3,
+          "time_estimate": 320,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "zero_over_zero_accept", "feedback": "Najpierw rozłóż $x^2-9=(x-3)(x+3)$ i skróć, potem podstaw." },
+            "incorrect_answer_2": { "type": "cancel_wrong", "feedback": "Nie skracaj x z x – skracamy identyczne czynniki, nie składniki sumy." }
+          }
+        },
+        {
+          "exercise_code": "LIM_EX_003",
+          "problem_statement": "Oblicz $\\lim_{x\\to0}\\frac{\\sqrt{4+x}-2}{x}$.",
+          "expected_answer": "$\\frac{1}{4}$",
+          "difficulty_level": 3,
+          "time_estimate": 320,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "no_conjugate", "feedback": "Pomnóż przez sprzężenie $\\sqrt{4+x}+2$ i skróć $x$ po uproszczeniu." },
+            "incorrect_answer_2": { "type": "substitution_zero_zero", "feedback": "Bez przekształcenia dostajesz $0/0$. Użyj sprzężenia." }
+          }
+        }
+      ]
+    },
+    "misconception_patterns": [
+      {
+        "pattern_code": "LIMIT_ALGEBRA_ZERO_ZERO",
+        "description": "Ignorowanie formy $0/0$ i błędne podstawienie bez przekształceń.",
+        "intervention_strategy": "Zidentyfikuj formę nieoznaczoną, następnie rozkład na czynniki/sprzężenie i skracanie dopiero po przekształceniu."
+      },
+      {
+        "pattern_code": "LIMIT_RATIONALIZATION_MISS",
+        "description": "Brak mnożenia przez sprzężenie w wyrażeniach z pierwiastkiem.",
+        "intervention_strategy": "Stosuj \\cdot\\frac{\\text{sprzężenie}}{\\text{sprzężenie}} aby usunąć pierwiastek i skrócić $x$."
+      },
+      {
+        "pattern_code": "LIMIT_TRIG_ID",
+        "description": "Używanie granicy $\\sin x / x$ bez radianów lub błędne skalowanie argumentu.",
+        "intervention_strategy": "Pracuj w radianach i stosuj $\\frac{\\sin(kx)}{kx}\\to1$; wyciągnij czynnik $k$."
+      }
+    ],
+    "real_world_applications": [
+      {
+        "context": "Fizyka – ruch i prędkość chwilowa",
+        "problem_description": "Zdefiniuj prędkość chwilową jako granicę średniej prędkości na krótkim odcinku czasu.",
+        "age_group": "liceum/studia",
+        "connection_explanation": "Iloraz różnicowy i granica Δs/Δt gdy Δt→0 prowadzi do pochodnej."
+      },
+      {
+        "context": "Ekonomia – koszt krańcowy",
+        "problem_description": "Koszt krańcowy jako granica przyrostu kosztu na jednostkę produkcji.",
+        "age_group": "liceum/studia",
+        "connection_explanation": "Granica ΔC/Δq dla Δq→0 uzasadnia pojęcie pochodnej i marginaliów."
+      }
+    ],
+    "pedagogical_notes": {
+      "common_mistakes": [
+        "Podstawianie w formie $0/0$ bez przekształceń.",
+        "Brak radianów przy granicach trygonometrycznych.",
+        "Mylenie asymptot i porównania stopni w nieskończoności.",
+        "Ignorowanie kierunku granicy jednostronnej i dziedziny.",
+        "Niepoprawne skracanie składników zamiast czynników."
+      ],
+      "teaching_tips": [
+        "Wprowadzaj mapę decyzji: typ granicy → diagnoza formy → wybór techniki.",
+        "Ćwicz sprzężenie i rozkład na czynniki na krótkich, celowanych przykładach.",
+        "Stale używaj radianów i przypominaj granice wzorcowe.",
+        "Zachęcaj do szkiców i analizy dominujących składników przy $x\\to\\infty$.",
+        "Po każdym wyniku: kontrola sensu (znak, asymptota, rząd wielkości)."
+      ],
+      "prerequisites": [
+        "Algebra: rozkłady, wzory skróconego mnożenia, ułamki algebraiczne",
+        "Funkcje elementarne: wykładnicza, logarytmiczna, trygonometryczne",
+        "Podstawy ciągłości i własności funkcji"
+      ],
+      "estimated_time": 5100,
+      "difficulty_progression": "Start: granice funkcji ciągłych i proste przekształcenia (poziom 3). Dalej: sprzężenia, wzorce trygo/log/exp i granice w nieskończoności (poziom 4). Finał: granice jednostronne, asymptoty i wyrażenia złożone (poziom 5)."
+    },
+    "assessment_rubric": {
+      "scope": "Ocena opanowania granic funkcji: rachunek, interpretacja i asymptoty.",
+      "criteria": [
+        {
+          "skill": "Diagnoza i dobór techniki",
+          "beginner": "Rozpoznaje granice funkcji ciągłych i stosuje podstawienie.",
+          "intermediate": "Identyfikuje formy nieoznaczone i dobiera właściwe przekształcenia.",
+          "advanced": "Łączy kilka technik w złożonych wyrażeniach, uzasadnia każdy krok."
+        },
+        {
+          "skill": "Granice wzorcowe i trygonometryczne",
+          "beginner": "Zna podstawową granicę $\\sin x/x$ w radianach.",
+          "intermediate": "Stosuje granice wzorcowe z przeskalowaniem argumentu.",
+          "advanced": "Wykorzystuje rozwinięcia przybliżone i zasadę ściskania."
+        },
+        {
+          "skill": "Granice w nieskończoności i asymptoty",
+          "beginner": "Porównuje stopnie i wyznacza proste granice.",
+          "intermediate": "Wyznacza asymptoty poziome i pionowe funkcji wymiernych.",
+          "advanced": "Analizuje ukośne asymptoty i zachowanie jednostronne przy przerwach."
+        }
+      ]
+    }
+  };
+
+  return await importSingleSkillFromJSON(skillData);
 };
 
 export async function importTrigonometricFunctionsSkill() {
