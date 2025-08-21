@@ -2301,3 +2301,340 @@ export const importNumberSequencesSkill = async (): Promise<SkillImportResult> =
   
   return await importSingleSkillFromJSON(skillData);
 };
+
+export async function importTrigonometricFunctionsSkill() {
+  console.log('Starting import of Trigonometric Functions skill...');
+  
+  try {
+    const skillData = {
+      skillName: "Funkcje trygonometryczne",
+      class_level: 2,
+      department: "funkcje_elementarne",
+      generator_params: {
+        microSkill: "trigonometric_functions",
+        difficultyRange: [2, 5],
+        fallbackTrigger: "use_basic_trig_patterns"
+      },
+      teaching_flow: {
+        phase1: { name: "Wprowadzenie", duration: 1500, activities: ["theory", "guided_examples"] },
+        phase2: { name: "Ćwiczenia", duration: 2400, activities: ["practice", "feedback"] },
+        phase3: { name: "Utrwalanie", duration: 1200, activities: ["mastery_tasks", "assessment"] }
+      },
+      content: {
+        theory: {
+          theory_text: "Funkcje trygonometryczne opisują zjawiska okresowe i obrót na okręgu jednostkowym. Podstawowe funkcje to sinus, cosinus, tangens i cotangens. Definicja geometryczna opiera się na okręgu jednostkowym: dla kąta x (w radianach) punkt P=(cos x, sin x) leży na okręgu o promieniu 1. Zatem cos x to współrzędna x punktu P, a sin x to współrzędna y. Tangens i cotangens definiujemy jako tan x=sin x/cos x (dla cos x≠0) oraz cot x=cos x/sin x (dla sin x≠0). Warto pracować w radianach, ponieważ upraszczają one wzory i analizę. Konwersja między stopniami a radianami: 180°=π, więc x°=x·π/180, a t radianów odpowiada t·180/π stopni. Dziedzina i wartości: sin x oraz cos x są określone dla wszystkich x∈ℝ i przyjmują wartości w przedziale [−1,1]. Funkcja tan x jest określona dla x≠π/2+kπ i ma wartości w ℝ (okres π), a cot x dla x≠kπ (okres także π). Okresy: sin(x+2π)=sin x, cos(x+2π)=cos x, zaś tan(x+π)=tan x i cot(x+π)=cot x. Podstawowe symetrie i parzystość: sin(−x)=−sin x (nieparzysta), cos(−x)=cos x (parzysta), tan(−x)=−tan x, cot(−x)=−cot x. Te własności pozwalają szybko upraszczać wyrażenia i sprawdzać sens wyników.",
+          key_formulas: [
+            "$180^\\circ=\\pi$",
+            "$x^\\circ=x\\frac{\\pi}{180}$",
+            "$\\sin^2x+\\cos^2x=1$",
+            "$\\tan x=\\frac{\\sin x}{\\cos x}$",
+            "$\\sin(\\alpha\\pm\\beta)=\\sin\\alpha\\cos\\beta\\pm\\cos\\alpha\\sin\\beta$",
+            "$\\cos(\\alpha\\pm\\beta)=\\cos\\alpha\\cos\\beta\\mp\\sin\\alpha\\sin\\beta$",
+            "$\\sin 2x=2\\sin x\\cos x$",
+            "$\\cos 2x=1-2\\sin^2 x=2\\cos^2 x-1$",
+            "$\\sin(x+2\\pi)=\\sin x$",
+            "$\\cos(x+2\\pi)=\\cos x$",
+            "$\\tan(x+\\pi)=\\tan x$",
+            "$T=\\frac{2\\pi}{\\omega}$",
+            "$\\sin x=a\\Rightarrow x=\\arcsin a\\vee x=\\pi-\\arcsin a$",
+            "$\\cos x=a\\Rightarrow x=\\pm\\arccos a$",
+            "$\\tan x=a\\Rightarrow x=\\arctan a+k\\pi$",
+            "$y=A\\sin(\\omega x+\\varphi)+D$"
+          ],
+          time_estimate: 600,
+          difficulty_level: 4
+        },
+        examples: [
+          {
+            example_code: "TRIG_001",
+            problem_statement: "Wyznacz $\\sin\\frac{\\pi}{6}$, $\\cos\\frac{\\pi}{3}$, $\\tan\\frac{\\pi}{4}$.",
+            solution_steps: [
+              { step: "Wartości szczególne", latex: "$\\sin\\frac{\\pi}{6}=\\frac{1}{2}$", explanation: "Trójkąt 30°–60°–90°." },
+              { step: "Cosinus", latex: "$\\cos\\frac{\\pi}{3}=\\frac{1}{2}$", explanation: "Symetryczna wartość dla 60°." },
+              { step: "Tangens", latex: "$\\tan\\frac{\\pi}{4}=1$", explanation: "Bo $\\sin=\\cos=\\frac{\\sqrt{2}}{2}$." }
+            ],
+            final_answer: "$\\frac{1}{2},\\ \\frac{1}{2},\\ 1$",
+            explanation: "Użyto wartości z okręgu jednostkowego.",
+            time_estimate: 260,
+            difficulty_level: 3
+          },
+          {
+            example_code: "TRIG_002",
+            problem_statement: "Rozwiąż $\\sin x=\\frac{1}{2}$ dla $x\\in[0,2\\pi]$ oraz podaj rozwiązanie ogólne.",
+            solution_steps: [
+              { step: "Kąt główny", latex: "$x_0=\\arcsin\\frac{1}{2}=\\frac{\\pi}{6}$", explanation: "W I ćwiartce sinus dodatni." },
+              { step: "Symetria II ćwiartka", latex: "$x=\\pi-\\frac{\\pi}{6}=\\frac{5\\pi}{6}$", explanation: "Sinus ma tę samą wartość." },
+              { step: "Okresowość", latex: "$x=x_0+2k\\pi\\ \\vee\\ x=\\pi-x_0+2k\\pi$", explanation: "Pełne rozwiązanie ogólne." }
+            ],
+            final_answer: "$x\\in\\{\\frac{\\pi}{6},\\frac{5\\pi}{6}\\}$ i $x=\\frac{\\pi}{6}+2k\\pi$ lub $x=\\frac{5\\pi}{6}+2k\\pi$",
+            explanation: "Dwie pozycje w $[0,2\\pi]$ oraz dodanie okresu $2\\pi$.",
+            time_estimate: 300,
+            difficulty_level: 3
+          },
+          {
+            example_code: "TRIG_003",
+            problem_statement: "Rozwiąż $2\\sin x-\\sqrt{3}=0$.",
+            solution_steps: [
+              { step: "Izoluj sinus", latex: "$\\sin x=\\frac{\\sqrt{3}}{2}$", explanation: "Dodaj $\\sqrt{3}$ i podziel przez 2." },
+              { step: "Kąty w $[0,2\\pi]$", latex: "$x=\\frac{\\pi}{3},\\frac{2\\pi}{3}$", explanation: "Sinus dodatni w I i II ćwiartce." },
+              { step: "Ogólne", latex: "$x=\\frac{\\pi}{3}+2k\\pi\\ \\vee\\ x=\\frac{2\\pi}{3}+2k\\pi$", explanation: "Okres $2\\pi$." }
+            ],
+            final_answer: "$x=\\frac{\\pi}{3}+2k\\pi$ lub $x=\\frac{2\\pi}{3}+2k\\pi$",
+            explanation: "Użyto wartości szczególnych sinusa.",
+            time_estimate: 320,
+            difficulty_level: 4
+          },
+          {
+            example_code: "TRIG_004",
+            problem_statement: "Rozwiąż $\\cos(2x)=\\frac{1}{2}$ dla $x\\in[0,2\\pi]$.",
+            solution_steps: [
+              { step: "Równanie dla $2x$", latex: "$2x=\\pm\\frac{\\pi}{3}+2k\\pi$", explanation: "Bo $\\cos t=\\frac{1}{2}$ dla $t=\\pm\\pi/3+2k\\pi$." },
+              { step: "Podziel przez 2", latex: "$x=\\pm\\frac{\\pi}{6}+k\\pi$", explanation: "Okres dla $2x$ to $2\\pi$, więc dla $x$ okres $\\pi$." },
+              { step: "Wypisz w $[0,2\\pi]$", latex: "$x\\in\\{\\frac{\\pi}{6},\\frac{5\\pi}{6},\\frac{7\\pi}{6},\\frac{11\\pi}{6}\\}$", explanation: "Cztery rozwiązania." }
+            ],
+            final_answer: "$x=\\pm\\frac{\\pi}{6}+k\\pi$; w $[0,2\\pi]$: $\\{\\frac{\\pi}{6},\\frac{5\\pi}{6},\\frac{7\\pi}{6},\\frac{11\\pi}{6}\\}$",
+            explanation: "Wzór podwójnego kąta i okresowość argumentu.",
+            time_estimate: 330,
+            difficulty_level: 4
+          },
+          {
+            example_code: "TRIG_005",
+            problem_statement: "Udowodnij tożsamość $2\\sin x\\cos x=\\sin 2x$ i zastosuj do obliczenia $\\sin(60^\\circ)$.",
+            solution_steps: [
+              { step: "Wzór na sinus sumy", latex: "$\\sin(\\alpha+\\beta)=\\sin\\alpha\\cos\\beta+\\cos\\alpha\\sin\\beta$", explanation: "Podstawowa tożsamość." },
+              { step: "Ustaw $\\alpha=\\beta=x$", latex: "$\\sin(2x)=2\\sin x\\cos x$", explanation: "Zsumowanie dwóch identycznych składników." },
+              { step: "Oblicz $\\sin 60^\\circ$", latex: "$\\sin 60^\\circ=\\sin(2\\cdot30^\\circ)$", explanation: "Użyj podwójnego kąta." },
+              { step: "Zastosowanie", latex: "$2\\sin30^\\circ\\cos30^\\circ=2\\cdot\\frac{1}{2}\\cdot\\frac{\\sqrt{3}}{2}=\\frac{\\sqrt{3}}{2}$", explanation: "Wartości tablicowe." }
+            ],
+            final_answer: "$\\sin 60^\\circ=\\frac{\\sqrt{3}}{2}$",
+            explanation: "Dowód z definicji sinus sumy i obliczenie przez podwójny kąt.",
+            time_estimate: 320,
+            difficulty_level: 4
+          },
+          {
+            example_code: "TRIG_006",
+            problem_statement: "Dla $y=3\\sin(2x-\\frac{\\pi}{3})+1$ wyznacz amplitudę, okres, przesunięcie fazowe i oś średnią.",
+            solution_steps: [
+              { step: "Amplituda", latex: "$A=3$", explanation: "Współczynnik przy sin." },
+              { step: "Okres", latex: "$T=\\frac{2\\pi}{2}=\\pi$", explanation: "Dla $\\sin(\\omega x)$ okres to $2\\pi/\\omega$." },
+              { step: "Faza", latex: "$2x-\\frac{\\pi}{3}=2(x-\\frac{\\pi}{6})$", explanation: "Przesunięcie w prawo o $\\frac{\\pi}{6}$." },
+              { step: "Oś średnia", latex: "$y=D=1$", explanation: "Stała dodana przesuwa wykres pionowo." }
+            ],
+            final_answer: "Amplituda $3$, okres $\\pi$, przesunięcie $\\frac{\\pi}{6}$ w prawo, oś $y=1$",
+            explanation: "Parametry odczytano z postaci $A\\sin(\\omega x+\\varphi)+D$.",
+            time_estimate: 340,
+            difficulty_level: 5
+          }
+        ],
+        practice_exercises: [
+          {
+            exercise_code: "EX_TRIG_001",
+            problem_statement: "Oblicz: $\\cos0$, $\\sin\\pi$, $\\tan\\frac{\\pi}{3}$.",
+            expected_answer: "$1,\\ 0,\\ \\sqrt{3}$",
+            difficulty_level: 3,
+            time_estimate: 300,
+            misconception_map: {
+              incorrect_answer_1: { type: "special_values_confusion", feedback: "Sprawdź wartości tablicowe: $\\cos0=1$, $\\sin\\pi=0$, $\\tan\\frac{\\pi}{3}=\\sqrt{3}$." },
+              incorrect_answer_2: { type: "unit_circle_sign", feedback: "Zweryfikuj znaki z okręgu jednostkowego i ćwiartek." }
+            }
+          },
+          {
+            exercise_code: "EX_TRIG_002",
+            problem_statement: "Przekształć kąt: $150^\\circ$ na radiany i oblicz $\\sin150^\\circ$.",
+            expected_answer: "$\\frac{5\\pi}{6},\\ \\frac{1}{2}$",
+            difficulty_level: 3,
+            time_estimate: 310,
+            misconception_map: {
+              incorrect_answer_1: { type: "deg_rad_confusion", feedback: "Użyj $x^\\circ=x\\frac{\\pi}{180}$. Dla 150° otrzymasz $5\\pi/6$." },
+              incorrect_answer_2: { type: "quadrant_sign_error", feedback: "W II ćwiartce sinus dodatni: $\\sin150^\\circ=\\sin30^\\circ$." }
+            }
+          },
+          {
+            exercise_code: "EX_TRIG_003",
+            problem_statement: "Rozwiąż $\\tan x=1$ w $[0,2\\pi]$ i podaj rozwiązanie ogólne.",
+            expected_answer: "$x=\\frac{\\pi}{4},\\frac{5\\pi}{4}$; ogólnie $x=\\frac{\\pi}{4}+k\\pi$",
+            difficulty_level: 3,
+            time_estimate: 320,
+            misconception_map: {
+              incorrect_answer_1: { type: "tan_period_error", feedback: "Pamiętaj, że okres $\\tan$ to $\\pi$, więc dodaj $k\\pi$, nie $2k\\pi$." },
+              incorrect_answer_2: { type: "missing_solution", feedback: "W IV ćwiartce $\\tan$ ujemny, ale w III dodatni: dodaj $5\\pi/4$." }
+            }
+          },
+          {
+            exercise_code: "EX_TRIG_004",
+            problem_statement: "Rozwiąż $\\cos x=-\\frac{\\sqrt{2}}{2}$ w $[0,2\\pi]$.",
+            expected_answer: "$x=\\frac{3\\pi}{4},\\frac{5\\pi}{4}$",
+            difficulty_level: 4,
+            time_estimate: 330,
+            misconception_map: {
+              incorrect_answer_1: { type: "quadrant_sign_error", feedback: "Ujemny cosinus w II i III ćwiartce. Wartość odpowiada $45^\\circ$ od osi." },
+              incorrect_answer_2: { type: "principal_only", feedback: "Nie podawaj jednego kąta – w $[0,2\\pi]$ są dwie pozycje." }
+            }
+          },
+          {
+            exercise_code: "EX_TRIG_005",
+            problem_statement: "Oblicz $\\sin75^\\circ$ korzystając z $\\sin(\\alpha+\\beta)$.",
+            expected_answer: "$\\frac{\\sqrt{6}+\\sqrt{2}}{4}$",
+            difficulty_level: 4,
+            time_estimate: 340,
+            misconception_map: {
+              incorrect_answer_1: { type: "identity_misuse", feedback: "Użyj $75^\\circ=45^\\circ+30^\\circ$ i wzoru na sinus sumy." },
+              incorrect_answer_2: { type: "value_table_error", feedback: "Sprawdź: $\\sin45=\\frac{\\sqrt{2}}{2}$, $\\cos30=\\frac{\\sqrt{3}}{2}$ itd." }
+            }
+          },
+          {
+            exercise_code: "EX_TRIG_006",
+            problem_statement: "Rozwiąż $\\sin(2x)=\\frac{\\sqrt{3}}{2}$ dla $x\\in[0,2\\pi]$.",
+            expected_answer: "$x=\\frac{\\pi}{6},\\frac{5\\pi}{6},\\frac{7\\pi}{6},\\frac{11\\pi}{6}$",
+            difficulty_level: 4,
+            time_estimate: 350,
+            misconception_map: {
+              incorrect_answer_1: { type: "argument_scaling", feedback: "Najpierw rozwiąż dla $2x$: $2x=\\frac{\\pi}{3},\\frac{2\\pi}{3},\\ldots$ i dopiero dziel przez 2." },
+              incorrect_answer_2: { type: "missing_period_solutions", feedback: "Dla $2x$ masz 4 rozwiązania w $[0,4\\pi)$; po podzieleniu otrzymasz 4 w $[0,2\\pi]$." }
+            }
+          },
+          {
+            exercise_code: "EX_TRIG_007",
+            problem_statement: "Dla $y=2\\cos(x-\\frac{\\pi}{4})-1$ wyznacz max, min i okres.",
+            expected_answer: "Max $y=1$ (dla $\\cos=1$), min $y=-3$ (dla $\\cos=-1$), $T=2\\pi$",
+            difficulty_level: 5,
+            time_estimate: 370,
+            misconception_map: {
+              incorrect_answer_1: { type: "amplitude_shift_confusion", feedback: "Amplituda $|A|=2$, oś $y=-1$: max $-1+2=1$, min $-1-2=-3$." },
+              incorrect_answer_2: { type: "period_param_error", feedback: "Brak mnożnika przy x oznacza $\\omega=1$, więc $T=2\\pi$." }
+            }
+          },
+          {
+            exercise_code: "EX_TRIG_008",
+            problem_statement: "Rozwiąż $\\cos(3x)=0$ w $[0,2\\pi]$ i podaj rozwiązanie ogólne.",
+            expected_answer: "$x=\\frac{\\pi}{6},\\frac{\\pi}{2},\\frac{5\\pi}{6},\\frac{7\\pi}{6},\\frac{3\\pi}{2},\\frac{11\\pi}{6}$; ogólnie $x=\\frac{\\pi}{2}\\frac{1+2k}{3}$",
+            difficulty_level: 5,
+            time_estimate: 380,
+            misconception_map: {
+              incorrect_answer_1: { type: "argument_scaling", feedback: "Dla $3x$ równania $\\cos t=0$ mamy $t=\\frac{\\pi}{2}+k\\pi$, więc $x=\\frac{\\pi}{6}+\\frac{k\\pi}{3}$." },
+              incorrect_answer_2: { type: "counting_solutions", feedback: "W $[0,2\\pi]$ powinno wyjść 6 rozwiązań – przelicz po podzieleniu przez 3." }
+            }
+          }
+        ]
+      },
+      misconception_patterns: [
+        {
+          pattern_code: "TRIG_DEG_RAD_CONFUSION",
+          description: "Mylenie stopni i radianów (np. użycie 180 zamiast $\\pi$).",
+          intervention_strategy: "Zawsze konwertuj: $x^\\circ=x\\frac{\\pi}{180}$. Dodaj kontrolę jednostek w rozwiązaniu."
+        },
+        {
+          pattern_code: "TRIG_QUADRANT_SIGN",
+          description: "Błędne znaki funkcji w ćwiartkach (np. $\\cos$ ujemny w II i III).",
+          intervention_strategy: "Użyj okręgu jednostkowego i reguły ćwiartek; testuj przykładowy kąt z przedziału."
+        },
+        {
+          pattern_code: "TRIG_PRINCIPAL_ONLY",
+          description: "Podawanie tylko rozwiązania głównego bez okresu.",
+          intervention_strategy: "Po znalezieniu kąta dodaj $+2k\\pi$ (lub $+k\\pi$ dla $\\tan$). Zapisz oba ramiona dla $\\sin$."
+        },
+        {
+          pattern_code: "TRIG_IDENTITY_MISUSE",
+          description: "Niepoprawne tożsamości (np. $\\sin(a+b)=\\sin a+\\sin b$).",
+          intervention_strategy: "Ucz wzorów sumy/różnicy i weryfikuj przez podstawienie $x=\\frac{\\pi}{4}$."
+        },
+        {
+          pattern_code: "TRIG_ARGUMENT_SCALING",
+          description: "Ignorowanie mnożnika przy argumencie (np. w $\\sin(2x)$).",
+          intervention_strategy: "Najpierw rozwiąż równanie dla nowej zmiennej $t=2x$, potem podziel przez 2 i policz liczbę rozwiązań."
+        },
+        {
+          pattern_code: "TRIG_PHASE_PARAM",
+          description: "Mylenie amplitudy z przesunięciem pionowym i fazą.",
+          intervention_strategy: "Stosuj schemat $A,\\ \\omega,\\ \\varphi,\\ D$ i wypełnij tabelę parametrów przed odpowiedzią."
+        }
+      ],
+      real_world_applications: [
+        {
+          context: "Fizyka – fale i drgania",
+          problem_description: "Model ruchu harmonijnego $y=A\\sin(\\omega t+\\varphi)$, wyznaczanie okresu i amplitudy.",
+          age_group: "liceum/studia",
+          connection_explanation: "Parametry sinusoidy odpowiadają amplitudzie i częstotliwości drgań."
+        },
+        {
+          context: "Inżynieria – prąd przemienny",
+          problem_description: "Analiza napięcia $u(t)=U_m\\cos(\\omega t)$, obliczanie wartości skutecznej.",
+          age_group: "liceum/studia",
+          connection_explanation: "Funkcje trygonometryczne opisują przebiegi AC; okres i faza są kluczowe."
+        },
+        {
+          context: "Astronomia – wysokość Słońca",
+          problem_description: "Zmiany dobowej wysokości kątowej modelowane kosinusem.",
+          age_group: "liceum/studia",
+          connection_explanation: "Okres $2\\pi$ odpowiada dobie, przesunięcia fazowe – porom roku i długości geograficznej."
+        },
+        {
+          context: "Informatyka – grafika i animacja",
+          problem_description: "Ruch wahadła/efekty falowe w shaderach i animacjach.",
+          age_group: "liceum/studia",
+          connection_explanation: "Sinus i cosinus generują płynne, okresowe ruchy i deformacje."
+        }
+      ],
+      pedagogical_notes: {
+        common_mistakes: [
+          "Mylone stopnie i radiany w obliczeniach.",
+          "Błędne znaki funkcji w różnych ćwiartkach.",
+          "Brak dodania okresu do rozwiązań równań.",
+          "Użycie nieistniejących tożsamości (np. suma sinusów).",
+          "Ignorowanie mnożnika w argumencie funkcji.",
+          "Nieprawidłowe odczyty parametrów sinusoidy."
+        ],
+        teaching_tips: [
+          "Stała praca z okręgiem jednostkowym: zaznaczaj kąty i znaki.",
+          "Twórz tabelę wartości szczególnych i powtarzaj konwersje jednostek.",
+          "Ćwicz pełny zapis rozwiązań z $k\\in\\mathbb{Z}$, potem zawężaj do przedziałów.",
+          "Stosuj test podstawienia liczby do sprawdzenia tożsamości.",
+          "Ucz analizy $A,\\omega,\\varphi,D$ przed rysowaniem sinusoidy."
+        ],
+        prerequisites: [
+          "Podstawy geometrii i okręgu jednostkowego",
+          "Algebra: równania liniowe i proste przekształcenia",
+          "Konwersja jednostek kątowych (stopnie–radiany)"
+        ],
+        estimated_time: 5100,
+        difficulty_progression: "Start: wartości szczególne i konwersje (poziom 3). Dalej: równania podstawowe i tożsamości (poziom 4). Finał: parametryzacja sinusoidy, mnożnik argumentu i modelowanie (poziom 5)."
+      },
+      assessment_rubric: {
+        scope: "Ocena opanowania funkcji trygonometrycznych: wartości, tożsamości, równania, wykresy i zastosowania.",
+        criteria: [
+          {
+            skill: "Wartości i konwersje",
+            beginner: "Zna podstawowe wartości i konwersję stopnie–radiany z pomocą.",
+            intermediate: "Sprawnie oblicza wartości w typowych kątach i znaki w ćwiartkach.",
+            advanced: "Używa symetrii i redukcji kątów do szybkich obliczeń nietypowych."
+          },
+          {
+            skill: "Tożsamości i przekształcenia",
+            beginner: "Stosuje prostą tożsamość Pitagorasa.",
+            intermediate: "Wykorzystuje sumę/różnicę i podwójny kąt do upraszczania.",
+            advanced: "Łączy wiele tożsamości i weryfikuje poprawność przez testy numeryczne."
+          },
+          {
+            skill: "Równania i okresowość",
+            beginner: "Rozwiązuje sin x=a, cos x=a w zadanych przedziałach.",
+            intermediate: "Zapisuje rozwiązania ogólne i obsługuje mnożnik w argumencie.",
+            advanced: "Rozwiązuje złożone układy i zadania z parametrami, poprawnie liczy liczbę rozwiązań."
+          },
+          {
+            skill: "Wykresy i modelowanie",
+            beginner: "Rozpoznaje podstawowy kształt sinusoidy.",
+            intermediate: "Odczytuje/wyznacza $A,\\omega,\\varphi,D$ i okres.",
+            advanced: "Modeluje zjawiska okresowe, interpretuje parametry fizycznie i sprawdza sens wyników."
+          }
+        ]
+      }
+    };
+
+    await importSingleSkillFromJSON(skillData);
+    console.log('Trigonometric Functions skill imported successfully');
+    return { success: true, message: 'Trigonometric Functions skill imported successfully' };
+  } catch (error) {
+    console.error('Error importing Trigonometric Functions skill:', error);
+    return { success: false, message: `Error importing skill: ${error.message}` };
+  }
+};

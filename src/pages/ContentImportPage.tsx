@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { autoImportNewBatch, importSingleSkillFromJSON, importLinearInequalitiesSkill, importAbsoluteValueSkill, importQuadraticInequalitiesSkill, importAbsoluteValueEquationsSkill, importDefiniteIntegralApplicationsSkill, importDefiniteIntegralBasicsSkill, importExponentialLogarithmicFunctionsSkill, importNumberSequencesSkill } from '@/lib/skillContentImporter';
+import { autoImportNewBatch, importSingleSkillFromJSON, importLinearInequalitiesSkill, importAbsoluteValueSkill, importQuadraticInequalitiesSkill, importAbsoluteValueEquationsSkill, importDefiniteIntegralApplicationsSkill, importDefiniteIntegralBasicsSkill, importExponentialLogarithmicFunctionsSkill, importNumberSequencesSkill, importTrigonometricFunctionsSkill } from '@/lib/skillContentImporter';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle, AlertCircle, Clock, Upload, Calculator, Loader2 } from 'lucide-react';
@@ -55,6 +55,10 @@ export const ContentImportPage = () => {
   // State for Number Sequences import
   const [importingSequences, setImportingSequences] = useState(false);
   const [sequencesResult, setSequencesResult] = useState<any>(null);
+
+  // State for Trigonometric Functions import
+  const [importingTrigonometric, setImportingTrigonometric] = useState(false);
+  const [trigonometricResult, setTrigonometricResult] = useState<any>(null);
 
   const handleImport = async () => {
     setImporting(true);
@@ -389,17 +393,17 @@ export const ContentImportPage = () => {
     }
   };
 
-  const handleSequencesImport = async () => {
-    setImportingSequences(true);
-    setSequencesResult(null);
+  const handleTrigonometricImport = async () => {
+    setImportingTrigonometric(true);
+    setTrigonometricResult(null);
 
     try {
-      const result = await importNumberSequencesSkill();
-      setSequencesResult(result);
+      const result = await importTrigonometricFunctionsSkill();
+      setTrigonometricResult(result);
       
       if (result.result.success) {
         toast({
-          title: "Number Sequences Imported!",
+          title: "Trigonometric Functions Imported!",
           description: `Successfully imported: ${result.skillName}`,
         });
       } else {
@@ -413,11 +417,11 @@ export const ContentImportPage = () => {
       console.error('Import error:', error);
       toast({
         title: "Import Failed",
-        description: "Failed to import number sequences skill",
+        description: "Failed to import trigonometric functions skill",
         variant: "destructive"
       });
     } finally {
-      setImportingSequences(false);
+      setImportingTrigonometric(false);
     }
   };
 
@@ -972,6 +976,42 @@ export const ContentImportPage = () => {
                 <p className={`text-sm ${sequencesResult.result.success ? 'text-green-600' : 'text-red-600'}`}>
                   Status: {sequencesResult.result.success ? 'Success' : 'Failed'}
                   {sequencesResult.result.error && ` - ${sequencesResult.result.error}`}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Trigonometric Functions - HIGH PRIORITY */}
+        <Card className="border-2 border-primary">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              ⭐ PRIORYTET WYSOKI: Funkcje trygonometryczne
+            </CardTitle>
+            <CardDescription>
+              Import "Funkcje trygonometryczne" skill for class 2 (funkcje elementarne) - HIGH PRIORITY
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button 
+              onClick={handleTrigonometricImport}
+              disabled={importingTrigonometric}
+              className="w-full"
+              variant="default"
+            >
+              {importingTrigonometric && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Import Trigonometric Functions (PRIORYTET WYSOKI)
+            </Button>
+            
+            {trigonometricResult && (
+              <div className="mt-4 p-3 rounded-md bg-muted/50">
+                <p className="text-sm font-medium">Import Result:</p>
+                <p className="text-sm text-muted-foreground">
+                  Skill: {trigonometricResult.skillName}
+                </p>
+                <p className={`text-sm ${trigonometricResult.result.success ? 'text-green-600' : 'text-red-600'}`}>
+                  Status: {trigonometricResult.result.success ? 'Success' : 'Failed'}
+                  {trigonometricResult.result.error && ` - ${trigonometricResult.result.error}`}
                 </p>
               </div>
             )}
