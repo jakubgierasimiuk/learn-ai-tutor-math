@@ -3650,3 +3650,127 @@ export const importSolidGeometrySkill = async (): Promise<SkillImportResult> => 
     throw error;
   }
 };
+
+// Import function for Kombinatoryka i prawdopodobieństwo
+export const importCombinatoricsProbabilitySkill = async (): Promise<SkillImportResult> => {
+  const skillData = {
+    skillName: "Kombinatoryka i prawdopodobieństwo",
+    class_level: 3,
+    department: "statystyka_prawdopodobienstwo",
+    generatorParams: {
+      microSkill: "combinatorics_probability_basics",
+      difficultyRange: [2, 5],
+      fallbackTrigger: "use_basic_probability_patterns"
+    },
+    teachingFlow: {
+      phase1: { name: "Wprowadzenie", duration: 1500, activities: ["theory", "guided_examples"] },
+      phase2: { name: "Ćwiczenia", duration: 2400, activities: ["practice", "feedback"] },
+      phase3: { name: "Utrwalanie", duration: 1200, activities: ["mastery_tasks", "assessment"] }
+    },
+    content: {
+      theory: {
+        introduction: "Kombinatoryka dostarcza narzędzi do liczenia liczby możliwości w zadaniach dyskretnych, a rachunek prawdopodobieństwa przypisuje tym możliwościom miary szansy zajścia zdarzenia. Kluczowe idee to zasady sumy i mnożenia, rozróżnienie permutacji, wariacji i kombinacji (z i bez powtórzeń), a także prawdopodobieństwo klasyczne, warunkowe, niezależność, twierdzenie o prawdopodobieństwie całkowitym, wzór Bayesa oraz rozkład dwumianowy (schemat Bernoulliego). Model zliczania: jeśli doświadczenie przebiega w kolejnych niezależnych etapach o odpowiednio m i n możliwościach, to łączna liczba wyników to m*n (zasada mnożenia). Jeśli rozważamy rozłączne przypadki (nie zachodzą jednocześnie), to liczba wszystkich wyników to suma liczności (zasada sumy). Bardzo często wybór strategii sprowadza się do decyzji: czy kolejność ma znaczenie? czy elementy mogą się powtarzać? Gdy kolejność ma znaczenie i brak powtórzeń, używamy wariacji bez powtórzeń; gdy kolejność ma znaczenie i powtórzenia są dozwolone - wariacji z powtórzeniami. Gdy kolejność nie ma znaczenia i brak powtórzeń, stosujemy kombinacje; jeżeli dopuszczamy powtórzenia - kombinacje z powtórzeniami (na poziomie liceum zwykle pomijane lub wprowadzane jako rozszerzenie). Permutacje opisują przestawienia wszystkich n elementów (z lub bez powtórzeń).",
+        keyConceptsLaTex: [
+          "$n(A\\cup B)=n(A)+n(B)-n(A\\cap B)$",
+          "$P(A\\cup B)=P(A)+P(B)-P(A\\cap B)$",
+          "$P(A)=\\frac{|A|}{|\\Omega|}$",
+          "$P(A\\mid B)=\\frac{P(A\\cap B)}{P(B)}$",
+          "$P(A\\cap B)=P(A)P(B)$",
+          "$n!=1\\cdot2\\cdots n$",
+          "$P_n=n!$",
+          "$P_{n}^{(n_1,\\dots,n_k)}=\\frac{n!}{n_1!\\cdots n_k!}$",
+          "$V(n,k)=\\frac{n!}{(n-k)!}$",
+          "$V'(n,k)=n^k$",
+          "$C(n,k)=\\frac{n!}{k!(n-k)!}$",
+          "$\\binom{n}{k}=\\binom{n}{n-k}$",
+          "$(a+b)^n=\\sum_{k=0}^n \\binom{n}{k}a^{n-k}b^k$",
+          "$P(A)=\\sum_i P(A\\mid B_i)P(B_i)$",
+          "$P(B_i\\mid A)=\\frac{P(A\\mid B_i)P(B_i)}{\\sum_j P(A\\mid B_j)P(B_j)}$",
+          "$P(X=k)=\\binom{n}{k}p^k(1-p)^{n-k}$",
+          "$E[X]=np,\\ Var(X)=np(1-p)$"
+        ],
+        timeEstimate: 600
+      },
+      examples: [
+        {
+          title: "COMBPROB_001",
+          problem: "Ile jest możliwych kodów PIN czterocyfrowych, jeśli cyfry mogą się powtarzać?",
+          solution: {
+            steps: [
+              { step: "Model etapowy", latex: "$4$ miejsca, cyfry $0$-$9$", explanation: "Każde miejsce wybieramy niezależnie spośród 10 cyfr." },
+              { step: "Zasada mnożenia", latex: "$10\\cdot10\\cdot10\\cdot10$", explanation: "Powtórzenia dozwolone, kolejność ma znaczenie." },
+              { step: "Wynik", latex: "$10^4=10000$", explanation: "Łączna liczba PIN-ów." }
+            ],
+            final_answer: "$10000$"
+          },
+          expectedAnswer: "$10000$",
+          maturaConnection: "Wariacje z powtórzeniami: $V'(10,4)=10^4$.",
+          timeEstimate: 280
+        },
+        {
+          title: "COMBPROB_002",
+          problem: "Na ile sposobów można ustawić litery wyrazu $ANANAS$?",
+          solution: {
+            steps: [
+              { step: "Policz grupy", latex: "$A\\times3,\\ N\\times2,\\ S\\times1$", explanation: "Są powtórzenia liter." },
+              { step: "Permutacje z powtórzeniami", latex: "$\\dfrac{6!}{3!\\,2!\\,1!}$", explanation: "Dzielimy przez permutacje w obrębie identycznych liter." },
+              { step: "Oblicz", latex: "$\\dfrac{720}{6\\cdot2}=60$", explanation: "Upraszczamy ułamki." }
+            ],
+            final_answer: "$60$"
+          },
+          expectedAnswer: "$60$",
+          maturaConnection: "Permutacje z powtórzeniami dla multizbioru liter.",
+          timeEstimate: 300
+        }
+      ],
+      practiceExercises: [
+        {
+          exerciseId: "EX_CP_001",
+          difficulty: 3,
+          problem: "Ile jest 5-literowych haseł z liter $A$-$Z$, jeśli litery mogą się powtarzać?",
+          expectedAnswer: "$26^5$",
+          hints: [],
+          timeEstimate: 300
+        },
+        {
+          exerciseId: "EX_CP_002",
+          difficulty: 3,
+          problem: "Na ile sposobów można wybrać 4-osobową drużynę z 10 kandydatów?",
+          expectedAnswer: "$\\binom{10}{4}=210$",
+          hints: [],
+          timeEstimate: 310
+        }
+      ]
+    },
+    pedagogicalNotes: {
+      commonMistakes: [
+        "Użycie kombinacji, gdy kolejność ma znaczenie (lub odwrotnie).",
+        "Pominięcie części wspólnej przy sumowaniu przypadków.",
+        "Nieuprawnione założenie niezależności zdarzeń.",
+        "Odwracanie warunku bez zastosowania wzoru Bayesa.",
+        "Błędny dobór parametrów w rozkładzie dwumianowym lub brak dopełnienia."
+      ],
+      teachingTips: [
+        "Zaczynaj od pytań kontrolnych: kolejność? powtórzenia? rozłączność?",
+        "Rysuj drzewa prawdopodobieństw i diagramy Venna, aby wizualizować strukturę zdarzeń.",
+        "Ćwicz pary zadań: (kombinacje vs wariacje) na tym samym zbiorze danych.",
+        "Stosuj dopełnienie w zadaniach co najmniej raz, by oszczędzić rachunki.",
+        "Łącz zadania liczności z prawdopodobieństwem - ten sam model służy obu obszarom."
+      ],
+      prerequisites: [
+        "Algebra elementarna: potęgi, silnia, ułamki.",
+        "Podstawy teorii zbiorów i logiki zdarzeń.",
+        "Umiejętność czytania i tworzenia drzew decyzyjnych."
+      ],
+      estimatedTime: 5100
+    }
+  };
+
+  try {
+    console.log('Starting import for Kombinatoryka i prawdopodobieństwo...');
+    return await importSingleSkillFromJSON(skillData);
+  } catch (error) {
+    console.error('Error importing Kombinatoryka i prawdopodobieństwo:', error);
+    throw error;
+  }
+};

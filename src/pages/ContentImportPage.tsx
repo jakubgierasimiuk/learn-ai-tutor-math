@@ -8,6 +8,7 @@ import {
   importPolynomialEquationsSkill,
   importPlaneGeometrySkill,
   importSolidGeometrySkill,
+  importCombinatoricsProbabilitySkill,
   autoImportNewBatch,
   importSingleSkillFromJSON,
   importLinearInequalitiesSkill,
@@ -96,6 +97,10 @@ export const ContentImportPage = () => {
   // State for Solid Geometry import
   const [importingSolidGeometry, setImportingSolidGeometry] = useState(false);
   const [solidGeometryResult, setSolidGeometryResult] = useState<any>(null);
+
+  // State for Combinatorics Probability import
+  const [importingCombinatoricsProbability, setImportingCombinatoricsProbability] = useState(false);
+  const [combinatoricsProbabilityResult, setCombinatoricsProbabilityResult] = useState<any>(null);
 
   const handleImport = async () => {
     setImporting(true);
@@ -650,6 +655,38 @@ export const ContentImportPage = () => {
       });
     } finally {
       setImportingSolidGeometry(false);
+    }
+  };
+
+  const handleCombinatoricsProbabilityImport = async () => {
+    setImportingCombinatoricsProbability(true);
+    setCombinatoricsProbabilityResult(null);
+
+    try {
+      const result = await importCombinatoricsProbabilitySkill();
+      setCombinatoricsProbabilityResult(result);
+      
+      if (result.result.success) {
+        toast({
+          title: "Combinatorics & Probability Imported!",
+          description: `Successfully imported: ${result.skillName}`,
+        });
+      } else {
+        toast({
+          title: "Import Failed",
+          description: result.result.error || "Unknown error",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      toast({
+        title: "Import Failed",
+        description: "Failed to import combinatorics & probability skill",
+        variant: "destructive"
+      });
+    } finally {
+      setImportingCombinatoricsProbability(false);
     }
   };
 
@@ -1420,6 +1457,43 @@ export const ContentImportPage = () => {
                 <p className={`text-sm ${solidGeometryResult.result.success ? 'text-green-600' : 'text-red-600'}`}>
                   Status: {solidGeometryResult.result.success ? 'Success' : 'Failed'}
                   {solidGeometryResult.result.error && ` - ${solidGeometryResult.result.error}`}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Kombinatoryka i prawdopodobieństwo */}
+        <Card className="border-l-4 border-l-orange-500">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calculator className="h-5 w-5" />
+              Kombinatoryka i prawdopodobieństwo
+            </CardTitle>
+            <CardDescription>
+              Import "Kombinatoryka i prawdopodobieństwo" skill for class 3 (statystyka_prawdopodobienstwo) - HIGH PRIORITY
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button 
+              onClick={handleCombinatoricsProbabilityImport}
+              disabled={importingCombinatoricsProbability}
+              className="w-full"
+              variant="default"
+            >
+              {importingCombinatoricsProbability && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Import Kombinatoryka i prawdopodobieństwo (PRIORYTET WYSOKI)
+            </Button>
+            
+            {combinatoricsProbabilityResult && (
+              <div className="mt-4 p-3 rounded-md bg-muted/50">
+                <p className="text-sm font-medium">Import Result:</p>
+                <p className="text-sm text-muted-foreground">
+                  Skill: {combinatoricsProbabilityResult.skillName}
+                </p>
+                <p className={`text-sm ${combinatoricsProbabilityResult.result.success ? 'text-green-600' : 'text-red-600'}`}>
+                  Status: {combinatoricsProbabilityResult.result.success ? 'Success' : 'Failed'}
+                  {combinatoricsProbabilityResult.result.error && ` - ${combinatoricsProbabilityResult.result.error}`}
                 </p>
               </div>
             )}
