@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { importAllSkillContent, contentDatabase, autoImportNewBatch, newBatchContentDatabase, importSingleSkillFromJSON, importLinearInequalitiesSkill, importAbsoluteValueSkill } from '@/lib/skillContentImporter';
+import { autoImportNewBatch, importSingleSkillFromJSON, importLinearInequalitiesSkill, importAbsoluteValueSkill, importQuadraticInequalitiesSkill, importAbsoluteValueEquationsSkill } from '@/lib/skillContentImporter';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle, AlertCircle, Clock, Upload } from 'lucide-react';
@@ -31,6 +31,14 @@ export const ContentImportPage = () => {
   // Absolute value import
   const [importingAbsoluteValue, setImportingAbsoluteValue] = useState(false);
   const [absoluteValueResult, setAbsoluteValueResult] = useState<any>(null);
+  
+  // State for Quadratic Inequalities import
+  const [importingQuadraticInequalities, setImportingQuadraticInequalities] = useState(false);
+  const [quadraticInequalitiesResult, setQuadraticInequalitiesResult] = useState<any>(null);
+  
+  // State for Absolute Value Equations import
+  const [importingAbsoluteValueEquations, setImportingAbsoluteValueEquations] = useState(false);
+  const [absoluteValueEquationsResult, setAbsoluteValueEquationsResult] = useState<any>(null);
 
   const handleImport = async () => {
     setImporting(true);
@@ -204,6 +212,72 @@ export const ContentImportPage = () => {
       });
     } finally {
       setImportingAbsoluteValue(false);
+    }
+  };
+
+  const handleQuadraticInequalitiesImport = async () => {
+    setImportingQuadraticInequalities(true);
+    setQuadraticInequalitiesResult(null);
+
+    try {
+      const result = await importQuadraticInequalitiesSkill();
+      setQuadraticInequalitiesResult(result);
+      
+      if (result.result.success) {
+        toast({
+          title: "Quadratic Inequalities Imported!",
+          description: `Successfully imported: ${result.skillName}`,
+        });
+      } else {
+        toast({
+          title: "Import Failed",
+          description: result.result.error || "Unknown error",
+          variant: "destructive"
+        });
+      }
+
+    } catch (error) {
+      console.error('Import error:', error);
+      toast({
+        title: "Import Failed",
+        description: "Failed to import quadratic inequalities skill",
+        variant: "destructive"
+      });
+    } finally {
+      setImportingQuadraticInequalities(false);
+    }
+  };
+
+  const handleAbsoluteValueEquationsImport = async () => {
+    setImportingAbsoluteValueEquations(true);
+    setAbsoluteValueEquationsResult(null);
+
+    try {
+      const result = await importAbsoluteValueEquationsSkill();
+      setAbsoluteValueEquationsResult(result);
+      
+      if (result.result.success) {
+        toast({
+          title: "Absolute Value Equations Imported!",
+          description: `Successfully imported: ${result.skillName}`,
+        });
+      } else {
+        toast({
+          title: "Import Failed",
+          description: result.result.error || "Unknown error",
+          variant: "destructive"
+        });
+      }
+
+    } catch (error) {
+      console.error('Import error:', error);
+      toast({
+        title: "Import Failed",
+        description: "Failed to import absolute value equations skill",
+        variant: "destructive"
+      });
+    } finally {
+      setImportingAbsoluteValueEquations(false);
     }
   };
 
@@ -517,10 +591,124 @@ export const ContentImportPage = () => {
 
           <Button 
             onClick={handleAbsoluteValueImport} 
-            disabled={importing || importingNewBatch || importingJson || importingInequalities || importingAbsoluteValue}
+            disabled={importing || importingNewBatch || importingJson || importingInequalities || importingAbsoluteValue || importingQuadraticInequalities || importingAbsoluteValueEquations}
             className="w-full"
           >
             {importingAbsoluteValue ? 'Importing...' : 'Import Absolute Value Skill'}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Quick Quadratic Inequalities Import */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            📈 Quick Import: Quadratic Inequalities
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="text-sm text-muted-foreground">
+            Import the "Nierówności kwadratowe" skill for Class 1 with complete content including theory, examples, and practice exercises.
+          </div>
+
+          {importingQuadraticInequalities && (
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 animate-spin" />
+              <span>Importing quadratic inequalities skill...</span>
+            </div>
+          )}
+
+          {quadraticInequalitiesResult && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                {quadraticInequalitiesResult.result.success ? (
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-red-500" />
+                )}
+                <span className={quadraticInequalitiesResult.result.success ? "text-green-700" : "text-red-700"}>
+                  {quadraticInequalitiesResult.skillName}
+                </span>
+              </div>
+
+              {quadraticInequalitiesResult.result.success && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <span className="font-semibold text-green-800">Skill Successfully Imported!</span>
+                  </div>
+                  <p className="text-green-700 mt-1">
+                    Skill ID: {quadraticInequalitiesResult.result.skillId}<br />
+                    Now available in Study-Tutor system with complete content.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          <Button 
+            onClick={handleQuadraticInequalitiesImport} 
+            disabled={importing || importingNewBatch || importingJson || importingInequalities || importingAbsoluteValue || importingQuadraticInequalities || importingAbsoluteValueEquations}
+            className="w-full"
+          >
+            {importingQuadraticInequalities ? 'Importing...' : 'Import Quadratic Inequalities'}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Quick Absolute Value Equations Import */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            🔧 Quick Import: Absolute Value Equations
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="text-sm text-muted-foreground">
+            Import the "Równania i nierówności z wartością bezwzględną" skill for Class 2 with comprehensive content.
+          </div>
+
+          {importingAbsoluteValueEquations && (
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 animate-spin" />
+              <span>Importing absolute value equations skill...</span>
+            </div>
+          )}
+
+          {absoluteValueEquationsResult && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                {absoluteValueEquationsResult.result.success ? (
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-red-500" />
+                )}
+                <span className={absoluteValueEquationsResult.result.success ? "text-green-700" : "text-red-700"}>
+                  {absoluteValueEquationsResult.skillName}
+                </span>
+              </div>
+
+              {absoluteValueEquationsResult.result.success && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <span className="font-semibold text-green-800">Skill Successfully Imported!</span>
+                  </div>
+                  <p className="text-green-700 mt-1">
+                    Skill ID: {absoluteValueEquationsResult.result.skillId}<br />
+                    Now available in Study-Tutor system with complete content.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          <Button 
+            onClick={handleAbsoluteValueEquationsImport} 
+            disabled={importing || importingNewBatch || importingJson || importingInequalities || importingAbsoluteValue || importingQuadraticInequalities || importingAbsoluteValueEquations}
+            className="w-full"
+          >
+            {importingAbsoluteValueEquations ? 'Importing...' : 'Import Absolute Value Equations'}
           </Button>
         </CardContent>
       </Card>

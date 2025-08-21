@@ -1071,3 +1071,585 @@ export const importAbsoluteValueSkill = async (): Promise<SkillImportResult> => 
 
   return await importSingleSkillFromJSON(skill);
 };
+
+// Quadratic Inequalities skill import function
+export const importQuadraticInequalitiesSkill = async (): Promise<SkillImportResult> => {
+  const skillData = {
+    "skillId": "quadratic-inequalities-cl1",
+    "skillName": "Nierówności kwadratowe",
+    "class_level": 1,
+    "department": "algebra",
+    "generator_params": {
+      "microSkill": "quadratic_inequality_solving",
+      "difficultyRange": [2, 5],
+      "fallbackTrigger": "use_basic_quadratic_patterns"
+    },
+    "teaching_flow": {
+      "phase1": { "name": "Wprowadzenie", "duration": 1200, "activities": ["theory", "guided_examples"] },
+      "phase2": { "name": "Ćwiczenia", "duration": 1800, "activities": ["practice", "feedback"] },
+      "phase3": { "name": "Utrwalanie", "duration": 900, "activities": ["mastery_tasks", "assessment"] }
+    },
+    "content": {
+      "theory": {
+        "theory_text": "Nierówność kwadratowa dotyczy znaku trójmianu $ax^2+bx+c$ ($>0$, $<0$, $\\geq0$, $\\leq0$). Badamy znak funkcji kwadratowej przez miejsca zerowe i ramiona paraboli (znak $a$). Kluczowa rola dyskryminantu: $\\Delta=b^2-4ac$. Gdy $\\Delta>0$, mamy dwa pierwiastki $x_1<x_2$ i znak zmienia się na zewnątrz/wewnątrz zgodnie z $a$. Gdy $\\Delta=0$, jeden pierwiastek podwójny: znak jak $a$, a równość tylko w punkcie. Gdy $\\Delta<0$, brak miejsc zerowych: znak stały jak $a$. W postaci iloczynowej $a(x-x_1)(x-x_2)$ łatwo odczytać schemat znaków i przedziały rozwiązań na osi OX.",
+        "key_formulas": ["$\\Delta=b^2-4ac$", "$ax^2+bx+c=a(x-x_1)(x-x_2)$", "$\\text{sgn}(ax^2+bx+c)$ zależy od $a$ i pierwiastków"],
+        "time_estimate": 460,
+        "difficulty_level": 3
+      },
+      "examples": [
+        {
+          "example_code": "QUAD_INE_001",
+          "problem_statement": "Rozwiąż: $x^2-5x+6>0$.",
+          "solution_steps": [
+            { "step": "Rozkład na czynniki", "latex": "$x^2-5x+6=(x-2)(x-3)$", "explanation": "Łatwe czynniki o sumie 5 i iloczynie 6." },
+            { "step": "Wyznacz miejsca zerowe", "latex": "$x_1=2,\\ x_2=3$", "explanation": "Parabola przecina oś OX w 2 i 3." },
+            { "step": "Oceń znak dla $a>0$", "latex": "$a=1>0$", "explanation": "Parabola w górę: dodatnia na zewnątrz pierwiastków." },
+            { "step": "Zapisz rozwiązanie", "latex": "$x\\in(-\\infty,2)\\cup(3,\\infty)$", "explanation": "Poza przedziałem między pierwiastkami." }
+          ],
+          "final_answer": "$(-\\infty,2)\\cup(3,\\infty)$",
+          "explanation": "Graficznie parabola powyżej osi poza przedziałem $[2,3]$.",
+          "time_estimate": 200,
+          "difficulty_level": 2
+        },
+        {
+          "example_code": "QUAD_INE_002",
+          "problem_statement": "Rozwiąż: $2x^2+3x+5>0$.",
+          "solution_steps": [
+            { "step": "Policz dyskryminant", "latex": "$Δ=3^2-4\\cdot2\\cdot5=-31<0$", "explanation": "Brak miejsc zerowych." },
+            { "step": "Ustal znak trójmianu", "latex": "$a=2>0$", "explanation": "Parabola w górę: funkcja zawsze dodatnia." },
+            { "step": "Wniosek", "latex": "$2x^2+3x+5>0\\ \\forall x\\in\\mathbb{R}$", "explanation": "Prawdziwe dla wszystkich liczb rzeczywistych." }
+          ],
+          "final_answer": "$\\mathbb{R}$",
+          "explanation": "Wykres leży cały czas nad osią OX.",
+          "time_estimate": 190,
+          "difficulty_level": 2
+        },
+        {
+          "example_code": "QUAD_INE_003",
+          "problem_statement": "Rozwiąż: $x^2-2x+1≤0$.",
+          "solution_steps": [
+            { "step": "Zauważ postać kwadratu", "latex": "$x^2-2x+1=(x-1)^2$", "explanation": "Pierwiastek podwójny $x=1$ ($Δ=0$)." },
+            { "step": "Analiza znaku kwadratu", "latex": "$(x-1)^2≥0$", "explanation": "Kwadrat jest nieujemny dla każdego $x$." },
+            { "step": "Zastosuj $≤0$", "latex": "$(x-1)^2≤0\\Rightarrow x=1$", "explanation": "Równość tylko w punkcie styku." }
+          ],
+          "final_answer": "$\\{1\\}$",
+          "explanation": "Parabola styka oś w $x=1$; poniżej osi tylko w tym punkcie (z równością).",
+          "time_estimate": 200,
+          "difficulty_level": 3
+        },
+        {
+          "example_code": "QUAD_INE_004",
+          "problem_statement": "Rozwiąż: $-x^2+4x-3≤0$.",
+          "solution_steps": [
+            { "step": "Wyznacz pierwiastki", "latex": "-x^2+4x-3=0\\ \\Leftrightarrow\\ x^2-4x+3=0\\Rightarrow x=1,3", "explanation": "Przekształcenie przez $-1$ i rozkład." },
+            { "step": "Oceń ramiona", "latex": "$a=-1<0$", "explanation": "Parabola w dół: dodatnia wewnątrz $[1,3]$, ujemna na zewnątrz." },
+            { "step": "Zapisz rozwiązanie", "latex": "$x\\in(-\\infty,1]\\cup[3,\\infty)$", "explanation": "Warunek $≤0$ obejmuje końce przedziałów." }
+          ],
+          "final_answer": "$(-\\infty,1]\\cup[3,\\infty)$",
+          "explanation": "Wykres poniżej lub na osi poza $[1,3]$.",
+          "time_estimate": 210,
+          "difficulty_level": 3
+        },
+        {
+          "example_code": "QUAD_INE_005",
+          "problem_statement": "Rozwiąż: $(x+1)(x-4)>2x$.",
+          "solution_steps": [
+            { "step": "Przenieś wszystko na jedną stronę", "latex": "$(x+1)(x-4)-2x>0$", "explanation": "Sprowadzamy do trójmianu." },
+            { "step": "Upraszczaj", "latex": "$x^2-3x-4-2x=x^2-5x-4$", "explanation": "Redukcja wyrazów podobnych." },
+            { "step": "Policz pierwiastki", "latex": "$Δ=25+16=41,\\ x=\\frac{5\\pm\\sqrt{41}}{2}$", "explanation": "Dwa miejsca zerowe." },
+            { "step": "Oceń znak dla $a>0$", "latex": "$x\\in(-\\infty,\\tfrac{5-\\sqrt{41}}{2})\\cup(\\tfrac{5+\\sqrt{41}}{2},\\infty)$", "explanation": "Parabola w górę: dodatnia na zewnątrz." }
+          ],
+          "final_answer": "$(-\\infty,\\tfrac{5-\\sqrt{41}}{2})\\cup(\\tfrac{5+\\sqrt{41}}{2},\\infty)$",
+          "explanation": "Graficznie parabola nad osią poza przedziałem między pierwiastkami.",
+          "time_estimate": 220,
+          "difficulty_level": 4
+        }
+      ],
+      "practice_exercises": [
+        {
+          "exercise_code": "QUAD_EX_001",
+          "problem_statement": "Rozwiąż: $x^2-x-6≥0$.",
+          "expected_answer": "$x\\in(-\\infty,-2]\\cup[3,\\infty)$",
+          "difficulty_level": 2,
+          "time_estimate": 200,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "interval_in_out", "feedback": "Dla $a>0$ warunek $≥0$ spełniony poza przedziałem między pierwiastkami." },
+            "incorrect_answer_2": { "type": "factoring_error", "feedback": "Poprawny rozkład: $(x-3)(x+2)$." }
+          }
+        },
+        {
+          "exercise_code": "QUAD_EX_002",
+          "problem_statement": "Rozwiąż: $-2x^2+8x-6>0$.",
+          "expected_answer": "$x\\in(1,3)$",
+          "difficulty_level": 3,
+          "time_estimate": 210,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "leading_sign", "feedback": "Przy $a<0$ dodatnie wartości są między pierwiastkami." },
+            "incorrect_answer_2": { "type": "flip_wrong", "feedback": "Mnożąc przez $-1$ przy przekształceniach pamiętaj o odwróceniu znaku nierówności tylko wtedy, gdy naprawdę mnożysz/dzielisz obie strony przez liczbę ujemną." }
+          }
+        },
+        {
+          "exercise_code": "QUAD_EX_003",
+          "problem_statement": "Rozwiąż: $x^2-6x+9≤0$.",
+          "expected_answer": "$x=3$",
+          "difficulty_level": 3,
+          "time_estimate": 180,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "endpoint_missing", "feedback": "Dla $≤0$ uwzględnij równość: $(x-3)^2≤0$ tylko dla $x=3$." },
+            "incorrect_answer_2": { "type": "all_reals", "feedback": "Kwadrat nie jest ujemny dla innych $x$." }
+          }
+        },
+        {
+          "exercise_code": "QUAD_EX_004",
+          "problem_statement": "Rozwiąż: $x^2+4x+5<0$.",
+          "expected_answer": "Brak rozwiązań",
+          "difficulty_level": 3,
+          "time_estimate": 200,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "discriminant_ignored", "feedback": "$Δ=16-20<0$ i $a>0$ $\\Rightarrow$ trójmian zawsze dodatni." },
+            "incorrect_answer_2": { "type": "wrong_all_reals", "feedback": "Nierówność $<0$ nie może być spełniona przez wszystkie $x$ przy paraboli w górę bez zer." }
+          }
+        },
+        {
+          "exercise_code": "QUAD_EX_005",
+          "problem_statement": "Rozwiąż: $(x-2)(x+1)≤x+5$.",
+          "expected_answer": "$x\\in\\big[1-2\\sqrt{2},\\ 1+2\\sqrt{2}\\big]$",
+          "difficulty_level": 4,
+          "time_estimate": 230,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "algebra_transform", "feedback": "Sprowadź do trójmianu: $x^2-2x-7≤0$ i użyj $Δ=32$." },
+            "incorrect_answer_2": { "type": "interval_in_out", "feedback": "Dla $a>0$ warunek $≤0$ daje przedział między pierwiastkami (z końcami włączonymi)." }
+          }
+        },
+        {
+          "exercise_code": "QUAD_EX_006",
+          "problem_statement": "Firma osiąga zysk $P(x)=-x^2+10x-21$. Dla jakich $x$ zysk jest nieujemny ($P(x)≥0$)?",
+          "expected_answer": "$x\\in[3,7]$",
+          "difficulty_level": 4,
+          "time_estimate": 230,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "orientation_error", "feedback": "Przy $a<0$ wartości $≥0$ występują między pierwiastkami." },
+            "incorrect_answer_2": { "type": "endpoint_missing", "feedback": "Warunek $≥0$ obejmuje $x=3$ i $x=7$." }
+          }
+        }
+      ]
+    },
+    "misconception_patterns": [
+      {
+        "pattern_code": "QUAD_LEADING_SIGN",
+        "description": "Pomijanie znaku współczynnika przy $x^2$ i błędny wybór "wewnątrz" vs "na zewnątrz".",
+        "example_error": "Dla $-x^2+4x-3>0$ podanie $(-\\infty,1)\\cup(3,\\infty)$ zamiast $(1,3)$.",
+        "intervention_strategy": "Narysuj szkic paraboli dla $a<0$ (ramiona w dół); podkreśl, że dodatnie wartości są między pierwiastkami."
+      },
+      {
+        "pattern_code": "QUAD_FLIP_CONFUSION",
+        "description": "Mylenie kierunku nierówności przy mnożeniu przez $-1$ podczas przekształceń.",
+        "example_error": "$-2x^2+8x-6>0\\ \\Rightarrow\\ 2x^2-8x+6>0$ (zamiast $<0$).",
+        "intervention_strategy": "Przypomnienie: gdy mnożysz/dzielisz CAŁĄ nierówność przez liczbę ujemną, odwracasz znak."
+      },
+      {
+        "pattern_code": "QUAD_ENDPOINTS",
+        "description": "Ignorowanie równości w nierównościach nieostrych ($≤,\\ ≥$).",
+        "example_error": "Dla $(x-3)^2≤0$ odpowiedź $\\varnothing$ lub $x\\in(-\\infty,3)\\cup(3,\\infty)$.",
+        "intervention_strategy": "Zaznacz końce przedziałów pełnym kółkiem; sprawdź wartości graniczne w podstawieniu."
+      },
+      {
+        "pattern_code": "QUAD_GRAPH_ORIENTATION",
+        "description": "Błędna interpretacja graficzna (ramiona w dół/górę).",
+        "example_error": "Dla $a>0$ przyjęcie, że trójmian $>0$ między pierwiastkami.",
+        "intervention_strategy": "Ćwiczenia ze szkicowaniem wykresów dla $a>0$ i $a<0$ + tablica znaków."
+      },
+      {
+        "pattern_code": "QUAD_SIGN_TABLE_MISREAD",
+        "description": "Nieprawidłowe odczytanie przedziałów z tablicy znaków.",
+        "example_error": "Odwrotne przypisanie znaków dla przedziałów wyznaczonych przez pierwiastki.",
+        "intervention_strategy": "Użyj test-point: sprawdź jeden punkt w każdym przedziale, potwierdź znak."
+      }
+    ],
+    "real_world_applications": [
+      {
+        "context": "Optymalizacja zysku",
+        "problem_description": "Zysk modelowany $P(x)=-ax^2+bx+c$. Znajdź zakres sprzedaży $x$, dla którego $P(x)≥0$.",
+        "age_group": "liceum",
+        "connection_explanation": "Nierówność kwadratowa $P(x)≥0$ wyznacza opłacalny przedział."
+      },
+      {
+        "context": "Ruch ciała",
+        "problem_description": "Wysokość $h(t)=-\\tfrac{1}{2}gt^2+v_0t+h_0$. Dla jakich $t$ obiekt jest nad ziemią ($h(t)≥0$)?",
+        "age_group": "liceum",
+        "connection_explanation": "Rozwiązujemy $h(t)≥0$ – zakres czasu między pierwiastkami."
+      },
+      {
+        "context": "Geometria i pole",
+        "problem_description": "Warunek na dodatniość pola trójkąta w zależności od parametru $x$ sprowadza się do trójmianu.",
+        "age_group": "liceum",
+        "connection_explanation": "Nierówność $ax^2+bx+c>0$ gwarantuje dodatnie pole."
+      },
+      {
+        "context": "Kontrola jakości",
+        "problem_description": "Parametr produktu spełnia $q(x)=ax^2+bx+c≤0$ w granicach tolerancji.",
+        "age_group": "liceum",
+        "connection_explanation": "Przedział akceptacji to część osi wyznaczona przez nierówność kwadratową."
+      }
+    ],
+    "pedagogical_notes": {
+      "common_mistakes": [
+        "Nieodróżnianie roli znaku $a$ (ramiona paraboli).",
+        "Pominięcie równości w $≤,\\ ≥$ i błędne końce przedziałów.",
+        "Zamiana "wewnątrz" i "na zewnątrz" dla $a>0$/$a<0$.",
+        "Błędy w $Δ$ i w obliczaniu pierwiastków."
+      ],
+      "teaching_tips": [
+        "Zawsze zaczynaj od szkicu paraboli i tablicy znaków.",
+        "Po wyznaczeniu pierwiastków użyj punktu testowego w każdym przedziale.",
+        "Ucz kontrprzykładów: $Δ<0$ z $a>0$ $\\Rightarrow$ brak rozwiązań dla $<0$, ale $>0$ dla wszystkich $x$.",
+        "Podkreślaj różnicę między $>$/$<$ a $≥$/$≤$ (otwarte vs domknięte końce)."
+      ],
+      "prerequisites": ["Równania kwadratowe i $Δ$", "Rozkład na czynniki", "Nierówności liniowe i zapis przedziałów"],
+      "estimated_time": 3900,
+      "difficulty_progression": "Start: rozpoznawanie znaku dla $Δ<0/==0/>0$; dalej: iloczynowa i tablica znaków; finał: przekształcenia do trójmianu i zadania aplikacyjne."
+    },
+    "assessment_rubric": {
+      "scope": "Ocena zestawu 10 zadań z nierówności kwadratowych (klasa 1).",
+      "criteria": [
+        {
+          "skill": "Identyfikacja znaku i szkic paraboli",
+          "beginner": "Rozpoznaje znak $a$ i orientację paraboli w 5/10 zadań.",
+          "intermediate": "Poprawnie szkicuje i wskazuje obszary $>0/<0$ w 8/10 zadań.",
+          "advanced": "Bez szkicu potrafi odczytać przedziały z tablicy znaków i uzasadnić wybór."
+        },
+        {
+          "skill": "Obliczanie pierwiastków i użycie $Δ$",
+          "beginner": "Liczy $Δ$ z drobnymi błędami rachunkowymi.",
+          "intermediate": "Poprawnie wyznacza pierwiastki i kolejność $x_1<x_2$.",
+          "advanced": "Sprawnie rozpoznaje przypadki $Δ≤0$ i wyciąga wnioski o zbiorze rozwiązań."
+        },
+        {
+          "skill": "Zapis rozwiązań i granice",
+          "beginner": "Myli zapis przedziałów i nie uwzględnia równości.",
+          "intermediate": "Poprawnie zapisuje przedziały, zwykle z poprawnymi końcami.",
+          "advanced": "Konsekwentnie poprawny zapis, kontrola końców i test punktu."
+        },
+        {
+          "skill": "Przekształcenia algebraiczne",
+          "beginner": "Trudności ze sprowadzaniem do trójmianu.",
+          "intermediate": "Sprowadza poprawnie i rozwiązuje większość zadań.",
+          "advanced": "Sprawnie upraszcza złożone nierówności i interpretuje wyniki w kontekście."
+        }
+      ]
+    }
+  };
+
+  return await importSingleSkillFromJSON(skillData);
+};
+
+// Absolute Value Equations and Inequalities skill import function
+export const importAbsoluteValueEquationsSkill = async (): Promise<SkillImportResult> => {
+  const skillData = {
+    "skillId": "equations-inequalities-absolute-value-cl2",
+    "skillName": "Równania i nierówności z wartością bezwzględną",
+    "class_level": 2,
+    "department": "algebra",
+    "generator_params": {
+      "microSkill": "absolute_value_equations_inequalities",
+      "difficultyRange": [2, 5],
+      "fallbackTrigger": "use_basic_absolute_equation_patterns"
+    },
+    "teaching_flow": {
+      "phase1": { "name": "Wprowadzenie", "duration": 900, "activities": ["theory", "guided_examples"] },
+      "phase2": { "name": "Ćwiczenia", "duration": 1800, "activities": ["practice", "feedback"] },
+      "phase3": { "name": "Utrwalanie", "duration": 900, "activities": ["mastery_tasks", "assessment"] }
+    },
+    "content": {
+      "theory": {
+        "theory_text": "Wartość bezwzględną traktujemy jako odległość od zera. Równania $|f(x)|=a$: gdy $a>0$, rozwiązujemy $f(x)=a$ lub $f(x)=-a$; gdy $a=0$, rozwiązujemy $f(x)=0$; gdy $a<0$, brak rozwiązań. Dla $|f(x)|=|g(x)|$ mamy dwa przypadki: $f(x)=g(x)$ lub $f(x)=-g(x)$. Nierówności: $|f(x)|<a$ (z $a>0$) daje $-a<f(x)<a$, a $|f(x)|>a$ daje $f(x)<-a$ lub $f(x)>a$. Dla $|f(x)|<|g(x)|$ korzystamy z równoważności $f(x)^2<g(x)^2$. Interpretacja geometryczna: $|x-c|\\leq r$ opisuje punkty na osi w odległości najwyżej $r$ od $c$.",
+        "key_formulas": [
+          "$|x|=\\begin{cases}x,&x≥0\\\\-x,&x<0\\end{cases}$",
+          "$|f(x)|=a\\Rightarrow f(x)=a\\ \\text{lub}\\ f(x)=-a$",
+          "$|f(x)|=|g(x)|\\Rightarrow f(x)=g(x)\\ \\text{lub}\\ f(x)=-g(x)$",
+          "$|x|<a\\ (a>0)\\Rightarrow -a<x<a$",
+          "$|x|>a\\ (a>0)\\Rightarrow x<-a\\ \\text{lub}\\ x>a$",
+          "$|f(x)|<|g(x)|\\Rightarrow f(x)^2<g(x)^2$"
+        ],
+        "time_estimate": 460,
+        "difficulty_level": 3
+      },
+      "examples": [
+        {
+          "example_code": "ABS_EQ_001",
+          "problem_statement": "Rozwiąż równanie $|x|=3$.",
+          "solution_steps": [
+            { "step": "Zastosuj definicję równania z modułem", "latex": "$|x|=3\\Rightarrow x=3\\ \\text{lub}\\ x=-3$", "explanation": "Odległość od 0 równa 3." },
+            { "step": "Sprawdzenie", "latex": "$|3|=3,\\ |-3|=3$", "explanation": "Obie wartości spełniają równanie." }
+          ],
+          "final_answer": "$x=3\\ \\text{lub}\\ x=-3$",
+          "explanation": "Dwie liczby w odległości 3 od zera.",
+          "time_estimate": 130,
+          "difficulty_level": 1
+        },
+        {
+          "example_code": "ABS_EQ_002",
+          "problem_statement": "Rozwiąż równanie $|x-2|=5$.",
+          "solution_steps": [
+            { "step": "Dwa przypadki", "latex": "$x-2=5\\ \\text{lub}\\ x-2=-5$", "explanation": "Odległość od 2 równa 5." },
+            { "step": "Rozwiąż oba", "latex": "$x=7\\ \\text{lub}\\ x=-3$", "explanation": "Proste równania liniowe." },
+            { "step": "Kontrola", "latex": "$|7-2|=5,\\ |-3-2|=5$", "explanation": "Obie liczby spełniają." }
+          ],
+          "final_answer": "$x=7\\ \\text{lub}\\ x=-3$",
+          "explanation": "Punkty oddalone o 5 od liczby 2.",
+          "time_estimate": 150,
+          "difficulty_level": 1
+        },
+        {
+          "example_code": "ABS_EQ_003",
+          "problem_statement": "Rozwiąż równanie $|2x+1|=7$.",
+          "solution_steps": [
+            { "step": "Dwa przypadki", "latex": "$2x+1=7\\ \\text{lub}\\ 2x+1=-7$", "explanation": "Definicja wartości bezwzględnej." },
+            { "step": "Rozwiąż", "latex": "$x=3\\ \\text{lub}\\ x=-4$", "explanation": "Dzielimy przez 2 po odjęciu 1." },
+            { "step": "Sprawdzenie", "latex": "$|2\\cdot3+1|=7,\\ |2\\cdot(-4)+1|=7$", "explanation": "Oba wyniki poprawne." }
+          ],
+          "final_answer": "$x=3\\ \\text{lub}\\ x=-4$",
+          "explanation": "Równanie liniowe w obu gałęziach.",
+          "time_estimate": 170,
+          "difficulty_level": 2
+        },
+        {
+          "example_code": "ABS_EQ_004",
+          "problem_statement": "Rozwiąż nierówność $|x|≤4$.",
+          "solution_steps": [
+            { "step": "Zamień na nierówność podwójną", "latex": "$-4≤x≤4$", "explanation": "Odległość od 0 nie większa niż 4." },
+            { "step": "Zapis przedziału", "latex": "$x\\in[-4,4]$", "explanation": "Końce włączone przez $≤$." }
+          ],
+          "final_answer": "$x\\in[-4,4]$",
+          "explanation": "Punkty na osi w promieniu 4 od zera.",
+          "time_estimate": 140,
+          "difficulty_level": 2
+        },
+        {
+          "example_code": "ABS_EQ_005",
+          "problem_statement": "Rozwiąż nierówność $|x-3|>2$.",
+          "solution_steps": [
+            { "step": "Rozbij na sumę przedziałów", "latex": "$x-3>2\\ \\text{lub}\\ x-3<-2$", "explanation": "Odległość większa niż 2." },
+            { "step": "Rozwiąż", "latex": "$x>5\\ \\text{lub}\\ x<1$", "explanation": "Dodaj 3 do obu stron." },
+            { "step": "Zapis zbioru", "latex": "$x\\in(-\\infty,1)\\cup(5,\\infty)$", "explanation": "Przedziały rozłączne." }
+          ],
+          "final_answer": "$(-\\infty,1)\\cup(5,\\infty)$",
+          "explanation": "Poza kulą o promieniu 2 wokół 3.",
+          "time_estimate": 160,
+          "difficulty_level": 3
+        },
+        {
+          "example_code": "ABS_EQ_006",
+          "problem_statement": "Rozwiąż równanie $|x-1|=|x+2|$.",
+          "solution_steps": [
+            { "step": "Użyj równoważności", "latex": "$(x-1)^2=(x+2)^2$", "explanation": "Kwadraty wartości bezwzględnych są równe." },
+            { "step": "Rozwiń i uprość", "latex": "$x^2-2x+1=x^2+4x+4$", "explanation": "Redukcja $x^2$ po obu stronach." },
+            { "step": "Rozwiąż liniowe", "latex": "$-6x=3\\Rightarrow x=-\\tfrac{1}{2}$", "explanation": "Jedno rozwiązanie." }
+          ],
+          "final_answer": "$x=-\\tfrac{1}{2}$",
+          "explanation": "Punkt równo odległy od $1$ i $-2$ to ich środek.",
+          "time_estimate": 180,
+          "difficulty_level": 4
+        }
+      ],
+      "practice_exercises": [
+        {
+          "exercise_code": "ABS_EQ_EX_001",
+          "problem_statement": "Rozwiąż równanie $|x|=6$.",
+          "expected_answer": "$x=6\\ \\text{lub}\\ x=-6$",
+          "difficulty_level": 1,
+          "time_estimate": 180,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "two_cases_missing", "feedback": "Pamiętaj o dwóch przypadkach: $x=\\pm6$." },
+            "incorrect_answer_2": { "type": "sign_confusion", "feedback": "Wartość bezwzględna jest nieujemna; $|-6|=6$." }
+          }
+        },
+        {
+          "exercise_code": "ABS_EQ_EX_002",
+          "problem_statement": "Rozwiąż równanie $|x+4|=1$.",
+          "expected_answer": "$x=-5\\ \\text{lub}\\ x=-3$",
+          "difficulty_level": 2,
+          "time_estimate": 200,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "shift_error", "feedback": "Po rozwiązaniu $x+4=\\pm1$ odejmij 4: $x=-5$ lub $x=-3$." },
+            "incorrect_answer_2": { "type": "a_lt_0_error", "feedback": "Sprawdź $a$: tu $a=1>0$, więc rozwiązania istnieją." }
+          }
+        },
+        {
+          "exercise_code": "ABS_EQ_EX_003",
+          "problem_statement": "Rozwiąż równanie $|2x-3|=5$.",
+          "expected_answer": "$x=4\\ \\text{lub}\\ x=-1$",
+          "difficulty_level": 2,
+          "time_estimate": 220,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "divide_error", "feedback": "Po $2x-3=\\pm5$ dodaj 3 i podziel przez 2." },
+            "incorrect_answer_2": { "type": "two_cases_missing", "feedback": "Uwzględnij oba przypadki: $+5$ i $-5$." }
+          }
+        },
+        {
+          "exercise_code": "ABS_INE_EX_004",
+          "problem_statement": "Rozwiąż nierówność $|x-2|≤7$.",
+          "expected_answer": "$-5≤x≤9$",
+          "difficulty_level": 3,
+          "time_estimate": 240,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "strict_non_strict", "feedback": "Symbol $≤$ włącza końce: $x=-5$ i $x=9$ są dozwolone." },
+            "incorrect_answer_2": { "type": "double_inequality_setup", "feedback": "Zapisz $-7≤x-2≤7$ i dodaj 2." }
+          }
+        },
+        {
+          "exercise_code": "ABS_INE_EX_005",
+          "problem_statement": "Rozwiąż nierówność $|3x+2|>8$.",
+          "expected_answer": "$x>2\\ \\text{lub}\\ x<-\\tfrac{10}{3}$",
+          "difficulty_level": 3,
+          "time_estimate": 240,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "union_vs_intersection", "feedback": "Warunek $|\\cdot|>a$ daje sumę przedziałów, nie część wspólną." },
+            "incorrect_answer_2": { "type": "algebra_error", "feedback": "Po $3x+2>8$ lub $3x+2<-8$ odejmij 2 i podziel przez 3." }
+          }
+        },
+        {
+          "exercise_code": "ABS_CMP_EX_006",
+          "problem_statement": "Rozwiąż nierówność $|x-1|≥|2x+3|$.",
+          "expected_answer": "$x\\in[-4,-\\tfrac{2}{3}]$",
+          "difficulty_level": 4,
+          "time_estimate": 260,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "squaring_misuse", "feedback": "Możesz podnieść obie strony do kwadratu: $(x-1)^2≥(2x+3)^2$, bo obie strony są nieujemne." },
+            "incorrect_answer_2": { "type": "interval_in_out", "feedback": "Po uzyskaniu $3x^2+14x+8≤0$ wybierz przedział między pierwiastkami." }
+          }
+        },
+        {
+          "exercise_code": "ABS_MIX_EX_007",
+          "problem_statement": "Rozwiąż nierówność $|2x+1|-|x-2|≤3$.",
+          "expected_answer": "$x\\in[-6,\\tfrac{4}{3}]$",
+          "difficulty_level": 5,
+          "time_estimate": 300,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "case_partition", "feedback": "Rozważ trzy obszary: $x<-\\tfrac{1}{2}$, $-\\tfrac{1}{2}≤x<2$, $x≥2$ i w każdym usuń moduły." },
+            "incorrect_answer_2": { "type": "endpoint_check", "feedback": "Sprawdź końce: $x=-6$ i $x=\\tfrac{4}{3}$ spełniają nierówność." }
+          }
+        },
+        {
+          "exercise_code": "ABS_CMP_EX_008",
+          "problem_statement": "Rozwiąż nierówność $|x+1|<|2x-5|$.",
+          "expected_answer": "$x<\\tfrac{4}{3}\\ \\text{lub}\\ x>6$",
+          "difficulty_level": 4,
+          "time_estimate": 260,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "squaring_direction", "feedback": "Ponieważ moduły są nieujemne, $|\\cdot|<|\\cdot|$ jest równoważne $\\big(x+1\\big)^2<\\big(2x-5\\big)^2$." },
+            "incorrect_answer_2": { "type": "interval_union_error", "feedback": "Parabola w górę $>0$ poza pierwiastkami, więc rozwiązanie to dwa przedziały." }
+          }
+        }
+      ]
+    },
+    "misconception_patterns": [
+      {
+        "pattern_code": "ABS_TWO_CASES_MISSING",
+        "description": "Pomijanie jednego z przypadków w $|f(x)|=a$.",
+        "example_error": "$|x-2|=5\\Rightarrow x=7$ (brak $x=-3$).",
+        "intervention_strategy": "Stosuj schemat: $f(x)=a$ LUB $f(x)=-a$ i sprawdź oba wyniki."
+      },
+      {
+        "pattern_code": "ABS_STRICT_NONSTRICT",
+        "description": "Mylenie $<$/$>$ z $≤$/$≥$ w końcach przedziałów.",
+        "example_error": "$|x|≤4\\Rightarrow (-4,4)$.",
+        "intervention_strategy": "Przypominaj: $≤,\\ ≥$ włączają końce (kropka pełna)."
+      },
+      {
+        "pattern_code": "ABS_UNION_INTERSECTION",
+        "description": "Błędne łączenie przedziałów dla $|x|>a$ i $|x|<a$.",
+        "example_error": "$|x-3|>2\\Rightarrow (1,5)$.",
+        "intervention_strategy": "Użyj modelu odległości: $>$ — poza kulą; $<$ — wewnątrz kuli."
+      },
+      {
+        "pattern_code": "ABS_EQUAL_ABS_CONFUSION",
+        "description": "Błąd przy $|f(x)|=|g(x)|$ (pomijanie przypadku z minusem).",
+        "example_error": "$|x-1|=|x+2|\\Rightarrow x-1=x+2$.",
+        "intervention_strategy": "Wypisz oba: $f=g$ LUB $f=-g$; ewentualnie porównaj kwadraty."
+      },
+      {
+        "pattern_code": "ABS_GEOMETRY_MISREAD",
+        "description": "Niepoprawna interpretacja odległości na osi.",
+        "example_error": "$|x-2|≤3\\Rightarrow x\\in(-\\infty,5]$.",
+        "intervention_strategy": "Rysuj oś: promień $3$ wokół $2$ daje $[-1,5]$."
+      }
+    ],
+    "real_world_applications": [
+      {
+        "context": "Fizyka i pomiary",
+        "problem_description": "Dokładność urządzenia $\\pm0{,}2$ m: wyznacz dopuszczalny błąd względem wartości $x_0$.",
+        "age_group": "liceum",
+        "connection_explanation": "Warunek jakości: $|x-x_0|≤0{,}2$."
+      },
+      {
+        "context": "Geografia/GPS",
+        "problem_description": "Punkty w odległości najwyżej $r$ km od bazy przy drodze liniowej.",
+        "age_group": "liceum",
+        "connection_explanation": "Model 1D: $|x-x_{\\text{baza}}|≤r$."
+      },
+      {
+        "context": "Ekonomia domowa",
+        "problem_description": "Odchylenie wydatków od budżetu $B$ nie powinno przekroczyć 10%.",
+        "age_group": "liceum",
+        "connection_explanation": "Warunek: $\\big|\\tfrac{W-B}{B}\\big|≤0{,}1$."
+      },
+      {
+        "context": "Technologia/produkcja",
+        "problem_description": "Tolerancja wymiaru $d$: $d_0\\pm0{,}05$ mm.",
+        "age_group": "liceum",
+        "connection_explanation": "Spełnienie normy: $|d-d_0|≤0{,}05$."
+      }
+    ],
+    "pedagogical_notes": {
+      "common_mistakes": [
+        "Pomijanie jednego z przypadków w równaniach $|f(x)|=a$.",
+        "Błędne włączanie/wyłączanie końców przedziału przy $≤/≥$.",
+        "Mylenie sumy i części wspólnej przedziałów w $|x|>a$.",
+        "Niewłaściwe użycie potęgowania przy porównywaniu modułów.",
+        "Brak interpretacji geometrycznej jako odległości."
+      ],
+      "teaching_tips": [
+        "Zawsze zaczynaj od rysunku osi i interpretacji odległości.",
+        "Stosuj tabelę przypadków przed usuwaniem modułów.",
+        "Dla porównań modułów używaj kwadratów i uzasadnij nieujemność.",
+        "Weryfikuj rozwiązania przez podstawienie i rysunek.",
+        "Dawaj kontrprzykłady, by obalić fałszywe uogólnienia."
+      ],
+      "prerequisites": ["Równania i nierówności liniowe", "Wartość bezwzględna – definicja kawałkowa", "Operacje na przedziałach"],
+      "estimated_time": 3600,
+      "difficulty_progression": "Start: proste równania $|x|=a$; dalej: przesunięcia $|x-c|=a$ i $|ax+b|=a$; następnie nierówności $|x-c|≤r$, $|x-c|>r$; finał: porównania $|f(x)|\\lessgtr|g(x)|$ i zadania mieszane."
+    },
+    "assessment_rubric": {
+      "scope": "Ocena 10 zadań z równań i nierówności z wartością bezwzględną (klasa 2).",
+      "criteria": [
+        {
+          "skill": "Rozwiązywanie równań z wartością bezwzględną",
+          "beginner": "Rozwiązuje proste $|x|=a$ i $|x-c|=a$ w 5/10 przypadków.",
+          "intermediate": "Poprawnie rozwiązuje $|ax+b|=a$ i sprawdza wyniki.",
+          "advanced": "Sprawnie rozwiązuje $|f(x)|=|g(x)|$ i uzasadnia oba przypadki."
+        },
+        {
+          "skill": "Rozwiązywanie nierówności z wartością bezwzględną",
+          "beginner": "Poprawnie przepisuje $|x|≤a$ na $-a≤x≤a$ w prostych zadaniach.",
+          "intermediate": "Radzi sobie z $|x-c|\\gtrless r$ oraz łączy przedziały poprawnie.",
+          "advanced": "Rozwiązuje porównania $|f(x)|\\lessgtr|g(x)|$ metodą kwadratów lub przypadków."
+        },
+        {
+          "skill": "Interpretacja geometryczna",
+          "beginner": "Opisuje $|x-c|≤r$ jako odległość, ale myli końce.",
+          "intermediate": "Poprawnie wskazuje i rysuje przedziały rozwiązań.",
+          "advanced": "Samodzielnie modeluje sytuacje praktyczne modułem i interpretuje wyniki."
+        },
+        {
+          "skill": "Analiza przypadków i weryfikacja",
+          "beginner": "Niepełna tabela przypadków; rzadkie sprawdzanie rozwiązań.",
+          "intermediate": "Tworzy kompletne przypadki i zwykle weryfikuje wyniki.",
+          "advanced": "Konsekwentnie buduje przypadki, sprawdza końce i testuje punkty wewnątrz."
+        }
+      ]
+    }
+  };
+
+  return await importSingleSkillFromJSON(skillData);
+};
