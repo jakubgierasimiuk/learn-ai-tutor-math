@@ -1195,6 +1195,7 @@ export const contentDatabase = {
           "proficient": "71-90% poprawnych odpowiedzi",
           "advanced": "91-100% poprawnych odpowiedzi"
         }
+      }
     },
     // HIGH SCHOOL (LICEUM) CONTENT - 5 SKILLS FOR GRADE 1
     {
@@ -1862,7 +1863,6 @@ export const contentDatabase = {
             "uniwersytecki": "Stosuje Bayesa w modelach i analizuje niezależność."
           }
         ]
-      }
       }
     }
   ]
