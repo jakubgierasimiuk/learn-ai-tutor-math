@@ -1,7 +1,21 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { importTrigonometricFunctionsSkill, importLimitsFunctionsSkill, importDerivativeFunctionSkill } from '@/lib/skillContentImporter';
+import { 
+  importTrigonometricFunctionsSkill, 
+  importLimitsFunctionsSkill, 
+  importDerivativeFunctionSkill,
+  autoImportNewBatch,
+  importSingleSkillFromJSON,
+  importLinearInequalitiesSkill,
+  importAbsoluteValueSkill,
+  importQuadraticInequalitiesSkill,
+  importAbsoluteValueEquationsSkill,
+  importDefiniteIntegralBasicsSkill,
+  importDefiniteIntegralApplicationsSkill,
+  importExponentialLogarithmicFunctionsSkill,
+  importNumberSequencesSkill
+} from '@/lib/skillContentImporter';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle, AlertCircle, Clock, Upload, Calculator, Loader2 } from 'lucide-react';
