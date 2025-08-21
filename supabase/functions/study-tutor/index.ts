@@ -620,21 +620,80 @@ const skillContext = {
   }
 };
 
-    // Add conversation history
-    previousSteps?.forEach((interaction) => {
-      // Convert learning_interactions format to messages
-      if (interaction.interaction_type === 'user') {
-        messages.push({
-          role: 'user',
-          content: `Previous input (${interaction.sequence_number || 'unknown'})`
-        });
-      } else if (interaction.interaction_type === 'assistant') {
-        messages.push({
-          role: 'assistant',
-          content: `Previous response (${interaction.sequence_number || 'unknown'})`
-        });
-      }
+    // Add skill context as system message
+    messages.push({
+      role: 'system', 
+      content: `KONTEKST UMIEJĘTNOŚCI I SESJI:
+
+UMIEJĘTNOŚĆ: ${skillContext.skill_name} (${skillContext.department})
+- Poziom: ${skillContext.class_level || skillContext.level}
+- Opis: ${skillContext.description || 'Brak opisu'}
+- Trudność docelowa: ${skillContext.target_difficulty}
+- Faza: ${skillContext.phase_name} (${skillContext.current_phase})
+- ${skillContext.phase_description ? `Opis fazy: ${skillContext.phase_description}` : ''}
+
+PROFIL UCZNIA:
+- Poziom motywacji: ${skillContext.diagnostic_profile.motivation_type || skillContext.learner_profile.motivation_type}
+- Preferowana trudność: ${skillContext.diagnostic_profile.recommended_difficulty || skillContext.learner_profile.preferred_difficulty}
+- Obszary trudności: ${skillContext.diagnostic_profile.struggled_areas.join(', ') || skillContext.learner_profile.struggle_areas.join(', ') || 'brak danych'}
+- Opanowane umiejętności: ${skillContext.diagnostic_profile.mastered_skills.join(', ') || skillContext.learner_profile.strength_areas.join(', ') || 'brak danych'}
+
+POSTĘP W UMIEJĘTNOŚCI:
+- Poziom opanowania: ${skillContext.skill_progress.mastery_level}/10
+- Próby: ${skillContext.skill_progress.correct_attempts}/${skillContext.skill_progress.total_attempts}
+- Kolejne poprawne: ${skillContext.skill_progress.consecutive_correct}
+- Status: ${skillContext.skill_progress.is_mastered ? 'OPANOWANE' : 'W TRAKCIE NAUKI'}
+
+${skillContext.content_context || ''}
+${skillContext.phase_ai_instructions ? `INSTRUKCJE FAZY: ${skillContext.phase_ai_instructions}` : ''}
+${skillContext.current_equation ? `AKTUALNE RÓWNANIE: ${skillContext.current_equation}` : ''}
+
+KROK SESJI: ${skillContext.step_number}
+`
     });
+
+    // Add real conversation history from learning_interactions 
+    if (previousSteps && previousSteps.length > 0) {
+      // Get last 8 interactions to save tokens but provide context
+      const recentSteps = previousSteps.slice(-8);
+      
+      // Group interactions by sequence number to reconstruct conversation
+      const conversationPairs = new Map();
+      
+      recentSteps.forEach(step => {
+        const seqNum = step.sequence_number || step.step_number || 0;
+        if (!conversationPairs.has(seqNum)) {
+          conversationPairs.set(seqNum, { user: null, assistant: null });
+        }
+        
+        const pair = conversationPairs.get(seqNum);
+        if (step.user_input && step.user_input.trim()) {
+          pair.user = step.user_input.trim();
+        }
+        if (step.ai_response && step.ai_response.trim()) {
+          pair.assistant = step.ai_response.trim();
+        }
+      });
+      
+      // Add conversation in chronological order
+      Array.from(conversationPairs.keys()).sort((a, b) => a - b).forEach(seqNum => {
+        const pair = conversationPairs.get(seqNum);
+        
+        if (pair.user) {
+          messages.push({
+            role: 'user',
+            content: pair.user
+          });
+        }
+        
+        if (pair.assistant) {
+          messages.push({
+            role: 'assistant', 
+            content: pair.assistant
+          });
+        }
+      });
+    }
 
     // Add current message
     messages.push({
@@ -741,7 +800,7 @@ const skillContext = {
         }
       });
     } else if (validationResult) {
-      // Fallback to basic instructions
+      // Fallback to basic instructions when we have validation but no analysis
       pedagogicalInstructions = `
 INSTRUKCJE_PEDAGOGICZNE dla aktualnego kroku:
 - Odpowiedź ucznia: ${validationResult.isCorrect ? 'POPRAWNA' : 'NIEPOPRAWNA'}
@@ -756,15 +815,26 @@ REAKCJA: ${validationResult.isCorrect ?
   'Skoryguj błąd, wyjaśnij problem i daj kolejną szansę.'}
       `.trim();
     } else {
+      // Basic fallback instructions when no validation available
       pedagogicalInstructions = `
 INSTRUKCJE_PEDAGOGICZNE:
+- Krok sesji: ${turnNumber}
 - Trudność docelowa: ${targetDifficulty}
-- To ${turnNumber === 1 ? 'PIERWSZE' : 'kolejne'} pytanie
+- To ${turnNumber === 1 ? 'PIERWSZE' : 'kolejne'} pytanie w sesji
 - Pseudo-aktywność: ${isPseudoActivity ? 'TAK - zwróć uwagę na jakość odpowiedzi!' : 'nie'}
+- Profil ucznia: ${cognitiveProfile.ageGroup || 'nieznany'} (${cognitiveProfile.cognitiveStyle || 'standardowy'})
+
+WSKAZÓWKI:
+${turnNumber === 1 ? 
+  '- To pierwsza wiadomość - przedstaw zadanie i sprawdź zrozumienie' :
+  '- Kontynuuj zgodnie z metodą I do → We do → You do'
+}
+- Dostosuj komunikację do poziomu ${skillContext.class_level || 'podstawowego'}
+- Używaj metody sokratejskiej - pytaj zamiast od razu wyjaśniać
       `.trim();
     }
 
-    // Add pedagogical instructions to system context
+    // Add pedagogical instructions to system context BEFORE conversation history
     if (pedagogicalInstructions) {
       messages.push({
         role: 'system',
@@ -780,8 +850,29 @@ INSTRUKCJE_PEDAGOGICZNE:
       messages.splice(0, messages.length, systemMessage, ...recentMessages);
     }
 
+    // CRITICAL DEBUGGING: Log complete context being sent to AI
+    console.log('[AI CONTEXT DEBUG] Complete message structure:');
+    console.log(`[AI CONTEXT] Total messages: ${messages.length}`);
+    
+    messages.forEach((msg, index) => {
+      const contentPreview = msg.content.substring(0, 200) + (msg.content.length > 200 ? '...' : '');
+      console.log(`[AI CONTEXT ${index}] ${msg.role}: ${contentPreview}`);
+    });
+    
+    console.log('[AI CONTEXT] Skill context summary:', {
+      skillName: skillContext.skill_name,
+      department: skillContext.department,
+      phase: `${skillContext.current_phase} - ${skillContext.phase_name}`,
+      targetDifficulty: skillContext.target_difficulty,
+      stepNumber: skillContext.step_number,
+      hasHistory: (previousSteps?.length || 0) > 0,
+      historyLength: previousSteps?.length || 0,
+      hasPedagogicalInstructions: !!pedagogicalInstructions,
+      cognitiveProfile: cognitiveProfile.ageGroup || 'unknown'
+    });
+
     // Call OpenAI API with GPT-5 parameters
-    console.log('Calling OpenAI API with GPT-5...');
+    console.log('Calling OpenAI API with GPT-4o-mini...');
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -938,12 +1029,17 @@ Jak podejdziemy do tego zadania?`;
       stepType: stepType || 'question'
     });
 
-    // Save lesson step with fallback tracking
+    // Save lesson step with fallback tracking and full context
     const stepData = {
       session_id: sessionId,
       step_number: nextStepNumber,
       step_type: usedFallback ? 'fallback' : (stepType || 'question'),
-      ai_prompt: JSON.stringify(skillContext),
+      ai_prompt: JSON.stringify({
+        system_context: skillContext,
+        pedagogical_instructions: pedagogicalInstructions || 'basic',
+        message_count: messages.length,
+        has_history: (previousSteps?.length || 0) > 0
+      }),
       ai_response: aiMessage,
       user_input: message,
       is_correct: isCorrect,
@@ -956,7 +1052,7 @@ Jak podejdziemy do tego zadania?`;
       console.log(`[Fallback Used] Session ${sessionId}, Turn ${nextStepNumber}, Skill ${skillId}`);
     }
     
-    // Save interaction to learning_interactions
+    // Save interaction to learning_interactions with proper user_input and ai_response
     const { error: interactionError } = await supabaseClient
       .from('learning_interactions')
       .insert({
@@ -968,7 +1064,10 @@ Jak podejdziemy do tego zadania?`;
         difficulty_level: targetDifficulty === 'hard' ? 7 : 5,
         response_time_ms: responseTime,
         correctness_level: isCorrect ? 1 : 0,
-        confidence_level: evaluation.confidence || 0.5
+        confidence_level: evaluation.confidence || 0.5,
+        // CRITICAL: Store actual conversation content for future history
+        user_input: message,
+        ai_response: aiMessage
       });
 
     if (interactionError) {
