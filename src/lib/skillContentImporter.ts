@@ -2132,6 +2132,367 @@ export const newBatchContentDatabase = {
           }
         ]
       }
+    },
+    {
+      "skillId": "skill_008",
+      "skillName": "Granica funkcji",
+      "class_level": 2,
+      "department": "calculus",
+      "generatorParams": {
+        "microSkill": "limits",
+        "difficultyRange": [3, 9],
+        "fallbackTrigger": "canonical_examples_when_generator_fails"
+      },
+      "teachingFlow": {
+        "phase1": {
+          "name": "Wprowadzenie teoretyczne",
+          "duration": 1800,
+          "activities": ["theory", "formal_definitions", "guided_examples"]
+        },
+        "phase2": {
+          "name": "Ćwiczenia i zastosowania",
+          "duration": 2400,
+          "activities": ["practice", "problem_solving", "feedback"]
+        },
+        "phase3": {
+          "name": "Przygotowanie maturalne",
+          "duration": 1200,
+          "activities": ["exam_tasks", "complex_problems", "assessment"]
+        }
+      },
+      "content": {
+        "theory": {
+          "introduction": "Granica funkcji opisuje zachowanie funkcji w pobliżu danego punktu lub przy dążeniu zmiennej do nieskończoności. Formalna definicja granicy wymaga precyzji w zapisie, ale intuicyjnie chodzi o to, do jakiej wartości zbliża się funkcja.",
+          "keyConceptsLaTex": ["$\\lim_{x \\to a} f(x)$", "$\\lim_{x \\to \\infty} f(x)$"],
+          "formalDefinitions": [
+            "Granica funkcji $f(x)$ w punkcie $a$ istnieje i równa się $L$, jeśli dla dowolnego $\\varepsilon>0$ istnieje $\\delta>0$, takie że dla $0<|x-a|<\\delta$ zachodzi $|f(x)-L|<\\varepsilon$."
+          ],
+          "theorems": [
+            {
+              "name": "Granica sumy",
+              "statement": "$\\lim_{x \\to a}(f(x)+g(x))=\\lim_{x \\to a}f(x)+\\lim_{x \\to a}g(x)$",
+              "proof_outline": "Korzystamy z definicji granicy i własności wartości bezwzględnej, sumując nierówności i pokazując, że suma granic istnieje i jest równa granicy sumy."
+            }
+          ],
+          "timeEstimate": 1800
+        },
+        "examples": [
+          {
+            "title": "Granica prostej funkcji",
+            "problem": "Oblicz $\\lim_{x \\to 2}(3x+1)$",
+            "solution": {
+              "steps": [
+                {
+                  "step": "Podstaw $x=2$ do wzoru",
+                  "latex": "$3(2)+1=7$",
+                  "explanation": "Funkcja liniowa jest ciągła, więc granica w punkcie równa się wartości funkcji.",
+                  "justification": "Własność ciągłości funkcji liniowej."
+                }
+              ]
+            },
+            "maturaConnection": "Typowe zadanie na maturze podstawowej sprawdzające rozumienie granic prostych funkcji.",
+            "timeEstimate": 300
+          }
+        ],
+        "practiceExercises": [
+          {
+            "exerciseId": "ex8_1",
+            "difficulty": 5,
+            "examLevel": "rozszerzony",
+            "problem": "Oblicz $\\lim_{x \\to \\infty} \\frac{2x+1}{x-3}$",
+            "expectedAnswer": "2",
+            "hints": [
+              {
+                "level": 1,
+                "hint": "Podziel licznik i mianownik przez $x$.",
+                "timeEstimate": 120
+              }
+            ],
+            "timeEstimate": 600
+          }
+        ]
+      },
+      "pedagogicalNotes": {
+        "commonMistakes": ["Uczeń podstawia wartość bezpośrednio, gdy nie jest to dozwolone.", "Mylenie granicy w nieskończoności z wartością funkcji."],
+        "teachingTips": ["Zacznij od graficznych ilustracji zbliżania się funkcji do wartości.", "Stopniowo wprowadzaj formalizm epsilon-delta."],
+        "prerequisites": ["skill_006"],
+        "estimatedTime": 5400,
+        "maturaPreparation": "Zadania z granic występują na maturze rozszerzonej, szczególnie przy ciągach i funkcjach wymiernych.",
+        "universityConnection": "Podstawowy koncept rachunku różniczkowego i całkowego."
+      },
+      "misconceptionPatterns": [
+        {
+          "pattern": "direct_substitution_error",
+          "description": "Uczeń próbuje podstawić $x$ do mianownika, uzyskując dzielenie przez zero.",
+          "feedback": "Granica nie oznacza podstawienia, lecz badanie zachowania funkcji.",
+          "remediation": "Wyjaśnij różnicę między wartością a granicą funkcji.",
+          "prerequisiteGap": "Rozumienie dziedziny funkcji."
+        }
+      ],
+      "realWorldApplications": [
+        {
+          "context": "Fizyka",
+          "example": "Obliczanie prędkości chwilowej jako granicy średniej prędkości.",
+          "practicalUse": "Definicja pochodnej korzysta z granicy różnicy ilorazowej.",
+          "careerConnection": "Fizyka, inżynieria, matematyka stosowana."
+        }
+      ],
+      "assessmentRubric": {
+        "scope": "Ocena przygotowania maturalnego - 15 zadań różnego poziomu",
+        "criteria": [
+          {
+            "skill": "Obliczanie granic funkcji",
+            "podstawowy": "Uczeń oblicza granice funkcji ciągłych w punkcie.",
+            "rozszerzony": "Uczeń oblicza granice w nieskończoności i granice jednostronne.",
+            "uniwersytecki": "Uczeń stosuje formalizm epsilon-delta w dowodach."
+          }
+        ]
+      }
+    },
+    {
+      "skillId": "skill_009",
+      "skillName": "Kombinatoryka zaawansowana",
+      "class_level": 2,
+      "department": "statistics",
+      "generatorParams": {
+        "microSkill": "combinatorics_advanced",
+        "difficultyRange": [4, 9],
+        "fallbackTrigger": "use_fallback_for_complex_enumerations"
+      },
+      "teachingFlow": {
+        "phase1": {
+          "name": "Wprowadzenie teoretyczne",
+          "duration": 2000,
+          "activities": ["theory", "formal_definitions", "guided_examples"]
+        },
+        "phase2": {
+          "name": "Ćwiczenia i zastosowania",
+          "duration": 2600,
+          "activities": ["practice", "problem_solving", "feedback"]
+        },
+        "phase3": {
+          "name": "Przygotowanie maturalne",
+          "duration": 1400,
+          "activities": ["exam_tasks", "complex_problems", "assessment"]
+        }
+      },
+      "content": {
+        "theory": {
+          "introduction": "Kombinatoryka bada sposoby wyboru i uporządkowania elementów w zbiorach. W liceum zaawansowanym omawia się permutacje, kombinacje i wariacje z powtórzeniami oraz twierdzenie Newtona.",
+          "keyConceptsLaTex": ["$n!$", "$\\binom{n}{k}$"],
+          "formalDefinitions": [
+            "Permutacja: uporządkowany układ wszystkich elementów zbioru.",
+            "Kombinacja: wybór $k$ elementów ze zbioru $n$ elementowego, bez uwzględniania kolejności."
+          ],
+          "theorems": [
+            {
+              "name": "Twierdzenie Newtona",
+              "statement": "$(a+b)^n=\\sum_{k=0}^n \\binom{n}{k} a^{n-k}b^k$",
+              "proof_outline": "Dowód opiera się na zasadach kombinatorycznych i liczbie sposobów wyboru wyrazów w rozwinięciu potęgi dwumianu."
+            }
+          ],
+          "timeEstimate": 2000
+        },
+        "examples": [
+          {
+            "title": "Kombinacje bez powtórzeń",
+            "problem": "Ile jest kombinacji 3-elementowych ze zbioru 5-elementowego?",
+            "solution": {
+              "steps": [
+                {
+                  "step": "Użyj wzoru na kombinacje.",
+                  "latex": "$\\binom{5}{3}$",
+                  "explanation": "Wzór określa liczbę kombinacji k-elementowych.",
+                  "justification": "Definicja kombinacji."
+                },
+                {
+                  "step": "Oblicz wartość.",
+                  "latex": "$10$",
+                  "explanation": "Z 5 elementów można utworzyć 10 kombinacji 3-elementowych.",
+                  "justification": "Podstawienie liczb do wzoru."
+                }
+              ]
+            },
+            "maturaConnection": "Zadania tego typu pojawiają się na maturze rozszerzonej, często z kontekstem praktycznym.",
+            "timeEstimate": 420
+          }
+        ],
+        "practiceExercises": [
+          {
+            "exerciseId": "ex9_1",
+            "difficulty": 6,
+            "examLevel": "rozszerzony",
+            "problem": "Ile jest permutacji 6-elementowych, w których 2 elementy są identyczne?",
+            "expectedAnswer": "360",
+            "hints": [
+              {
+                "level": 1,
+                "hint": "Użyj wzoru $n!/k!$ dla elementów powtarzających się.",
+                "timeEstimate": 180
+              }
+            ],
+            "timeEstimate": 720
+          }
+        ]
+      },
+      "pedagogicalNotes": {
+        "commonMistakes": ["Mylenie permutacji z kombinacjami.", "Błędne stosowanie wzoru przy powtórzeniach."],
+        "teachingTips": ["Podawaj przykłady w kontekście kart, loterii, gier planszowych.", "Ćwicz rozpoznawanie, czy kolejność ma znaczenie."],
+        "prerequisites": ["skill_005"],
+        "estimatedTime": 6000,
+        "maturaPreparation": "Na maturze rozszerzonej często pojawiają się zadania kombinatoryczne wymagające twórczego podejścia.",
+        "universityConnection": "Podstawa teorii prawdopodobieństwa i statystyki matematycznej."
+      },
+      "misconceptionPatterns": [
+        {
+          "pattern": "wrong_formula_use",
+          "description": "Uczeń używa wzoru na kombinacje zamiast permutacji.",
+          "feedback": "Zwróć uwagę, czy kolejność elementów ma znaczenie.",
+          "remediation": "Rozróżnij permutacje i kombinacje na prostych przykładach.",
+          "prerequisiteGap": "Podstawy rachunku prawdopodobieństwa."
+        }
+      ],
+      "realWorldApplications": [
+        {
+          "context": "Informatyka",
+          "example": "Tworzenie haseł jako uporządkowane wybory znaków.",
+          "practicalUse": "Bezpieczeństwo komputerowe opiera się na zasadach kombinatoryki.",
+          "careerConnection": "Cyberbezpieczeństwo, informatyka, kryptografia."
+        }
+      ],
+      "assessmentRubric": {
+        "scope": "Ocena przygotowania maturalnego - 15 zadań różnego poziomu",
+        "criteria": [
+          {
+            "skill": "Zastosowanie permutacji i kombinacji",
+            "podstawowy": "Uczeń oblicza proste kombinacje i permutacje.",
+            "rozszerzony": "Uczeń stosuje kombinacje i permutacje z powtórzeniami.",
+            "uniwersytecki": "Uczeń stosuje kombinatorykę w dowodach matematycznych."
+          }
+        ]
+      }
+    },
+    {
+      "skillId": "skill_010",
+      "skillName": "Liczby zespolone",
+      "class_level": 2,
+      "department": "algebra",
+      "generatorParams": {
+        "microSkill": "operations",
+        "difficultyRange": [4, 9],
+        "fallbackTrigger": "use_canonical_for_complex_numbers"
+      },
+      "teachingFlow": {
+        "phase1": {
+          "name": "Wprowadzenie teoretyczne",
+          "duration": 2000,
+          "activities": ["theory", "formal_definitions", "guided_examples"]
+        },
+        "phase2": {
+          "name": "Ćwiczenia i zastosowania",
+          "duration": 2600,
+          "activities": ["practice", "problem_solving", "feedback"]
+        },
+        "phase3": {
+          "name": "Przygotowanie maturalne",
+          "duration": 1400,
+          "activities": ["exam_tasks", "complex_problems", "assessment"]
+        }
+      },
+      "content": {
+        "theory": {
+          "introduction": "Liczby zespolone mają postać $z=a+bi$, gdzie $i^2=-1$. Rozszerzają zbiór liczb rzeczywistych, pozwalając rozwiązywać równania bez pierwiastków rzeczywistych.",
+          "keyConceptsLaTex": ["$z=a+bi$", "$i^2=-1$"],
+          "formalDefinitions": [
+            "Liczba zespolona to para uporządkowana liczb rzeczywistych $(a,b)$ z działaniami dodawania i mnożenia zdefiniowanymi poprzez $i^2=-1$."
+          ],
+          "theorems": [
+            {
+              "name": "Wzór Eulera",
+              "statement": "$e^{i\\theta}=\\cos\\theta+i\\sin\\theta$",
+              "proof_outline": "Dowód wykorzystuje rozwinięcia szeregowe funkcji wykładniczej, cosinusa i sinusa, pokazując równość wyraz po wyrazie."
+            }
+          ],
+          "timeEstimate": 2000
+        },
+        "examples": [
+          {
+            "title": "Dodawanie liczb zespolonych",
+            "problem": "Oblicz $(2+3i)+(4-2i)$",
+            "solution": {
+              "steps": [
+                {
+                  "step": "Dodaj części rzeczywiste.",
+                  "latex": "2+4=6",
+                  "explanation": "Dodajemy współczynniki przy części rzeczywistej.",
+                  "justification": "Definicja dodawania liczb zespolonych."
+                },
+                {
+                  "step": "Dodaj części urojone.",
+                  "latex": "3i-2i=i",
+                  "explanation": "Dodajemy współczynniki przy $i$.",
+                  "justification": "Definicja dodawania liczb zespolonych."
+                }
+              ]
+            },
+            "maturaConnection": "Zadania wprowadzające na maturze rozszerzonej, często związane z równaniami kwadratowymi.",
+            "timeEstimate": 360
+          }
+        ],
+        "practiceExercises": [
+          {
+            "exerciseId": "ex10_1",
+            "difficulty": 5,
+            "examLevel": "rozszerzony",
+            "problem": "Oblicz moduł liczby $z=3+4i$",
+            "expectedAnswer": "5",
+            "hints": [
+              {
+                "level": 1,
+                "hint": "Skorzystaj z wzoru $|z|=\\sqrt{a^2+b^2}$.",
+                "timeEstimate": 180
+              }
+            ],
+            "timeEstimate": 600
+          }
+        ]
+      },
+      "pedagogicalNotes": {
+        "commonMistakes": ["Uczeń zapomina, że $i^2=-1$.", "Mylenie modułu z częścią rzeczywistą."],
+        "teachingTips": ["Stosuj reprezentację geometryczną w płaszczyźnie zespolonej.", "Wprowadź liczby zespolone przez rozwiązywanie równań kwadratowych."],
+        "prerequisites": ["skill_006", "skill_007"],
+        "estimatedTime": 6000,
+        "maturaPreparation": "Podstawowe działania na liczbach zespolonych i moduł liczby pojawiają się na maturze rozszerzonej.",
+        "universityConnection": "Podstawa analizy zespolonej, elektrotechniki i teorii sygnałów."
+      },
+      "misconceptionPatterns": [
+        {
+          "pattern": "treat_i_as_variable",
+          "description": "Uczeń traktuje $i$ jak niewiadomą zamiast jednostkę urojoną.",
+          "feedback": "$i$ jest stałą spełniającą $i^2=-1$.",
+          "remediation": "Pokaż różnicę między zmienną a jednostką urojoną.",
+          "prerequisiteGap": "Podstawy algebry."
+        }
+      ],
+      "realWorldApplications": [
+        {
+          "context": "Elektrotechnika",
+          "example": "Reprezentacja sygnałów sinusoidalnych za pomocą liczb zespolonych.",
+          "practicalUse": "Ułatwia obliczenia w analizie obwodów elektrycznych.",
+          "careerConnection": "Inżynieria elektryczna, telekomunikacja, fizyka."
+        }
+      ],
+      "assessmentRubric": {
+        "scope": "Ocena przygotowania maturalnego - 15 zadań różnego poziomu",
+        "criteria": [
+          {
+            "skill": "Podstawowe operacje na liczbach zespolonych",
+            "podstawowy": "Uczeń dodaje i odejmuje liczby zespolone.",
+            "rozszerzony": "Uczeń oblicza moduł i sprzężenie liczby zespolonej.",
+            "uniwersytecki": "Uczeń stosuje wzór Eulera i reprezentację trygonometryczną."
+          }
+        ]
+      }
     }
   ]
 };
