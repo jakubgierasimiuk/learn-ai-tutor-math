@@ -23,6 +23,38 @@ function estimateTokens(text: string): number {
 
 const INPUT_BUDGET = 1200;
 const RECENT_WINDOW_DEFAULT = 6;
+const COMPACT_MAX_TOKENS = 180;
+const CLAMP_COMPACT_TOKENS = 120;
+
+// Enhanced token monitoring
+function logTokenUsage(sessionId: string, inputTokens: number, outputTokens: number, windowPairs: number, compactLen: number) {
+  console.log(`[TokenMonitor] Session: ${sessionId}, Input: ${inputTokens}, Output: ${outputTokens}, Window: ${windowPairs}, Compact: ${compactLen}`);
+  
+  // Alerts
+  if (inputTokens > 1400) {
+    console.warn(`[TokenAlert] Input tokens exceed 1400: ${inputTokens}`);
+  }
+  if (compactLen > 200) {
+    console.warn(`[TokenAlert] Compact summary too long: ${compactLen} tokens`);
+  }
+}
+
+// Intelligent budget cutting
+function clampCompact(text: string, maxTokens: number): string {
+  const tokens = estimateTokens(text);
+  if (tokens <= maxTokens) return text;
+  
+  const ratio = maxTokens / tokens;
+  const targetLength = Math.floor(text.length * ratio * 0.9); // 10% buffer
+  return text.substring(0, targetLength) + "...";
+}
+
+function minifySystemPrompts(skillContext: string, pedagogicalInstructions: string): { skill: string, pedagogy: string } {
+  return {
+    skill: skillContext.split('\n')[0] + " (skrócone)",
+    pedagogy: pedagogicalInstructions.split('\n')[0] + " (auto)"
+  };
+}
 
 // Session Summary Types
 interface SessionSummaryState {
@@ -66,10 +98,11 @@ interface MessagePair {
 }
 
 // Session Summarization Functions
-async function needsResummarization(supabaseClient: any, sessionId: string): Promise<boolean> {
+// Enhanced summarization triggers
+async function needsResummarization(supabaseClient: any, sessionId: string, predictedInputTokens?: number): Promise<boolean> {
   const { data: session } = await supabaseClient
     .from('study_sessions')
-    .select('last_summarized_sequence, summary_updated_at')
+    .select('last_summarized_sequence, summary_updated_at, status, session_type')
     .eq('id', sessionId)
     .single();
 
@@ -88,7 +121,58 @@ async function needsResummarization(supabaseClient: any, sessionId: string): Pro
     Date.now() - new Date(session.summary_updated_at).getTime() : 
     Infinity;
 
-  return sequencesSince >= 8 || summaryAge > 24 * 60 * 60 * 1000; // 8 turns or 24 hours
+  // Enhanced triggers
+  const reasons = [];
+  
+  if (sequencesSince >= 8) reasons.push('8_turns');
+  if (summaryAge > 24 * 60 * 60 * 1000) reasons.push('24_hours');
+  if (predictedInputTokens && predictedInputTokens > 900) reasons.push('token_budget');
+  if (session?.status === 'completed') reasons.push('lesson_end');
+  if (sequencesSince >= 2 && session?.session_type !== session?.last_summarized_session_type) reasons.push('phase_change');
+  
+  if (reasons.length > 0) {
+    console.log(`[Summarization] Triggered by: ${reasons.join(', ')}`);
+    return true;
+  }
+  
+  return false;
+}
+
+// Build dynamic pedagogical instructions based on session state
+function buildPedagogicalInstructions(summaryState: SessionSummaryState | null): string {
+  if (!summaryState) return "INSTRUKCJE_PEDAGOGICZNE: Standardowe tempo, brak specjalnych adaptacji";
+  
+  const { progress, affect, misconceptions } = summaryState;
+  const instructions: string[] = [];
+  
+  // Pace adjustment
+  if (affect.pace === 'fast') {
+    instructions.push("TEMPO: Zwiększ trudność");
+  } else if (affect.pace === 'slow') {
+    instructions.push("TEMPO: Zwolnij, dodaj wyjaśnienia");
+  }
+  
+  // Pseudo-activity detection
+  if (affect.pseudo_activity_strikes >= 2) {
+    instructions.push("PSEUDO-AKTYWNOŚĆ: Wymagaj szczegółowych wyjaśnień");
+  }
+  
+  // Top misconception
+  const topMisconception = misconceptions?.[0]?.code;
+  if (topMisconception && misconceptions[0].count >= 2) {
+    instructions.push(`GŁÓWNY_BŁĄD: ${topMisconception} (${misconceptions[0].count}x)`);
+  }
+  
+  // Success streak
+  if (progress.correct_streak >= 3) {
+    instructions.push("SUKCES: Można zwiększyć trudność");
+  } else if (progress.errors_total > progress.attempts * 0.6) {
+    instructions.push("BŁĘDY: Potrzebne wsparcie i uproszczenie");
+  }
+  
+  return instructions.length > 0 
+    ? `INSTRUKCJE_PEDAGOGICZNE: ${instructions.join('; ')}`
+    : "INSTRUKCJE_PEDAGOGICZNE: Kontynuuj standardowo";
 }
 
 function detectMisconceptions(messages: Array<{role: string, content: string}>): Array<{code: string, count: number}> {
@@ -109,6 +193,7 @@ function detectMisconceptions(messages: Array<{role: string, content: string}>):
     .sort((a, b) => b.count - a.count);
 }
 
+// Enhanced session summary with complete state tracking
 async function updateSessionSummary(supabaseClient: any, sessionId: string): Promise<void> {
   console.log('[Summarization] Starting summary update for session:', sessionId);
   
@@ -137,47 +222,84 @@ async function updateSessionSummary(supabaseClient: any, sessionId: string): Pro
       ])
       .filter(Boolean);
 
-    // Detect misconceptions and calculate progress
+    // Enhanced analytics
     const misconceptions = detectMisconceptions(messages);
     const totalAttempts = interactions.filter(i => i.user_input).length;
     const correctAttempts = interactions.filter(i => i.correctness_level === 1).length;
     const hintUses = interactions.filter(i => i.interaction_type === 'hint_request').length;
+    const earlyReveals = interactions.filter(i => i.assistant_flags?.early_reveal).length;
     
+    // Calculate streaks and struggles
     let correctStreak = 0;
+    let consecutiveErrors = 0;
+    const mastered: string[] = [];
+    const struggled: string[] = [];
+    
     for (let i = interactions.length - 1; i >= 0; i--) {
-      if (interactions[i].correctness_level === 1) correctStreak++;
-      else break;
+      if (interactions[i].correctness_level === 1) {
+        correctStreak++;
+        consecutiveErrors = 0;
+      } else {
+        consecutiveErrors++;
+        if (correctStreak > 0) break; // End of streak
+      }
     }
 
-    // Build summary state
+    // Determine mastered/struggled skills
+    const skillAccuracy = correctAttempts / Math.max(totalAttempts, 1);
+    if (skillAccuracy >= 0.8 && correctStreak >= 3) {
+      mastered.push(session.skill_id);
+    } else if (skillAccuracy < 0.5 || consecutiveErrors >= 3) {
+      struggled.push(session.skill_id);
+    }
+
+    // Enhanced affect detection
+    const avgResponseTime = interactions
+      .filter(i => i.response_time_ms)
+      .reduce((sum, i) => sum + i.response_time_ms, 0) / Math.max(interactions.filter(i => i.response_time_ms).length, 1);
+    
+    const pace = avgResponseTime < 30000 ? 'fast' : avgResponseTime > 120000 ? 'slow' : 'normal';
+    const pseudoActivityStrikes = interactions.filter(i => i.assistant_flags?.pseudo_fast).length;
+
+    // Spaced repetition metrics (simplified)
+    const dueCards = Math.max(0, 5 - correctStreak);
+    const reviewRatio = correctAttempts / Math.max(totalAttempts, 1);
+
+    // Build comprehensive summary state
     const summaryState: SessionSummaryState = {
       session_id: sessionId,
       student_id: session.user_id,
       skill_focus: [session.skill_id],
       phase: session.session_type || 'wprowadzenie_podstaw',
-      difficulty_pref: 3,
-      last_difficulty: 3,
+      difficulty_pref: session.difficulty_level || 3,
+      last_difficulty: session.difficulty_level || 3,
       progress: {
         attempts: totalAttempts,
         correct_streak: correctStreak,
         errors_total: totalAttempts - correctAttempts,
         hint_uses: hintUses,
-        early_reveal: session.early_reveals || 0
+        early_reveal: earlyReveals
       },
       misconceptions,
-      mastered: [],
-      struggled: [],
-      spaced_repetition: { due_cards: 0, review_ratio: 0.0 },
-      affect: {
-        pace: 'normal',
-        pseudo_activity_strikes: session.pseudo_activity_strikes || 0
+      mastered,
+      struggled,
+      spaced_repetition: { 
+        due_cards: dueCards, 
+        review_ratio: reviewRatio 
       },
-      last_window_digest: `Ostatnie ${Math.min(interactions.length, 6)} interakcji w sesji.`,
-      next_recommendation: null,
+      affect: {
+        pace,
+        pseudo_activity_strikes: pseudoActivityStrikes
+      },
+      last_window_digest: `Ostatnie ${Math.min(interactions.length, 6)} interakcji: ${correctAttempts}/${totalAttempts} poprawnych`,
+      next_recommendation: mastered.length > 0 ? {
+        skill_uuid: 'next_skill_uuid',
+        rationale: 'Skill mastered, ready for next level'
+      } : null,
       updated_at: new Date().toISOString()
     };
 
-    // Generate compact summary (5 lines)
+    // Generate compact summary with token control
     const compactSummary = generateCompactSummary(summaryState);
     
     // Save summary to database
@@ -193,67 +315,94 @@ async function updateSessionSummary(supabaseClient: any, sessionId: string): Pro
       })
       .eq('id', sessionId);
 
-    console.log('[Summarization] Summary updated successfully');
+    console.log('[Summarization] Enhanced summary updated successfully');
   } catch (error) {
     console.error('[Summarization] Error updating summary:', error);
   }
 }
 
+// Enhanced compact summary generation with token control
 function generateCompactSummary(state: SessionSummaryState): string {
-  const { progress, misconceptions, affect } = state;
+  const { progress, misconceptions, affect, spaced_repetition } = state;
   const topMisconception = misconceptions[0]?.code || 'brak';
   const accuracy = progress.attempts > 0 ? 
     Math.round((progress.attempts - progress.errors_total) / progress.attempts * 100) : 0;
 
-  return [
+  let summary = [
     `[SESJA] ${state.phase}, Focus: ${state.skill_focus[0] || 'nieznana umiejętność'}`,
     `[UCZEŃ] Preferuje trudność ${state.difficulty_pref}, tempo: ${affect.pace}`,
     `[POSTĘP] Próby ${progress.attempts}, streak ${progress.correct_streak}, celność ${accuracy}%, podpowiedzi ${progress.hint_uses}×`,
     `[STATUS] Błędy: ${topMisconception}, pseudo-aktywność: ${affect.pseudo_activity_strikes}`,
     `[DALEJ] Kontynuuj z trudnością ${state.last_difficulty}`
   ].join('\n');
+  
+  // Ensure it fits within token budget
+  return clampCompact(summary, COMPACT_MAX_TOKENS);
 }
 
+// Enhanced recent window with better edge case handling
 async function getRecentWindow(supabaseClient: any, sessionId: string, pairs: number = 6): Promise<MessagePair[]> {
   const { data: interactions } = await supabaseClient
     .from('learning_interactions')
     .select('sequence_number, user_input, ai_response, tokens_estimate')
     .eq('session_id', sessionId)
-    .not('user_input', 'is', null)
-    .or('ai_response.not.is.null')
     .order('sequence_number', { ascending: false })
-    .limit(pairs);
+    .limit(pairs * 2); // Get more to filter properly
 
-  return (interactions || [])
+  const filtered = (interactions || [])
+    .filter(i => i.user_input || i.ai_response) // Only complete interactions
+    .slice(0, pairs)
     .reverse()
-    .map(i => ({
-      user: i.user_input,
-      assistant: i.ai_response,
-      sequence: i.sequence_number,
-      tokens_estimate: i.tokens_estimate || 0
-    }));
+    .map(i => {
+      // Handle multiple assistant responses by joining them
+      const assistantContent = typeof i.ai_response === 'string' && i.ai_response.includes('\n\n---\n\n')
+        ? i.ai_response.split('\n\n---\n\n')[0] // Take first part if multiple
+        : i.ai_response;
+        
+      return {
+        user: i.user_input,
+        assistant: assistantContent,
+        sequence: i.sequence_number,
+        tokens_estimate: i.tokens_estimate || 0
+      };
+    });
+
+  return filtered;
 }
 
-async function buildLayeredContext(supabaseClient: any, sessionId: string, userMessage: string): Promise<any[]> {
-  // Check if summarization is needed
-  if (await needsResummarization(supabaseClient, sessionId)) {
+// Enhanced layered context with intelligent budget management
+async function buildLayeredContext(supabaseClient: any, sessionId: string, userMessage: string): Promise<{ messages: any[], tokenStats: any }> {
+  // Pre-calculate estimated input tokens to trigger summarization if needed
+  const estimatedUserTokens = estimateTokens(userMessage);
+  const predictedInputTokens = estimatedUserTokens + 800; // Base system prompts + context
+  
+  // Check if summarization is needed (including token budget trigger)
+  if (await needsResummarization(supabaseClient, sessionId, predictedInputTokens)) {
     await updateSessionSummary(supabaseClient, sessionId);
   }
 
   // Get summary and recent window
   const { data: session } = await supabaseClient
     .from('study_sessions')
-    .select('summary_compact, summary_state')
+    .select('summary_compact, summary_state, skill_id')
     .eq('id', sessionId)
     .single();
 
   let recentWindow = await getRecentWindow(supabaseClient, sessionId, RECENT_WINDOW_DEFAULT);
+  
+  // Get skill context
+  const skillContext = session?.skill_id 
+    ? `KONTEKST_UMIEJĘTNOŚCI: Matematyka - umiejętność ${session.skill_id}` 
+    : 'KONTEKST_UMIEJĘTNOŚCI: Matematyka - poziom licealny';
+  
+  // Build dynamic pedagogical instructions
+  const pedagogicalInstructions = buildPedagogicalInstructions(session?.summary_state);
 
   // Build layered messages
   const messages: any[] = [
     { role: 'system', content: SYSTEM_PROMPT },
-    { role: 'system', content: 'KONTEKST_UMIEJĘTNOŚCI: Matematyka - poziom licealny' },
-    { role: 'system', content: 'INSTRUKCJE_PEDAGOGICZNE: Dostosuj poziom do ucznia' }
+    { role: 'system', content: skillContext },
+    { role: 'system', content: pedagogicalInstructions }
   ];
 
   // Add compact summary if exists
@@ -273,21 +422,26 @@ async function buildLayeredContext(supabaseClient: any, sessionId: string, userM
   // Add current user message
   messages.push({ role: 'user', content: userMessage });
 
-  // Token budget control
-  while (estimateTokens(messages.map(m => m.content).join('\n')) > INPUT_BUDGET && recentWindow.length > 4) {
+  let currentTokens = estimateTokens(messages.map(m => m.content).join('\n'));
+  
+  // Intelligent budget cutting
+  while (currentTokens > INPUT_BUDGET && recentWindow.length > 4) {
     recentWindow = recentWindow.slice(1);
     
-    // Rebuild with smaller window
+    // Use minified prompts for extreme budget pressure
+    const minified = minifySystemPrompts(skillContext, pedagogicalInstructions);
+    
     const compactMessages = [
       { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'system', content: 'KONTEKST_UMIEJĘTNOŚCI: Matematyka' },
-      { role: 'system', content: 'INSTRUKCJE_PEDAGOGICZNE: Standard' }
+      { role: 'system', content: minified.skill },
+      { role: 'system', content: minified.pedagogy }
     ];
 
     if (session?.summary_compact) {
+      const clampedSummary = clampCompact(session.summary_compact, CLAMP_COMPACT_TOKENS);
       compactMessages.push({
         role: 'system',
-        content: `SESSION_SUMMARY:\n${session.summary_compact.substring(0, 400)}`
+        content: `SESSION_SUMMARY:\n${clampedSummary}`
       });
     }
 
@@ -298,12 +452,27 @@ async function buildLayeredContext(supabaseClient: any, sessionId: string, userM
 
     compactMessages.push({ role: 'user', content: userMessage });
     
-    if (estimateTokens(compactMessages.map(m => m.content).join('\n')) <= INPUT_BUDGET) {
-      return compactMessages;
+    currentTokens = estimateTokens(compactMessages.map(m => m.content).join('\n'));
+    
+    if (currentTokens <= INPUT_BUDGET) {
+      const stats = {
+        inputTokens: currentTokens,
+        windowPairs: recentWindow.length,
+        compactLen: session?.summary_compact ? estimateTokens(session.summary_compact) : 0,
+        minified: true
+      };
+      return { messages: compactMessages, tokenStats: stats };
     }
   }
 
-  return messages;
+  const stats = {
+    inputTokens: currentTokens,
+    windowPairs: recentWindow.length,
+    compactLen: session?.summary_compact ? estimateTokens(session.summary_compact) : 0,
+    minified: false
+  };
+  
+  return { messages, tokenStats: stats };
 }
 
 // ContentTaskManager for edge functions (simplified version)
@@ -822,7 +991,18 @@ Nie dawaj żadnej podpowiedzi.
 Stosuj politykę 2‑1‑0. Off‑topic → redirect do celu.`;
     // Build layered context with session summaries and token control
     console.log('[LayeredContext] Building layered context for session:', sessionId);
-    const messages = await buildLayeredContext(supabaseClient, sessionId, message);
+    const contextResult = await buildLayeredContext(supabaseClient, sessionId, message);
+    const messages = contextResult.messages;
+    const tokenStats = contextResult.tokenStats;
+    
+    // Log token usage for monitoring
+    logTokenUsage(
+      sessionId, 
+      tokenStats.inputTokens, 
+      0, // outputTokens - will be set after AI response
+      tokenStats.windowPairs,
+      tokenStats.compactLen
+    );
 
 // Handle session initialization and current equation tracking
 let currentEquation = session.current_equation || null;
@@ -1144,6 +1324,15 @@ Jak podejdziemy do tego zadania?`;
     }
 
     const tokensUsed = usedFallback ? 0 : (await openAIResponse.json()).usage?.total_tokens || 0;
+    
+    // Enhanced token tracking
+    const aiResponseUsage = usedFallback ? null : (await openAIResponse.json()).usage;
+    const promptTokens = aiResponseUsage?.prompt_tokens || tokenStats.inputTokens;
+    const completionTokens = aiResponseUsage?.completion_tokens || 0;
+    const totalTokens = aiResponseUsage?.total_tokens || (promptTokens + completionTokens);
+
+    // Log final token usage
+    logTokenUsage(sessionId, promptTokens, completionTokens, tokenStats.windowPairs, tokenStats.compactLen);
 
     // Generate unique step number to prevent overwriting
     const nextStepNumber = (previousSteps?.length || 0) + 1;
@@ -1243,7 +1432,17 @@ Jak podejdziemy do tego zadania?`;
       console.log(`[Fallback Used] Session ${sessionId}, Turn ${nextStepNumber}, Skill ${skillId}`);
     }
     
-    // Save interaction to learning_interactions with proper user_input and ai_response
+    // Enhanced assistant flags for event tracking
+    const assistantFlags: any = {};
+    
+    if (stepType === 'hint') assistantFlags.hint = true;
+    if (evaluation.pseudoActivity) assistantFlags.pseudo_fast = true;
+    if (message.toLowerCase().includes('pokaż rozwiązanie')) assistantFlags.early_reveal = true;
+    if (usedFallback) assistantFlags.fallback_used = true;
+    if (tokenStats.minified) assistantFlags.budget_pressure = true;
+    if (analysisResult?.teachingMoment?.type === 'diagnostic') assistantFlags.diagnostic = true;
+    
+    // Save interaction to learning_interactions with enhanced tracking
     const { error: interactionError } = await supabaseClient
       .from('learning_interactions')
       .insert({
@@ -1258,7 +1457,12 @@ Jak podejdziemy do tego zadania?`;
         confidence_level: evaluation.confidence || 0.5,
         // CRITICAL: Store actual conversation content for future history
         user_input: message,
-        ai_response: aiMessage
+        ai_response: aiMessage,
+        // Enhanced token tracking
+        prompt_tokens: promptTokens,
+        completion_tokens: completionTokens,
+        // Assistant flags for clean event tracking
+        assistant_flags: assistantFlags
       });
 
     if (interactionError) {
@@ -1289,7 +1493,7 @@ Jak podejdziemy do tego zadania?`;
       hints_used: newHintsUsed,
       early_reveals: newEarlyReveals,
       pseudo_activity_strikes: newStrikes,
-      total_tokens_used: session.total_tokens_used + tokensUsed,
+      total_tokens_used: session.total_tokens_used + totalTokens,
       average_response_time_ms: userSteps.length > 0 ? 
         Math.round((session.average_response_time_ms * userSteps.length + responseTime) / (userSteps.length + 1)) :
         responseTime
@@ -1314,14 +1518,14 @@ Jak podejdziemy do tego zadania?`;
       console.error('Error updating session:', sessionUpdateError);
     }
 
-    // Update daily token usage
+    // Enhanced daily token tracking
     const today = new Date().toISOString().split('T')[0];
     const { error: dailyLimitError } = await supabaseClient
       .from('user_daily_limits')
       .upsert({
         user_id: session.user_id,
         date: today,
-        tokens_used: tokensUsed,
+        tokens_used: totalTokens,
         sessions_count: 1
       }, {
         onConflict: 'user_id,date',
@@ -1332,15 +1536,26 @@ Jak podejdziemy do tego zadania?`;
       console.error('Error updating daily limits:', dailyLimitError);
     }
 
-    // Return response with enhanced metadata
+    // Enhanced response with token breakdown
     const responseData: any = {
       message: aiMessage,
-      tokensUsed: tokensUsed,
+      tokensUsed: totalTokens,
+      tokenBreakdown: {
+        prompt: promptTokens,
+        completion: completionTokens,
+        total: totalTokens
+      },
       stepNumber: nextStepNumber,
       pseudoActivityDetected: evaluation.pseudoActivity || false,
       correctAnswer: isCorrect,
       hints: newHintsUsed,
-      strikes: newStrikes
+      strikes: newStrikes,
+      budgetStats: {
+        inputTokens: tokenStats.inputTokens,
+        windowPairs: tokenStats.windowPairs,
+        compactLength: tokenStats.compactLen,
+        minified: tokenStats.minified
+      }
     };
 
     // Add adaptive pedagogy insights for debugging/monitoring

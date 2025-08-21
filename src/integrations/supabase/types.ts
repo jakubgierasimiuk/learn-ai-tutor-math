@@ -898,8 +898,10 @@ export type Database = {
       learning_interactions: {
         Row: {
           ai_response: string | null
+          assistant_flags: Json | null
           cognitive_load_estimate: number | null
           cognitive_strategies_used: Json | null
+          completion_tokens: number | null
           confidence_level: number | null
           content_id: string | null
           correctness_level: number | null
@@ -915,18 +917,22 @@ export type Database = {
           misconceptions_activated: Json | null
           mouse_movement_patterns: Json | null
           pause_locations: Json | null
+          prompt_tokens: number | null
           response_time_ms: number | null
           sequence_number: number | null
           session_id: string
           skills_demonstrated: Json | null
           tokens_estimate: number | null
+          total_tokens: number | null
           user_id: string
           user_input: string | null
         }
         Insert: {
           ai_response?: string | null
+          assistant_flags?: Json | null
           cognitive_load_estimate?: number | null
           cognitive_strategies_used?: Json | null
+          completion_tokens?: number | null
           confidence_level?: number | null
           content_id?: string | null
           correctness_level?: number | null
@@ -942,18 +948,22 @@ export type Database = {
           misconceptions_activated?: Json | null
           mouse_movement_patterns?: Json | null
           pause_locations?: Json | null
+          prompt_tokens?: number | null
           response_time_ms?: number | null
           sequence_number?: number | null
           session_id: string
           skills_demonstrated?: Json | null
           tokens_estimate?: number | null
+          total_tokens?: number | null
           user_id: string
           user_input?: string | null
         }
         Update: {
           ai_response?: string | null
+          assistant_flags?: Json | null
           cognitive_load_estimate?: number | null
           cognitive_strategies_used?: Json | null
+          completion_tokens?: number | null
           confidence_level?: number | null
           content_id?: string | null
           correctness_level?: number | null
@@ -969,11 +979,13 @@ export type Database = {
           misconceptions_activated?: Json | null
           mouse_movement_patterns?: Json | null
           pause_locations?: Json | null
+          prompt_tokens?: number | null
           response_time_ms?: number | null
           sequence_number?: number | null
           session_id?: string
           skills_demonstrated?: Json | null
           tokens_estimate?: number | null
+          total_tokens?: number | null
           user_id?: string
           user_input?: string | null
         }
