@@ -2080,3 +2080,112 @@ export const importDefiniteIntegralBasicsSkill = async () => {
 
   return await importSingleSkillFromJSON(skillData);
 };
+
+export const importExponentialLogarithmicFunctionsSkill = async (): Promise<SkillImportResult> => {
+  const skillData = {
+    "skillId": "exponential-logarithmic-functions-cl3",
+    "skillName": "Funkcje wykładnicze i logarytmiczne", 
+    "class_level": 3,
+    "department": "analiza_matematyczna",
+    "generator_params": {
+      "microSkill": "exp_log_functions",
+      "difficultyRange": [2, 5],
+      "fallbackTrigger": "use_basic_explog_patterns"
+    },
+    "teaching_flow": {
+      "phase1": { "name": "Wprowadzenie", "duration": 1500, "activities": ["theory", "guided_examples"] },
+      "phase2": { "name": "Ćwiczenia", "duration": 2400, "activities": ["practice", "feedback"] },
+      "phase3": { "name": "Utrwalanie", "duration": 1200, "activities": ["mastery_tasks", "assessment"] }
+    },
+    "content": {
+      "theory": {
+        "theory_text": "Funkcje wykładnicze i logarytmiczne stanowią parę funkcji wzajemnie odwrotnych i są filarem analizy na poziomie liceum rozszerzonego oraz studiów. Funkcja wykładnicza o podstawie a, gdzie a>0 i a≠1, ma postać y=a^x. Jej dziedziną jest zbiór liczb rzeczywistych, a przeciwdziedziną zbiór liczb dodatnich. Dla a>1 funkcja jest rosnąca, dla 0<a<1 malejąca. Wykres przecina oś OY w punkcie (0,1), ponieważ a^0=1. Funkcja nie przyjmuje wartości ujemnych i ma asymptotę poziomą y=0. Funkcja logarytmiczna jest odwrotnością wykładniczej: y=log_a(x) to liczba, do której należy podnieść a, aby otrzymać x. Warunki: a>0, a≠1, x>0. Dziedziną logarytmu są liczby dodatnie, a przeciwdziedziną wszystkie liczby rzeczywiste. Z definicji log_a(a)=1 oraz log_a(1)=0. Do kluczowych własności logarytmów należą: log_a(xy)=log_a(x)+log_a(y), log_a(x/y)=log_a(x)-log_a(y), log_a(x^r)=r*log_a(x) dla x>0.",
+        "key_formulas": [
+          "$a>0, a \\neq 1$",
+          "$y=a^x$", 
+          "$y=\\log_a(x)$",
+          "$\\log_a b=c \\iff a^c=b$",
+          "$\\log_a(xy)=\\log_a x+\\log_a y$",
+          "$\\log_a(x/y)=\\log_a x-\\log_a y$",
+          "$\\log_a(x^r)=r\\log_a x$",
+          "$\\log_a 1=0$",
+          "$\\log_a a=1$"
+        ],
+        "time_estimate": 600,
+        "difficulty_level": 4
+      },
+      "examples": [
+        {
+          "example_code": "EXPLOG_001",
+          "problem_statement": "Rozwiąż równanie $2^x=8$.",
+          "solution_steps": [
+            { "step": "Sprowadź do wspólnej podstawy", "expression": "$8=2^3$", "explanation": "Obie strony w tej samej podstawie 2." },
+            { "step": "Porównaj wykładniki", "expression": "$2^x=2^3 \\Rightarrow x=3$", "explanation": "Funkcja $2^x$ jest różnowartościowa." }
+          ],
+          "final_answer": "$x=3$",
+          "explanation": "Najprostsze równanie wykładnicze przez porównanie wykładników.",
+          "time_estimate": 260,
+          "difficulty_level": 3
+        },
+        {
+          "example_code": "EXPLOG_002", 
+          "problem_statement": "Rozwiąż równanie $\\log_3(x)=2$.",
+          "solution_steps": [
+            { "step": "Przejdź do postaci wykładniczej", "expression": "$\\log_3 x=2 \\iff 3^2=x$", "explanation": "Definicja logarytmu." },
+            { "step": "Wyznacz x", "expression": "$x=9$", "explanation": "Sprawdzenie dziedziny: $x>0$ spełnione." }
+          ],
+          "final_answer": "$x=9$",
+          "explanation": "Użyto równoważności $\\log_a x=c \\iff a^c=x$.",
+          "time_estimate": 280,
+          "difficulty_level": 3
+        }
+      ],
+      "practice_exercises": [
+        {
+          "exercise_code": "EXPLOG_EX_001",
+          "problem_statement": "Rozwiąż $4^x=\\frac{1}{8}$.",
+          "expected_answer": "$x=-\\frac{3}{2}$",
+          "difficulty_level": 3,
+          "time_estimate": 300,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "base_handling", "feedback": "Zapisz $\\frac{1}{8}=2^{-3}$ i $4=2^2$, wtedy $2^{2x}=2^{-3}$." },
+            "incorrect_answer_2": { "type": "sign_error", "feedback": "Uważaj na znak wykładnika: $2x=-3 \\Rightarrow x=-\\frac{3}{2}$." }
+          }
+        },
+        {
+          "exercise_code": "EXPLOG_EX_002",
+          "problem_statement": "Oblicz $\\log_5 125$.",
+          "expected_answer": "$3$",
+          "difficulty_level": 3,
+          "time_estimate": 310,
+          "misconception_map": {
+            "incorrect_answer_1": { "type": "definition_confusion", "feedback": "Szukasz $c$ z $5^c=125$. Ponieważ $125=5^3$, wynik to 3." },
+            "incorrect_answer_2": { "type": "inverse_error", "feedback": "Nie myl $\\log_5 125$ z $\\log_{125} 5$." }
+          }
+        }
+      ]
+    },
+    "misconception_patterns": [
+      {
+        "pattern_code": "EXPLOG_DOMAIN_NEG",
+        "description": "Ignorowanie dziedziny logarytmu: próby liczenia log_a(x) dla x≤0.",
+        "intervention_strategy": "Zawsze wypisz warunki: argument logarytmu musi być dodatni; sprawdzaj je przed przekształceniami."
+      },
+      {
+        "pattern_code": "LOG_SUM_FALLACY", 
+        "description": "Błędne utożsamienie log(a+b) z log a + log b.",
+        "intervention_strategy": "Kontrprzykład liczbowy i utrwalanie praw: tylko iloczyn/wiloraz/potęga mają proste wzory."
+      }
+    ],
+    "real_world_applications": [
+      {
+        "context": "Ekonomia - procent składany",
+        "problem_description": "Kapitał K_0 rośnie do K(t)=K_0(1+r)^t lub K_0*e^(rt).",
+        "age_group": "liceum/studia",
+        "connection_explanation": "Model wykładniczy opisuje wzrost/kapitalizację; logarytm służy do wyznaczania czasu lub stopy."
+      }
+    ]
+  };
+  
+  return await importSingleSkillFromJSON(skillData);
+};
