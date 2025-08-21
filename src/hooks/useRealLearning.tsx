@@ -152,7 +152,7 @@ export const useRealLearning = () => {
           action: 'generate_task',
           userId: user.id,
           difficulty: targetDifficulty || 5,
-          skillCode: skillCode || 'b5a925c5-5821-401f-a7bb-824bceee34d3' // Use real skill UUID
+          skillCode: skillCode || 'default' // Use provided skill or default
         }
       });
 

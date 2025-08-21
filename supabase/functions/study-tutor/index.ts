@@ -165,6 +165,27 @@ class EdgeContentTaskManager {
 
 const contentManager = new EdgeContentTaskManager();
 
+// Helper function to get default skill
+async function getDefaultSkill(supabaseClient: any): Promise<string> {
+  try {
+    const { data: skills, error } = await supabaseClient
+      .from('skills')
+      .select('id')
+      .eq('is_active', true)
+      .limit(1);
+    
+    if (error || !skills || skills.length === 0) {
+      console.warn('No skills found, using fallback');
+      return 'default_skill';
+    }
+    
+    return skills[0].id;
+  } catch (error) {
+    console.error('Error getting default skill:', error);
+    return 'default_skill';
+  }
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -268,11 +289,15 @@ serve(async (req) => {
     }
     
     if (isSessionAction) {
-      return await handleStartSession(supabaseClient, user.id, sessionType || 'adaptive_practice', skillId || 'basic_math');
+      // Get default skill if none provided
+      const targetSkillId = skillId || await getDefaultSkill(supabaseClient);
+      return await handleStartSession(supabaseClient, user.id, sessionType || 'adaptive_practice', targetSkillId);
     }
     
     if (isTaskAction) {
-      return await handleGenerateTask(supabaseClient, sessionId, skillId || 'basic_math');
+      // Get default skill if none provided
+      const targetSkillId = skillId || await getDefaultSkill(supabaseClient);
+      return await handleGenerateTask(supabaseClient, sessionId, targetSkillId);
     }
     
     if (isChatAction) {
@@ -325,20 +350,20 @@ serve(async (req) => {
       throw sessionError;
     }
 
-    // Get previous conversation history
+    // Get previous conversation history from learning_interactions
     const { data: previousSteps, error: stepsError } = await supabaseClient
-      .from('lesson_steps')
+      .from('learning_interactions')
       .select('*')
       .eq('session_id', sessionId)
-      .order('step_number', { ascending: true });
+      .order('interaction_timestamp', { ascending: true });
 
     if (stepsError) {
-      console.error('Error fetching steps:', stepsError);
-      throw stepsError;
+      console.error('Error fetching interactions:', stepsError);
+      // Continue without history rather than failing
     }
 
     // Calculate average response time for pseudo-activity detection (skip for initial/start steps)
-    const userSteps = previousSteps?.filter(step => step.user_input && step.response_time_ms) || [];
+    const userSteps = previousSteps?.filter(step => step.response_time_ms) || [];
     const averageResponseTime = userSteps.length > 0 
       ? userSteps.reduce((sum, step) => sum + (step.response_time_ms || 0), 0) / userSteps.length
       : 5000; // Default 5 seconds
@@ -525,17 +550,17 @@ const skillContext = {
 };
 
     // Add conversation history
-    previousSteps?.forEach((step) => {
-      if (step.ai_response) {
-        messages.push({
-          role: 'assistant',
-          content: step.ai_response
-        });
-      }
-      if (step.user_input) {
+    previousSteps?.forEach((interaction) => {
+      // Convert learning_interactions format to messages
+      if (interaction.interaction_type === 'user') {
         messages.push({
           role: 'user',
-          content: step.user_input
+          content: `Previous input (${interaction.sequence_number || 'unknown'})`
+        });
+      } else if (interaction.interaction_type === 'assistant') {
+        messages.push({
+          role: 'assistant',
+          content: `Previous response (${interaction.sequence_number || 'unknown'})`
         });
       }
     });
@@ -860,16 +885,25 @@ Jak podejdziemy do tego zadania?`;
       console.log(`[Fallback Used] Session ${sessionId}, Turn ${nextStepNumber}, Skill ${skillId}`);
     }
     
-    console.log('Inserting lesson step:', stepData);
-    
-    const { error: stepInsertError } = await supabaseClient
-      .from('lesson_steps')
-      .insert(stepData);
+    // Save interaction to learning_interactions
+    const { error: interactionError } = await supabaseClient
+      .from('learning_interactions')
+      .insert({
+        user_id: session.user_id,
+        session_id: sessionId,
+        interaction_type: 'user_answer',
+        sequence_number: nextStepNumber,
+        content_id: skillId,
+        difficulty_level: targetDifficulty === 'hard' ? 7 : 5,
+        response_time_ms: responseTime,
+        correctness_level: isCorrect ? 1 : 0,
+        confidence_level: evaluation.confidence || 0.5
+      });
 
-    if (stepInsertError) {
-      console.error('Error saving lesson step:', stepInsertError);
+    if (interactionError) {
+      console.error('Error saving interaction:', interactionError);
     } else {
-      // CRITICAL: Update skill progress after saving step
+      // CRITICAL: Update skill progress after saving interaction
       await updateSkillProgress(supabaseClient, session.user_id, skillId, isCorrect, responseTime);
     }
 
@@ -1100,7 +1134,7 @@ async function handleChatMessage(supabaseClient: any, userId: string, message: s
         .from('study_sessions')
         .insert({
           user_id: userId,
-          skill_id: 'basic_math', // Default for chat
+          skill_id: await getDefaultSkill(supabaseClient), // Use actual skill ID
           session_type: 'chat',
           status: 'in_progress'
         })
@@ -1146,19 +1180,20 @@ Pytanie ucznia: ${message}`;
       aiMessage = aiResponse.choices?.[0]?.message?.content || aiMessage;
     }
 
-    // Save chat step
-    const { error: stepError } = await supabaseClient
-      .from('lesson_steps')
+    // Save chat interaction
+    const { error: interactionError } = await supabaseClient
+      .from('learning_interactions')
       .insert({
+        user_id: userId,
         session_id: session.id,
-        step_number: 1, // Simplified for chat
-        step_type: 'chat',
-        user_input: message,
-        ai_response: aiMessage
+        interaction_type: 'chat_message',
+        sequence_number: 1,
+        response_time_ms: 0,
+        confidence_level: 0.8
       });
 
-    if (stepError) {
-      console.error('[Chat] Error saving step:', stepError);
+    if (interactionError) {
+      console.error('[Chat] Error saving interaction:', interactionError);
     }
 
     return new Response(JSON.stringify({ 

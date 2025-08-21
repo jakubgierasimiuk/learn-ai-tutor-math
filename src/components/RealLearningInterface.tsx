@@ -35,6 +35,8 @@ export const RealLearningInterface = () => {
   const [feedback, setFeedback] = useState<string>('');
   const [showHints, setShowHints] = useState(false);
   const [sessionMode, setSessionMode] = useState<'adaptive_practice' | 'spaced_review' | 'mastery_check'>('adaptive_practice');
+  const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
+  const [availableSkills, setAvailableSkills] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasActiveSession, setHasActiveSession] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -42,9 +44,10 @@ export const RealLearningInterface = () => {
 
   const isReady = true; // Always ready with study-tutor
 
-  // Load user profile on mount
+  // Load user profile and skills on mount
   useEffect(() => {
     loadProfile();
+    loadAvailableSkills();
   }, []);
 
   // Auto-generate first task when session starts
@@ -53,6 +56,26 @@ export const RealLearningInterface = () => {
       generateNewTask();
     }
   }, [hasActiveSession, currentTask]);
+
+  const loadAvailableSkills = async () => {
+    try {
+      const { data: skills, error } = await supabase
+        .from('skills')
+        .select('id, name, department, description')
+        .eq('is_active', true)
+        .order('name');
+
+      if (error) throw error;
+
+      setAvailableSkills(skills || []);
+      // Set first skill as default
+      if (skills && skills.length > 0 && !selectedSkillId) {
+        setSelectedSkillId(skills[0].id);
+      }
+    } catch (error) {
+      console.error('Error loading skills:', error);
+    }
+  };
 
   const loadProfile = async () => {
     try {
@@ -81,7 +104,7 @@ export const RealLearningInterface = () => {
         body: {
           actionType: 'start_session',
           sessionType: sessionMode,
-          skillId: 'basic_math' // Default skill
+          skillId: selectedSkillId || availableSkills[0]?.id
         }
       });
 
@@ -114,7 +137,7 @@ export const RealLearningInterface = () => {
         body: {
           actionType: 'generate_task',
           sessionId: sessionId,
-          skillId: 'basic_math',
+          skillId: selectedSkillId || availableSkills[0]?.id,
           sessionType: sessionMode
         }
       });
@@ -160,7 +183,7 @@ export const RealLearningInterface = () => {
           actionType: 'practice_answer',
           message: currentTask.userAnswer,
           sessionId: sessionId,
-          skillId: 'basic_math',
+          skillId: selectedSkillId || availableSkills[0]?.id,
           responseTime,
           userAnswer: currentTask.userAnswer,
           expectedAnswer: currentTask.task.expectedAnswer,
@@ -311,6 +334,36 @@ export const RealLearningInterface = () => {
       </div>
 
 
+      {/* Skill Selection */}
+      {!hasActiveSession && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Select Skill to Practice</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {availableSkills.map((skill) => (
+                <div 
+                  key={skill.id}
+                  className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                    selectedSkillId === skill.id 
+                      ? 'border-primary bg-primary/10' 
+                      : 'border-muted hover:border-primary/50'
+                  }`}
+                  onClick={() => setSelectedSkillId(skill.id)}
+                >
+                  <h4 className="font-medium">{skill.name}</h4>
+                  <p className="text-sm text-muted-foreground">{skill.description}</p>
+                  <Badge variant="outline" className="mt-2">
+                    {skill.department.replace('_', ' ')}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Session Controls */}
       {!hasActiveSession ? (
         <Card>
@@ -352,9 +405,14 @@ export const RealLearningInterface = () => {
               </Button>
             </div>
             
-            <Button onClick={startNewSession} className="w-full" size="lg">
+            <Button onClick={startNewSession} className="w-full" size="lg" disabled={!selectedSkillId}>
               <Play className="h-4 w-4 mr-2" />
               Start Session
+              {selectedSkillId && availableSkills.find(s => s.id === selectedSkillId) && (
+                <span className="ml-2 text-xs opacity-80">
+                  ({availableSkills.find(s => s.id === selectedSkillId)?.name})
+                </span>
+              )}
             </Button>
           </CardContent>
         </Card>
