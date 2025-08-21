@@ -91,7 +91,7 @@ export const AutoImportRunner = () => {
               <span className="font-medium text-green-800">Import Complete!</span>
             </div>
             <p className="text-sm text-green-700 mt-1">
-              All skills have been imported. The Real Learning Engine and Study-Tutor can now use this content.
+              All skills have been imported. The Study-Tutor system can now use this content.
             </p>
           </div>
         )}

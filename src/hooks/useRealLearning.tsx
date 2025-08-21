@@ -1,3 +1,19 @@
+/**
+ * REAL LEARNING HOOK - UNDER DEVELOPMENT
+ * 
+ * WARNING: This hook is NON-FUNCTIONAL and should not be used.
+ * 
+ * CRITICAL ISSUES:
+ * - Attempts to call 'real-learning-engine' function which does not exist
+ * - No backend implementation
+ * - No database schema for Real Learning Engine
+ * 
+ * WORKING ALTERNATIVE: 
+ * - Use Study Tutor system directly via supabase.functions.invoke('study-tutor', ...)
+ * 
+ * STATUS: DEVELOPMENT ONLY - DO NOT USE
+ */
+
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';

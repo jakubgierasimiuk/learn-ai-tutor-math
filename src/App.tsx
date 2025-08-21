@@ -224,11 +224,12 @@ const App = () => (
                 <StudyDashboard />
               </AuthenticatedLayout>
             } />
-            <Route path="/real-learning" element={
+            {/* Real Learning Engine - UNDER DEVELOPMENT - DO NOT USE */}
+            {/* <Route path="/real-learning" element={
               <AuthenticatedLayout>
                 <RealLearningPage />
               </AuthenticatedLayout>
-            } />
+            } /> */}
             <Route path="/content-manager" element={<ContentImportPage />} />
             <Route path="/study/lesson/:skillId" element={
               <AuthenticatedLayout>

@@ -194,7 +194,7 @@ export const ContentImportPage = () => {
                 <span className="font-semibold text-green-800">New Batch Import Complete!</span>
               </div>
               <p className="text-green-700 mt-1">
-                New skills have been imported. The Real Learning Engine and Study-Tutor can now use this 
+                New skills have been imported. The Study-Tutor system can now use this 
                 advanced content for class 2 liceum students.
               </p>
             </div>

@@ -1,3 +1,20 @@
+/**
+ * REAL LEARNING INTERFACE - UNDER DEVELOPMENT
+ * 
+ * WARNING: This component is NON-FUNCTIONAL and should not be used.
+ * 
+ * ISSUES:
+ * - Calls non-existent 'real-learning-engine' function (multiple locations)
+ * - Backend implementation missing
+ * - No database tables for Real Learning Engine
+ * 
+ * WORKING ALTERNATIVE: 
+ * - Use Study Tutor system via supabase.functions.invoke('study-tutor', ...)
+ * - See PhaseBasedLesson.tsx and AIChat.tsx for working examples
+ * 
+ * STATUS: DEVELOPMENT ONLY - DO NOT USE IN PRODUCTION
+ */
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

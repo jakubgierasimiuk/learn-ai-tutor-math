@@ -1,6 +1,18 @@
 import { RealLearningInterface } from "@/components/RealLearningInterface";
 import { Seo } from "@/components/Seo";
 
+/**
+ * REAL LEARNING ENGINE - UNDER DEVELOPMENT
+ * 
+ * This component and its related systems are currently non-functional
+ * and under active development. It attempts to call a non-existent
+ * 'real-learning-engine' function.
+ * 
+ * CURRENT STATUS: NOT WORKING - Missing backend implementation
+ * ALTERNATIVE: Use Study Tutor system at /study route
+ * 
+ * DO NOT USE IN PRODUCTION
+ */
 export const RealLearningPage = () => {
   return (
     <>

@@ -5,8 +5,8 @@ const StudyLesson = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect to real learning since this is the new lesson system
-    navigate("/real-learning");
+    // Redirect to study dashboard - lessons are handled by Study Tutor system
+    navigate("/study");
   }, [navigate]);
 
   return (
