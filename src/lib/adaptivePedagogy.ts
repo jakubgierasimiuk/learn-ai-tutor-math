@@ -10,7 +10,8 @@ export type StudentResponsePattern =
 
 export interface StudentProfile {
   // Core metrics
-  averageResponseTime: number;
+  averageResponseTime?: number; // Make optional for compatibility
+  responseTime?: number;         // Alternative naming
   correctnessRate: number;
   commonMistakes: string[];
   preferredExplanationStyle: 'visual' | 'verbal' | 'step_by_step';
@@ -28,8 +29,19 @@ export interface StudentProfile {
   
   // Age-based calibration
   ageGroup: 'elementary' | 'middle' | 'high_school';
-  cognitiveStyle: 'impulsive' | 'reflective' | 'persistent';
+  attentionSpanMinutes?: number;
+  cognitiveFlexibilityIndex?: number;
+  cognitiveStyle: 'impulsive' | 'reflective' | 'persistent' | 'minimalist' | 'optimistic';
   preferredPedagogyStyle: 'fading' | 'example-problem' | 'self-explanation' | 'interleaving' | 'contrasting';
+  
+  // Advanced cognitive intelligence (from 4 tables) - NEW
+  cognitiveLoadCapacity?: number;     // From learner_intelligence  
+  emotionalBaseline?: number;         // Baseline arousal level
+  stressThreshold?: number;           // Stress tolerance
+  planningSkills?: number;            // Metacognitive planning (1-5)
+  monitoringSkills?: number;          // Self-monitoring ability (1-5)  
+  activeMisconceptions?: string[];    // Current active misconceptions
+  recentEmotions?: string[];          // Recent emotional states
 }
 
 export interface FlowStateIndicators {

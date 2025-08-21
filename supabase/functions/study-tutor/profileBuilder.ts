@@ -6,7 +6,11 @@ import { StudentProfile } from './adaptivePedagogy.ts';
 export function buildCognitiveProfile(
   profile: any,
   skillProgress: any,
-  diagnosticSession: any
+  diagnosticSession: any,
+  learnerIntelligence?: any,
+  emotionalStates?: any[],
+  metacognitiveData?: any,
+  misconceptionNetworks?: any[]
 ): StudentProfile {
   
   // Extract basic profile data
@@ -19,14 +23,24 @@ export function buildCognitiveProfile(
   const classLevel = diagnosticSession?.class_level || profile?.level || 8;
   const ageGroup = classLevel <= 6 ? 'elementary' : classLevel <= 9 ? 'middle' : 'high_school';
   
-  // Calculate cognitive metrics from historical data
-  const workingMemoryCapacity = calculateWorkingMemoryCapacity(learnerProfile, ageGroup);
-  const processingSpeed = calculateProcessingSpeed(baseResponseTime, ageGroup);
+  // Calculate cognitive metrics - use advanced data if available, fallback to estimates
+  const workingMemoryCapacity = learnerIntelligence?.working_memory_span || 
+    calculateWorkingMemoryCapacity(learnerProfile, ageGroup);
+  const processingSpeed = learnerIntelligence?.processing_speed_percentile || 
+    calculateProcessingSpeed(baseResponseTime, ageGroup);
   const attentionRegulationIndex = calculateAttentionRegulation(skillProgress);
   const inhibitoryControlIndex = calculateInhibitoryControl(skillProgress);
   const cognitiveFlexibilityIndex = calculateCognitiveFlexibility(learnerProfile);
   const selfEfficacy = learnerProfile?.confidence_level || 0.6;
   const persistenceIndex = calculatePersistenceIndex(skillProgress);
+  
+  // Enhanced metrics from advanced tables
+  const cognitiveLoadCapacity = learnerIntelligence?.cognitive_load_capacity || 
+    (ageGroup === 'elementary' ? 3 : ageGroup === 'middle' ? 5 : 7);
+  const emotionalBaseline = learnerIntelligence?.emotional_state?.baseline_arousal || 0.5;
+  const stressThreshold = learnerIntelligence?.emotional_state?.stress_threshold || 0.7;
+  const planningSkills = metacognitiveData?.planning_skills?.goal_setting || 3;
+  const monitoringSkills = metacognitiveData?.monitoring_skills?.progress_awareness || 3;
   
   // Cognitive style detection from response patterns
   const cognitiveStyle = detectCognitiveStyle(skillProgress, baseResponseTime);
@@ -59,7 +73,20 @@ export function buildCognitiveProfile(
     
     // Learning patterns
     cognitiveStyle,
-    preferredPedagogyStyle: learnerProfile?.preferred_pedagogy || 'fading'
+    preferredPedagogyStyle: learnerProfile?.preferred_pedagogy || 'fading',
+    
+    // Advanced cognitive intelligence (NEW)
+    cognitiveLoadCapacity,
+    emotionalBaseline,
+    stressThreshold, 
+    planningSkills,
+    monitoringSkills,
+    
+    // Active misconceptions from networks
+    activeMisconceptions: misconceptionNetworks?.map(m => m.misconception_cluster_id) || [],
+    
+    // Recent emotional states
+    recentEmotions: emotionalStates?.slice(-3).map(e => e.detected_emotion) || []
   };
 }
 

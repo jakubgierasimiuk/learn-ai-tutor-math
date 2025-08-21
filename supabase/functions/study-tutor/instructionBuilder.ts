@@ -55,9 +55,34 @@ export function buildPedagogicalInstructions(params: BuildInstructionsParams): s
 === PROFIL KOGNITYWNY UCZNIA ===
 - Grupa wiekowa: ${cognitiveProfile.ageGroup || 'nieznana'}
 - Styl kognitywny: ${cognitiveProfile.cognitiveStyle || 'analityczny'}
-- Średni czas odpowiedzi: ${cognitiveProfile.averageResponseTime || 0}ms
-- Wskaźnik poprawności: ${Math.round((cognitiveProfile.correctnessRate || 0.5) * 100)}%`;
+- Średni czas odpowiedzi: ${(cognitiveProfile.averageResponseTime || cognitiveProfile.responseTime || 0)}ms
+- Wskaźnik poprawności: ${Math.round((cognitiveProfile.correctnessRate || 0.5) * 100)}%
+- Pamięć robocza: ${cognitiveProfile.workingMemoryCapacity || 'nieznana'} elementów
+- Szybkość przetwarzania: ${cognitiveProfile.processingSpeed || 'nieznana'} percentyl
 
+=== ZAAWANSOWANA INTELIGENCJA UCZNIA ===
+- Pojemność kognitywna: ${cognitiveProfile.cognitiveLoadCapacity || 'brak danych'}/${cognitiveProfile.cognitiveLoadThreshold || 7}
+- Poziom emocjonalny bazowy: ${cognitiveProfile.emotionalBaseline ? Math.round(cognitiveProfile.emotionalBaseline * 100) + '%' : 'nieznany'}
+- Próg stresu: ${cognitiveProfile.stressThreshold ? Math.round(cognitiveProfile.stressThreshold * 100) + '%' : 'nieznany'}
+- Umiejętności planowania: ${cognitiveProfile.planningSkills || 'brak danych'}/5
+- Umiejętności monitorowania: ${cognitiveProfile.monitoringSkills || 'brak danych'}/5
+- Aktywne błędne rozumienia: ${cognitiveProfile.activeMisconceptions?.join(', ') || 'brak'}
+- Ostatnie emocje: ${cognitiveProfile.recentEmotions?.join(', ') || 'brak danych'}`;
+  
+  // Enhanced cognitive guidance based on advanced data
+  if (cognitiveProfile.recentEmotions?.includes('frustration')) {
+    instructions += `
+
+⚠️ ALERT: Wykryto frustrację - zastosuj strategię uspokojenia i uproszenia`;
+  }
+  
+  if (cognitiveProfile.activeMisconceptions?.length > 0) {
+    instructions += `
+
+⚠️ ALERT: Aktywne błędne rozumienia wymagają interwencji: ${cognitiveProfile.activeMisconceptions.join(', ')}`;
+  }
+  
+  
   // Strategia pedagogiczna
   const strategy = adaptiveRecommendations.pedagogicalStrategy;
   if (strategy) {

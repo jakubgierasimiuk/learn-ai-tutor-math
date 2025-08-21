@@ -13,13 +13,39 @@ export type StudentResponsePattern =
   | 'pseudo_activity';   // Pozorna aktywność
 
 export interface StudentProfile {
-  averageResponseTime: number;
+  averageResponseTime?: number;      // Make optional for compatibility
+  responseTime?: number;             // Alternative naming
   correctnessRate: number;
   commonMistakes: string[];
   preferredExplanationStyle: 'visual' | 'verbal' | 'step_by_step';
   difficultyLevel: number; // 1-7 (enhanced granularity)
   knowledgeGaps: string[];
-  lastActivity: Date;
+  lastActivity?: Date;
+  
+  // Enhanced cognitive metrics
+  workingMemoryCapacity?: number;
+  processingSpeed?: number;
+  attentionRegulationIndex?: number;
+  inhibitoryControlIndex?: number;
+  cognitiveFlexibilityIndex?: number;
+  selfEfficacy?: number;
+  persistenceIndex?: number;
+  
+  // Age-based calibration
+  ageGroup?: 'elementary' | 'middle' | 'high_school';
+  attentionSpanMinutes?: number;
+  cognitiveLoadThreshold?: number;
+  cognitiveStyle?: 'impulsive' | 'reflective' | 'persistent' | 'minimalist' | 'optimistic';
+  preferredPedagogyStyle?: 'fading' | 'example-problem' | 'self-explanation' | 'interleaving' | 'contrasting';
+  
+  // Advanced cognitive intelligence (from 4 tables) - NEW
+  cognitiveLoadCapacity?: number;     // From learner_intelligence  
+  emotionalBaseline?: number;         // Baseline arousal level
+  stressThreshold?: number;           // Stress tolerance
+  planningSkills?: number;            // Metacognitive planning (1-5)
+  monitoringSkills?: number;          // Self-monitoring ability (1-5)  
+  activeMisconceptions?: string[];    // Current active misconceptions
+  recentEmotions?: string[];          // Recent emotional states
 }
 
 export interface TeachingMoment {

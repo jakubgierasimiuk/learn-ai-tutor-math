@@ -921,15 +921,50 @@ const { data: diagnosticSession } = await supabaseClient
   .limit(1)
   .maybeSingle();
 
-// Get enhanced user profile with cognitive data
-const { data: profile } = await supabaseClient
-  .from('profiles')
-  .select('level, learner_profile')
-  .eq('user_id', session.user_id)
-  .single();
+    // Get enhanced user profile with cognitive data
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('level, learner_profile')
+      .eq('user_id', session.user_id)
+      .single();
 
-// Build enhanced cognitive profile from stored data
-const cognitiveProfile = buildCognitiveProfile(profile, skillProgress, diagnosticSession);
+    // Get advanced cognitive intelligence data (NEW)
+    const { data: learnerIntelligence } = await supabaseClient
+      .from('learner_intelligence')
+      .select('*')
+      .eq('user_id', session.user_id)
+      .single();
+      
+    const { data: emotionalStates } = await supabaseClient
+      .from('emotional_learning_states')
+      .select('*')
+      .eq('user_id', session.user_id)
+      .order('detected_at', { ascending: false })
+      .limit(5);
+      
+    const { data: metacognitiveData } = await supabaseClient
+      .from('metacognitive_development')
+      .select('*')
+      .eq('user_id', session.user_id)
+      .single();
+      
+    const { data: misconceptionNetworks } = await supabaseClient
+      .from('misconception_networks')
+      .select('*')
+      .eq('user_id', session.user_id)
+      .order('last_manifested', { ascending: false })
+      .limit(10);
+
+    // Build enhanced cognitive profile from ALL stored data
+    const cognitiveProfile = buildCognitiveProfile(
+      profile, 
+      skillProgress, 
+      diagnosticSession,
+      learnerIntelligence,
+      emotionalStates,
+      metacognitiveData,
+      misconceptionNetworks
+    );
 
 // Determine target difficulty using diagnostic data
 
@@ -1470,6 +1505,9 @@ Jak podejdziemy do tego zadania?`;
     } else {
       // CRITICAL: Update skill progress after saving interaction
       await updateSkillProgress(supabaseClient, session.user_id, skillId, isCorrect, responseTime);
+      
+      // Trigger background cognitive analysis (non-blocking)
+      EdgeRuntime.waitUntil(analyzeSessionInBackground(supabaseClient, sessionId, session.user_id));
     }
 
     // Extract equation from AI response for first message
@@ -1843,6 +1881,173 @@ function calculateResponseVariability(steps: any[]): number {
   const stdDev = Math.sqrt(variance);
   
   return Math.min(1, stdDev / mean); // Coefficient of variation
+}
+
+// BACKGROUND: Cognitive analysis function (silent AI call)
+async function analyzeSessionInBackground(supabaseClient: any, sessionId: string, userId: string) {
+  try {
+    console.log(`[CognitiveAnalysis] Starting background analysis for session ${sessionId}`);
+    
+    // Get all interactions from this session
+    const { data: interactions } = await supabaseClient
+      .from('learning_interactions')
+      .select('*')
+      .eq('session_id', sessionId)
+      .order('sequence_number', { ascending: true });
+    
+    if (!interactions || interactions.length < 3) return; // Need minimum data
+    
+    // Build analysis prompt for AI (SILENT - user won't see this)
+    const analysisPrompt = buildCognitiveAnalysisPrompt(interactions);
+    
+    // Silent AI call for cognitive analysis
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4.1-2025-04-14',
+        messages: [
+          { 
+            role: 'system', 
+            content: `Jesteś ekspertem od analizy kognitywnej ucznia. Analizuj dane sesji i zwróć strukturę JSON z dokładnymi wartościami dla tabel: learner_intelligence, emotional_learning_states, metacognitive_development, misconception_networks. ZWRÓĆ TYLKO VALID JSON bez dodatkowego tekstu.` 
+          },
+          { role: 'user', content: analysisPrompt }
+        ],
+        max_completion_tokens: 1500,
+      }),
+    });
+    
+    if (!response.ok) {
+      console.error('[CognitiveAnalysis] AI request failed:', await response.text());
+      return;
+    }
+    
+    const aiResult = await response.json();
+    const cognitiveData = JSON.parse(aiResult.choices[0].message.content);
+    
+    // Update all 4 advanced tables with AI analysis
+    await updateAdvancedCognitiveTables(supabaseClient, userId, cognitiveData, interactions);
+    
+    console.log('[CognitiveAnalysis] Background analysis completed successfully');
+  } catch (error) {
+    console.error('[CognitiveAnalysis] Error in background analysis:', error);
+  }
+}
+
+// Build comprehensive analysis prompt for AI
+function buildCognitiveAnalysisPrompt(interactions: any[]): string {
+  const responses = interactions.map(i => ({
+    user_input: i.user_input,
+    response_time_ms: i.response_time_ms,
+    correctness_level: i.correctness_level,
+    confidence_level: i.confidence_level,
+    interaction_type: i.interaction_type,
+    misconceptions_activated: i.misconceptions_activated,
+    cognitive_strategies_used: i.cognitive_strategies_used
+  }));
+  
+  return `
+Przeanalizuj pełną sesję uczenia i zwróć JSON z kognitywnymi analizami:
+
+DANE SESJI:
+${JSON.stringify(responses, null, 2)}
+
+ZWRÓĆ JSON W FORMACIE:
+{
+  "learner_intelligence": {
+    "cognitive_load_capacity": number(3-9),
+    "processing_speed_percentile": number(1-100),
+    "working_memory_span": number(3-9), 
+    "attention_span_minutes": number(5-45),
+    "learning_velocity": {"math": number(0.1-2.0)},
+    "emotional_state": {"baseline_arousal": number(0-1), "stress_threshold": number(0-1)},
+    "metacognitive_skills": {"planning": number(1-5), "monitoring": number(1-5), "evaluating": number(1-5)}
+  },
+  "emotional_learning_states": [
+    {
+      "detected_emotion": "frustration|confidence|confusion|flow",
+      "emotion_intensity": number(0-1),
+      "emotion_duration_seconds": number,
+      "regulation_strategies_needed": ["pause", "encouragement", "simplification"]
+    }
+  ],
+  "metacognitive_development": {
+    "planning_skills": {"goal_setting": number(1-5), "strategy_selection": number(1-5)},
+    "monitoring_skills": {"progress_awareness": number(1-5), "difficulty_recognition": number(1-5)},
+    "strategy_effectiveness": {"worked": ["strategy1"], "failed": ["strategy2"]}
+  },
+  "misconception_networks": [
+    {
+      "misconception_cluster_id": "string",
+      "strength": number(0-1),
+      "context_triggers": ["trigger1", "trigger2"],
+      "connected_misconceptions": ["misc1", "misc2"]
+    }
+  ]
+}`;
+}
+
+// Update all 4 advanced cognitive tables with AI analysis
+async function updateAdvancedCognitiveTables(supabaseClient: any, userId: string, cognitiveData: any, interactions: any[]) {
+  try {
+    // 1. Update learner_intelligence
+    if (cognitiveData.learner_intelligence) {
+      await supabaseClient
+        .from('learner_intelligence')
+        .upsert({
+          user_id: userId,
+          ...cognitiveData.learner_intelligence,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' });
+    }
+    
+    // 2. Insert emotional_learning_states (multiple records)
+    if (cognitiveData.emotional_learning_states?.length) {
+      const emotionalRecords = cognitiveData.emotional_learning_states.map(emotion => ({
+        user_id: userId,
+        interaction_id: interactions[0]?.id, // Link to first interaction
+        ...emotion,
+        detected_at: new Date().toISOString()
+      }));
+      
+      await supabaseClient
+        .from('emotional_learning_states')
+        .insert(emotionalRecords);
+    }
+    
+    // 3. Update metacognitive_development  
+    if (cognitiveData.metacognitive_development) {
+      await supabaseClient
+        .from('metacognitive_development')
+        .upsert({
+          user_id: userId,
+          ...cognitiveData.metacognitive_development,
+          last_assessed: new Date().toISOString()
+        }, { onConflict: 'user_id' });
+    }
+    
+    // 4. Insert misconception_networks (multiple records)
+    if (cognitiveData.misconception_networks?.length) {
+      const misconceptionRecords = cognitiveData.misconception_networks.map(misc => ({
+        user_id: userId,
+        ...misc,
+        last_manifested: new Date().toISOString(),
+        created_at: new Date().toISOString()
+      }));
+      
+      await supabaseClient
+        .from('misconception_networks')
+        .insert(misconceptionRecords);
+    }
+    
+    console.log('[CognitiveUpdate] All 4 advanced tables updated successfully');
+  } catch (error) {
+    console.error('[CognitiveUpdate] Error updating advanced tables:', error);
+  }
 }
 
 // CRITICAL: Function to update skill progress after each step
