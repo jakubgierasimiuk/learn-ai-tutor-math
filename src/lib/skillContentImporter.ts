@@ -8,32 +8,57 @@ export interface SkillContentData {
   generatorParams: {
     microSkill: string;
     difficultyRange: number[];
-    fallbackTrigger: boolean;
+    fallbackTrigger: boolean | string;
   };
-  teachingFlow: string[];
+  teachingFlow: any;
   content: {
     theory: {
-      text: string;
-      keyFormulas: string[];
+      text?: string;
+      introduction?: string;
+      keyFormulas?: string[];
+      keyConceptsLaTex?: string[];
+      mainPoints?: string[];
+      formalDefinitions?: string[];
+      theorems?: Array<{
+        name: string;
+        statement: string;
+        proof_outline: string;
+      }>;
       timeEstimate: number;
     };
     examples: Array<{
-      id: string;
-      problemStatement: string;
+      id?: string;
+      title?: string;
+      problemStatement?: string;
+      problem?: string;
       solution: {
-        steps: string[];
-        finalAnswer: string;
-        explanation: string;
+        steps?: string[] | Array<{
+          step: string;
+          latex: string;
+          explanation: string;
+          justification: string;
+        }>;
+        finalAnswer?: string;
+        explanation?: string;
       };
+      maturaConnection?: string;
       timeEstimate: number;
     }>;
     practiceExercises: Array<{
-      id: string;
-      problemStatement: string;
+      id?: string;
+      exerciseId?: string;
+      problemStatement?: string;
+      problem?: string;
       expectedAnswer: string;
       difficulty: number;
+      examLevel?: string;
       timeEstimate: number;
-      misconceptionMap: Array<{
+      hints?: Array<{
+        level: number;
+        hint: string;
+        timeEstimate: number;
+      }>;
+      misconceptionMap?: Array<{
         pattern: string;
         exampleAnswer: string;
         explanation: string;
@@ -41,37 +66,58 @@ export interface SkillContentData {
     }>;
   };
   pedagogicalNotes: {
-    scaffoldingQuestions: Array<{
+    scaffoldingQuestions?: Array<{
       question: string;
       tag: string;
       difficulty: string;
     }>;
-    prerequisiteCheck: {
-      skillRef: string;
-      description: string;
-    };
-    nextTopicConnection: {
-      skillRef: string;
-      description: string;
-    };
+    commonMistakes?: string[];
+    teachingTips?: string[];
+    prerequisites?: string[];
     estimatedTime: number;
+    maturaPreparation?: string;
+    universityConnection?: string;
+    prerequisiteCheck?: {
+      skillRef: string;
+      description: string;
+    };
+    nextTopicConnection?: {
+      skillRef: string;
+      description: string;
+    };
   };
   misconceptionPatterns: Array<{
     pattern: string;
     description: string;
-    exampleError: string;
-    intervention: string;
+    exampleError?: string;
+    feedback?: string;
+    remediation?: string;
+    prerequisiteGap?: string;
+    intervention?: string;
   }>;
   realWorldApplications: Array<{
     context: string;
-    problem: string;
-    ageGroup: string;
-    connection: string;
+    problem?: string;
+    example?: string;
+    practicalUse?: string;
+    careerConnection?: string;
+    ageGroup?: string;
+    connection?: string;
   }>;
   assessmentRubric: {
     scope: string;
-    masteryThreshold: number;
-    skillLevels: {
+    masteryThreshold?: number;
+    criteria?: Array<{
+      skill: string;
+      podstawowy?: string;
+      rozszerzony?: string;
+      uniwersytecki?: string;
+      beginning?: string;
+      developing?: string;
+      proficient?: string;
+      advanced?: string;
+    }>;
+    skillLevels?: {
       beginner: string;
       developing: string;
       proficient: string;
@@ -106,8 +152,8 @@ export async function importSkillContent(skillData: SkillContentData) {
       .from('skill_theory_content')
       .upsert({
         skill_id: skillId,
-        theory_text: skillData.content.theory.text,
-        key_formulas: skillData.content.theory.keyFormulas,
+        theory_text: skillData.content.theory.text || skillData.content.theory.introduction || '',
+        key_formulas: skillData.content.theory.keyFormulas || skillData.content.theory.keyConceptsLaTex || [],
         time_estimate: skillData.content.theory.timeEstimate,
         difficulty_level: 1
       }, { onConflict: 'skill_id' });
@@ -120,11 +166,11 @@ export async function importSkillContent(skillData: SkillContentData) {
         .from('skill_examples')
         .upsert({
           skill_id: skillId,
-          example_code: example.id,
-          problem_statement: example.problemStatement,
-          solution_steps: example.solution.steps,
-          final_answer: example.solution.finalAnswer,
-          explanation: example.solution.explanation,
+          example_code: example.id || example.title || `ex_${Date.now()}`,
+          problem_statement: example.problemStatement || example.problem || '',
+          solution_steps: Array.isArray(example.solution.steps) ? example.solution.steps : [example.solution.explanation || ''],
+          final_answer: example.solution.finalAnswer || '',
+          explanation: example.solution.explanation || '',
           time_estimate: example.timeEstimate,
           difficulty_level: 1
         }, { onConflict: 'skill_id, example_code' });
@@ -138,12 +184,13 @@ export async function importSkillContent(skillData: SkillContentData) {
         .from('skill_practice_exercises')
         .upsert({
           skill_id: skillId,
-          exercise_code: exercise.id,
-          problem_statement: exercise.problemStatement,
+          exercise_code: exercise.id || exercise.exerciseId || `ex_${Date.now()}`,
+          problem_statement: exercise.problemStatement || exercise.problem || '',
           expected_answer: exercise.expectedAnswer,
           difficulty_level: exercise.difficulty,
           time_estimate: exercise.timeEstimate,
-          misconception_map: exercise.misconceptionMap
+          misconception_map: exercise.misconceptionMap || [],
+          hints: exercise.hints || []
         }, { onConflict: 'skill_id, exercise_code' });
 
       if (exerciseError) throw exerciseError;
@@ -157,8 +204,8 @@ export async function importSkillContent(skillData: SkillContentData) {
           skill_id: skillId,
           pattern_code: misconception.pattern,
           description: misconception.description,
-          example_error: misconception.exampleError,
-          intervention_strategy: misconception.intervention
+          example_error: misconception.exampleError || misconception.feedback || '',
+          intervention_strategy: misconception.intervention || misconception.remediation || ''
         }, { onConflict: 'skill_id, pattern_code' });
 
       if (misconceptionError) throw misconceptionError;
@@ -171,9 +218,9 @@ export async function importSkillContent(skillData: SkillContentData) {
         .upsert({
           skill_id: skillId,
           context: application.context,
-          problem_description: application.problem,
-          age_group: application.ageGroup,
-          connection_explanation: application.connection,
+          problem_description: application.problem || application.example || '',
+          age_group: application.ageGroup || 'liceum',
+          connection_explanation: application.connection || application.practicalUse || '',
           difficulty_level: 1
         }, { onConflict: 'skill_id, context' });
 
@@ -185,9 +232,9 @@ export async function importSkillContent(skillData: SkillContentData) {
       .from('skill_pedagogical_notes')
       .upsert({
         skill_id: skillId,
-        scaffolding_questions: skillData.pedagogicalNotes.scaffoldingQuestions,
-        prerequisite_description: skillData.pedagogicalNotes.prerequisiteCheck.description,
-        next_topic_description: skillData.pedagogicalNotes.nextTopicConnection.description,
+        scaffolding_questions: skillData.pedagogicalNotes.scaffoldingQuestions || [],
+        prerequisite_description: skillData.pedagogicalNotes.prerequisiteCheck?.description || skillData.pedagogicalNotes.prerequisites?.join(', ') || '',
+        next_topic_description: skillData.pedagogicalNotes.nextTopicConnection?.description || '',
         estimated_total_time: skillData.pedagogicalNotes.estimatedTime,
         teaching_flow: skillData.teachingFlow
       }, { onConflict: 'skill_id' });
@@ -200,8 +247,8 @@ export async function importSkillContent(skillData: SkillContentData) {
       .upsert({
         skill_id: skillId,
         scope_description: skillData.assessmentRubric.scope,
-        mastery_threshold: skillData.assessmentRubric.masteryThreshold,
-        skill_levels: skillData.assessmentRubric.skillLevels
+        mastery_threshold: skillData.assessmentRubric.masteryThreshold || 80,
+        skill_levels: skillData.assessmentRubric.skillLevels || skillData.assessmentRubric.criteria || {}
       }, { onConflict: 'skill_id' });
 
     if (rubricError) throw rubricError;
@@ -1148,6 +1195,674 @@ export const contentDatabase = {
           "proficient": "71-90% poprawnych odpowiedzi",
           "advanced": "91-100% poprawnych odpowiedzi"
         }
+    },
+    // HIGH SCHOOL (LICEUM) CONTENT - 5 SKILLS FOR GRADE 1
+    {
+      "skillId": "8b2a3e3e-7e8e-4f5d-9a21-73d5e6a1c101",
+      "skillName": "Funkcje — definicja i własności",
+      "class_level": 1,
+      "department": "mathematics",
+      "generatorParams": {
+        "microSkill": "advanced_graphing",
+        "difficultyRange": [3, 8],
+        "fallbackTrigger": "use_canonical_when_generator_uncertain"
+      },
+      "teachingFlow": {
+        "phase1": {
+          "name": "Wprowadzenie teoretyczne",
+          "duration": 1800,
+          "activities": ["theory", "formal_definitions", "guided_examples"]
+        },
+        "phase2": {
+          "name": "Ćwiczenia i zastosowania",
+          "duration": 2400,
+          "activities": ["practice", "problem_solving", "feedback"]
+        },
+        "phase3": {
+          "name": "Przygotowanie maturalne",
+          "duration": 1200,
+          "activities": ["exam_tasks", "complex_problems", "assessment"]
+        }
+      },
+      "content": {
+        "theory": {
+          "introduction": "Funkcja przyporządkowuje każdemu elementowi z dziedziny dokładnie jedną wartość. Opisujemy ją wzorem, tabelą, wykresem lub słownie. Badamy dziedzinę, zbiór wartości, miejsca zerowe, monotoniczność i ekstrema. Przekształcenia wykresu obejmują przesunięcia, odbicia i skalowania. Złożenie funkcji łączy wyniki jednej jako argumenty drugiej.",
+          "keyConceptsLaTex": ["$f: X\\to Y$", "$f(x)=ax+b$", "$f(g(x))$", "$f(x-a)+b$", "$x_0: f(x_0)=0$"],
+          "mainPoints": [
+            "Funkcja to odwzorowanie, które każdemu $x$ z dziedziny $D$ przypisuje dokładnie jedną wartość $f(x)$ w zbiorze wartości.",
+            "Miejsce zerowe funkcji to taka liczba $x_0$, że $f(x_0)=0$. Funkcja rośnie, gdy dla $x_1<x_2$ mamy $f(x_1)\\le f(x_2)$."
+          ],
+          "theorems": [
+            {
+              "name": "Monotoniczność liniowej",
+              "statement": "Dla $f(x)=ax+b$ funkcja rośnie, gdy $a>0$, maleje, gdy $a<0$.",
+              "proof_outline": "Wybierz $x_1<x_2$. Wtedy $f(x_2)-f(x_1)=a(x_2-x_1)$. Jeśli $a>0$, to różnica jest dodatnia, więc wartości rosną wraz z argumentem. Dla $a<0$ różnica jest ujemna, więc funkcja maleje. Dla $a=0$ jest stała."
+            }
+          ],
+          "timeEstimate": 1800
+        },
+        "examples": [
+          {
+            "title": "Szkic wykresu funkcji liniowej",
+            "problem": "Narysuj wykres $f(x)=2x-3$, wyznacz miejsca zerowe i przekształcenia względem $y=x$.",
+            "solution": {
+              "steps": [
+                {
+                  "step": "Zapisz postać i odczytaj współczynniki nachylenia i wyrazu wolnego.",
+                  "latex": "$f(x)=2x-3$",
+                  "explanation": "Nachylenie wynosi 2, przecina oś $y$ w punkcie $-3$.",
+                  "justification": "Postać $ax+b$ określa nachylenie i przecięcie z osią $y$."
+                },
+                {
+                  "step": "Wyznacz miejsce zerowe, rozwiązując równanie $f(x)=0$.",
+                  "latex": "$2x-3=0$",
+                  "explanation": "Po przekształceniu otrzymujemy $x=1{,}5$.",
+                  "justification": "Miejsce zerowe spełnia równanie funkcji równe zero."
+                }
+              ],
+              "explanation": "Względem $y=x$ mamy zwiększone nachylenie i przesunięcie w dół o 3."
+            },
+            "maturaConnection": "Zadania wymagają odczytu własności z wykresu, obliczania miejsc zerowych oraz interpretacji współczynników we wzorze liniowym.",
+            "timeEstimate": 360
+          }
+        ],
+        "practiceExercises": [
+          {
+            "exerciseId": "f1_ex_01",
+            "difficulty": 3,
+            "examLevel": "podstawowy",
+            "problem": "Dla $f(x)=3x+6$ oblicz miejsce zerowe i wartość dla $x=-2$.",
+            "expectedAnswer": "Miejsce zerowe: x=-2; f(-2)=0.",
+            "hints": [
+              {
+                "level": 1,
+                "hint": "Ustaw $f(x)=0$ i rozwiąż równanie; potem podstaw $x=-2$ do wzoru.",
+                "timeEstimate": 120
+              }
+            ],
+            "timeEstimate": 420
+          },
+          {
+            "exerciseId": "f1_ex_02",
+            "difficulty": 4,
+            "examLevel": "podstawowy",
+            "problem": "Podaj przesunięcie wykresu $g(x)=f(x-1)+2$ dla $f(x)=x^2$.",
+            "expectedAnswer": "Przesunięcie o 1 w prawo i o 2 w górę.",
+            "hints": [
+              {
+                "level": 1,
+                "hint": "Argument $x-1$ to przesunięcie w prawo; dodanie liczby to przesunięcie w górę.",
+                "timeEstimate": 120
+              }
+            ],
+            "timeEstimate": 480
+          }
+        ]
+      },
+      "pedagogicalNotes": {
+        "commonMistakes": [
+          "Mylenie przesunięcia poziomego z pionowym przy zapisie $f(x-a)+b$.",
+          "Wnioskowanie o monotoniczności z pojedynczego punktu zamiast z parametru $a$."
+        ],
+        "teachingTips": [
+          "Zacznij od interpretacji geometrycznej współczynnika przy $x$ jako nachylenia oraz wyrazu wolnego jako przecięcia z osią $y$.",
+          "Ćwicz szybkie szkicowanie wykresu z dwóch punktów: miejsce zerowe i punkt przecięcia z osią $y$."
+        ],
+        "prerequisites": ["Algebra: równania liniowe", "Własności prostej na płaszczyźnie"],
+        "estimatedTime": 5400,
+        "maturaPreparation": "Przećwicz rozpoznawanie własności funkcji ze wzoru i wykresu: miejsca zerowe, monotoniczność, ekstrema lokalne w prostych przypadkach. Opanuj przesunięcia i skalowania, bo często pojawiają się w krótkich podpunktach.",
+        "universityConnection": "Podstawy analizy funkcji są niezbędne w analizie matematycznej, ekonomii (funkcje kosztu, popytu) i informatyce (złożoność funkcji)."
+      },
+      "misconceptionPatterns": [
+        {
+          "pattern": "shift_direction_confusion",
+          "description": "Uczeń myli kierunek przesunięcia dla $f(x-a)$ i $f(x)+b$.",
+          "feedback": "Zwróć uwagę: $x-a$ przesuwa w prawo o $a$, a dodanie $b$ przesuwa wykres w górę.",
+          "remediation": "Narysuj najpierw wykres bazowy, potem zaznacz nową oś argumentów $x-a$ i dorysuj skutek dodania $b$ jako przesunięcie pionowe.",
+          "prerequisiteGap": "Transformacje wykresów funkcji"
+        }
+      ],
+      "realWorldApplications": [
+        {
+          "context": "Ekonomia — model kosztu",
+          "example": "Koszt produkcji zależy liniowo od liczby sztuk: $C(x)=ax+b$; $b$ to koszt stały, $a$ to koszt jednostkowy.",
+          "practicalUse": "Szacowanie opłacalności przy zmianach skali produkcji.",
+          "careerConnection": "Ekonomista, analityk danych"
+        }
+      ],
+      "assessmentRubric": {
+        "scope": "Ocena przygotowania maturalnego - 15 zadań różnego poziomu",
+        "criteria": [
+          {
+            "skill": "Identyfikacja własności funkcji ze wzoru i wykresu",
+            "podstawowy": "Rozpoznaje miejsca zerowe i odczytuje wartości z prostych wykresów.",
+            "rozszerzony": "Analizuje przekształcenia wykresu i porównuje funkcje.",
+            "uniwersytecki": "Dowodzi własności i buduje modele funkcyjne z danych."
+          }
+        ]
+      }
+    },
+    {
+      "skillId": "c2c6b0a0-4f8f-4a1f-8b3e-2d8d7d0c1a02",
+      "skillName": "Równania i nierówności kwadratowe",
+      "class_level": 1,
+      "department": "mathematics",
+      "generatorParams": {
+        "microSkill": "quadratic_equations",
+        "difficultyRange": [3, 9],
+        "fallbackTrigger": "discriminant_edge_cases"
+      },
+      "teachingFlow": {
+        "phase1": {
+          "name": "Wprowadzenie teoretyczne",
+          "duration": 1800,
+          "activities": ["theory", "formal_definitions", "guided_examples"]
+        },
+        "phase2": {
+          "name": "Ćwiczenia i zastosowania",
+          "duration": 2400,
+          "activities": ["practice", "problem_solving", "feedback"]
+        },
+        "phase3": {
+          "name": "Przygotowanie maturalne",
+          "duration": 1200,
+          "activities": ["exam_tasks", "complex_problems", "assessment"]
+        }
+      },
+      "content": {
+        "theory": {
+          "introduction": "Równanie kwadratowe ma postać $ax^2+bx+c=0$ z $a\\ne0$. Rozwiązujemy je przez wzory kwadratowe, deltę, rozkład na czynniki lub podstawienie. Nierówności kwadratowe analizujemy znakiem funkcji kwadratowej, zwykle przez szkic i parabolę. Kluczowe jest rozpoznanie liczby pierwiastków na podstawie wartości delty.",
+          "keyConceptsLaTex": ["$ax^2+bx+c=0$", "$\\Delta=b^2-4ac$", "$x=\\frac{-b\\pm\\sqrt{\\Delta}}{2a}$"],
+          "mainPoints": [
+            "Równanie kwadratowe to równanie wielomianowe stopnia drugiego, w którym współczynnik przy $x^2$ jest niezerowy.",
+            "Nierówność kwadratowa to warunek postaci $ax^2+bx+c\\,\\#\\,0$ (z $\\#,\\in\\{<,\\le,>,\\ge\\}$), badany poprzez znak funkcji."
+          ],
+          "theorems": [
+            {
+              "name": "Kryterium delty",
+              "statement": "$\\Delta>0$ dwa pierwiastki, $\\Delta=0$ jeden, $\\Delta<0$ brak pierwiastków.",
+              "proof_outline": "Wzór kwadratowy określa pierwiastki przez pierwiastek z delty. Gdy $\\Delta>0$, mamy dwie różne wartości. Gdy $\\Delta=0$, pierwiastek jest podwójny. Gdy $\\Delta<0$, brak rzeczywistych rozwiązań."
+            }
+          ],
+          "timeEstimate": 1800
+        },
+        "examples": [
+          {
+            "title": "Rozwiązanie równania metodą delty",
+            "problem": "Rozwiąż $2x^2-3x-2=0$.",
+            "solution": {
+              "steps": [
+                {
+                  "step": "Oblicz deltę z definicji dla podanych współczynników.",
+                  "latex": "$\\Delta=b^2-4ac$",
+                  "explanation": "Dla $a=2$, $b=-3$, $c=-2$ mamy $\\Delta=9+16=25$.",
+                  "justification": "Definicja delty dla równania kwadratowego."
+                },
+                {
+                  "step": "Zastosuj wzór kwadratowy do obliczenia rozwiązań.",
+                  "latex": "$x=\\frac{-b\\pm\\sqrt{\\Delta}}{2a}$",
+                  "explanation": "Otrzymujemy $x=\\frac{3\\pm5}{4}$, czyli $x=2$ lub $x=-\\tfrac{1}{2}$.",
+                  "justification": "Wzór działa dla $a\\ne0$ i $\\Delta\\ge0$."
+                }
+              ]
+            },
+            "maturaConnection": "Typowe zadania: rozwiązywanie równań, analiza delty, znaku funkcji i przedziałów spełniania nierówności.",
+            "timeEstimate": 360
+          }
+        ],
+        "practiceExercises": [
+          {
+            "exerciseId": "q1_ex_01",
+            "difficulty": 4,
+            "examLevel": "podstawowy",
+            "problem": "Rozwiąż nierówność $x^2-4x+3\\le0$.",
+            "expectedAnswer": "Przedział rozwiązania: [1,3].",
+            "hints": [
+              {
+                "level": 1,
+                "hint": "Wyznacz miejsca zerowe trójmianu i sprawdź znak na przedziałach.",
+                "timeEstimate": 180
+              }
+            ],
+            "timeEstimate": 540
+          }
+        ]
+      },
+      "pedagogicalNotes": {
+        "commonMistakes": [
+          "Mylenie znaku przy obliczaniu delty i nieuważne podstawienia współczynników.",
+          "Pomijanie dziedziny przy skracaniu wyrażeń wymiernych i analizie nierówności."
+        ],
+        "teachingTips": [
+          "Ćwicz najpierw pełny algorytm: identyfikacja $a,b,c$, delta, wzór, a dopiero potem skracanie i tricki.",
+          "W nierównościach naucz testu znaku na przedziałach rozdzielonych miejscami zerowymi."
+        ],
+        "prerequisites": ["Algebra: wzory skróconego mnożenia", "Operacje na ułamkach algebraicznych"],
+        "estimatedTime": 5400,
+        "maturaPreparation": "Opanuj rozwiązywanie równań i nierówności, parametryzację przez deltę oraz analizę znaku na przedziałach. To częsty motyw w zadaniach otwartych i zamkniętych.",
+        "universityConnection": "Podstawa do algebry liniowej i analizy, pojawia się w modelowaniu fizycznym, optymalizacji i ekonomii."
+      },
+      "misconceptionPatterns": [
+        {
+          "pattern": "delta_sign_error",
+          "description": "Niepoprawne podstawienie znaków do delty $b^2-4ac$ i błędny wynik.",
+          "feedback": "Zapisz wyraźnie $a,b,c$. Wstawiaj nawiasy przy liczbach ujemnych.",
+          "remediation": "Porównaj dwa przykłady krok po kroku i zaznacz miejsca, gdzie nawias zmienia znak iloczynu.",
+          "prerequisiteGap": "Porządek działań i nawiasy"
+        }
+      ],
+      "realWorldApplications": [
+        {
+          "context": "Fizyka — ruch jednostajnie przyspieszony",
+          "example": "Wyznaczanie czasu spadku z równania $\\tfrac{1}{2}gt^2+v_0t-h=0$.",
+          "practicalUse": "Analiza trajektorii i czasu lotu w prostych modelach.",
+          "careerConnection": "Inżynier, fizyk"
+        }
+      ],
+      "assessmentRubric": {
+        "scope": "Ocena przygotowania maturalnego - 15 zadań różnego poziomu",
+        "criteria": [
+          {
+            "skill": "Równania i nierówności kwadratowe",
+            "podstawowy": "Poprawnie liczy deltę i stosuje wzór kwadratowy.",
+            "rozszerzony": "Analizuje parametry i znak funkcji na przedziałach.",
+            "uniwersytecki": "Stosuje faktoryzację i dyskryminant w uogólnieniach."
+          }
+        ]
+      }
+    },
+    {
+      "skillId": "6f1a7e22-3a9b-4b55-9f8c-2a0c1b8e7f03",
+      "skillName": "Trygonometria — funkcje i wzory",
+      "class_level": 1,
+      "department": "mathematics",
+      "generatorParams": {
+        "microSkill": "advanced_identities",
+        "difficultyRange": [4, 9],
+        "fallbackTrigger": "identity_simplification_ambiguous"
+      },
+      "teachingFlow": {
+        "phase1": {
+          "name": "Wprowadzenie teoretyczne",
+          "duration": 1800,
+          "activities": ["theory", "formal_definitions", "guided_examples"]
+        },
+        "phase2": {
+          "name": "Ćwiczenia i zastosowania",
+          "duration": 2400,
+          "activities": ["practice", "problem_solving", "feedback"]
+        },
+        "phase3": {
+          "name": "Przygotowanie maturalne",
+          "duration": 1200,
+          "activities": ["exam_tasks", "complex_problems", "assessment"]
+        }
+      },
+      "content": {
+        "theory": {
+          "introduction": "Funkcje trygonometryczne opisują zależności kątów i długości w trójkątach oraz ruch okresowy. Kluczowe są definicje w trójkącie prostokątnym i na okręgu jednostkowym, tożsamości oraz okresowość. W zadaniach upraszczamy wyrażenia, rozwiązujemy równania i wykorzystujemy wykresy sinusoidy oraz cosinusoidy.",
+          "keyConceptsLaTex": ["$\\sin^2x+\\cos^2x=1$", "$\\tan x=\\frac{\\sin x}{\\cos x}$", "$\\sin(-x)=-\\sin x$", "$\\cos(-x)=\\cos x$"],
+          "mainPoints": [
+            "Dla kąta $x$ na okręgu jednostkowym $\\sin x$ to rzędna, a $\\cos x$ to odcięta punktu odpowiadającego kątowi.",
+            "Tożsamość to równość prawdziwa dla wszystkich $x$ w dziedzinie, np. $\\sin^2x+\\cos^2x=1$."
+          ],
+          "theorems": [
+            {
+              "name": "Okresowość sinusa",
+              "statement": "$\\sin(x+2\\pi)=\\sin x$ dla każdego $x$.",
+              "proof_outline": "Na okręgu jednostkowym dodanie pełnego kąta $2\\pi$ zwraca do tego samego punktu, więc rzędna pozostaje taka sama dla każdego argumentu."
+            }
+          ],
+          "timeEstimate": 1800
+        },
+        "examples": [
+          {
+            "title": "Uproszczenie wyrażenia trygonometrycznego",
+            "problem": "Uprość $\\frac{1-\\cos 2x}{\\sin x\\cos x}$ w dziedzinie $\\sin x\\cos x\\ne0$.",
+            "solution": {
+              "steps": [
+                {
+                  "step": "Użyj tożsamości $1-\\cos 2x=2\\sin^2x$.",
+                  "latex": "$1-\\cos2x=2\\sin^2x$",
+                  "explanation": "Z tożsamości podwójnego kąta otrzymujemy prostszy licznik.",
+                  "justification": "Znana tożsamość dla cosinusa podwójnego kąta."
+                },
+                {
+                  "step": "Skróć czynnik $\\sin x$ w liczniku i mianowniku.",
+                  "latex": "$\\frac{2\\sin^2x}{\\sin x\\cos x}$",
+                  "explanation": "Po skróceniu dostajemy $\\frac{2\\sin x}{\\cos x}=2\\tan x$.",
+                  "justification": "Dla $\\sin x\\cos x\\ne0$ skracanie jest dozwolone."
+                }
+              ]
+            },
+            "maturaConnection": "Częste zadania: uproszczenia, rozwiązywanie równań i analiza okresowości funkcji trygonometrycznych.",
+            "timeEstimate": 420
+          }
+        ],
+        "practiceExercises": [
+          {
+            "exerciseId": "t1_ex_01",
+            "difficulty": 4,
+            "examLevel": "podstawowy",
+            "problem": "Rozwiąż $\\sin x=\\tfrac{\\sqrt{3}}{2}$ w $\\langle 0,2\\pi)$.",
+            "expectedAnswer": "x=\\tfrac{\\pi}{3} lub x=\\tfrac{2\\pi}{3}.",
+            "hints": [
+              {
+                "level": 1,
+                "hint": "Użyj wartości szczególnych sinusa i symetrii względem $\\tfrac{\\pi}{2}$.",
+                "timeEstimate": 120
+              }
+            ],
+            "timeEstimate": 420
+          }
+        ]
+      },
+      "pedagogicalNotes": {
+        "commonMistakes": [
+          "Skracanie przez funkcję równą zero bez sprawdzenia dziedziny.",
+          "Mylenie parzystości: traktowanie $\\cos(-x)$ jak $-\\cos x$."
+        ],
+        "teachingTips": [
+          "Wprowadź tabelę wartości szczególnych i kwadranty, ćwicz rysowanie na okręgu jednostkowym.",
+          "Ucz algorytmu: identyfikuj tożsamość → transformuj → sprawdź dziedzinę."
+        ],
+        "prerequisites": ["Geometria: okrąg jednostkowy", "Algebra: przekształcenia równań"],
+        "estimatedTime": 5400,
+        "maturaPreparation": "Zadania obejmują tożsamości, równania i identyfikację rozwiązań w przedziałach. Opanuj wartości szczególne i operacje na przedziałach.",
+        "universityConnection": "Podstawa do analizy sygnałów, fal, modeli okresowych oraz równań różniczkowych."
+      },
+      "misconceptionPatterns": [
+        {
+          "pattern": "cancel_zero_divisor",
+          "description": "Uczeń skraca przez wyrażenie, które może być równe zero.",
+          "feedback": "Zanim skrócisz, zapisz warunki: $\\sin x\\ne0$, $\\cos x\\ne0$.",
+          "remediation": "Ćwiczenia z wykluczeniami i testem dziedziny przed skracaniem.",
+          "prerequisiteGap": "Dziedzina funkcji trygonometrycznych"
+        }
+      ],
+      "realWorldApplications": [
+        {
+          "context": "Inżynieria — drgania",
+          "example": "Model $y=A\\sin(\\omega t+\\varphi)$ opisuje ruch harmoniczny.",
+          "practicalUse": "Analiza wibracji i fal w mechanice i elektronice.",
+          "careerConnection": "Inżynier mechanik, elektronik"
+        }
+      ],
+      "assessmentRubric": {
+        "scope": "Ocena przygotowania maturalnego - 15 zadań różnego poziomu",
+        "criteria": [
+          {
+            "skill": "Operacje na tożsamościach i równaniach trygonometrycznych",
+            "podstawowy": "Stosuje proste tożsamości i odczytuje rozwiązania z okręgu.",
+            "rozszerzony": "Upraszcza złożone wyrażenia i rozwiązuje układy równań.",
+            "uniwersytecki": "Łączy tożsamości w dowodach i analizie okresowości."
+          }
+        ]
+      }
+    },
+    {
+      "skillId": "a1d7f4c0-2b9d-4f2e-8e0b-1c3e6d7a9b04",
+      "skillName": "Ciągi arytmetyczne i geometryczne",
+      "class_level": 1,
+      "department": "mathematics",
+      "generatorParams": {
+        "microSkill": "recursive",
+        "difficultyRange": [3, 8],
+        "fallbackTrigger": "sum_formula_or_recursion_conflict"
+      },
+      "teachingFlow": {
+        "phase1": {
+          "name": "Wprowadzenie teoretyczne",
+          "duration": 1800,
+          "activities": ["theory", "formal_definitions", "guided_examples"]
+        },
+        "phase2": {
+          "name": "Ćwiczenia i zastosowania",
+          "duration": 2400,
+          "activities": ["practice", "problem_solving", "feedback"]
+        },
+        "phase3": {
+          "name": "Przygotowanie maturalne",
+          "duration": 1200,
+          "activities": ["exam_tasks", "complex_problems", "assessment"]
+        }
+      },
+      "content": {
+        "theory": {
+          "introduction": "Ciąg arytmetyczny ma stałą różnicę między kolejnymi wyrazami, ciąg geometryczny — stały iloraz. Stosujemy wzory na wyraz ogólny i sumę n pierwszych wyrazów. Ważne są oba opisy: rekurencyjny i jawny. W zadaniach maturalnych często łączymy warunki na sumy i wyrazy.",
+          "keyConceptsLaTex": ["$a_{n}=a_1+(n-1)r$", "$S_n=\\tfrac{n(a_1+a_n)}{2}$", "$a_{n}=a_1q^{n-1}$", "$S_n=a_1\\tfrac{1-q^n}{1-q}$"],
+          "mainPoints": [
+            "Ciąg arytmetyczny spełnia $a_{n+1}-a_n=r$ dla stałego $r$.",
+            "Ciąg geometryczny spełnia $\\tfrac{a_{n+1}}{a_n}=q$ dla stałego $q$ i $a_n\\ne0$."
+          ],
+          "theorems": [
+            {
+              "name": "Suma arytmetycznego",
+              "statement": "$S_n=\\tfrac{n(a_1+a_n)}{2}$ dla $n\\in\\mathbb{N}$.",
+              "proof_outline": "Sparuj wyrazy od początku i końca: każda para daje tę samą sumę $a_1+a_n$. Mamy $n/2$ par (dla parzystych $n$) lub używamy uogólnienia dla dowolnego $n$."
+            }
+          ],
+          "timeEstimate": 1800
+        },
+        "examples": [
+          {
+            "title": "Wyraz ogólny i suma ciągu arytmetycznego",
+            "problem": "Dany jest ciąg arytmetyczny o $a_1=3$ i $r=5$. Znajdź $a_{10}$ i $S_{10}$.",
+            "solution": {
+              "steps": [
+                {
+                  "step": "Zastosuj wzór na wyraz ogólny dla $n=10$.",
+                  "latex": "$a_{10}=a_1+9r$",
+                  "explanation": "Podstaw: $a_{10}=3+9\\cdot5=48$.",
+                  "justification": "Definicja wyrazu ogólnego w arytmetycznym."
+                },
+                {
+                  "step": "Użyj wzoru na sumę pierwszych $n$ wyrazów.",
+                  "latex": "$S_{10}=\\tfrac{10(a_1+a_{10})}{2}$",
+                  "explanation": "Podstaw: $S_{10}=\\tfrac{10(3+48)}{2}=255$.",
+                  "justification": "Wzór sumy oparty na parowaniu wyrazów."
+                }
+              ]
+            },
+            "maturaConnection": "Typowe zadania o wyrazie ogólnym, sumach, warunkach na parametry i mieszanych opisach rekurencyjno-jawnych.",
+            "timeEstimate": 360
+          }
+        ],
+        "practiceExercises": [
+          {
+            "exerciseId": "s1_ex_01",
+            "difficulty": 3,
+            "examLevel": "podstawowy",
+            "problem": "Ciąg arytm. $a_1=7$, $r=-2$. Oblicz $a_6$.",
+            "expectedAnswer": "a6=-3.",
+            "hints": [
+              {
+                "level": 1,
+                "hint": "Użyj $a_n=a_1+(n-1)r$ i podstaw $n=6$.",
+                "timeEstimate": 120
+              }
+            ],
+            "timeEstimate": 360
+          }
+        ]
+      },
+      "pedagogicalNotes": {
+        "commonMistakes": [
+          "Mylenie $r$ z $q$ i stosowanie złych wzorów do danego typu ciągu.",
+          "Błędne podstawienie indeksów przy opisie rekurencyjnym."
+        ],
+        "teachingTips": [
+          "Porównuj równolegle dwa typy ciągów, wyróżnij różnicę i iloraz innym kolorem.",
+          "Zawsze sprawdzaj, czy wynik pasuje do rosnącego lub malejącego charakteru ciągu."
+        ],
+        "prerequisites": ["Algebra: równania liniowe", "Potęgi i własności potęg"],
+        "estimatedTime": 5400,
+        "maturaPreparation": "Ćwicz mieszane zadania: wyraz ogólny, suma oraz warunki między wyrazami. Często pojawia się rekursja i sumy częściowe.",
+        "universityConnection": "Podstawa szeregów i analizy dyskretnej, ważne w informatyce i ekonomii."
+      },
+      "misconceptionPatterns": [
+        {
+          "pattern": "swap_r_and_q",
+          "description": "Uczeń używa wzorów geometrycznych dla arytmetycznego lub odwrotnie.",
+          "feedback": "Sprawdź, czy różnica jest stała (arytm.) czy iloraz (geom.).",
+          "remediation": "Stwórz tabelę decyzji: pytanie o różnicę lub iloraz przed wyborem wzoru.",
+          "prerequisiteGap": "Rozpoznawanie typu ciągu"
+        }
+      ],
+      "realWorldApplications": [
+        {
+          "context": "Finanse — procent składany",
+          "example": "Kapitał rośnie geometrycznie z ilorazem $q=1+r$.",
+          "practicalUse": "Szacowanie wzrostu inwestycji i rat oszczędnościowych.",
+          "careerConnection": "Analityk finansowy"
+        }
+      ],
+      "assessmentRubric": {
+        "scope": "Ocena przygotowania maturalnego - 15 zadań różnego poziomu",
+        "criteria": [
+          {
+            "skill": "Analiza ciągów i obliczenia sum",
+            "podstawowy": "Rozpoznaje typ ciągu i liczy wyraz ogólny.",
+            "rozszerzony": "Rozwiązuje układy warunków i sumy częściowe.",
+            "uniwersytecki": "Modeluje procesy dyskretne i dowodzi własności."
+          }
+        ]
+      }
+    },
+    {
+      "skillId": "e4f0c9b1-7a5d-4c2e-9f33-5b2c6a8d9f05",
+      "skillName": "Prawdopodobieństwo warunkowe",
+      "class_level": 1,
+      "department": "mathematics",
+      "generatorParams": {
+        "microSkill": "combinatorics_advanced",
+        "difficultyRange": [4, 9],
+        "fallbackTrigger": "conditional_tree_or_bayes_needed"
+      },
+      "teachingFlow": {
+        "phase1": {
+          "name": "Wprowadzenie teoretyczne",
+          "duration": 1800,
+          "activities": ["theory", "formal_definitions", "guided_examples"]
+        },
+        "phase2": {
+          "name": "Ćwiczenia i zastosowania",
+          "duration": 2400,
+          "activities": ["practice", "problem_solving", "feedback"]
+        },
+        "phase3": {
+          "name": "Przygotowanie maturalne",
+          "duration": 1200,
+          "activities": ["exam_tasks", "complex_problems", "assessment"]
+        }
+      },
+      "content": {
+        "theory": {
+          "introduction": "Prawdopodobieństwo warunkowe opisuje szansę zdarzenia przy założeniu, że inne zdarzenie już zaszło. Używamy definicji przez iloraz oraz drzewek i tabel. Z twierdzeniem Bayesa odwracamy warunek. Ważna jest niezależność, gdy warunek nie zmienia prawdopodobieństwa.",
+          "keyConceptsLaTex": ["$P(A\\mid B)=\\tfrac{P(A\\cap B)}{P(B)}$", "$P(A\\cap B)=P(A\\mid B)P(B)$", "$P(A\\mid B)=P(A)$"],
+          "mainPoints": [
+            "Dla $P(B)>0$ definiujemy $P(A\\mid B)=\\tfrac{P(A\\cap B)}{P(B)}$ jako prawd. $A$ pod warunkiem $B$.",
+            "Zdarzenia $A$ i $B$ są niezależne, gdy $P(A\\cap B)=P(A)P(B)$."
+          ],
+          "theorems": [
+            {
+              "name": "Twierdzenie Bayesa",
+              "statement": "$P(A\\mid B)=\\tfrac{P(B\\mid A)P(A)}{P(B)}$ dla $P(B)>0$.",
+              "proof_outline": "Zapisz $P(A\\cap B)$ na dwa sposoby: $P(A\\mid B)P(B)$ oraz $P(B\\mid A)P(A)$. Porównaj i przekształć, otrzymując wzór Bayesa."
+            }
+          ],
+          "timeEstimate": 1800
+        },
+        "examples": [
+          {
+            "title": "Drzewo prawdopodobieństw i Bayes",
+            "problem": "W urnie: 60% białych, 40% czarnych. Test wykrywa białą kulę z czułością 90%, myli się przy czarnej w 5%. Oblicz $P(Biała\\mid Test{+})$.",
+            "solution": {
+              "steps": [
+                {
+                  "step": "Zapisz dane: $P(B)=0{,}6$, $P(C)=0{,}4$, $P(T+\\mid B)=0{,}9$, $P(T+\\mid C)=0{,}05$.",
+                  "latex": "$P(T+)=?$",
+                  "explanation": "Potrzebny jest mianownik we wzorze Bayesa.",
+                  "justification": "Wzór Bayesa wymaga $P(T+)$."
+                },
+                {
+                  "step": "Policz $P(T+)=P(T+\\mid B)P(B)+P(T+\\mid C)P(C)$.",
+                  "latex": "$P(T+)=0{,}9\\cdot0{,}6+0{,}05\\cdot0{,}4$",
+                  "explanation": "Otrzymujemy $0{,}54+0{,}02=0{,}56$.",
+                  "justification": "Prawo totalne prawdopodobieństwa."
+                },
+                {
+                  "step": "Zastosuj Bayesa do obliczenia szukanego prawdopodobieństwa.",
+                  "latex": "$P(B\\mid T+)=\\tfrac{0{,}9\\cdot0{,}6}{0{,}56}$",
+                  "explanation": "Wynik $\\approx0{,}9643$.",
+                  "justification": "Bezpośrednie podstawienie do wzoru."
+                }
+              ]
+            },
+            "maturaConnection": "Zadania z drzewem, tablicą częstości i Bayesem pojawiają się na rozszerzeniu, często w wersjach słownych.",
+            "timeEstimate": 480
+          }
+        ],
+        "practiceExercises": [
+          {
+            "exerciseId": "p1_ex_01",
+            "difficulty": 4,
+            "examLevel": "podstawowy",
+            "problem": "Rzut monetą i kostką. Oblicz $P(parzysta\\mid orzeł)$.",
+            "expectedAnswer": "P=1/2.",
+            "hints": [
+              {
+                "level": 1,
+                "hint": "Warunek orzeł nie wpływa na wynik kostki — zdarzenia niezależne.",
+                "timeEstimate": 90
+              }
+            ],
+            "timeEstimate": 360
+          }
+        ]
+      },
+      "pedagogicalNotes": {
+        "commonMistakes": [
+          "Mylenie $P(A\\mid B)$ z $P(B\\mid A)$ i niepoprawne podstawienie do wzoru.",
+          "Brak normalizacji mianownika we wzorze Bayesa i pomijanie prawa całkowitego."
+        ],
+        "teachingTips": [
+          "Zawsze rysuj drzewo zdarzeń i oznaczaj gałęzie wartościami, a liście prawdopodobieństwami.",
+          "Używaj tabel kontyngencji do szybkiej wizualizacji zależności."
+        ],
+        "prerequisites": ["Kombinatoryka: iloczyn i suma zdarzeń", "Operacje na zdarzeniach i zbiory"],
+        "estimatedTime": 5400,
+        "maturaPreparation": "Ćwicz Bayesa z danymi procentowymi, drzewka losowań z błędami testów i zadania o niezależności. Częste w arkuszach rozszerzonych.",
+        "universityConnection": "Klucz do statystyki, uczenia maszynowego i przetwarzania sygnałów; fundament analizy danych."
+      },
+      "misconceptionPatterns": [
+        {
+          "pattern": "swap_condition",
+          "description": "Uczeń zamienia $P(A\\mid B)$ z $P(B\\mid A)$ i używa złego wzoru.",
+          "feedback": "Sprawdź, co jest warunkiem, a co zdarzeniem. Zastosuj Bayesa poprawnie.",
+          "remediation": "Ćwicz identyfikację kierunku warunku na prostych przykładach z tabelą i drzewem.",
+          "prerequisiteGap": "Interpretacja warunku w prawdopodobieństwie"
+        }
+      ],
+      "realWorldApplications": [
+        {
+          "context": "Medycyna — testy diagnostyczne",
+          "example": "Szacowanie $P(choroba\\mid wynik\\,pozytywny)$ z czułości i swoistości.",
+          "practicalUse": "Interpretacja badań i decyzje kliniczne.",
+          "careerConnection": "Analityk danych, lekarz"
+        }
+      ],
+      "assessmentRubric": {
+        "scope": "Ocena przygotowania maturalnego - 15 zadań różnego poziomu",
+        "criteria": [
+          {
+            "skill": "Obliczenia prawdopodobieństwa warunkowego i Bayesa",
+            "podstawowy": "Posługuje się definicją i prostymi drzewami.",
+            "rozszerzony": "Rozwiązuje złożone zadania z danymi warunkowymi.",
+            "uniwersytecki": "Stosuje Bayesa w modelach i analizuje niezależność."
+          }
+        ]
+      }
       }
     }
   ]
