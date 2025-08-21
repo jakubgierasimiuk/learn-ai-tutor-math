@@ -5,6 +5,7 @@ import { importAllSkillContent, contentDatabase, autoImportNewBatch, newBatchCon
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import SkillGapDashboard from '@/components/SkillGapDashboard';
 
 export const ContentImportPage = () => {
   const { toast } = useToast();
@@ -85,6 +86,9 @@ export const ContentImportPage = () => {
 
   return (
     <div className="container mx-auto py-8 space-y-8">
+      {/* Skill Gap Analysis Dashboard */}
+      <SkillGapDashboard />
+      
       {/* Original Content Import */}
       <Card>
         <CardHeader>
