@@ -2493,6 +2493,387 @@ export const newBatchContentDatabase = {
           }
         ]
       }
+    },
+    {
+      "skillId": "skill_011",
+      "skillName": "Pochodna funkcji — definicja, obliczanie, interpretacje",
+      "class_level": 3,
+      "department": "calculus",
+      "generatorParams": {
+        "microSkill": "derivatives_advanced",
+        "difficultyRange": [4, 9],
+        "fallbackTrigger": "use_canonical_rules_for_edge_cases"
+      },
+      "teachingFlow": {
+        "phase1": {
+          "name": "Wprowadzenie teoretyczne",
+          "duration": 2000,
+          "activities": ["theory", "formal_definitions", "guided_examples"]
+        },
+        "phase2": {
+          "name": "Ćwiczenia i zastosowania",
+          "duration": 2600,
+          "activities": ["practice", "problem_solving", "feedback"]
+        },
+        "phase3": {
+          "name": "Przygotowanie maturalne",
+          "duration": 1400,
+          "activities": ["exam_tasks", "complex_problems", "assessment"]
+        }
+      },
+      "content": {
+        "theory": {
+          "introduction": "Pochodna mierzy szybkość zmian funkcji. Formalnie to granica ilorazu różnicowego, jeśli istnieje. Reguły rachunkowe (suma, iloczyn, łańcuch) upraszczają obliczenia. Geometrycznie pochodna to nachylenie stycznej do wykresu. Interpretacje obejmują prędkość chwilową i tempo wzrostu.",
+          "keyConceptsLaTex": ["$f'(x)$", "$\\lim_{h\\to0}\\frac{f(x+h)-f(x)}{h}$", "$\\frac{d}{dx}(x^n)=nx^{n-1}$", "$(fg)'=f'g+fg'$", "$(f\\circ g)'=f'(g)g'$"],
+          "formalDefinitions": [
+            "Pochodną $f$ w punkcie $x$ definiujemy jako $f'(x)=\\lim_{h\\to0}\\frac{f(x+h)-f(x)}{h}$, jeśli granica istnieje.",
+            "Funkcja różniczkowalna w przedziale ma pochodną w każdym jego punkcie."
+          ],
+          "theorems": [
+            {
+              "name": "Zasada łańcuchowa",
+              "statement": "Dla $y=f(g(x))$ mamy $\\frac{dy}{dx}=f'(g(x))\\cdot g'(x)$.",
+              "proof_outline": "Rozpisz przyrost $f(g(x+h)) - f(g(x))$ i zastosuj definicję pochodnej wraz z granicą ilorazu różnicowego dla $g$ oraz liniową aproksymację $f$ w otoczeniu $g(x)$."
+            }
+          ],
+          "timeEstimate": 1800
+        },
+        "examples": [
+          {
+            "title": "Pochodna funkcji wielomianowej",
+            "problem": "Oblicz $f'(x)$ dla $f(x)=3x^4-5x^2+2x-7$.",
+            "solution": {
+              "steps": [
+                {
+                  "step": "Zastosuj regułę potęgową i liniowość operatora pochodnej.",
+                  "latex": "$\\frac{d}{dx}(x^n)=nx^{n-1}$",
+                  "explanation": "Liczymy pochodne składników i sumujemy wyniki.",
+                  "justification": "Pochodna sumy to suma pochodnych."
+                },
+                {
+                  "step": "Oblicz pochodną każdego składnika.",
+                  "latex": "$12x^3-10x+2$",
+                  "explanation": "Stała ma pochodną równą 0.",
+                  "justification": "Reguły rachunku różniczkowego."
+                }
+              ]
+            },
+            "maturaConnection": "Standardowe zadania: pochodne wielomianów, funkcji złożonych i interpretacja pochodnej jako nachylenia stycznej.",
+            "timeEstimate": 420
+          }
+        ],
+        "practiceExercises": [
+          {
+            "exerciseId": "der3_ex_01",
+            "difficulty": 5,
+            "examLevel": "rozszerzony",
+            "problem": "Oblicz pochodną $f(x)=\\sqrt{3x^2+1}$.",
+            "expectedAnswer": "$f'(x)=\\frac{3x}{\\sqrt{3x^2+1}}$",
+            "hints": [
+              {
+                "level": 1,
+                "hint": "Użyj zasady łańcuchowej dla $\\sqrt{u}$ i $u=3x^2+1$.",
+                "timeEstimate": 150
+              }
+            ],
+            "timeEstimate": 720
+          }
+        ]
+      },
+      "pedagogicalNotes": {
+        "commonMistakes": [
+          "Pominięcie zasady łańcuchowej przy funkcjach złożonych.",
+          "Błędne traktowanie stałych jak zmiennych w pochodnej."
+        ],
+        "teachingTips": [
+          "Ćwicz rozpoznawanie struktury złożenia przed obliczeniami.",
+          "Porównuj wykres i znak pochodnej, aby spiąć rachunek z geometrią."
+        ],
+        "prerequisites": ["skill_008", "Algebra: potęgi i pierwiastki"],
+        "estimatedTime": 6000,
+        "maturaPreparation": "Zadania obejmują rachunek pochodnych, monotoniczność, ekstrema lokalne i styczne. Warto trenować analizę znaków pochodnej.",
+        "universityConnection": "Niezbędne w analizie, optymalizacji, fizyce i ekonomii."
+      },
+      "misconceptionPatterns": [
+        {
+          "pattern": "forget_chain_rule",
+          "description": "Uczeń różniczkuje zewnętrzną funkcję i pomija mnożnik pochodnej wewnętrznej.",
+          "feedback": "Zapisz $u=g(x)$, policz $\\frac{df}{du}$ i pomnóż przez $u'(x)$.",
+          "remediation": "Wprowadź schemat: oznacz u, policz dwie pochodne, połącz wyniki.",
+          "prerequisiteGap": "Składanie funkcji i notacja"
+        }
+      ],
+      "realWorldApplications": [
+        {
+          "context": "Fizyka — prędkość i przyspieszenie",
+          "example": "Prędkość to pochodna położenia, przyspieszenie to pochodna prędkości.",
+          "practicalUse": "Analiza ruchu i dynamiki układów.",
+          "careerConnection": "Inżynieria, fizyka, robotyka"
+        }
+      ],
+      "assessmentRubric": {
+        "scope": "Ocena przygotowania maturalnego - 15 zadań różnego poziomu",
+        "criteria": [
+          {
+            "skill": "Rachunek pochodnych i zastosowania",
+            "podstawowy": "Liczy pochodne prostych funkcji.",
+            "rozszerzony": "Stosuje łańcuch, iloczyn i iloraz.",
+            "uniwersytecki": "Analizuje ekstrema i buduje modele różniczkowe."
+          }
+        ]
+      }
+    },
+    {
+      "skillId": "skill_012",
+      "skillName": "Całka nieoznaczona — podstawowe techniki",
+      "class_level": 3,
+      "department": "calculus",
+      "generatorParams": {
+        "microSkill": "integrals_advanced",
+        "difficultyRange": [4, 9],
+        "fallbackTrigger": "use_canonical_antiderivatives"
+      },
+      "teachingFlow": {
+        "phase1": {
+          "name": "Wprowadzenie teoretyczne",
+          "duration": 2000,
+          "activities": ["theory", "formal_definitions", "guided_examples"]
+        },
+        "phase2": {
+          "name": "Ćwiczenia i zastosowania",
+          "duration": 2600,
+          "activities": ["practice", "problem_solving", "feedback"]
+        },
+        "phase3": {
+          "name": "Przygotowanie maturalne",
+          "duration": 1400,
+          "activities": ["exam_tasks", "complex_problems", "assessment"]
+        }
+      },
+      "content": {
+        "theory": {
+          "introduction": "Całka nieoznaczona to rodzina funkcji pierwotnych. Odwraca działanie pochodnej i dodaje stałą całkowania. Kluczowe techniki to podstawienie i częściowe całkowanie. W prostych przypadkach korzystamy z tabeli podstawowych całek.",
+          "keyConceptsLaTex": ["$\\int f'(x)dx=f(x)+C$", "$\\int x^n dx=\\frac{x^{n+1}}{n+1}+C$", "$\\int e^x dx=e^x+C$", "$\\int \\cos x dx=\\sin x+C$"],
+          "formalDefinitions": [
+            "Funkcję $F$ nazywamy pierwotną $f$, gdy $F'(x)=f(x)$ dla każdego $x$ z dziedziny.",
+            "Całka nieoznaczona $\\int f(x)dx$ jest rodziną wszystkich pierwotnych funkcji $f$."
+          ],
+          "theorems": [
+            {
+              "name": "Całkowanie przez części",
+              "statement": "$\\int u\\,dv=uv-\\int v\\,du$",
+              "proof_outline": "Wynika bezpośrednio z reguły iloczynu dla pochodnych poprzez scałkowanie obu stron równania i przekształcenie składników."
+            }
+          ],
+          "timeEstimate": 1800
+        },
+        "examples": [
+          {
+            "title": "Prosta całka wielomianu",
+            "problem": "Oblicz $\\int (6x^2-4x+3)dx$.",
+            "solution": {
+              "steps": [
+                {
+                  "step": "Zastosuj liniowość całki i wzór na całkę potęgi.",
+                  "latex": "$\\int x^n dx=\\frac{x^{n+1}}{n+1}+C$",
+                  "explanation": "Całkujemy każdy składnik osobno i sumujemy wyniki.",
+                  "justification": "Liniowość operatora całkowania."
+                },
+                {
+                  "step": "Zapisz wynik sumaryczny.",
+                  "latex": "$2x^3-2x^2+3x+C$",
+                  "explanation": "Stałą całkowania dodajemy raz.",
+                  "justification": "Definicja całki nieoznaczonej."
+                }
+              ]
+            },
+            "maturaConnection": "Typowe zadania: proste całkowanie, podstawienie, częściowe całkowanie przy funkcjach elementarnych.",
+            "timeEstimate": 420
+          }
+        ],
+        "practiceExercises": [
+          {
+            "exerciseId": "int3_ex_01",
+            "difficulty": 6,
+            "examLevel": "rozszerzony",
+            "problem": "Oblicz $\\int x\\,e^{x}dx$.",
+            "expectedAnswer": "$(x-1)e^x+C$",
+            "hints": [
+              {
+                "level": 1,
+                "hint": "Użyj części: $u=x$, $dv=e^x dx$.",
+                "timeEstimate": 180
+              }
+            ],
+            "timeEstimate": 720
+          }
+        ]
+      },
+      "pedagogicalNotes": {
+        "commonMistakes": [
+          "Brak stałej całkowania w odpowiedzi.",
+          "Złe podstawienie w metodzie podstawienia lub pominięcie $dx$."
+        ],
+        "teachingTips": [
+          "Wprowadź checklistę: wybór techniki → formalne podstawienie → powrót do zmiennej x → +C.",
+          "Ćwicz rozpoznawanie par $(u,dv)$ do części."
+        ],
+        "prerequisites": ["skill_011", "Algebra: przekształcenia równań"],
+        "estimatedTime": 6000,
+        "maturaPreparation": "Zadania obejmują całki funkcji elementarnych, podstawienia i częściowe. Ważna jest ekonomia rachunku.",
+        "universityConnection": "Podstawa rozwiązywania równań różniczkowych i obliczania pól/objętości."
+      },
+      "misconceptionPatterns": [
+        {
+          "pattern": "missing_constant_C",
+          "description": "Uczeń zapomina dodać stałej całkowania w wyniku.",
+          "feedback": "Zawsze dodaj $+C$ na końcu całki nieoznaczonej.",
+          "remediation": "Weryfikuj wynik po zróżniczkowaniu — brak $C$ zmienia rodzinę rozwiązań.",
+          "prerequisiteGap": "Relacja całki i pochodnej"
+        }
+      ],
+      "realWorldApplications": [
+        {
+          "context": "Fizyka — praca siły",
+          "example": "Praca to całka z siły po drodze: $W=\\int F\\,ds$.",
+          "practicalUse": "Obliczanie energii i pól pod wykresami.",
+          "careerConnection": "Inżynieria, fizyka techniczna"
+        }
+      ],
+      "assessmentRubric": {
+        "scope": "Ocena przygotowania maturalnego - 15 zadań różnego poziomu",
+        "criteria": [
+          {
+            "skill": "Całkowanie funkcji elementarnych",
+            "podstawowy": "Rozpoznaje i całkuje proste funkcje.",
+            "rozszerzony": "Stosuje podstawienie i częściowe.",
+            "uniwersytecki": "Łączy techniki i weryfikuje przez różniczkowanie."
+          }
+        ]
+      }
+    },
+    {
+      "skillId": "skill_013",
+      "skillName": "Stereometria — objętości i pola powierzchni",
+      "class_level": 3,
+      "department": "geometry",
+      "generatorParams": {
+        "microSkill": "transformations_3d",
+        "difficultyRange": [3, 8],
+        "fallbackTrigger": "use_canonical_3d_formulas_when_needed"
+      },
+      "teachingFlow": {
+        "phase1": {
+          "name": "Wprowadzenie teoretyczne",
+          "duration": 1900,
+          "activities": ["theory", "formal_definitions", "guided_examples"]
+        },
+        "phase2": {
+          "name": "Ćwiczenia i zastosowania",
+          "duration": 2500,
+          "activities": ["practice", "problem_solving", "feedback"]
+        },
+        "phase3": {
+          "name": "Przygotowanie maturalne",
+          "duration": 1400,
+          "activities": ["exam_tasks", "complex_problems", "assessment"]
+        }
+      },
+      "content": {
+        "theory": {
+          "introduction": "W stereometrii obliczamy pola powierzchni i objętości brył: graniastosłupów, ostrosłupów, walców, stożków i kul. Kluczowe są przekroje, siatki oraz wzory, a także podobieństwo i skalowanie w 3D.",
+          "keyConceptsLaTex": ["$V_{walca}=\\pi r^2h$", "$V_{sto\\dot{z}}=\\tfrac{1}{3}\\pi r^2h$", "$V_{kuli}=\\tfrac{4}{3}\\pi r^3$", "$P_{kuli}=4\\pi r^2$"],
+          "formalDefinitions": [
+            "Objętość to miara zajmowanej przestrzeni przez bryłę w 3D.",
+            "Pole powierzchni całkowitej to suma pól wszystkich ścian bryły."
+          ],
+          "theorems": [
+            {
+              "name": "Podobieństwo brył",
+              "statement": "Dla podobnych brył skala pól to $k^2$, a objętości $k^3$.",
+              "proof_outline": "Wynika z podobieństwa figur na przekrojach i skalowania wymiarów: pola rosną z kwadratem skali, a objętości z sześcianem."
+            }
+          ],
+          "timeEstimate": 1600
+        },
+        "examples": [
+          {
+            "title": "Objętość i pole stożka ściętego",
+            "problem": "Stożek ścięty ma wysokość $h$, promienie $R$ i $r$. Oblicz objętość.",
+            "solution": {
+              "steps": [
+                {
+                  "step": "Wyraź objętości dwóch stożków i odejmij mniejszy od większego.",
+                  "latex": "$V=\\tfrac{1}{3}\\pi h(R^2+Rr+r^2)$",
+                  "explanation": "Wzór wynika z podobieństwa i odejmowania brył.",
+                  "justification": "Znany wzór dla stożka ściętego."
+                }
+              ]
+            },
+            "maturaConnection": "Częste: zadania o skalowaniu, przekrojach i mieszanych obliczeniach pola i objętości.",
+            "timeEstimate": 420
+          }
+        ],
+        "practiceExercises": [
+          {
+            "exerciseId": "st3_ex_01",
+            "difficulty": 5,
+            "examLevel": "rozszerzony",
+            "problem": "Walec o $r=3$ i $h=10$. Oblicz $V$ i $P_{bocz}$.",
+            "expectedAnswer": "$V=90\\pi$, $P_{bocz}=60\\pi$",
+            "hints": [
+              {
+                "level": 1,
+                "hint": "Użyj $V=\\pi r^2h$ oraz $P_{bocz}=2\\pi rh$.",
+                "timeEstimate": 150
+              }
+            ],
+            "timeEstimate": 660
+          }
+        ]
+      },
+      "pedagogicalNotes": {
+        "commonMistakes": [
+          "Mylenie jednostek dla pola i objętości.",
+          "Pominięcie pola podstaw przy walcu czy stożku."
+        ],
+        "teachingTips": [
+          "Zachęcaj do rysowania przekrojów i siatek brył.",
+          "Sprawdzaj jednostki i sens wyniku w kontekście skali."
+        ],
+        "prerequisites": ["Geometria: podobieństwo figur", "Algebra: wzory i podstawienia"],
+        "estimatedTime": 5800,
+        "maturaPreparation": "Zadania na rozszerzeniu często łączą kilka wzorów i wymagają analizy przekrojów.",
+        "universityConnection": "Wstęp do geometrii obliczeniowej i modelowania 3D."
+      },
+      "misconceptionPatterns": [
+        {
+          "pattern": "area_volume_confusion",
+          "description": "Uczeń myli wzory i jednostki pól oraz objętości.",
+          "feedback": "Pola w jednostkach kwadratowych, objętości w sześciennych.",
+          "remediation": "Tabelka wzorów z jednostkami i przykłady kontrolne.",
+          "prerequisiteGap": "Jednostki miary i skalowanie"
+        }
+      ],
+      "realWorldApplications": [
+        {
+          "context": "Inżynieria — projektowanie zbiorników",
+          "example": "Obliczenia pojemności zbiorników cylindrycznych i stożkowych.",
+          "practicalUse": "Dobór wymiarów i materiałów na podstawie $V$ i $P$.",
+          "careerConnection": "Inżynieria procesowa, budownictwo"
+        }
+      ],
+      "assessmentRubric": {
+        "scope": "Ocena przygotowania maturalnego - 15 zadań różnego poziomu",
+        "criteria": [
+          {
+            "skill": "Obliczenia pól i objętości brył",
+            "podstawowy": "Stosuje podstawowe wzory poprawnie.",
+            "rozszerzony": "Łączy wzory i analizuje przekroje.",
+            "uniwersytecki": "Modeluje złożone bryły i skaluje wyniki."
+          }
+        ]
+      }
     }
   ]
 };
