@@ -29,7 +29,7 @@ async function importSkillWithContent(skill: SkillContent) {
   try {
     console.log(`Importing skill: ${skill.skillName}`);
     
-    // Insert into skills table
+    // Insert into skills table (without pedagogical_notes - it's a separate table)
     const { data: skillData, error: skillError } = await supabase
       .from('skills')
       .upsert([{
@@ -38,8 +38,7 @@ async function importSkillWithContent(skill: SkillContent) {
         class_level: skill.class_level,
         department: skill.department,
         generator_params: skill.generatorParams || {},
-        teaching_flow: skill.teachingFlow || {},
-        pedagogical_notes: skill.pedagogicalNotes || {}
+        teaching_flow: skill.teachingFlow || {}
       }])
       .select()
       .single();
@@ -58,6 +57,24 @@ async function importSkillWithContent(skill: SkillContent) {
         success: false,
         error: 'No skill ID returned from insert'
       };
+    }
+
+    // Import pedagogical notes to separate table
+    if (skill.pedagogicalNotes) {
+      const { error: pedagogicalError } = await supabase
+        .from('skill_pedagogical_notes')
+        .upsert([{
+          skill_id: skillId,
+          scaffolding_questions: skill.pedagogicalNotes.teachingTips || [],
+          estimated_total_time: skill.pedagogicalNotes.estimatedTime || 3600,
+          teaching_flow: ["theory", "examples", "practice", "assessment"],
+          prerequisite_description: skill.pedagogicalNotes.prerequisites?.join(', ') || '',
+          next_topic_description: skill.pedagogicalNotes.universityConnection || ''
+        }]);
+
+      if (pedagogicalError) {
+        console.error(`Error inserting pedagogical notes for ${skill.skillName}:`, pedagogicalError);
+      }
     }
 
     // Import theory content
