@@ -5,12 +5,11 @@ import { ProgressMiniBar } from "@/components/ProgressMiniBar";
 import { Hero } from "@/components/Hero";
 import { Features } from "@/components/Features";
 import { ReferralPromo } from "@/components/ReferralPromo";
-import { AutoImportExecutor } from "@/components/AutoImportExecutor";
+
 
 import { LandingPage } from "@/components/LandingPage";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { importAllContentPackages } from "@/utils/importContentDatabase";
 
 const HomePage = () => {
   const { user, loading } = useAuth();
@@ -19,24 +18,8 @@ const HomePage = () => {
   useEffect(() => {
     if (user) {
       loadProfile();
-      // Auto-import 8 advanced skills immediately when user is authenticated
-      executeAutoImport();
     }
   }, [user]);
-
-  const executeAutoImport = async () => {
-    try {
-      console.log('🚀 Auto-importing 8 advanced skills...');
-      const result = await importAllContentPackages();
-      if (result.success) {
-        console.log(`✅ Auto-import successful! Imported ${result.importedCount}/${result.totalSkills} skills`);
-      } else {
-        console.log('❌ Auto-import had some issues:', result.errors);
-      }
-    } catch (error) {
-      console.error('❌ Auto-import failed:', error);
-    }
-  };
 
   const loadProfile = async () => {
     if (!user) return;
@@ -125,12 +108,6 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* Auto Import Executor - Import 8 Advanced Skills */}
-        <section className="relative py-8 px-6">
-          <div className="max-w-6xl mx-auto">
-            <AutoImportExecutor />
-          </div>
-        </section>
 
         {/* Enhanced Progress Section */}
         <section className="relative py-8 px-6 bg-gradient-to-r from-background via-primary/5 to-background">

@@ -8,9 +8,6 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useReferral } from "@/hooks/useReferral";
 import { Navigation } from "@/components/Navigation";
 import HomePage from "./pages/HomePage";
-import LessonsPage from "./pages/LessonsPage";
-import TopicDetailPage from "./pages/TopicDetailPage";
-import LessonPage from "./pages/LessonPage";
 import QuizPage from "./pages/QuizPage";
 import DashboardPage from "./pages/DashboardPage";
 import ChatPage from "./pages/ChatPage";
@@ -27,8 +24,6 @@ import StudyLesson from "./pages/StudyLesson";
 import MaterialsPage from "./pages/MaterialsPage";
 import UXAuditPage from "./pages/UXAuditPage";
 import ProgressPage from "./pages/ProgressPage";
-import ContentManagerPage from "./pages/ContentManagerPage";
-import ImportAllContentPage from "./pages/ImportAllContentPage";
 import { RealLearningPage } from "./pages/RealLearningPage";
 import { OnboardingWelcome } from "@/components/onboarding/OnboardingWelcome";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
@@ -89,7 +84,7 @@ function RouteSeo() {
   const path = location.pathname;
   const canonical = typeof window !== 'undefined' ? `${window.location.origin}${path}` : undefined;
   const map: Record<string, { title: string; description: string }> = {
-    '/lessons': { title: 'Lekcje matematyki – AI Tutor', description: 'Lista lekcji i tematów z poziomami trudności.' },
+    
     '/dashboard': { title: 'Panel ucznia – AI Tutor', description: 'Twoje postępy, aktywność i szybkie skróty.' },
     '/chat': { title: 'AI Korepetytor – Chat', description: 'Rozmawiaj z AI Tutorem i rozwiązuj zadania krok po kroku.' },
     '/analytics': { title: 'Analityka nauki – AI Tutor', description: 'Wgląd w metryki nauki i efektywność.' },
@@ -100,8 +95,6 @@ function RouteSeo() {
     '/ux-test': { title: 'UX Testy – Panel', description: 'Zestaw testów użyteczności i jakości UI.' },
     '/ux-audit': { title: 'UX Audyt – Raport', description: 'Wyniki audytu UX i priorytety działań.' },
     '/study': { title: 'Panel nauki – AI Tutor', description: 'Twoje umiejętności i ścieżka nauki.' },
-    '/content-manager': { title: 'Content Manager – AI Tutor', description: 'Import and manage educational content database.' },
-    '/import-all-content': { title: 'Import Content Packages – AI Tutor', description: 'Import all predefined content packages into the database.' },
   };
   if (path === '/' || path.startsWith('/postepy')) return null;
   const match = Object.entries(map).find(([k]) => path === k || path.startsWith(k + '/'))?.[1];
@@ -165,26 +158,6 @@ const App = () => (
               </AuthenticatedLayout>
             } />
             
-            <Route path="/lessons" element={
-              <AuthenticatedLayout>
-                <LessonsPage />
-              </AuthenticatedLayout>
-            } />
-            <Route path="/topic/:topicId" element={
-              <AuthenticatedLayout>
-                <TopicDetailPage />
-              </AuthenticatedLayout>
-            } />
-            <Route path="/lesson/:lessonId" element={
-              <AuthenticatedLayout>
-                <LessonPage />
-              </AuthenticatedLayout>
-            } />
-            <Route path="/lesson/start" element={
-              <AuthenticatedLayout>
-                <ChatPage />
-              </AuthenticatedLayout>
-            } />
             <Route path="/recommendations" element={
               <AuthenticatedLayout>
                 <SmartRecommendations />
@@ -258,16 +231,6 @@ const App = () => (
             <Route path="/study/lesson/:skillId" element={
               <AuthenticatedLayout>
                 <StudyLesson />
-              </AuthenticatedLayout>
-            } />
-            <Route path="/content-manager" element={
-              <AuthenticatedLayout>
-                <ContentManagerPage />
-              </AuthenticatedLayout>
-            } />
-            <Route path="/import-all-content" element={
-              <AuthenticatedLayout>
-                <ImportAllContentPage />
               </AuthenticatedLayout>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -167,38 +167,6 @@ export type Database = {
         }
         Relationships: []
       }
-      chat_logs: {
-        Row: {
-          id: number
-          message: string
-          role: string
-          session_id: number
-          timestamp: string
-        }
-        Insert: {
-          id?: number
-          message: string
-          role: string
-          session_id: number
-          timestamp?: string
-        }
-        Update: {
-          id?: number
-          message?: string
-          role?: string
-          session_id?: number
-          timestamp?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "chat_logs_session_id_fkey"
-            columns: ["session_id"]
-            isOneToOne: false
-            referencedRelation: "lesson_sessions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       cognitive_load_profiles: {
         Row: {
           break_timing_preferences: Json | null
@@ -1175,172 +1143,6 @@ export type Database = {
         }
         Relationships: []
       }
-      lesson_sessions: {
-        Row: {
-          completed_at: string | null
-          had_confusion: boolean
-          id: number
-          points_earned: number | null
-          started_at: string
-          status: string
-          topic_id: number
-          user_id: string
-        }
-        Insert: {
-          completed_at?: string | null
-          had_confusion?: boolean
-          id?: number
-          points_earned?: number | null
-          started_at?: string
-          status?: string
-          topic_id: number
-          user_id: string
-        }
-        Update: {
-          completed_at?: string | null
-          had_confusion?: boolean
-          id?: number
-          points_earned?: number | null
-          started_at?: string
-          status?: string
-          topic_id?: number
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lesson_sessions_topic_id_fkey"
-            columns: ["topic_id"]
-            isOneToOne: false
-            referencedRelation: "topics"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lesson_sessions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-        ]
-      }
-      lesson_steps: {
-        Row: {
-          ai_prompt: string | null
-          ai_response: string | null
-          created_at: string
-          id: string
-          is_correct: boolean | null
-          response_time_ms: number | null
-          session_id: string
-          step_number: number
-          step_type: string
-          tokens_used: number | null
-          user_input: string | null
-        }
-        Insert: {
-          ai_prompt?: string | null
-          ai_response?: string | null
-          created_at?: string
-          id?: string
-          is_correct?: boolean | null
-          response_time_ms?: number | null
-          session_id: string
-          step_number: number
-          step_type: string
-          tokens_used?: number | null
-          user_input?: string | null
-        }
-        Update: {
-          ai_prompt?: string | null
-          ai_response?: string | null
-          created_at?: string
-          id?: string
-          is_correct?: boolean | null
-          response_time_ms?: number | null
-          session_id?: string
-          step_number?: number
-          step_type?: string
-          tokens_used?: number | null
-          user_input?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lesson_steps_session_id_fkey"
-            columns: ["session_id"]
-            isOneToOne: false
-            referencedRelation: "study_sessions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lessons: {
-        Row: {
-          assessment_rubric: Json | null
-          content_data: Json
-          content_type: string
-          created_at: string
-          description: string | null
-          difficulty_level: number
-          estimated_time_minutes: number | null
-          generator_params: Json | null
-          id: number
-          is_active: boolean | null
-          lesson_order: number
-          misconception_patterns: Json | null
-          real_world_applications: Json | null
-          teaching_flow: Json | null
-          title: string
-          topic_id: number
-          updated_at: string
-        }
-        Insert: {
-          assessment_rubric?: Json | null
-          content_data?: Json
-          content_type?: string
-          created_at?: string
-          description?: string | null
-          difficulty_level?: number
-          estimated_time_minutes?: number | null
-          generator_params?: Json | null
-          id?: number
-          is_active?: boolean | null
-          lesson_order?: number
-          misconception_patterns?: Json | null
-          real_world_applications?: Json | null
-          teaching_flow?: Json | null
-          title: string
-          topic_id: number
-          updated_at?: string
-        }
-        Update: {
-          assessment_rubric?: Json | null
-          content_data?: Json
-          content_type?: string
-          created_at?: string
-          description?: string | null
-          difficulty_level?: number
-          estimated_time_minutes?: number | null
-          generator_params?: Json | null
-          id?: number
-          is_active?: boolean | null
-          lesson_order?: number
-          misconception_patterns?: Json | null
-          real_world_applications?: Json | null
-          teaching_flow?: Json | null
-          title?: string
-          topic_id?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lessons_topic_id_fkey"
-            columns: ["topic_id"]
-            isOneToOne: false
-            referencedRelation: "topics"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       math_validation_cache: {
         Row: {
           cached_at: string
@@ -1714,13 +1516,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "points_history_session_id_fkey"
-            columns: ["session_id"]
-            isOneToOne: false
-            referencedRelation: "lesson_sessions"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "points_history_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -1949,51 +1744,6 @@ export type Database = {
         }
         Relationships: []
       }
-      session_analytics: {
-        Row: {
-          completion_rate: number | null
-          correct_answers: number | null
-          created_at: string
-          duration_minutes: number | null
-          engagement_score: number | null
-          hints_used: number | null
-          id: number
-          mistakes_made: number | null
-          questions_answered: number | null
-          session_id: number
-          topic_id: number
-          user_id: string
-        }
-        Insert: {
-          completion_rate?: number | null
-          correct_answers?: number | null
-          created_at?: string
-          duration_minutes?: number | null
-          engagement_score?: number | null
-          hints_used?: number | null
-          id?: number
-          mistakes_made?: number | null
-          questions_answered?: number | null
-          session_id: number
-          topic_id: number
-          user_id: string
-        }
-        Update: {
-          completion_rate?: number | null
-          correct_answers?: number | null
-          created_at?: string
-          duration_minutes?: number | null
-          engagement_score?: number | null
-          hints_used?: number | null
-          id?: number
-          mistakes_made?: number | null
-          questions_answered?: number | null
-          session_id?: number
-          topic_id?: number
-          user_id?: string
-        }
-        Relationships: []
-      }
       session_participants: {
         Row: {
           id: number
@@ -2044,13 +1794,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "skill_mastery_topic_id_fkey"
-            columns: ["topic_id"]
-            isOneToOne: false
-            referencedRelation: "topics"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "skill_mastery_user_id_fkey"
             columns: ["user_id"]
@@ -2550,72 +2293,6 @@ export type Database = {
           },
         ]
       }
-      topic_progress_history: {
-        Row: {
-          id: number
-          mastery_percentage: number
-          recorded_at: string
-          session_id: number | null
-          topic_id: number
-          user_id: string
-        }
-        Insert: {
-          id?: number
-          mastery_percentage: number
-          recorded_at?: string
-          session_id?: number | null
-          topic_id: number
-          user_id: string
-        }
-        Update: {
-          id?: number
-          mastery_percentage?: number
-          recorded_at?: string
-          session_id?: number | null
-          topic_id?: number
-          user_id?: string
-        }
-        Relationships: []
-      }
-      topics: {
-        Row: {
-          category: string
-          created_at: string
-          description: string | null
-          difficulty_level: number
-          estimated_time_minutes: number | null
-          id: number
-          is_active: boolean | null
-          learning_objectives: string[]
-          name: string
-          prerequisites: string[] | null
-        }
-        Insert: {
-          category?: string
-          created_at?: string
-          description?: string | null
-          difficulty_level?: number
-          estimated_time_minutes?: number | null
-          id?: number
-          is_active?: boolean | null
-          learning_objectives?: string[]
-          name: string
-          prerequisites?: string[] | null
-        }
-        Update: {
-          category?: string
-          created_at?: string
-          description?: string | null
-          difficulty_level?: number
-          estimated_time_minutes?: number | null
-          id?: number
-          is_active?: boolean | null
-          learning_objectives?: string[]
-          name?: string
-          prerequisites?: string[] | null
-        }
-        Relationships: []
-      }
       unified_learning_sessions: {
         Row: {
           ai_model_used: string | null
@@ -2868,69 +2545,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
-      }
-      user_lesson_progress: {
-        Row: {
-          completed_at: string | null
-          completion_percentage: number | null
-          created_at: string
-          id: number
-          last_accessed_at: string | null
-          lesson_id: number
-          score: number | null
-          started_at: string | null
-          status: string
-          time_spent_minutes: number | null
-          topic_id: number
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          completed_at?: string | null
-          completion_percentage?: number | null
-          created_at?: string
-          id?: number
-          last_accessed_at?: string | null
-          lesson_id: number
-          score?: number | null
-          started_at?: string | null
-          status?: string
-          time_spent_minutes?: number | null
-          topic_id: number
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          completed_at?: string | null
-          completion_percentage?: number | null
-          created_at?: string
-          id?: number
-          last_accessed_at?: string | null
-          lesson_id?: number
-          score?: number | null
-          started_at?: string | null
-          status?: string
-          time_spent_minutes?: number | null
-          topic_id?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_lesson_progress_lesson_id_fkey"
-            columns: ["lesson_id"]
-            isOneToOne: false
-            referencedRelation: "lessons"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_lesson_progress_topic_id_fkey"
-            columns: ["topic_id"]
-            isOneToOne: false
-            referencedRelation: "topics"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       user_referral_stats: {
         Row: {

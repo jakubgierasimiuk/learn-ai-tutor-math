@@ -64,7 +64,7 @@ const Analytics: React.FC = () => {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      const [dailyStatsResponse, goalsResponse, topicProgressResponse, sessionResponse] = await Promise.all([
+      const [dailyStatsResponse, goalsResponse, sessionResponse] = await Promise.all([
         supabase
           .from('daily_stats')
           .select('*')
@@ -79,19 +79,7 @@ const Analytics: React.FC = () => {
           .eq('status', 'active'),
 
         supabase
-          .from('topic_progress_history')
-          .select(`
-            topic_id,
-            mastery_percentage,
-            recorded_at,
-            topics(name)
-          `)
-          .eq('user_id', user!.id)
-          .order('recorded_at', { ascending: false })
-          .limit(50),
-
-        supabase
-          .from('session_analytics')
+          .from('unified_learning_sessions')
           .select(`
             duration_minutes,
             completion_rate,

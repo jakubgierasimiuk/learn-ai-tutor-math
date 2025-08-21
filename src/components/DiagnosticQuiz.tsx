@@ -243,20 +243,20 @@ export const DiagnosticQuiz = () => {
       
       // Save results to database
       for (const result of results) {
-        // Find topic by name
-        const { data: topics } = await supabase
-          .from('topics')
+        // Find skill by name/topic
+        const { data: skill } = await supabase
+          .from('skills')
           .select('id')
           .eq('name', result.topic)
           .maybeSingle();
           
-        if (topics) {
+        if (skill) {
           await supabase
-            .from('skill_mastery')
+            .from('skill_progress')
             .upsert({
               user_id: user.id,
-              topic_id: topics.id,
-              mastery_percentage: result.mastery
+              skill_id: skill.id,
+              mastery_level: result.mastery
             });
         }
       }
