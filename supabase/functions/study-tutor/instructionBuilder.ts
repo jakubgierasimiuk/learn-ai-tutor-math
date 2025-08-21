@@ -1,97 +1,143 @@
 // Pedagogical Instruction Builder
 // Creates comprehensive AI instructions based on cognitive analysis
 
-import { TeachingMoment, StudentResponsePattern, FlowStateIndicators, StudentProfile } from './adaptivePedagogy.ts';
+interface BuildInstructionsParams {
+  mathValidation: any;
+  cognitiveAnalysis: any;
+  flowState: any;
+  cognitiveProfile: any;
+  sessionContext: {
+    turnNumber: number;
+    targetDifficulty: string;
+    isPseudoActivity: boolean;
+    isFirstMessage: boolean;
+    skillId: string;
+    department: string;
+  };
+  adaptiveRecommendations: {
+    pedagogicalStrategy: string;
+    difficultyAdjustment: number;
+    zpd_alignment: number;
+    shouldTakeBreak: boolean;
+  };
+}
 
-export function buildPedagogicalInstructions(
-  teachingMoment: TeachingMoment,
-  responsePattern: StudentResponsePattern,
-  flowState: FlowStateIndicators,
-  cognitiveProfile: StudentProfile,
-  needsMicroBreak: boolean,
-  isPseudoActivity: boolean
-): string {
+export function buildPedagogicalInstructions(params: BuildInstructionsParams): string {
+  const { 
+    mathValidation, 
+    cognitiveAnalysis, 
+    flowState, 
+    cognitiveProfile, 
+    sessionContext, 
+    adaptiveRecommendations 
+  } = params;
 
   let instructions = `INSTRUKCJE_PEDAGOGICZNE - ADAPTACYJNA REAKCJA:
 
-GŁÓWNA STRATEGIA: ${teachingMoment.pedagogicalStrategy}
-${teachingMoment.message}
+=== KONTEKST MATEMATYCZNY ===
+- Odpowiedź ucznia: ${mathValidation.isCorrect ? 'POPRAWNA ✓' : 'NIEPOPRAWNA ✗'}
+- Pewność walidacji: ${Math.round(mathValidation.confidence * 100)}%
+- Wykryte błędne rozumienie: ${mathValidation.detectedMisconception || 'brak'}
+- Feedback matematyczny: ${mathValidation.feedback || 'standardowy'}
 
-KONTEKST POZNAWCZY:
-- Wzorzec odpowiedzi: ${responsePattern}
-- Styl kognitywny: ${cognitiveProfile.cognitiveStyle}
-- ZPD alignment: ${Math.round(teachingMoment.zpdAlignment * 100)}%
-- Obciążenie poznawcze: ${flowState.perceivedChallenge}/10
-- Poziom zaangażowania: ${Math.round(flowState.engagementLevel * 100)}%
-- Poziom frustracji: ${Math.round(flowState.frustrationLevel * 100)}%`;
+=== ANALIZA KOGNITYWNA ===
+- Wzorzec odpowiedzi: ${cognitiveAnalysis.responsePattern}
+- Poziom pewności ucznia: ${Math.round(cognitiveAnalysis.confidenceLevel * 100)}%
+- Moment nauczania: ${cognitiveAnalysis.teachingMoment.type}
+- Rekomendowana akcja: ${cognitiveAnalysis.teachingMoment.nextAction}
 
-  // Age-appropriate communication style
-  if (cognitiveProfile.ageGroup === 'elementary') {
-    instructions += `\n\nSTYL KOMUNIKACJI: Prosty język, krótkie zdania, pozytywne wzmocnienie. Unikaj skomplikowanej terminologii.`;
-  } else if (cognitiveProfile.ageGroup === 'high_school') {
-    instructions += `\n\nSTYL KOMUNIKACJI: Precyzyjny, analityczny. Można używać terminologii matematycznej.`;
+=== STAN FLOW I ZAANGAŻOWANIE ===
+- Poziom zaangażowania: ${Math.round((flowState.engagementLevel || 0.5) * 100)}%
+- Poziom frustracji: ${Math.round((flowState.frustrationLevel || 0) * 100)}%
+- Wyzwanie vs. umiejętności: ${flowState.perceivedChallenge || 'średnie'}
+- ZPD alignment: ${Math.round(adaptiveRecommendations.zpd_alignment * 100)}%
+
+=== PROFIL KOGNITYWNY UCZNIA ===
+- Grupa wiekowa: ${cognitiveProfile.ageGroup || 'nieznana'}
+- Styl kognitywny: ${cognitiveProfile.cognitiveStyle || 'analityczny'}
+- Średni czas odpowiedzi: ${cognitiveProfile.averageResponseTime || 0}ms
+- Wskaźnik poprawności: ${Math.round((cognitiveProfile.correctnessRate || 0.5) * 100)}%`;
+
+  // Strategia pedagogiczna
+  const strategy = adaptiveRecommendations.pedagogicalStrategy;
+  if (strategy) {
+    instructions += `\n\n=== STRATEGIA PEDAGOGICZNA ===\nGłówna strategia: ${strategy.toUpperCase()}`;
+    
+    switch (strategy) {
+      case 'fading':
+        instructions += `\nSTRATEGIA FADING: Stopniowo zmniejszaj pomoc. Zacznij od konkretnej wskazówki, potem prowadź pytaniami.`;
+        break;
+      case 'worked_example':
+        instructions += `\nSTRATEGIA WORKED EXAMPLE: Najpierw pokaż podobny rozwiązany przykład, potem poproś o analogiczne rozwiązanie.`;
+        break;
+      case 'self_explanation':
+        instructions += `\nSTRATEGIA SELF-EXPLANATION: Poproś ucznia o wyjaśnienie swojego rozumowania własnymi słowami.`;
+        break;
+      case 'contrasting_cases':
+        instructions += `\nSTRATEGIA CONTRASTING: Pokaż różnicę między poprawnym a niepoprawnym podejściem.`;
+        break;
+      case 'cognitive_conflict':
+        instructions += `\nSTRATEGIA COGNITIVE CONFLICT: Zwróć uwagę na sprzeczność w rozumowaniu ucznia.`;
+        break;
+      case 'bridging':
+        instructions += `\nSTRATEGIA BRIDGING: Połącz nową wiedzę z tym, co uczeń już wie.`;
+        break;
+      case 'reinforcement':
+        instructions += `\nSTRATEGIA REINFORCEMENT: Wzmocnij poprawne rozumienie przez dodatkowe przykłady.`;
+        break;
+      default:
+        instructions += `\nUżyj adaptacyjnego podejścia dostosowanego do potrzeb ucznia.`;
+    }
   }
 
-  // Specific pedagogical strategy instructions
-  switch (teachingMoment.pedagogicalStrategy) {
-    case 'fading':
-      instructions += `\n\nSTRATEGIA FADING: Stopniowo zmniejszaj pomoc. Zacznij od konkretnej wskazówki, potem prowadź pytaniami.`;
-      break;
-    case 'example-problem':
-      instructions += `\n\nSTRATEGIA WORKED EXAMPLE: Najpierw pokaż podobny rozwiązany przykład, potem poproś o analogiczne rozwiązanie.`;
-      break;
-    case 'self-explanation':
-      instructions += `\n\nSTRATEGIA SELF-EXPLANATION: Poproś ucznia o wyjaśnienie swojego rozumowania własnymi słowami.`;
-      break;
-    case 'contrasting':
-      instructions += `\n\nSTRATEGIA CONTRASTING: Pokaż różnicę między poprawnym a niepoprawnym podejściem.`;
-      break;
-    case 'cognitive-conflict':
-      instructions += `\n\nSTRATEGIA COGNITIVE CONFLICT: Zwróć uwagę na sprzeczność w rozumowaniu ucznia.`;
-      break;
-    case 'bridging':
-      instructions += `\n\nSTRATEGIA BRIDGING: Połącz nową wiedzę z tym, co uczeń już wie.`;
-      break;
-    case 'reinforcement':
-      instructions += `\n\nSTRATEGIA REINFORCEMENT: Wzmocnij poprawne rozumienie przez dodatkowe przykłady.`;
-      break;
+  // Optymalizacja trudności
+  const difficultyAdj = adaptiveRecommendations.difficultyAdjustment;
+  if (Math.abs(difficultyAdj) > 0.1) {
+    const adjustment = difficultyAdj > 0 ? 'ZWIĘKSZ' : 'ZMNIEJSZ';
+    instructions += `\n\n=== DOSTOSOWANIE TRUDNOŚCI ===\n${adjustment} poziom trudności o ${Math.abs(difficultyAdj).toFixed(1)} punkty.`;
+    
+    if (difficultyAdj > 0) {
+      instructions += `\nUczeń jest gotowy na większe wyzwanie. Wprowadź bardziej skomplikowane problemy.`;
+    } else {
+      instructions += `\nUczeń może być przeciążony. Uprość zadania i zapewnij więcej wsparcia.`;
+    }
   }
 
-  // Flow state optimization
-  switch (teachingMoment.flowStateOptimization) {
-    case 'increase_challenge':
-      instructions += `\n\nOPTYMALIZACJA FLOW: Zwiększ wyzwanie - uczeń jest gotowy na trudniejsze zadania.`;
-      break;
-    case 'decrease_challenge':
-      instructions += `\n\nOPTYMALIZACJA FLOW: Obniż poziom trudności - uczeń może być przeciążony.`;
-      break;
-    case 'micro_break':
-      instructions += `\n\nOPTYMALIZACJA FLOW: Zasugeruj krótką przerwę lub zmianę aktywności.`;
-      break;
+  // Style komunikacji dostosowane do wieku
+  if (cognitiveProfile.ageGroup) {
+    instructions += `\n\n=== STYL KOMUNIKACJI ===`;
+    if (cognitiveProfile.ageGroup === 'elementary') {
+      instructions += `\nProsty język, krótkie zdania, pozytywne wzmocnienie. Unikaj skomplikowanej terminologii.`;
+    } else if (cognitiveProfile.ageGroup === 'middle_school') {
+      instructions += `\nJasne wyjaśnienia z przykładami. Możesz użyć podstawowej terminologii matematycznej.`;
+    } else if (cognitiveProfile.ageGroup === 'high_school') {
+      instructions += `\nPrecyzyjny, analityczny język. Używaj odpowiedniej terminologii matematycznej.`;
+    }
   }
 
-  // Micro-break recommendation
-  if (needsMicroBreak) {
+  // Rekomendacja przerwy
+  if (adaptiveRecommendations.shouldTakeBreak) {
     const breakSuggestion = cognitiveProfile.ageGroup === 'elementary' 
       ? 'Może czas na krótką przerwę? Można się przeciągnąć lub napić wody.'
       : 'Warto zrobić chwilę przerwy, żeby lepiej się skoncentrować na kolejnym zadaniu.';
-    instructions += `\n\nPRZERWA: ${breakSuggestion}`;
+    instructions += `\n\n=== REKOMENDACJA PRZERWY ===\n${breakSuggestion}`;
   }
 
-  // Pseudo-activity warning
-  if (isPseudoActivity) {
-    instructions += `\n\nUWAGA PSEUDO-AKTYWNOŚĆ: Uczeń odpowiada zbyt szybko. Poproś o dokładniejsze przemyślenie lub wyjaśnienie rozumowania.`;
+  // Ostrzeżenie o pseudo-aktywności
+  if (sessionContext.isPseudoActivity) {
+    instructions += `\n\n=== UWAGA PSEUDO-AKTYWNOŚĆ ===\nUczeń odpowiada zbyt szybko (czas < ${cognitiveProfile.averageResponseTime * 0.4}ms). Poproś o dokładniejsze przemyślenie lub wyjaśnienie rozumowania.`;
   }
 
-  // Difficulty adjustment
-  if (teachingMoment.difficultyAdjustment !== 0) {
-    const adjustment = teachingMoment.difficultyAdjustment > 0 ? 'zwiększ' : 'zmniejsz';
-    instructions += `\n\nDOSTOSOWANIE TRUDNOŚCI: ${adjustment} poziom trudności o ${Math.abs(teachingMoment.difficultyAdjustment)} punkty.`;
-  }
+  // Kontekst sesji
+  instructions += `\n\n=== KONTEKST SESJI ===
+- Numer kroku: ${sessionContext.turnNumber}
+- Docelowa trudność: ${sessionContext.targetDifficulty}
+- Dział: ${sessionContext.department}
+- Pierwsza wiadomość: ${sessionContext.isFirstMessage ? 'TAK' : 'NIE'}`;
 
-  // Intervention sequence for complex errors
-  if (teachingMoment.interventionSequence && teachingMoment.interventionSequence.length > 0) {
-    instructions += `\n\nSEKWENCJA INTERWENCJI: ${teachingMoment.interventionSequence.join(' → ')}`;
+  // Specjalne instrukcje dla pierwszej wiadomości
+  if (sessionContext.isFirstMessage) {
+    instructions += `\n\n=== INSTRUKCJE POCZĄTKOWE ===\nTo pierwsza interakcja w tej sesji. Przywitaj ucznia i przedstaw zadanie w sposób motywujący.`;
   }
 
   return instructions;
