@@ -36,14 +36,36 @@ export const useContentAnalysis = () => {
 
         if (skillsError) throw skillsError;
 
-        // Process skills to determine content status
-        const processedSkills: SkillContent[] = skills.map(skill => ({
-          id: skill.id,
-          name: skill.name,
-          class_level: skill.class_level,
-          department: skill.department,
-          has_content: skill.content_structure && Object.keys(skill.content_structure).length > 0
-        }));
+        // Process skills to determine REAL content status
+        const processedSkills: SkillContent[] = skills.map(skill => {
+          let hasTheory = false;
+          let hasExamples = false;
+          let hasPractice = false;
+
+          if (skill.content_structure && typeof skill.content_structure === 'object' && skill.content_structure !== null) {
+            const content = skill.content_structure as any;
+            
+            hasTheory = content.theory?.sections && 
+                       Array.isArray(content.theory.sections) && 
+                       content.theory.sections.length > 0;
+            
+            hasExamples = content.examples?.solved && 
+                         Array.isArray(content.examples.solved) && 
+                         content.examples.solved.length > 0;
+            
+            hasPractice = content.practiceExercises && 
+                         Array.isArray(content.practiceExercises) && 
+                         content.practiceExercises.length > 0;
+          }
+
+          return {
+            id: skill.id,
+            name: skill.name,
+            class_level: skill.class_level,
+            department: skill.department,
+            has_content: hasTheory || hasExamples || hasPractice
+          };
+        });
 
         // Filter skills missing content
         const missingContent = processedSkills.filter(skill => !skill.has_content);
