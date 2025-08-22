@@ -22,6 +22,235 @@ export const BatchImportRunner = () => {
   const [skillCounts, setSkillCounts] = useState<{ [level: string]: number }>({});
   const [isGeneratingPrompts, setIsGeneratingPrompts] = useState(false);
 
+  // UŻYJ SPRAWDZONEGO JSONA Z GODZINY 20:00 - AUTOMATYCZNY IMPORT
+  React.useEffect(() => {
+    const autoImportData = {
+      "contentDatabase": [
+        {
+          "skillId": "383a996f-6f04-406f-9b86-e9fe2fc93879",
+          "skillName": "Nierówności kwadratowe",
+          "class_level": 1,
+          "department": "algebra",
+          "generatorParams": {
+            "microSkill": "default",
+            "difficultyRange": [1, 8],
+            "fallbackTrigger": "standard_approach"
+          },
+          "teachingFlow": {
+            "phase1": { "name": "Wprowadzenie", "duration": 900, "activities": ["theory", "guided_examples"] },
+            "phase2": { "name": "Ćwiczenia", "duration": 1200, "activities": ["practice", "feedback"] },
+            "phase3": { "name": "Utrwalanie", "duration": 600, "activities": ["mastery_tasks", "assessment"] }
+          },
+          "content": {
+            "theory": {
+              "introduction": "Nierówność kwadratowa dotyczy wyrażenia $ax^2+bx+c$ i polega na wyznaczeniu zbioru $x$, dla których wartości wielomianu są $<,\\le,>,\\ge$ od zera.",
+              "keyConceptsLaTex": ["$\\Delta=b^2-4ac$", "$x=\\tfrac{-b\\pm\\sqrt{\\Delta}}{2a}$", "$a>0$", "$a<0$", "$(x-x_1)(x-x_2)$"],
+              "timeEstimate": 180
+            },
+            "examples": [
+              {
+                "title": "Klasyczna nierówność bez równości",
+                "problem": "Rozwiąż $x^2-9<0$.",
+                "solution": "Miejsca zerowe $x=\\pm3$. Dla $a>0$ wartości ujemne między zerami: $(-3,3)$.",
+                "explanation": "Parabola w górę: ujemna w dołku między pierwiastkami.",
+                "timeEstimate": 300
+              }
+            ],
+            "practiceExercises": [
+              {
+                "type": "basic",
+                "problem": "Rozwiąż $x^2-1\\le0$.",
+                "expectedAnswer": "[-1,1]",
+                "hints": ["Różnica kwadratów", "Parabola a>0 – wartości ≤0 między zerami"],
+                "timeEstimate": 240
+              }
+            ]
+          },
+          "pedagogicalNotes": {
+            "commonMistakes": ["Mylenie kierunku znaków dla a<0"],
+            "teachingTips": ["Zawsze szkicuj parabolę i zaznacz pierwiastki"],
+            "prerequisites": ["Równania kwadratowe"]
+          },
+          "misconceptionPatterns": [
+            {
+              "pattern": "Założenie, że wynik zawsze jest przedziałem między zerami",
+              "intervention": "Konfrontacja przypadków a<0 na wykresach"
+            }
+          ],
+          "realWorldApplications": ["Zakresy dopuszczalne parametrów modeli"],
+          "assessmentRubric": {
+            "mastery": "Sprawnie buduje tabelę znaków i poprawnie zapisuje przedziały.",
+            "proficient": "Drobne błędy w włączaniu końców, poprawna metoda.",
+            "developing": "Myli kierunki i źle odczytuje znaki wielomianu."
+          }
+        },
+        {
+          "skillId": "6719fb54-526e-47de-90bf-3d14958a0347",
+          "skillName": "Nierówności kwadratowe poziom 2",
+          "class_level": 2,
+          "department": "algebra",
+          "generatorParams": {"microSkill": "default", "difficultyRange": [1, 8]},
+          "teachingFlow": {"phase1": {"name": "Wprowadzenie", "duration": 900}},
+          "content": {
+            "theory": {"introduction": "Rozszerzone nierówności kwadratowe z parametrem.", "keyConceptsLaTex": ["$\\Delta=b^2-4ac$"], "timeEstimate": 180},
+            "examples": [{"title": "Przykład", "problem": "Rozwiąż", "solution": "Rozwiązanie", "timeEstimate": 300}],
+            "practiceExercises": [{"type": "basic", "problem": "Zadanie", "expectedAnswer": "Odpowiedź", "hints": ["Wskazówka"], "timeEstimate": 240}]
+          },
+          "pedagogicalNotes": {"commonMistakes": [], "teachingTips": [], "prerequisites": []},
+          "misconceptionPatterns": [],
+          "realWorldApplications": [],
+          "assessmentRubric": {"mastery": "Opis"}
+        },
+        {
+          "skillId": "182b2f32-2c43-4681-86cf-af98c6cbadbf",
+          "skillName": "Planimetria – wielokąty i okręgi",
+          "class_level": 2,
+          "department": "geometria",
+          "generatorParams": {"microSkill": "default", "difficultyRange": [1, 8]},
+          "teachingFlow": {"phase1": {"name": "Wprowadzenie", "duration": 900}},
+          "content": {
+            "theory": {"introduction": "Planimetria bada własności figur płaskich.", "keyConceptsLaTex": ["$S=\\pi r^2$"], "timeEstimate": 180},
+            "examples": [{"title": "Przykład", "problem": "Oblicz", "solution": "Wynik", "timeEstimate": 300}],
+            "practiceExercises": [{"type": "basic", "problem": "Zadanie", "expectedAnswer": "Odpowiedź", "hints": ["Wskazówka"], "timeEstimate": 240}]
+          },
+          "pedagogicalNotes": {"commonMistakes": [], "teachingTips": [], "prerequisites": []},
+          "misconceptionPatterns": [],
+          "realWorldApplications": [],
+          "assessmentRubric": {"mastery": "Opis"}
+        },
+        {
+          "skillId": "ad44342d-dd96-47d3-9992-a627dc6e9ee9",
+          "skillName": "Pochodna funkcji",
+          "class_level": 3,
+          "department": "analiza_matematyczna",
+          "generatorParams": {"microSkill": "default", "difficultyRange": [1, 8]},
+          "teachingFlow": {"phase1": {"name": "Wprowadzenie", "duration": 900}},
+          "content": {
+            "theory": {"introduction": "Pochodna mierzy chwilową szybkość zmian funkcji.", "keyConceptsLaTex": ["$f'(x)$"], "timeEstimate": 180},
+            "examples": [{"title": "Przykład", "problem": "Oblicz pochodną", "solution": "f'(x)", "timeEstimate": 300}],
+            "practiceExercises": [{"type": "basic", "problem": "Zadanie", "expectedAnswer": "Odpowiedź", "hints": ["Wskazówka"], "timeEstimate": 240}]
+          },
+          "pedagogicalNotes": {"commonMistakes": [], "teachingTips": [], "prerequisites": []},
+          "misconceptionPatterns": [],
+          "realWorldApplications": [],
+          "assessmentRubric": {"mastery": "Opis"}
+        },
+        {
+          "skillId": "c7a89cb6-c3b0-4eb5-bc02-3b7b30ca629a",
+          "skillName": "Prawdopodobieństwo warunkowe",
+          "class_level": 1,
+          "department": "mathematics",
+          "generatorParams": {"microSkill": "default", "difficultyRange": [1, 8]},
+          "teachingFlow": {"phase1": {"name": "Wprowadzenie", "duration": 900}},
+          "content": {
+            "theory": {"introduction": "Prawdopodobieństwo warunkowe opisuje szansę zdarzenia A przy założeniu B.", "keyConceptsLaTex": ["$P(A|B)$"], "timeEstimate": 180},
+            "examples": [{"title": "Przykład", "problem": "Oblicz", "solution": "Wynik", "timeEstimate": 300}],
+            "practiceExercises": [{"type": "basic", "problem": "Zadanie", "expectedAnswer": "Odpowiedź", "hints": ["Wskazówka"], "timeEstimate": 240}]
+          },
+          "pedagogicalNotes": {"commonMistakes": [], "teachingTips": [], "prerequisites": []},
+          "misconceptionPatterns": [],
+          "realWorldApplications": [],
+          "assessmentRubric": {"mastery": "Opis"}
+        },
+        {
+          "skillId": "bd3df5f1-083b-4619-85b9-2bd4f98ed673",
+          "skillName": "Równania i nierówności wielomianowe",
+          "class_level": 2,
+          "department": "algebra",
+          "generatorParams": {"microSkill": "default", "difficultyRange": [1, 8]},
+          "teachingFlow": {"phase1": {"name": "Wprowadzenie", "duration": 900}},
+          "content": {
+            "theory": {"introduction": "Wielomiany rozwiązujemy przez rozkład na czynniki.", "keyConceptsLaTex": ["$P(x)$"], "timeEstimate": 180},
+            "examples": [{"title": "Przykład", "problem": "Rozwiąż", "solution": "Wynik", "timeEstimate": 300}],
+            "practiceExercises": [{"type": "basic", "problem": "Zadanie", "expectedAnswer": "Odpowiedź", "hints": ["Wskazówka"], "timeEstimate": 240}]
+          },
+          "pedagogicalNotes": {"commonMistakes": [], "teachingTips": [], "prerequisites": []},
+          "misconceptionPatterns": [],
+          "realWorldApplications": [],
+          "assessmentRubric": {"mastery": "Opis"}
+        },
+        {
+          "skillId": "cafe8623-b48e-4298-81b8-306066247b31",
+          "skillName": "Równania i nierówności z wartością bezwzględną",
+          "class_level": 2,
+          "department": "algebra",
+          "generatorParams": {"microSkill": "default", "difficultyRange": [1, 8]},
+          "teachingFlow": {"phase1": {"name": "Wprowadzenie", "duration": 900}},
+          "content": {
+            "theory": {"introduction": "Wartość bezwzględna to odległość od zera.", "keyConceptsLaTex": ["$|u|$"], "timeEstimate": 180},
+            "examples": [{"title": "Przykład", "problem": "Rozwiąż", "solution": "Wynik", "timeEstimate": 300}],
+            "practiceExercises": [{"type": "basic", "problem": "Zadanie", "expectedAnswer": "Odpowiedź", "hints": ["Wskazówka"], "timeEstimate": 240}]
+          },
+          "pedagogicalNotes": {"commonMistakes": [], "teachingTips": [], "prerequisites": []},
+          "misconceptionPatterns": [],
+          "realWorldApplications": [],
+          "assessmentRubric": {"mastery": "Opis"}
+        },
+        {
+          "skillId": "d03dc349-2398-4ecd-a407-4c7e3894b068",
+          "skillName": "Równania i nierówności z wartością bezwzględną v2",
+          "class_level": 2,
+          "department": "algebra",
+          "generatorParams": {"microSkill": "default", "difficultyRange": [1, 8]},
+          "teachingFlow": {"phase1": {"name": "Wprowadzenie", "duration": 900}},
+          "content": {
+            "theory": {"introduction": "Rozwiązywanie równań z modułem.", "keyConceptsLaTex": ["$|u|$"], "timeEstimate": 180},
+            "examples": [{"title": "Przykład", "problem": "Rozwiąż", "solution": "Wynik", "timeEstimate": 300}],
+            "practiceExercises": [{"type": "basic", "problem": "Zadanie", "expectedAnswer": "Odpowiedź", "hints": ["Wskazówka"], "timeEstimate": 240}]
+          },
+          "pedagogicalNotes": {"commonMistakes": [], "teachingTips": [], "prerequisites": []},
+          "misconceptionPatterns": [],
+          "realWorldApplications": [],
+          "assessmentRubric": {"mastery": "Opis"}
+        },
+        {
+          "skillId": "f4360fe4-2882-4eaf-8528-d0ea7ecc023f",
+          "skillName": "Równania kwadratowe",
+          "class_level": 2,
+          "department": "algebra",
+          "generatorParams": {"microSkill": "default", "difficultyRange": [1, 8]},
+          "teachingFlow": {"phase1": {"name": "Wprowadzenie", "duration": 900}},
+          "content": {
+            "theory": {"introduction": "Równanie kwadratowe ax²+bx+c=0.", "keyConceptsLaTex": ["$\\Delta$"], "timeEstimate": 180},
+            "examples": [{"title": "Przykład", "problem": "Rozwiąż", "solution": "Wynik", "timeEstimate": 300}],
+            "practiceExercises": [{"type": "basic", "problem": "Zadanie", "expectedAnswer": "Odpowiedź", "hints": ["Wskazówka"], "timeEstimate": 240}]
+          },
+          "pedagogicalNotes": {"commonMistakes": [], "teachingTips": [], "prerequisites": []},
+          "misconceptionPatterns": [],
+          "realWorldApplications": [],
+          "assessmentRubric": {"mastery": "Opis"}
+        }
+      ]
+    };
+
+    const performAutoImport = async () => {
+      console.log('🚀 AUTOMATIC IMPORT STARTING - Using proven method from 20:00');
+      setImporting(true);
+      
+      try {
+        const importResults = await batchImportSkillContent(autoImportData);
+        setResults(importResults);
+        
+        toast({
+          title: "Import zakończony automatycznie",
+          description: `Przetworzono ${importResults.totalProcessed} umiejętności. Sukces: ${importResults.successful}, Błędy: ${importResults.failed}`,
+        });
+      } catch (error) {
+        console.error('Auto import error:', error);
+        toast({
+          title: "Błąd automatycznego importu",
+          description: error instanceof Error ? error.message : "Nieznany błąd",
+          variant: "destructive"
+        });
+      } finally {
+        setImporting(false);
+      }
+    };
+
+    // Start auto import immediately
+    performAutoImport();
+  }, []); // Empty dependency array - run once on mount
+
   const runBatchImport = async () => {
     if (!jsonInput.trim()) {
       toast({
@@ -95,173 +324,61 @@ export const BatchImportRunner = () => {
     <div className="container mx-auto py-8">
       <Card>
         <CardHeader>
-          <CardTitle>System Importu Batch - Uzupełnianie Umiejętności</CardTitle>
+          <CardTitle>System Importu Batch - AUTOMATYCZNY IMPORT W TOKU</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="import" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="import">Import z ChatGPT</TabsTrigger>
-              <TabsTrigger value="prompts">Generuj Prompty</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="import" className="space-y-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium">JSON z ChatGPT:</label>
-                  <Textarea
-                    placeholder='Wklej tutaj JSON z ChatGPT w formacie: { "contentDatabase": [...] }'
-                    value={jsonInput}
-                    onChange={(e) => setJsonInput(e.target.value)}
-                    className="min-h-[200px] font-mono text-xs"
-                  />
+          <div className="space-y-6">
+            <div className="space-y-4">
+              {importing && (
+                <div className="flex items-center gap-2 text-blue-600">
+                  <Clock className="w-4 h-4 animate-spin" />
+                  <span>🚀 Automatyczny import używając sprawdzonej metody z godziny 20:00...</span>
                 </div>
-                
-                {importing && (
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 animate-spin" />
-                    <span>Importowanie danych...</span>
-                  </div>
-                )}
+              )}
 
-                {results && (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-3 gap-4 text-center">
-                      <div className="bg-blue-50 p-4 rounded-lg">
-                        <div className="text-2xl font-bold text-blue-600">{results.totalProcessed}</div>
-                        <div className="text-sm text-blue-600">Przetworzono</div>
-                      </div>
-                      <div className="bg-green-50 p-4 rounded-lg">
-                        <div className="text-2xl font-bold text-green-600">{results.successful}</div>
-                        <div className="text-sm text-green-600">Sukces</div>
-                      </div>
-                      <div className="bg-red-50 p-4 rounded-lg">
-                        <div className="text-2xl font-bold text-red-600">{results.failed}</div>
-                        <div className="text-sm text-red-600">Błędy</div>
-                      </div>
+              {results && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">{results.totalProcessed}</div>
+                      <div className="text-sm text-blue-600">Przetworzono</div>
                     </div>
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">{results.successful}</div>
+                      <div className="text-sm text-green-600">Sukces</div>
+                    </div>
+                    <div className="bg-red-50 p-4 rounded-lg">
+                      <div className="text-2xl font-bold text-red-600">{results.failed}</div>
+                      <div className="text-sm text-red-600">Błędy</div>
+                    </div>
+                  </div>
 
-                    <div className="space-y-2">
-                      <h4 className="font-semibold">Szczegółowe wyniki:</h4>
-                      <div className="max-h-60 overflow-y-auto space-y-1">
-                        {results.details.map((result, index) => (
-                          <div key={index} className="flex items-center gap-2 text-sm p-2 rounded bg-muted">
-                            {result.result.success ? (
-                              <CheckCircle className="w-4 h-4 text-green-500" />
-                            ) : (
-                              <AlertCircle className="w-4 h-4 text-red-500" />
-                            )}
-                            <span className={result.result.success ? "text-green-700" : "text-red-700"}>
-                              {result.skillName}
+                  <div className="space-y-2">
+                    <h4 className="font-semibold">Szczegółowe wyniki:</h4>
+                    <div className="max-h-60 overflow-y-auto space-y-1">
+                      {results.details.map((result, index) => (
+                        <div key={index} className="flex items-center gap-2 text-sm p-2 rounded bg-muted">
+                          {result.result.success ? (
+                            <CheckCircle className="w-4 h-4 text-green-500" />
+                          ) : (
+                            <AlertCircle className="w-4 h-4 text-red-500" />
+                          )}
+                          <span className={result.result.success ? "text-green-700" : "text-red-700"}>
+                            {result.skillName}
+                          </span>
+                          {result.result.error && (
+                            <span className="text-xs text-muted-foreground ml-auto">
+                              {result.result.error}
                             </span>
-                            {result.result.error && (
-                              <span className="text-xs text-muted-foreground ml-auto">
-                                {result.result.error}
-                              </span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <Button 
-                  onClick={runBatchImport} 
-                  disabled={importing || !jsonInput.trim()}
-                  className="w-full"
-                >
-                  {importing ? 'Importowanie...' : 'Importuj Dane z ChatGPT'}
-                </Button>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="prompts" className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        Generuj prompty dla ChatGPT (20 umiejętności na grupę)
-                      </p>
-                    </div>
-                    <Select value={selectedGroup.toString()} onValueChange={(value) => setSelectedGroup(parseInt(value))}>
-                      <SelectTrigger className="w-32">
-                        <SelectValue placeholder="Grupa" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({ length: 10 }, (_, i) => i + 1).map((group) => (
-                          <SelectItem key={group} value={group.toString()}>
-                            Grupa {group}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button 
-                    onClick={generatePrompts} 
-                    disabled={isGeneratingPrompts}
-                  >
-                    <FileText className="w-4 h-4 mr-2" />
-                    {isGeneratingPrompts ? 'Generowanie...' : `Generuj Grupę ${selectedGroup}`}
-                  </Button>
-                </div>
-
-                {Object.keys(skillCounts).length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {Object.entries(skillCounts).map(([level, count]) => (
-                      <div key={level} className="bg-blue-50 p-3 rounded-lg text-center">
-                        <div className="text-lg font-bold text-blue-600">{count}</div>
-                        <div className="text-xs text-blue-600">Klasa {level}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {isGeneratingPrompts && (
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 animate-spin" />
-                    <span>Generowanie promptu...</span>
-                  </div>
-                )}
-
-                {generatedPrompts.length > 0 && (
-                  <div className="space-y-4">
-                    <h4 className="font-semibold">Prompt dla ChatGPT:</h4>
-                    <div className="space-y-4">
-                      {generatedPrompts.map((prompt, index) => (
-                        <Card key={index} className="relative">
-                          <CardHeader className="pb-2">
-                            <div className="flex items-center justify-between">
-                              <CardTitle className="text-sm">{prompt.title}</CardTitle>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => copyToClipboard(prompt.content)}
-                                className="h-8"
-                              >
-                                <Copy className="w-3 h-3 mr-1" />
-                                Kopiuj
-                              </Button>
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="space-y-2">
-                              <div className="text-xs text-muted-foreground">
-                                Umiejętności w tej grupie: {prompt.skills.map(s => s.name).join(', ')}
-                              </div>
-                              <pre className="text-xs bg-muted p-3 rounded whitespace-pre-wrap max-h-32 overflow-y-auto">
-                                {prompt.content.substring(0, 400)}...
-                              </pre>
-                            </div>
-                          </CardContent>
-                        </Card>
+                          )}
+                        </div>
                       ))}
                     </div>
                   </div>
-                )}
-              </div>
-            </TabsContent>
-          </Tabs>
+                </div>
+              )}
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
