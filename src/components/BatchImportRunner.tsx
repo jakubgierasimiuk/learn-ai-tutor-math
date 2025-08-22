@@ -202,6 +202,42 @@ export const BatchImportRunner = () => {
                     ✅ Uruchom NAPRAWIONY Import (4 umiejętności)
                   </Button>
                 </div>
+                
+                <Button 
+                  onClick={async () => {
+                    setImporting(true);
+                    try {
+                      const { runAlgebralno2Import } = await import('@/lib/algebralno2ImportRunner');
+                      const result = await runAlgebralno2Import();
+                      setResults({
+                        totalProcessed: result.total,
+                        successful: result.successful,
+                        failed: result.failed,
+                        details: result.results?.map(r => ({
+                          skillName: r.skillId || 'Unknown',
+                          result: r
+                        })) || []
+                      });
+                      toast({
+                        title: "Algebrano2 import zakończony!",
+                        description: `Zaimportowano ${result.successful}/${result.total} umiejętności algebry`,
+                      });
+                    } catch (error) {
+                      toast({
+                        title: "Błąd importu Algebrano2",
+                        description: error instanceof Error ? error.message : "Nieznany błąd",
+                        variant: "destructive"
+                      });
+                    } finally {
+                      setImporting(false);
+                    }
+                  }}
+                  disabled={importing}
+                  variant="outline"
+                  className="w-full mt-4"
+                >
+                  🔢 Uruchom Algebrano2 Import (7 umiejętności)
+                </Button>
               </div>
             </TabsContent>
 
