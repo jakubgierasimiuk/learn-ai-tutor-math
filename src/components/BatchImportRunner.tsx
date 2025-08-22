@@ -274,6 +274,42 @@ export const BatchImportRunner = () => {
                 >
                   📊 Uruchom Calculus2 Import (6 umiejętności)
                 </Button>
+
+                <Button 
+                  onClick={async () => {
+                    setImporting(true);
+                    try {
+                      const { runAdvancedImport } = await import('@/lib/advancedImportRunner');
+                      const result = await runAdvancedImport();
+                      setResults({
+                        totalProcessed: result.total,
+                        successful: result.successful,
+                        failed: result.failed,
+                        details: result.results?.map(r => ({
+                          skillName: r.skillId || 'Unknown',
+                          result: r
+                        })) || []
+                      });
+                      toast({
+                        title: "Advanced import zakończony!",
+                        description: `Zaimportowano ${result.successful}/${result.total} zaawansowanych umiejętności`,
+                      });
+                    } catch (error) {
+                      toast({
+                        title: "Błąd importu Advanced",
+                        description: error instanceof Error ? error.message : "Nieznany błąd",
+                        variant: "destructive"
+                      });
+                    } finally {
+                      setImporting(false);
+                    }
+                  }}
+                  disabled={importing}
+                  variant="outline"
+                  className="w-full mt-2"
+                >
+                  🚀 Uruchom Advanced Import (7 umiejętności)
+                </Button>
               </div>
             </TabsContent>
 
