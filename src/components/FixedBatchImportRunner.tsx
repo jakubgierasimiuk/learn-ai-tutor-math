@@ -136,62 +136,62 @@ export const FixedBatchImportRunner = () => {
           "assessmentRubric": { "mastery": "Poprawnie przenosi", "proficient": "Drobne błędy", "developing": "Nie przenosi" }
         },
         {
-          "skillId": "9f686b42-7f73-49c8-99a1-44fdcad9e17c",
-          "skillName": "Całka nieoznaczona",
+          "skillId": "40eaafc7-7355-4dd3-baf7-fb36659a8e49",
+          "skillName": "Dzielenie pisemne przez liczbę jednocyfrową (z resztą)",
           "class_level": 4,
-          "department": "calculus",
+          "department": "arithmetic",
           "generatorParams": { "microSkill": "default", "difficultyRange": [1, 8], "fallbackTrigger": "standard_approach" },
           "teachingFlow": { "phase1": { "name": "Wprowadzenie", "duration": 900, "activities": ["theory", "guided_examples"] }, "phase2": { "name": "Ćwiczenia", "duration": 1200, "activities": ["practice", "feedback"] }, "phase3": { "name": "Utrwalanie", "duration": 600, "activities": ["mastery_tasks", "assessment"] } },
           "content": {
             "theory": {
-              "introduction": "Całka nieoznaczona to działanie odwrotne do pochodnej: szukamy funkcji, której pochodna daje wyrażenie pod całką. Nazywamy ją funkcją pierwotną i dodajemy stałą całkowania. Dla prostych potęg stosujemy prosty wzór. W tym wprowadzeniu skupiamy się na rozpoznawaniu prostych schematów i sprawdzaniu wyniku przez zróżniczkowanie.",
-              "keyConceptsLaTex": ["$\\int f=F+C$", "$F'=f$", "$\\int x^n dx=\\tfrac{x^{n+1}}{n+1}$", "$\\int 1 dx=x$"],
+              "introduction": "Dzielenie pisemne to wielokrotne sprawdzanie, ile razy dzielnik mieści się w kolejnych częściach dzielnej. Przepisujemy kolejne cyfry, wyznaczamy cyfrę ilorazu, mnożymy przez dzielnik i odejmujemy. Gdy nie da się dalej, cyfra ilorazu to 0. Reszta to liczba mniejsza od dzielnika, która pozostaje po odjęciach. Zawsze zachodzi $a=bq+r$ oraz $0\\le r<b$.",
+              "keyConceptsLaTex": ["$a=bq+r$", "$0\\le r<b$", "$36:5=7$ r.1", "$48:6=8$"],
               "timeEstimate": 180
             },
             "examples": [
               {
-                "title": "Prosta potęga",
-                "problem": "Oblicz ∫ x dx.",
-                "solution": "Z wzoru: ∫ x dx = x^2/2 + C. Sprawdź: (x^2/2)'=x.",
-                "explanation": "Całkowanie odwraca różniczkowanie potęgi.",
+                "title": "Dzielenie z resztą",
+                "problem": "Oblicz 53 : 4.",
+                "solution": "1) 5:4=1, reszta 1, przepisz 3 → 13.\n2) 13:4=3, reszta 1.\nIloraz 13, reszta 1.\nSprawdz.: 4·13+1=53.",
+                "explanation": "Korzystamy z zapisu $a=bq+r$ do weryfikacji.",
                 "timeEstimate": 240
               },
               {
-                "title": "Stała pod całką",
-                "problem": "Oblicz ∫ 3 dx.",
-                "solution": "∫ 3 dx = 3x + C. Sprawdź: (3x)'=3.",
-                "explanation": "Stałą wyciągamy przed znak całki i całkujemy 1.",
-                "timeEstimate": 180
+                "title": "Cyfra 0 w ilorazie",
+                "problem": "Oblicz 406 : 5.",
+                "solution": "4:5=0 (zapisz 0), przepisz 40.\n40:5=8, reszta 0, przepisz 6.\n6:5=1, reszta 1.\nWynik: 81 r.1.",
+                "explanation": "Gdy część jest mniejsza od dzielnika, wpisujemy 0 i bierzemy kolejną cyfrę.",
+                "timeEstimate": 300
               }
             ],
             "practiceExercises": [
               {
                 "type": "basic",
-                "problem": "Oblicz ∫ 1 dx",
-                "expectedAnswer": "x + C",
-                "hints": ["Stała całkowania", "Sprawdź pochodną"],
+                "problem": "75 : 3",
+                "expectedAnswer": "25 r.0",
+                "hints": ["3 mieści się w 7 dwa razy", "Sprawdź mnożeniem"],
                 "timeEstimate": 180
               },
               {
                 "type": "intermediate",
-                "problem": "Oblicz ∫ 2x dx",
-                "expectedAnswer": "x^2 + C",
-                "hints": ["Wyciągnij 2", "Zastosuj wzór potęgowy"],
-                "timeEstimate": 180
+                "problem": "92 : 7",
+                "expectedAnswer": "13 r.1",
+                "hints": ["7·13=91", "Reszta to 92−91"],
+                "timeEstimate": 240
               },
               {
                 "type": "advanced",
-                "problem": "Oblicz ∫ x^2 dx",
-                "expectedAnswer": "x^3/3 + C",
-                "hints": ["n=2", "Zwiększ wykładnik o 1 i podziel"],
-                "timeEstimate": 240
+                "problem": "608 : 9",
+                "expectedAnswer": "67 r.5",
+                "hints": ["9·67=603", "Reszta < 9"],
+                "timeEstimate": 300
               }
             ]
           },
-          "pedagogicalNotes": { "commonMistakes": ["Zapomnienie stałej C"], "teachingTips": ["Zawsze sprawdzaj przez pochodną"], "prerequisites": ["Pochodne"] },
-          "misconceptionPatterns": [{ "pattern": "Pomijanie stałej całkowania", "intervention": "Podkreśl że to rodzina funkcji" }],
-          "realWorldApplications": ["Obliczenia pól pod wykresami"],
-          "assessmentRubric": { "mastery": "Poprawnie całkuje i sprawdza", "proficient": "Drobne błędy", "developing": "Pomija stałą" }
+          "pedagogicalNotes": { "commonMistakes": ["Błędy w dzieleniu"], "teachingTips": ["Sprawdzaj mnożeniem"], "prerequisites": ["Mnożenie"] },
+          "misconceptionPatterns": [{ "pattern": "Błędne dzielenie", "intervention": "Ćwicz krok po kroku" }],
+          "realWorldApplications": ["Dzielenie przedmiotów"],
+          "assessmentRubric": { "mastery": "Poprawnie dzieli", "proficient": "Drobne błędy", "developing": "Błędy w algorytmie" }
         }
       ]
     };
