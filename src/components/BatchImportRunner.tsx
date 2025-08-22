@@ -178,16 +178,16 @@ export const BatchImportRunner = () => {
                     onClick={async () => {
                       setImporting(true);
                       try {
-                        const { runFixedImport } = await import('@/lib/fixedImportRunner');
-                        const result = await runFixedImport();
+                        const { runCompleteImport } = await import('@/lib/fixedSkillImporter');
+                        const result = await runCompleteImport();
                         setResults(result);
                         toast({
-                          title: "Import naprawiony zakończony",
+                          title: "Import zakończony pomyślnie!",
                           description: `Zaimportowano ${result.successful}/${result.totalProcessed} umiejętności`,
                         });
                       } catch (error) {
                         toast({
-                          title: "Błąd naprawionego importu",
+                          title: "Błąd importu",
                           description: error instanceof Error ? error.message : "Nieznany błąd",
                           variant: "destructive"
                         });
@@ -199,7 +199,7 @@ export const BatchImportRunner = () => {
                     variant="secondary"
                     className="w-full"
                   >
-                    🚀 Uruchom Naprawiony Import (4 umiejętności)
+                    ✅ Uruchom NAPRAWIONY Import (4 umiejętności)
                   </Button>
                 </div>
               </div>
