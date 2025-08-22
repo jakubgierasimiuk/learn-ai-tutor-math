@@ -3779,9 +3779,9 @@ export async function batchImportSkillContent(chatGPTData: { contentDatabase: Ch
   // Process each skill from ChatGPT
   for (const skill of chatGPTData.contentDatabase) {
     try {
-      // 2. UUID GENEROWANIE - zawsze nowy UUID zamiast stringowego ID
-      const skillId = uuidv4(); // ⭐ KLUCZ DO SUKCESU
-      console.log(`🔑 Generated UUID ${skillId} for ${skill.skillName}`);
+      // 2. UŻYWANIE SKILLID Z JSON-A - zamiast generowania nowego
+      const skillId = skill.skillId; // ⭐ KLUCZ DO SUKCESU - używamy ID z JSON-a
+      console.log(`🔑 Using skillId ${skillId} for ${skill.skillName}`);
 
       // 3. CONTENT_DATA - dodanie skillName bezpośrednio
       const unifiedContentData = {
