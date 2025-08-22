@@ -3996,51 +3996,60 @@ export async function batchImportSkillContent(chatGPTData: { contentDatabase: Ch
   return batchResult;
 }
 
-// Generate ChatGPT prompts for missing skills
-export async function generateChatGPTPrompts(): Promise<{ prompts: string[], skillCounts: Record<string, number> }> {
-  // Get missing skills grouped by class level
-  const { data: missingSkills } = await supabase
-    .from('skills')
-    .select('id, name, class_level, department')
-    .not('id', 'in', `(SELECT skill_id FROM unified_skill_content WHERE is_complete = true)`)
-    .order('class_level, department, name');
-
-  if (!missingSkills) return { prompts: [], skillCounts: {} };
-
-  // Group skills by class level for batch processing
-  const skillsByLevel: Record<number, typeof missingSkills> = {};
-  const skillCounts: Record<string, number> = {};
-
-  missingSkills.forEach(skill => {
-    if (!skillsByLevel[skill.class_level]) {
-      skillsByLevel[skill.class_level] = [];
-    }
-    skillsByLevel[skill.class_level].push(skill);
+// Generate ChatGPT prompts for missing skills - numbered groups approach
+export async function generateChatGPTPrompts(groupNumber: number = 1): Promise<{ 
+  prompts: Array<{
+    title: string;
+    content: string;
+    skills: Array<{ id: string; name: string; class_level: number; department: string }>;
+  }>;
+  totalSkillsCount: { [level: string]: number };
+}> {
+  try {
+    console.log(`Starting prompt generation for group ${groupNumber}...`);
     
-    const key = `Class ${skill.class_level}`;
-    skillCounts[key] = (skillCounts[key] || 0) + 1;
-  });
-
-  const prompts: string[] = [];
-  
-  // Generate prompts for each class level batch (max 20 skills per prompt)
-  Object.entries(skillsByLevel).forEach(([level, skills]) => {
-    const classLevel = parseInt(level);
-    const chunks = [];
+    // Calculate offset for the selected group (20 skills per group)
+    const offset = (groupNumber - 1) * 20;
     
-    // Split into chunks of 20 skills
-    for (let i = 0; i < skills.length; i += 20) {
-      chunks.push(skills.slice(i, i + 20));
+    // Get exactly 20 skills without content for the selected group
+    const { data: skillsWithoutContent, error } = await supabase
+      .from('skills')
+      .select('id, name, class_level, department')
+      .is('content_data', null)
+      .order('class_level')
+      .order('department')  
+      .order('name')
+      .range(offset, offset + 19); // range is inclusive, so 0-19 gives us 20 items
+
+    if (error) {
+      console.error('Error fetching skills:', error);
+      throw error;
     }
 
-    chunks.forEach((chunk, chunkIndex) => {
-      const prompt = `# Generowanie Treści dla Klasy ${classLevel} - Batch ${chunkIndex + 1}
+    if (!skillsWithoutContent || skillsWithoutContent.length === 0) {
+      console.log(`No skills found for group ${groupNumber}`);
+      return { prompts: [], totalSkillsCount: {} };
+    }
 
-Wygeneruj pełną treść edukacyjną dla poniższych ${chunk.length} umiejętności z klasy ${classLevel} polskiej szkoły podstawowej/średniej.
+    console.log(`Found ${skillsWithoutContent.length} skills for group ${groupNumber}`);
+
+    // Count skills per level in this group
+    const totalSkillsCount = skillsWithoutContent.reduce((acc, skill) => {
+      const level = skill.class_level.toString();
+      acc[level] = (acc[level] || 0) + 1;
+      return acc;
+    }, {} as { [level: string]: number });
+
+    console.log('Skills by level in this group:', totalSkillsCount);
+
+    // Generate prompt for this group
+    const prompt = `# Generowanie Treści - Grupa ${groupNumber} (${skillsWithoutContent.length} umiejętności)
+
+Wygeneruj pełną treść edukacyjną dla poniższych ${skillsWithoutContent.length} umiejętności z polskiej szkoły podstawowej/średniej.
 
 ## Umiejętności do wygenerowania:
 
-${chunk.map((skill, index) => `${index + 1}. **${skill.name}** (ID: ${skill.id}, Dział: ${skill.department})`).join('\n')}
+${skillsWithoutContent.map((skill, index) => `${index + 1}. **${skill.name}** (ID: ${skill.id}, Klasa: ${skill.class_level}, Dział: ${skill.department})`).join('\n')}
 
 ## Wymagania:
 
@@ -4048,7 +4057,7 @@ ${chunk.map((skill, index) => `${index + 1}. **${skill.name}** (ID: ${skill.id},
 \`\`\`json
 {
   "contentDatabase": [
-    // ... ${chunk.length} umiejętności z pełną strukturą
+    // ... dokładnie ${skillsWithoutContent.length} umiejętności z pełną strukturą
   ]
 }
 \`\`\`
@@ -4056,26 +4065,34 @@ ${chunk.map((skill, index) => `${index + 1}. **${skill.name}** (ID: ${skill.id},
 2. **Struktura każdej umiejętności**:
    - skillId: użyj dokładnie podanego ID z listy powyżej
    - skillName: użyj dokładnie podanej nazwy z listy powyżej  
-   - class_level: ${classLevel}
+   - class_level: użyj podanego poziomu klasy
    - department: użyj podanego działu
-   - generatorParams: { microSkill: "default", difficultyRange: [1, ${Math.min(classLevel + 2, 10)}], fallbackTrigger: "standard_approach" }
+   - generatorParams: { microSkill: "default", difficultyRange: [1, 8], fallbackTrigger: "standard_approach" }
 
 3. **Zawartość (content)**:
    - theory: wprowadzenie (maks 100 słów), keyConceptsLaTex (wzory inline $...$)
    - examples: 2-3 przykłady z rozwiązaniem krok po kroku
    - practiceExercises: 3-5 ćwiczeń o rosnącej trudności
 
-4. **Polskie nazewnictwo**: Wszystko w języku polskim, dostosowane do poziomu klasy ${classLevel}
+4. **Polskie nazewnictwo**: Wszystko w języku polskim, dostosowane do odpowiedniego poziomu klasy
 
 5. **LaTeX**: TYLKO inline $wzory$ (maks 50 znaków), NO display math $$...$$
 
 6. **Czas**: Wszystkie timeEstimate w sekundach (60-300 dla teorii, 120-600 dla ćwiczeń)
 
 **UWAGA**: Odpowiedz TYLKO prawidłowym JSON bez dodatkowych komentarzy!`;
+    
+    const prompts = [{
+      title: `Grupa ${groupNumber} (${skillsWithoutContent.length} umiejętności)`,
+      content: prompt,
+      skills: skillsWithoutContent
+    }];
 
-      prompts.push(prompt);
-    });
-  });
+    console.log(`Generated prompt for group ${groupNumber} with ${skillsWithoutContent.length} skills`);
+    return { prompts, totalSkillsCount };
 
-  return { prompts, skillCounts };
+  } catch (error) {
+    console.error('Error in generateChatGPTPrompts:', error);
+    throw error;
+  }
 }

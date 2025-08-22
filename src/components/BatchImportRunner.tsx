@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { batchImportSkillContent, generateChatGPTPrompts, type BatchImportResult } from '@/lib/skillContentImporter';
 import { useToast } from '@/hooks/use-toast';
 import { CheckCircle, AlertCircle, Clock, Copy, FileText } from 'lucide-react';
@@ -12,9 +13,14 @@ export const BatchImportRunner = () => {
   const [importing, setImporting] = useState(false);
   const [jsonInput, setJsonInput] = useState('');
   const [results, setResults] = useState<BatchImportResult | null>(null);
-  const [prompts, setPrompts] = useState<string[]>([]);
-  const [skillCounts, setSkillCounts] = useState<Record<string, number>>({});
-  const [generatingPrompts, setGeneratingPrompts] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<number>(1);
+  const [generatedPrompts, setGeneratedPrompts] = useState<Array<{
+    title: string;
+    content: string;
+    skills: Array<{ id: string; name: string; class_level: number; department: string }>;
+  }>>([]);
+  const [skillCounts, setSkillCounts] = useState<{ [level: string]: number }>({});
+  const [isGeneratingPrompts, setIsGeneratingPrompts] = useState(false);
 
   const runBatchImport = async () => {
     if (!jsonInput.trim()) {
@@ -52,34 +58,36 @@ export const BatchImportRunner = () => {
   };
 
   const generatePrompts = async () => {
-    setGeneratingPrompts(true);
+    setIsGeneratingPrompts(true);
+    setGeneratedPrompts([]);
+    setSkillCounts({});
     
     try {
-      const { prompts: generatedPrompts, skillCounts: counts } = await generateChatGPTPrompts();
-      setPrompts(generatedPrompts);
-      setSkillCounts(counts);
+      const result = await generateChatGPTPrompts(selectedGroup);
+      setGeneratedPrompts(result.prompts);
+      setSkillCounts(result.totalSkillsCount);
       
       toast({
-        title: "Prompty wygenerowane",
-        description: `Utworzono ${generatedPrompts.length} promptów dla ChatGPT`,
+        title: "Prompt wygenerowany",
+        description: `Utworzono prompt dla grupy ${selectedGroup} z ${result.prompts[0]?.skills.length || 0} umiejętnościami`,
       });
     } catch (error) {
       console.error('Error generating prompts:', error);
       toast({
         title: "Błąd generowania",
-        description: "Nie udało się wygenerować promptów",
+        description: "Nie udało się wygenerować promptu",
         variant: "destructive"
       });
     } finally {
-      setGeneratingPrompts(false);
+      setIsGeneratingPrompts(false);
     }
   };
 
-  const copyToClipboard = (text: string, index: number) => {
+  const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
       title: "Skopiowano",
-      description: `Prompt ${index + 1} skopiowany do schowka`,
+      description: `Prompt dla grupy ${selectedGroup} skopiowany do schowka`,
     });
   };
 
@@ -169,8 +177,33 @@ export const BatchImportRunner = () => {
 
             <TabsContent value="prompts" className="space-y-6">
               <div className="space-y-4">
-                <div className="text-sm text-muted-foreground">
-                  Wygeneruj prompty dla ChatGPT aby uzupełnić brakujące umiejętności:
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">
+                        Generuj prompty dla ChatGPT (20 umiejętności na grupę)
+                      </p>
+                    </div>
+                    <Select value={selectedGroup.toString()} onValueChange={(value) => setSelectedGroup(parseInt(value))}>
+                      <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Grupa" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 10 }, (_, i) => i + 1).map((group) => (
+                          <SelectItem key={group} value={group.toString()}>
+                            Grupa {group}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button 
+                    onClick={generatePrompts} 
+                    disabled={isGeneratingPrompts}
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    {isGeneratingPrompts ? 'Generowanie...' : `Generuj Grupę ${selectedGroup}`}
+                  </Button>
                 </div>
 
                 {Object.keys(skillCounts).length > 0 && (
@@ -178,32 +211,32 @@ export const BatchImportRunner = () => {
                     {Object.entries(skillCounts).map(([level, count]) => (
                       <div key={level} className="bg-blue-50 p-3 rounded-lg text-center">
                         <div className="text-lg font-bold text-blue-600">{count}</div>
-                        <div className="text-xs text-blue-600">{level}</div>
+                        <div className="text-xs text-blue-600">Klasa {level}</div>
                       </div>
                     ))}
                   </div>
                 )}
 
-                {generatingPrompts && (
+                {isGeneratingPrompts && (
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 animate-spin" />
-                    <span>Generowanie promptów...</span>
+                    <span>Generowanie promptu...</span>
                   </div>
                 )}
 
-                {prompts.length > 0 && (
+                {generatedPrompts.length > 0 && (
                   <div className="space-y-4">
-                    <h4 className="font-semibold">Prompty dla ChatGPT ({prompts.length}):</h4>
-                    <div className="space-y-4 max-h-96 overflow-y-auto">
-                      {prompts.map((prompt, index) => (
+                    <h4 className="font-semibold">Prompt dla ChatGPT:</h4>
+                    <div className="space-y-4">
+                      {generatedPrompts.map((prompt, index) => (
                         <Card key={index} className="relative">
                           <CardHeader className="pb-2">
                             <div className="flex items-center justify-between">
-                              <CardTitle className="text-sm">Prompt {index + 1}</CardTitle>
+                              <CardTitle className="text-sm">{prompt.title}</CardTitle>
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => copyToClipboard(prompt, index)}
+                                onClick={() => copyToClipboard(prompt.content)}
                                 className="h-8"
                               >
                                 <Copy className="w-3 h-3 mr-1" />
@@ -212,24 +245,20 @@ export const BatchImportRunner = () => {
                             </div>
                           </CardHeader>
                           <CardContent>
-                            <pre className="text-xs bg-muted p-3 rounded whitespace-pre-wrap max-h-32 overflow-y-auto">
-                              {prompt.substring(0, 300)}...
-                            </pre>
+                            <div className="space-y-2">
+                              <div className="text-xs text-muted-foreground">
+                                Umiejętności w tej grupie: {prompt.skills.map(s => s.name).join(', ')}
+                              </div>
+                              <pre className="text-xs bg-muted p-3 rounded whitespace-pre-wrap max-h-32 overflow-y-auto">
+                                {prompt.content.substring(0, 400)}...
+                              </pre>
+                            </div>
                           </CardContent>
                         </Card>
                       ))}
                     </div>
                   </div>
                 )}
-
-                <Button 
-                  onClick={generatePrompts} 
-                  disabled={generatingPrompts}
-                  className="w-full"
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  {generatingPrompts ? 'Generowanie...' : 'Wygeneruj Prompty dla ChatGPT'}
-                </Button>
               </div>
             </TabsContent>
           </Tabs>
