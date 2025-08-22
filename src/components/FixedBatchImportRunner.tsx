@@ -192,6 +192,122 @@ export const FixedBatchImportRunner = () => {
           "misconceptionPatterns": [{ "pattern": "Błędne dzielenie", "intervention": "Ćwicz krok po kroku" }],
           "realWorldApplications": ["Dzielenie przedmiotów"],
           "assessmentRubric": { "mastery": "Poprawnie dzieli", "proficient": "Drobne błędy", "developing": "Błędy w algorytmie" }
+        },
+        {
+          "skillId": "f4f515ba-4657-49bb-aaf2-a535f5cec0fb",
+          "skillName": "Kolejność wykonywania działań z nawiasami",
+          "class_level": 4,
+          "department": "arithmetic",
+          "generatorParams": { "microSkill": "default", "difficultyRange": [1, 8], "fallbackTrigger": "standard_approach" },
+          "teachingFlow": { "phase1": { "name": "Wprowadzenie", "duration": 900, "activities": ["theory", "guided_examples"] }, "phase2": { "name": "Ćwiczenia", "duration": 1200, "activities": ["practice", "feedback"] }, "phase3": { "name": "Utrwalanie", "duration": 600, "activities": ["mastery_tasks", "assessment"] } },
+          "content": {
+            "theory": {
+              "introduction": "Obowiązuje porządek: najpierw działania w nawiasach, potem mnożenie i dzielenie od lewej do prawej, na końcu dodawanie i odejmowanie także od lewej. Nawias może zmienić naturalny wynik, dlatego pilnujemy ich hierarchii. Gdy jest kilka poziomów nawiasów, zaczynamy od najgłębszych. Stosuj linię pomocniczą i zaznaczaj wykonane etapy.",
+              "keyConceptsLaTex": ["$(2+3)\\cdot4=20$", "$2+3\\cdot4=14$", "$8:(2+2)=2$", "$(10-6)+1=5$"],
+              "timeEstimate": 180
+            },
+            "examples": [
+              {
+                "title": "Nawias zmienia wynik",
+                "problem": "Oblicz: (7−2)·3 + 4.",
+                "solution": "1) Nawias: 5·3 + 4.\n2) Mnożenie: 15 + 4.\n3) Dodawanie: 19.",
+                "explanation": "Najpierw nawias, potem mnożenie, na końcu dodawanie.",
+                "timeEstimate": 240
+              },
+              {
+                "title": "Mieszane działania",
+                "problem": "Oblicz: 18 − 6 : 3 + 2·5.",
+                "solution": "1) Dzielenie: 18 − 2 + 2·5.\n2) Mnożenie: 18 − 2 + 10.\n3) Od lewej: 16 + 10 = 26.",
+                "explanation": "Brak nawiasów: dzielenie i mnożenie przed dodawaniem/odejmowaniem.",
+                "timeEstimate": 300
+              }
+            ],
+            "practiceExercises": [
+              {
+                "type": "basic",
+                "problem": "(4+3)·2",
+                "expectedAnswer": "14",
+                "hints": ["Najpierw nawias", "Potem mnożenie"],
+                "timeEstimate": 180
+              },
+              {
+                "type": "intermediate",
+                "problem": "20 − 8 : 2 + 3",
+                "expectedAnswer": "19",
+                "hints": ["Policz 8:2", "Następnie od lewej"],
+                "timeEstimate": 240
+              },
+              {
+                "type": "advanced",
+                "problem": "6 + (12 − 4·2) : 2",
+                "expectedAnswer": "6",
+                "hints": ["Najpierw 4·2", "Potem nawias, na końcu dzielenie i dodawanie"],
+                "timeEstimate": 300
+              }
+            ]
+          },
+          "pedagogicalNotes": { "commonMistakes": ["Błędna kolejność"], "teachingTips": ["Pamiętaj o hierarchii"], "prerequisites": ["Działania podstawowe"] },
+          "misconceptionPatterns": [{ "pattern": "Ignorowanie nawiasów", "intervention": "Ćwicz krok po kroku" }],
+          "realWorldApplications": ["Obliczenia matematyczne"],
+          "assessmentRubric": { "mastery": "Poprawna kolejność", "proficient": "Drobne błędy", "developing": "Błędna hierarchia" }
+        },
+        {
+          "skillId": "10084046-1879-4b0b-b88a-d772fe072f15",
+          "skillName": "Liczby dziesiętne – zapis, porównywanie i oś liczbowa",
+          "class_level": 4,
+          "department": "arithmetic",
+          "generatorParams": { "microSkill": "default", "difficultyRange": [1, 8], "fallbackTrigger": "standard_approach" },
+          "teachingFlow": { "phase1": { "name": "Wprowadzenie", "duration": 900, "activities": ["theory", "guided_examples"] }, "phase2": { "name": "Ćwiczenia", "duration": 1200, "activities": ["practice", "feedback"] }, "phase3": { "name": "Utrwalanie", "duration": 600, "activities": ["mastery_tasks", "assessment"] } },
+          "content": {
+            "theory": {
+              "introduction": "Liczby dziesiętne zapisujemy z przecinkiem. Każde miejsce po przecinku to część dziesiętna, setna, tysięczna itd. Porównujemy liczby, wyrównując liczbę miejsc po przecinku przez dopisanie zer. Na osi liczbowej liczby rosną w prawo; zaznaczamy je w odpowiednich miejscach, dzieląc odcinki na równe części.",
+              "keyConceptsLaTex": ["$3,45=3+45/100$", "$2,5=2,50$", "$3,4<3,5$", "$|b-a|$ odległość"],
+              "timeEstimate": 180
+            },
+            "examples": [
+              {
+                "title": "Porównywanie",
+                "problem": "Która liczba większa: 2,7 czy 2,65?",
+                "solution": "Wyrównaj: 2,70 i 2,65. Większa jest 2,70.",
+                "explanation": "Dopisanie zera nie zmienia wartości, ułatwia porównanie.",
+                "timeEstimate": 240
+              },
+              {
+                "title": "Zaznaczanie na osi",
+                "problem": "Zaznacz 1,25 na osi od 1 do 2.",
+                "solution": "Podziel odcinek [1;2] na 100 części. 1,25 to 25 setnych za 1, czyli 1/4 odcinka.",
+                "explanation": "Setne to sto równych części jedności.",
+                "timeEstimate": 240
+              }
+            ],
+            "practiceExercises": [
+              {
+                "type": "basic",
+                "problem": "Porównaj: 0,5 i 0,45",
+                "expectedAnswer": "0,5 > 0,45",
+                "hints": ["Wyrównaj: 0,50 i 0,45", "Porównaj cyfry"],
+                "timeEstimate": 180
+              },
+              {
+                "type": "intermediate",
+                "problem": "Wstaw brakującą: 3,1 __ 3,09",
+                "expectedAnswer": ">",
+                "hints": ["3,10 i 3,09", "Porównaj dziesiąte i setne"],
+                "timeEstimate": 240
+              },
+              {
+                "type": "advanced",
+                "problem": "Ile wynosi odległość między 2,03 a 1,9?",
+                "expectedAnswer": "0,13",
+                "hints": ["2,03 − 1,90", "Wyrównaj miejsca po przecinku"],
+                "timeEstimate": 300
+              }
+            ]
+          },
+          "pedagogicalNotes": { "commonMistakes": ["Błędne porównywanie"], "teachingTips": ["Wyrównuj miejsca"], "prerequisites": ["Liczby dziesiętne"] },
+          "misconceptionPatterns": [{ "pattern": "Błędne porównywanie", "intervention": "Ćwicz wyrównywanie" }],
+          "realWorldApplications": ["Pomiary precyzyjne"],
+          "assessmentRubric": { "mastery": "Poprawnie porównuje", "proficient": "Drobne błędy", "developing": "Błędne porównywanie" }
         }
       ]
     };
