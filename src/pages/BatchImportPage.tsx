@@ -276,6 +276,162 @@ const BatchImportPage = () => {
               }
             ]
           }
+        },
+        {
+          "skillId": "4ddf10c4-4a7a-498e-8cde-38fc9c5a4b2a",
+          "skillName": "Mnożenie pisemne przez liczbę jednocyfrową",
+          "class_level": 4,
+          "department": "arithmetic",
+          "content": {
+            "theory": {
+              "introduction": "Mnożenie pisemne wykonujemy od prawej do lewej, mnożąc każdą cyfrę przez jednocyfrowy mnożnik. Jeśli iloczyn w kolumnie przekracza 9, zapisujemy cyfrę jedności, a dziesiątki przenosimy do następnej kolumny. Ustaw liczby pionowo i kontroluj przeniesienia. Wynik można sprawdzić dzieleniem odwrotnym lub przybliżeniem.",
+              "keyConceptsLaTex": ["$9\\cdot7=63$", "$Przen=6$", "$a\\cdot0=0$", "$a\\cdot1=a$"],
+              "timeEstimate": 180
+            },
+            "examples": [
+              {
+                "title": "Proste mnożenie",
+                "problem": "Oblicz 346 · 3.",
+                "solution": "Jedności: 6·3=18 → 8, przeniesienie 6.\nDziesiątki: 4·3=12 + 6=18 → 8, przeniesienie 1.\nSetki: 3·3=9 + 1=10.\nWynik: 1038.",
+                "explanation": "Kolumnowe mnożenie z kontrolą przeniesień.",
+                "timeEstimate": 240
+              },
+              {
+                "title": "Zero w środku liczby",
+                "problem": "Oblicz 502 · 7.",
+                "solution": "Jedności: 2·7=14 → 4, przeniesienie 1.\nDziesiątki: 0·7=0 +1=1.\nSetki: 5·7=35.\nWynik: 3514.",
+                "explanation": "Mnożenie przez 0 w kolumnie daje tylko przeniesienie.",
+                "timeEstimate": 240
+              }
+            ],
+            "practiceExercises": [
+              {
+                "type": "basic",
+                "problem": "128 · 4",
+                "expectedAnswer": "512",
+                "hints": ["8·4, przenieś dziesiątki", "Kolejne kolumny"],
+                "timeEstimate": 180
+              },
+              {
+                "type": "intermediate",
+                "problem": "709 · 6",
+                "expectedAnswer": "4254",
+                "hints": ["9·6, potem 0·6 z przeniesieniem", "Na końcu 7·6"],
+                "timeEstimate": 240
+              },
+              {
+                "type": "advanced",
+                "problem": "999 · 8",
+                "expectedAnswer": "7992",
+                "hints": ["Maksymalne przeniesienia", "Sprawdź dzieleniem przez 8"],
+                "timeEstimate": 300
+              }
+            ]
+          }
+        },
+        {
+          "skillId": "903233a2-5494-49bc-a079-46d111022daf",
+          "skillName": "Odejmowanie pisemne liczb naturalnych (z pożyczką)",
+          "class_level": 4,
+          "department": "arithmetic",
+          "content": {
+            "theory": {
+              "introduction": "Odejmowanie pisemne wykonujemy od prawej do lewej. Gdy w kolumnie odjemnik jest większy niż odjemna, pożyczamy 1 z wyższej kolumny (zamienia się w 10 jednostek w aktualnej kolumnie). Kontynuujemy, pamiętając o zmniejszeniu cyfry w kolumnie wyższej o 1. Na końcu sprawdzamy dodając różnicę i odjemnik, by uzyskać odjemną.",
+              "keyConceptsLaTex": ["$10$ pożyczka", "$a-b=c$", "$c+b=a$", "$0$ wiodące pomijamy"],
+              "timeEstimate": 180
+            },
+            "examples": [
+              {
+                "title": "Pożyczka w jednych dziesiątych",
+                "problem": "Oblicz 705 − 268.",
+                "solution": "Jedności: 5−8 nie można → pożycz z dziesiątek (0), pożycz z setek: 10 dziesiątek → 9 setek, 9 dziesiątek.\nJedności: 15−8=7.\nDziesiątki: 9−6=3.\nSetki: 6−2=4.\nWynik: 437.",
+                "explanation": "Pożyczka może przechodzić przez kolumny, aż znajdziemy niezerową cyfrę.",
+                "timeEstimate": 300
+              },
+              {
+                "title": "Zerowe cyfry pośrodku",
+                "problem": "Oblicz 1000 − 457.",
+                "solution": "Jedności: 0−7 → pożycz z dziesiątek (0), dalej z setek (0), z tysięcy: 10 setek.\nZamień: 9 setek, 9 dziesiątek, 10 jedności.\nJedności: 10−7=3.\nDziesiątki: 9−5=4.\nSetki: 9−4=5.\nTysiące: 0.\nWynik: 543.",
+                "explanation": "Kaskadowa pożyczka przez wiele kolumn.",
+                "timeEstimate": 300
+              }
+            ],
+            "practiceExercises": [
+              {
+                "type": "basic",
+                "problem": "632 − 287",
+                "expectedAnswer": "345",
+                "hints": ["Jedności: pożyczka", "Idź kolumnami"],
+                "timeEstimate": 240
+              },
+              {
+                "type": "intermediate",
+                "problem": "1003 − 598",
+                "expectedAnswer": "405",
+                "hints": ["Pożycz przez zero", "Sprawdź dodawaniem"],
+                "timeEstimate": 240
+              },
+              {
+                "type": "advanced",
+                "problem": "20000 − 13579",
+                "expectedAnswer": "6421",
+                "hints": ["Seria pożyczek", "Zapisuj zmiany w każdej kolumnie"],
+                "timeEstimate": 300
+              }
+            ]
+          }
+        },
+        {
+          "skillId": "a7454708-2be1-48d1-8ce2-a2ffdb031381",
+          "skillName": "Dodawanie i odejmowanie ułamków o różnych mianownikach",
+          "class_level": 5,
+          "department": "arithmetic",
+          "content": {
+            "theory": {
+              "introduction": "Aby dodać lub odjąć ułamki o różnych mianownikach, sprowadzamy je do wspólnego mianownika (najlepiej NWW), mnożąc licznik i mianownik przez odpowiednie liczby. Następnie dodajemy/odejmujemy liczniki, mianownik pozostaje wspólny. Wynik skracamy, a jeśli jest niewłaściwy, zamieniamy na liczbę mieszaną.",
+              "keyConceptsLaTex": ["$\\tfrac{a}{b}+\\tfrac{c}{d}=\\tfrac{ad+bc}{bd}$", "$NWW$", "$\\tfrac{a}{b}-\\tfrac{c}{d}$", "$Skracanie$"],
+              "timeEstimate": 180
+            },
+            "examples": [
+              {
+                "title": "Dodawanie przez NWW",
+                "problem": "Oblicz 3/4 + 2/3.",
+                "solution": "NWW(4,3)=12. 3/4=9/12, 2/3=8/12. Suma 17/12=1 5/12.",
+                "explanation": "Wspólny mianownik 12 pozwala dodać liczniki.",
+                "timeEstimate": 300
+              },
+              {
+                "title": "Odejmowanie i skracanie",
+                "problem": "Oblicz 5/6 − 1/4.",
+                "solution": "NWW(6,4)=12. 5/6=10/12, 1/4=3/12. Różnica 7/12.",
+                "explanation": "Rachunek na wspólnym mianowniku, wynik już skrócony.",
+                "timeEstimate": 240
+              }
+            ],
+            "practiceExercises": [
+              {
+                "type": "basic",
+                "problem": "1/2 + 1/3",
+                "expectedAnswer": "5/6",
+                "hints": ["NWW=6", "3/6 + 2/6"],
+                "timeEstimate": 240
+              },
+              {
+                "type": "intermediate",
+                "problem": "7/8 − 1/2",
+                "expectedAnswer": "3/8",
+                "hints": ["NWW=8", "7/8 − 4/8"],
+                "timeEstimate": 240
+              },
+              {
+                "type": "advanced",
+                "problem": "2/5 + 3/10 − 1/2",
+                "expectedAnswer": "0",
+                "hints": ["NWW=10", "4/10 + 3/10 − 5/10"],
+                "timeEstimate": 300
+              }
+            ]
+          }
         }
       ]
     };
