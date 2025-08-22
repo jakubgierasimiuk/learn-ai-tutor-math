@@ -8,6 +8,16 @@ const simpleChatGPTData = {
       skillName: "Działania na liczbach rzeczywistych",
       class_level: 1,
       department: "algebra",
+      generatorParams: {
+        microSkill: "default",
+        difficultyRange: [1, 8],
+        fallbackTrigger: "standard_approach"
+      },
+      teachingFlow: {
+        phase1: { name: "Wprowadzenie", duration: 900, activities: ["theory", "guided_examples"] },
+        phase2: { name: "Ćwiczenia", duration: 1200, activities: ["practice", "feedback"] },
+        phase3: { name: "Utrwalanie", duration: 600, activities: ["mastery_tasks", "assessment"] }
+      },
       content: {
         theory: {
           introduction: "Liczby rzeczywiste obejmują liczby całkowite, wymierne i niewymierne. W tym temacie ćwiczymy kolejność działań, pracę z liczbami ujemnymi oraz ułamkami zwykłymi i dziesiętnymi.",
@@ -31,6 +41,23 @@ const simpleChatGPTData = {
             timeEstimate: 240
           }
         ]
+      },
+      pedagogicalNotes: {
+        commonMistakes: ["Ignorowanie kolejności działań", "Błędy znaków przy mnożeniu ujemnych"],
+        teachingTips: ["Wprowadzaj szacowanie przed rachunkiem"],
+        prerequisites: ["Arytmetyka szkoły podstawowej"]
+      },
+      misconceptionPatterns: [
+        {
+          pattern: "Dodawanie przed mnożeniem w złożonych wyrażeniach",
+          intervention: "Przypomnij hierarchię działań i rozwiąż kontrprzykład krok po kroku"
+        }
+      ],
+      realWorldApplications: ["Przeliczanie cen i rabatów", "Szacowanie wyników pomiarów"],
+      assessmentRubric: {
+        mastery: "Bez błędów stosuje własności działań i szacuje wynik.",
+        proficient: "Popełnia drobne błędy rachunkowe, poprawna metoda.",
+        developing: "Często myli kolejność działań lub znaki."
       }
     },
     {
@@ -38,6 +65,16 @@ const simpleChatGPTData = {
       skillName: "Nierówności liniowe z jedną niewiadomą",
       class_level: 1,
       department: "algebra",
+      generatorParams: {
+        microSkill: "default",
+        difficultyRange: [1, 8],
+        fallbackTrigger: "standard_approach"
+      },
+      teachingFlow: {
+        phase1: { name: "Wprowadzenie", duration: 900, activities: ["theory", "guided_examples"] },
+        phase2: { name: "Ćwiczenia", duration: 1200, activities: ["practice", "feedback"] },
+        phase3: { name: "Utrwalanie", duration: 600, activities: ["mastery_tasks", "assessment"] }
+      },
       content: {
         theory: {
           introduction: "Nierówność liniowa ma postać $ax+b < c$. Rozwiązujemy ją analogicznie do równań, pamiętając o zmianie znaku przy dzieleniu przez liczbę ujemną.",
@@ -61,6 +98,23 @@ const simpleChatGPTData = {
             timeEstimate: 240
           }
         ]
+      },
+      pedagogicalNotes: {
+        commonMistakes: ["Brak zmiany znaku przy dzieleniu przez liczbę ujemną"],
+        teachingTips: ["Ćwicz na osi z kółkami otwartymi i zamkniętymi"],
+        prerequisites: ["Równania liniowe", "Notacja przedziałowa"]
+      },
+      misconceptionPatterns: [
+        {
+          pattern: "Dzielenie przez -1 bez odwrócenia znaku",
+          intervention: "Pokaż kontrprzykład liczbowy i zaznacz wynik na osi"
+        }
+      ],
+      realWorldApplications: ["Budżety z ograniczeniami", "Warunki progowe w fizyce"],
+      assessmentRubric: {
+        mastery: "Poprawnie wyznacza przedziały i przedstawia na osi.",
+        proficient: "Nieliczne potknięcia w zapisie przedziału.",
+        developing: "Nieprawidłowa zmiana znaku i mylenie nawiasów."
       }
     },
     {
@@ -68,6 +122,16 @@ const simpleChatGPTData = {
       skillName: "Rozwiązywanie równań liniowych",
       class_level: 1,
       department: "algebra",
+      generatorParams: {
+        microSkill: "default",
+        difficultyRange: [1, 8],
+        fallbackTrigger: "standard_approach"
+      },
+      teachingFlow: {
+        phase1: { name: "Wprowadzenie", duration: 900, activities: ["theory", "guided_examples"] },
+        phase2: { name: "Ćwiczenia", duration: 1200, activities: ["practice", "feedback"] },
+        phase3: { name: "Utrwalanie", duration: 600, activities: ["mastery_tasks", "assessment"] }
+      },
       content: {
         theory: {
           introduction: "Równanie liniowe w jednej niewiadomej ma postać $ax+b=c$. Celem jest izolacja $x$ za pomocą równoważnych przekształceń.",
@@ -91,6 +155,23 @@ const simpleChatGPTData = {
             timeEstimate: 240
           }
         ]
+      },
+      pedagogicalNotes: {
+        commonMistakes: ["Dzielenie tylko jednej strony równania", "Błędy znaków przy przenoszeniu"],
+        teachingTips: ["Ucz sprawdzania przez podstawienie"],
+        prerequisites: ["Działania na liczbach", "Kolejność działań"]
+      },
+      misconceptionPatterns: [
+        {
+          pattern: "Traktowanie znaku po przeniesieniu jako niezmiennego",
+          intervention: "Ćwiczenia z komentarzem 'co robię po obu stronach?'"
+        }
+      ],
+      realWorldApplications: ["Modele kosztów stałych i zmiennych", "Skalowanie wielkości w fizyce"],
+      assessmentRubric: {
+        mastery: "Szybko i bezbłędnie izoluje $x$ i weryfikuje wynik.",
+        proficient: "Poprawny wynik, okazjonalne potknięcia w zapisie.",
+        developing: "Błędy w przekształceniach, brak sprawdzenia."
       }
     },
     {
@@ -98,6 +179,16 @@ const simpleChatGPTData = {
       skillName: "Funkcja liniowa",
       class_level: 1,
       department: "funkcje",
+      generatorParams: {
+        microSkill: "default",
+        difficultyRange: [1, 8],
+        fallbackTrigger: "standard_approach"
+      },
+      teachingFlow: {
+        phase1: { name: "Wprowadzenie", duration: 900, activities: ["theory", "guided_examples"] },
+        phase2: { name: "Ćwiczenia", duration: 1200, activities: ["practice", "feedback"] },
+        phase3: { name: "Utrwalanie", duration: 600, activities: ["mastery_tasks", "assessment"] }
+      },
       content: {
         theory: {
           introduction: "Funkcja liniowa ma postać $f(x)=ax+b$. Współczynnik $a$ określa nachylenie prostej, a $b$ to punkt przecięcia z osią $OY$.",
@@ -121,6 +212,23 @@ const simpleChatGPTData = {
             timeEstimate: 240
           }
         ]
+      },
+      pedagogicalNotes: {
+        commonMistakes: ["Mylenie $a$ z $b$", "Błędny znak miejsca zerowego"],
+        teachingTips: ["Ćwicz odczyt z wykresu i z równania równolegle"],
+        prerequisites: ["Układ współrzędnych", "Równania liniowe"]
+      },
+      misconceptionPatterns: [
+        {
+          pattern: "Uznawanie $b$ za nachylenie prostej",
+          intervention: "Porównaj wykresy dla $a$ różnych i stałego $b$"
+        }
+      ],
+      realWorldApplications: ["Modele kosztów stałych i zmiennych", "Prędkość stała w fizyce"],
+      assessmentRubric: {
+        mastery: "Poprawnie interpretuje $a,b$, rysuje i odczytuje parametry.",
+        proficient: "Poprawny odczyt z drobnymi nieścisłościami.",
+        developing: "Myli role $a$ i $b$, niepewny wykres."
       }
     },
     {
@@ -128,6 +236,16 @@ const simpleChatGPTData = {
       skillName: "Twierdzenie Pitagorasa",
       class_level: 1,
       department: "geometry",
+      generatorParams: {
+        microSkill: "default",
+        difficultyRange: [1, 8],
+        fallbackTrigger: "standard_approach"
+      },
+      teachingFlow: {
+        phase1: { name: "Wprowadzenie", duration: 900, activities: ["theory", "guided_examples"] },
+        phase2: { name: "Ćwiczenia", duration: 1200, activities: ["practice", "feedback"] },
+        phase3: { name: "Utrwalanie", duration: 600, activities: ["mastery_tasks", "assessment"] }
+      },
       content: {
         theory: {
           introduction: "W trójkącie prostokątnym o przyprostokątnych $a,b$ i przeciwprostokątnej $c$ zachodzi $a^2+b^2=c^2$.",
@@ -151,6 +269,23 @@ const simpleChatGPTData = {
             timeEstimate: 240
           }
         ]
+      },
+      pedagogicalNotes: {
+        commonMistakes: ["Mylenie przeciwprostokątnej z przyprostokątną", "Zapominanie o pierwiastku na końcu"],
+        teachingTips: ["Zawsze szkicuj trójkąt i oznacz kąt prosty"],
+        prerequisites: ["Potęgowanie i pierwiastkowanie", "Geometria płaska – podstawy"]
+      },
+      misconceptionPatterns: [
+        {
+          pattern: "Stosowanie $c^2=a\\cdot b$ zamiast $a^2+b^2=c^2$",
+          intervention: "Kontrprzykład liczbowy i identyfikacja boków na rysunku"
+        }
+      ],
+      realWorldApplications: ["Budownictwo i geodezja", "Nawigacja i odległość w terenie"],
+      assessmentRubric: {
+        mastery: "Sprawnie oblicza brakujące boki i uzasadnia wybór wzoru.",
+        proficient: "Poprawne obliczenia, sporadyczne braki w komentarzu.",
+        developing: "Myli boki lub pomija pierwiastkowanie."
       }
     }
   ]
