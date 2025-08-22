@@ -238,6 +238,42 @@ export const BatchImportRunner = () => {
                 >
                   🔢 Uruchom Algebrano2 Import (7 umiejętności)
                 </Button>
+
+                <Button 
+                  onClick={async () => {
+                    setImporting(true);
+                    try {
+                      const { runCalculus2Import } = await import('@/lib/calculus2ImportRunner');
+                      const result = await runCalculus2Import();
+                      setResults({
+                        totalProcessed: result.total,
+                        successful: result.successful,
+                        failed: result.failed,
+                        details: result.results?.map(r => ({
+                          skillName: r.skillId || 'Unknown',
+                          result: r
+                        })) || []
+                      });
+                      toast({
+                        title: "Calculus2 import zakończony!",
+                        description: `Zaimportowano ${result.successful}/${result.total} umiejętności matematyki`,
+                      });
+                    } catch (error) {
+                      toast({
+                        title: "Błąd importu Calculus2",
+                        description: error instanceof Error ? error.message : "Nieznany błąd",
+                        variant: "destructive"
+                      });
+                    } finally {
+                      setImporting(false);
+                    }
+                  }}
+                  disabled={importing}
+                  variant="secondary"
+                  className="w-full mt-2"
+                >
+                  📊 Uruchom Calculus2 Import (6 umiejętności)
+                </Button>
               </div>
             </TabsContent>
 
