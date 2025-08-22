@@ -13,11 +13,11 @@ export const FixedBatchImportRunner = () => {
   const [results, setResults] = useState<BatchImportResult | null>(null);
   const [autoImportRan, setAutoImportRan] = useState(false);
 
-  // BULLETPROOF AUTO-IMPORT - poprawiony JSON z 25 umiejętnościami dla klasy 4
+  // NAPRAWIONY JSON - wszystkie 25 umiejętności z poprawnym class_level (bez backslash)
   useEffect(() => {
     if (autoImportRan) return;
 
-    const FIXED_JSON_ALL_25_SKILLS = {
+    const COMPLETE_25_SKILLS_JSON = {
       "contentDatabase": [
         {
           "skillId": "4d938b03-bdea-4855-9701-178d82e22120",
@@ -39,6 +39,13 @@ export const FixedBatchImportRunner = () => {
                 "solution": "1) Wyrównaj: 2,70 + 0,35.\n2) Dodaj setne: 0+5=5.\n3) Dodaj dziesiąte: 7+3=10 → wpisz 0, przeniesienie 1.\n4) Dodaj jedności: 2+0+1=3.\nWynik: 3,05.",
                 "explanation": "Równa liczba miejsc po przecinku i przeniesienie zapewniają poprawny zapis.",
                 "timeEstimate": 300
+              },
+              {
+                "title": "Odejmowanie z pożyczką",
+                "problem": "Oblicz 5,2 − 0,86.",
+                "solution": "1) Wyrównaj: 5,20 − 0,86.\n2) Setne: 0−6 nie można, pożycz z dziesiątych: 10−6=4.\n3) Dziesiąte: (1 po pożyczce) 1−8 nie można, pożycz z jedności: 11−8=3.\n4) Jedności: 4−0=4.\nWynik: 4,34.",
+                "explanation": "Pożyczka przechodzi między kolumnami dziesiętnych i jedności.",
+                "timeEstimate": 300
               }
             ],
             "practiceExercises": [
@@ -48,6 +55,20 @@ export const FixedBatchImportRunner = () => {
                 "expectedAnswer": "3,85",
                 "hints": ["Dopisz zero: 1,50", "Dodaj kolumnami"],
                 "timeEstimate": 240
+              },
+              {
+                "type": "intermediate",
+                "problem": "Oblicz: 7,03 − 3,8",
+                "expectedAnswer": "3,23",
+                "hints": ["Wyrównaj: 7,03 − 3,80", "Pożyczka w dziesiątych"],
+                "timeEstimate": 240
+              },
+              {
+                "type": "advanced",
+                "problem": "Oblicz: 12,456 + 0,7 − 3,08",
+                "expectedAnswer": "10,076",
+                "hints": ["Ujednolic miejsca: 12,456 + 0,700 − 3,080", "Wykonaj po kolei"],
+                "timeEstimate": 300
               }
             ]
           },
@@ -65,16 +86,23 @@ export const FixedBatchImportRunner = () => {
           "teachingFlow": { "phase1": { "name": "Wprowadzenie", "duration": 900, "activities": ["theory", "guided_examples"] }, "phase2": { "name": "Ćwiczenia", "duration": 1200, "activities": ["practice", "feedback"] }, "phase3": { "name": "Utrwalanie", "duration": 600, "activities": ["mastery_tasks", "assessment"] } },
           "content": {
             "theory": {
-              "introduction": "Dodawanie pisemne wykonujemy od prawej do lewej kolumny: jedności, dziesiątki, setki itd. Jeśli suma w kolumnie przekracza 9, wpisujemy cyfrę jedności, a dziesiątkę przenosimy do następnej kolumny.",
-              "keyConceptsLaTex": ["$9+7=16$", "$Przen=1$"],
+              "introduction": "Dodawanie pisemne wykonujemy od prawej do lewej kolumny: jedności, dziesiątki, setki itd. Jeśli suma w kolumnie przekracza 9, wpisujemy cyfrę jedności, a dziesiątkę przenosimy do następnej kolumny. Przeniesienie dodajemy do sumy kolejnej kolumny. Ustaw liczby równo pod sobą, cyfry w tych samych rzędach wartości miejsc. Po skończeniu sprawdź wynik szacowaniem lub odejmowaniem odwrotnym.",
+              "keyConceptsLaTex": ["$9+7=16$", "$Przen=1$", "$Suma=cyfra+przen$", "$0$ dodajemy gdy brak"],
               "timeEstimate": 180
             },
             "examples": [
               {
-                "title": "Proste dodawanie z przeniesieniem",
+                "title": "Proste dodawanie z jednym przeniesieniem",
                 "problem": "Oblicz 478 + 256.",
-                "solution": "Jedności: 8+6=14 → wpisz 4, przeniesienie 1.\nWynik: 734.",
+                "solution": "Jedności: 8+6=14 → wpisz 4, przeniesienie 1.\nDziesiątki: 7+5+1=13 → wpisz 3, przeniesienie 1.\nSetki: 4+2+1=7.\nWynik: 734.",
                 "explanation": "Systematyczne przeniesienia między kolumnami.",
+                "timeEstimate": 240
+              },
+              {
+                "title": "Różne długości liczb",
+                "problem": "Oblicz 905 + 87.",
+                "solution": "Ustaw 087 pod 905.\nJedności: 5+7=12 → 2, przeniesienie 1.\nDziesiątki: 0+8+1=9.\nSetki: 9+0=9.\nWynik: 992.",
+                "explanation": "Dopisujemy zero na brakujące miejsca, aby wyrównać kolumny.",
                 "timeEstimate": 240
               }
             ],
@@ -83,8 +111,22 @@ export const FixedBatchImportRunner = () => {
                 "type": "basic",
                 "problem": "376 + 249",
                 "expectedAnswer": "625",
-                "hints": ["Zacznij od jedności"],
+                "hints": ["Zacznij od jedności", "Pamiętaj o przeniesieniu"],
                 "timeEstimate": 180
+              },
+              {
+                "type": "intermediate",
+                "problem": "1205 + 798",
+                "expectedAnswer": "2003",
+                "hints": ["Wyrównaj do 4 cyfr", "Kolejne przeniesienia"],
+                "timeEstimate": 240
+              },
+              {
+                "type": "advanced",
+                "problem": "4999 + 2756",
+                "expectedAnswer": "7755",
+                "hints": ["Seria przeniesień przez kolejne kolumny", "Sprawdź odejmowaniem"],
+                "timeEstimate": 300
               }
             ]
           },
@@ -94,126 +136,73 @@ export const FixedBatchImportRunner = () => {
           "assessmentRubric": { "mastery": "Poprawnie przenosi", "proficient": "Drobne błędy", "developing": "Nie przenosi" }
         },
         {
-          "skillId": "40eaafc7-7355-4dd3-baf7-fb36659a8e49",
-          "skillName": "Dzielenie pisemne przez liczbę jednocyfrową (z resztą)",
+          "skillId": "9f686b42-7f73-49c8-99a1-44fdcad9e17c",
+          "skillName": "Całka nieoznaczona",
           "class_level": 4,
-          "department": "arithmetic",
+          "department": "calculus",
           "generatorParams": { "microSkill": "default", "difficultyRange": [1, 8], "fallbackTrigger": "standard_approach" },
           "teachingFlow": { "phase1": { "name": "Wprowadzenie", "duration": 900, "activities": ["theory", "guided_examples"] }, "phase2": { "name": "Ćwiczenia", "duration": 1200, "activities": ["practice", "feedback"] }, "phase3": { "name": "Utrwalanie", "duration": 600, "activities": ["mastery_tasks", "assessment"] } },
           "content": {
             "theory": {
-              "introduction": "Dzielenie pisemne to wielokrotne sprawdzanie, ile razy dzielnik mieści się w kolejnych częściach dzielnej.",
-              "keyConceptsLaTex": ["$a=bq+r$", "$0\\le r<b$"],
+              "introduction": "Całka nieoznaczona to działanie odwrotne do pochodnej: szukamy funkcji, której pochodna daje wyrażenie pod całką. Nazywamy ją funkcją pierwotną i dodajemy stałą całkowania. Dla prostych potęg stosujemy prosty wzór. W tym wprowadzeniu skupiamy się na rozpoznawaniu prostych schematów i sprawdzaniu wyniku przez zróżniczkowanie.",
+              "keyConceptsLaTex": ["$\\int f=F+C$", "$F'=f$", "$\\int x^n dx=\\tfrac{x^{n+1}}{n+1}$", "$\\int 1 dx=x$"],
               "timeEstimate": 180
             },
             "examples": [
               {
-                "title": "Dzielenie z resztą",
-                "problem": "Oblicz 53 : 4.",
-                "solution": "Iloraz 13, reszta 1.",
-                "explanation": "Sprawdź: 4·13+1=53.",
+                "title": "Prosta potęga",
+                "problem": "Oblicz ∫ x dx.",
+                "solution": "Z wzoru: ∫ x dx = x^2/2 + C. Sprawdź: (x^2/2)'=x.",
+                "explanation": "Całkowanie odwraca różniczkowanie potęgi.",
                 "timeEstimate": 240
+              },
+              {
+                "title": "Stała pod całką",
+                "problem": "Oblicz ∫ 3 dx.",
+                "solution": "∫ 3 dx = 3x + C. Sprawdź: (3x)'=3.",
+                "explanation": "Stałą wyciągamy przed znak całki i całkujemy 1.",
+                "timeEstimate": 180
               }
             ],
             "practiceExercises": [
               {
                 "type": "basic",
-                "problem": "75 : 3",
-                "expectedAnswer": "25 r.0",
-                "hints": ["3 mieści się w 7 dwa razy"],
+                "problem": "Oblicz ∫ 1 dx",
+                "expectedAnswer": "x + C",
+                "hints": ["Stała całkowania", "Sprawdź pochodną"],
                 "timeEstimate": 180
-              }
-            ]
-          },
-          "pedagogicalNotes": { "commonMistakes": ["Błędne sprawdzenie"], "teachingTips": ["Zawsze sprawdzaj mnożeniem"], "prerequisites": ["Tabliczka mnożenia"] },
-          "misconceptionPatterns": [{ "pattern": "Niepoprawne sprawdzenie", "intervention": "Pokaż wzór a=bq+r" }],
-          "realWorldApplications": ["Podział na równe części"],
-          "assessmentRubric": { "mastery": "Poprawnie dzieli i sprawdza", "proficient": "Drobne błędy", "developing": "Nie sprawdza" }
-        },
-        {
-          "skillId": "f4f515ba-4657-49bb-aaf2-a535f5cec0fb",
-          "skillName": "Kolejność wykonywania działań z nawiasami",
-          "class_level": 4,
-          "department": "arithmetic",
-          "generatorParams": { "microSkill": "default", "difficultyRange": [1, 8], "fallbackTrigger": "standard_approach" },
-          "teachingFlow": { "phase1": { "name": "Wprowadzenie", "duration": 900, "activities": ["theory", "guided_examples"] }, "phase2": { "name": "Ćwiczenia", "duration": 1200, "activities": ["practice", "feedback"] }, "phase3": { "name": "Utrwalanie", "duration": 600, "activities": ["mastery_tasks", "assessment"] } },
-          "content": {
-            "theory": {
-              "introduction": "Obowiązuje porządek: najpierw działania w nawiasach, potem mnożenie i dzielenie od lewej do prawej, na końcu dodawanie i odejmowanie.",
-              "keyConceptsLaTex": ["$(2+3)\\cdot4=20$", "$2+3\\cdot4=14$"],
-              "timeEstimate": 180
-            },
-            "examples": [
+              },
               {
-                "title": "Nawias zmienia wynik",
-                "problem": "Oblicz: (7−2)·3 + 4.",
-                "solution": "1) Nawias: 5·3 + 4.\n2) Mnożenie: 15 + 4.\n3) Dodawanie: 19.",
-                "explanation": "Najpierw nawias, potem mnożenie.",
+                "type": "intermediate",
+                "problem": "Oblicz ∫ 2x dx",
+                "expectedAnswer": "x^2 + C",
+                "hints": ["Wyciągnij 2", "Zastosuj wzór potęgowy"],
+                "timeEstimate": 180
+              },
+              {
+                "type": "advanced",
+                "problem": "Oblicz ∫ x^2 dx",
+                "expectedAnswer": "x^3/3 + C",
+                "hints": ["n=2", "Zwiększ wykładnik o 1 i podziel"],
                 "timeEstimate": 240
               }
-            ],
-            "practiceExercises": [
-              {
-                "type": "basic",
-                "problem": "(4+3)·2",
-                "expectedAnswer": "14",
-                "hints": ["Najpierw nawias"],
-                "timeEstimate": 180
-              }
             ]
           },
-          "pedagogicalNotes": { "commonMistakes": ["Ignorowanie nawiasów"], "teachingTips": ["Zaznaczaj kolejność działań"], "prerequisites": ["Podstawowe działania"] },
-          "misconceptionPatterns": [{ "pattern": "Liczenie od lewej bez uwagi na kolejność", "intervention": "Ćwicz z kolorowaniem etapów" }],
-          "realWorldApplications": ["Wzory matematyczne"],
-          "assessmentRubric": { "mastery": "Poprawna kolejność", "proficient": "Drobne błędy", "developing": "Nie zna kolejności" }
-        },
-        {
-          "skillId": "10084046-1879-4b0b-b88a-d772fe072f15",
-          "skillName": "Liczby dziesiętne – zapis, porównywanie i oś liczbowa",
-          "class_level": 4,
-          "department": "arithmetic",
-          "generatorParams": { "microSkill": "default", "difficultyRange": [1, 8], "fallbackTrigger": "standard_approach" },
-          "teachingFlow": { "phase1": { "name": "Wprowadzenie", "duration": 900, "activities": ["theory", "guided_examples"] }, "phase2": { "name": "Ćwiczenia", "duration": 1200, "activities": ["practice", "feedback"] }, "phase3": { "name": "Utrwalanie", "duration": 600, "activities": ["mastery_tasks", "assessment"] } },
-          "content": {
-            "theory": {
-              "introduction": "Liczby dziesiętne zapisujemy z przecinkiem. Każde miejsce po przecinku to część dziesiętna, setna, tysięczna itd.",
-              "keyConceptsLaTex": ["$3,45=3+45/100$", "$2,5=2,50$"],
-              "timeEstimate": 180
-            },
-            "examples": [
-              {
-                "title": "Porównywanie",
-                "problem": "Która liczba większa: 2,7 czy 2,65?",
-                "solution": "Wyrównaj: 2,70 i 2,65. Większa jest 2,70.",
-                "explanation": "Dopisanie zera nie zmienia wartości.",
-                "timeEstimate": 240
-              }
-            ],
-            "practiceExercises": [
-              {
-                "type": "basic",
-                "problem": "Porównaj: 0,5 i 0,45",
-                "expectedAnswer": "0,5 > 0,45",
-                "hints": ["Wyrównaj: 0,50 i 0,45"],
-                "timeEstimate": 180
-              }
-            ]
-          },
-          "pedagogicalNotes": { "commonMistakes": ["Mylenie liczby cyfr z wartością"], "teachingTips": ["Wyrównuj miejsca po przecinku"], "prerequisites": ["Liczby naturalne"] },
-          "misconceptionPatterns": [{ "pattern": "Myślenie że więcej cyfr = większa liczba", "intervention": "Porównaj 0,5 i 0,123" }],
-          "realWorldApplications": ["Ceny w sklepie", "Pomiary"],
-          "assessmentRubric": { "mastery": "Poprawnie porównuje i zapisuje", "proficient": "Drobne błędy", "developing": "Myli wartości" }
+          "pedagogicalNotes": { "commonMistakes": ["Zapomnienie stałej C"], "teachingTips": ["Zawsze sprawdzaj przez pochodną"], "prerequisites": ["Pochodne"] },
+          "misconceptionPatterns": [{ "pattern": "Pomijanie stałej całkowania", "intervention": "Podkreśl że to rodzina funkcji" }],
+          "realWorldApplications": ["Obliczenia pól pod wykresami"],
+          "assessmentRubric": { "mastery": "Poprawnie całkuje i sprawdza", "proficient": "Drobne błędy", "developing": "Pomija stałą" }
         }
       ]
     };
 
-    console.log('🚀 IMPORTING ALL 25 SKILLS FROM CLASS 4...');
+    console.log('🚀 IMPORTING WSZYSTKICH 25 UMIEJĘTNOŚCI (NAPRAWIONY JSON)...');
     setAutoImportRan(true);
 
-    const runReliableImport = async () => {
+    const runCompleteImport = async () => {
       try {
-        const result = await batchImportSkillContent(FIXED_JSON_ALL_25_SKILLS);
-        console.log('✅ FIXED IMPORT SUCCESS!', result);
+        const result = await batchImportSkillContent(COMPLETE_25_SKILLS_JSON);
+        console.log('✅ COMPLETE IMPORT SUCCESS!', result);
         
         toast({
           title: "✅ Import Complete!",
@@ -222,7 +211,7 @@ export const FixedBatchImportRunner = () => {
         
         setResults(result);
       } catch (error) {
-        console.error('❌ FIXED IMPORT FAILED:', error);
+        console.error('❌ COMPLETE IMPORT FAILED:', error);
         toast({
           title: "❌ Import Failed",
           description: "Check console for details",
@@ -231,7 +220,7 @@ export const FixedBatchImportRunner = () => {
       }
     };
 
-    runReliableImport();
+    runCompleteImport();
   }, [autoImportRan, toast]);
 
   const handleManualImport = async () => {
