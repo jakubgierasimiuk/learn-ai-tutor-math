@@ -26,6 +26,7 @@ import UXAuditPage from "./pages/UXAuditPage";
 import ProgressPage from "./pages/ProgressPage";
 import { RealLearningPage } from "./pages/RealLearningPage";
 import ContentImportPage from "./pages/ContentImportPage";
+import BatchImportPage from "./pages/BatchImportPage";
 import { OnboardingWelcome } from "@/components/onboarding/OnboardingWelcome";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 import { QuickDiagnostic } from "@/components/onboarding/QuickDiagnostic";
@@ -231,6 +232,7 @@ const App = () => (
               </AuthenticatedLayout>
             } /> */}
             <Route path="/content-manager" element={<ContentImportPage />} />
+            <Route path="/batch-import" element={<BatchImportPage />} />
             <Route path="/study/lesson/:skillId" element={
               <AuthenticatedLayout>
                 <StudyLesson />

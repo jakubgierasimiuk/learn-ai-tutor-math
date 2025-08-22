@@ -10,6 +10,48 @@ export interface SkillImportResult {
   };
 }
 
+export interface BatchImportResult {
+  totalProcessed: number;
+  successful: number;
+  failed: number;
+  details: SkillImportResult[];
+}
+
+interface ChatGPTSkillContent {
+  skillId: string;
+  skillName: string;
+  class_level: number;
+  department: string;
+  generatorParams: any;
+  teachingFlow: any;
+  content: any;
+  pedagogicalNotes: any;
+  misconceptionPatterns: any;
+  realWorldApplications: any;
+  assessmentRubric: any;
+}
+
+export interface BatchImportResult {
+  totalProcessed: number;
+  successful: number;
+  failed: number;
+  details: SkillImportResult[];
+}
+
+interface ChatGPTSkillContent {
+  skillId: string;
+  skillName: string;
+  class_level: number;
+  department: string;
+  generatorParams: any;
+  teachingFlow: any;
+  content: any;
+  pedagogicalNotes: any;
+  misconceptionPatterns: any;
+  realWorldApplications: any;
+  assessmentRubric: any;
+}
+
 interface SkillContent {
   skillId: string;
   skillName: string;
@@ -3785,3 +3827,255 @@ export const importCombinatoricsProbabilitySkill = async (): Promise<SkillImport
     throw error;
   }
 };
+
+// Batch import function for ChatGPT generated content
+export async function batchImportSkillContent(chatGPTData: { contentDatabase: ChatGPTSkillContent[] }): Promise<BatchImportResult> {
+  console.log('Starting batch import from ChatGPT data...');
+  
+  const results: SkillImportResult[] = [];
+  let successful = 0;
+  let failed = 0;
+
+  // Validate input structure
+  if (!chatGPTData?.contentDatabase || !Array.isArray(chatGPTData.contentDatabase)) {
+    throw new Error('Invalid data structure: expected { contentDatabase: [...] }');
+  }
+
+  // Process each skill from ChatGPT
+  for (const skill of chatGPTData.contentDatabase) {
+    try {
+      // Map skillId to existing skill in database
+      let targetSkillId = skill.skillId;
+      
+      // If skillId is a custom identifier, try to find by name
+      if (!targetSkillId || typeof targetSkillId !== 'string' || targetSkillId.startsWith('skill_')) {
+        const { data: existingSkill } = await supabase
+          .from('skills')
+          .select('id')
+          .eq('name', skill.skillName)
+          .single();
+        
+        if (existingSkill) {
+          targetSkillId = existingSkill.id;
+        } else {
+          results.push({
+            skillName: skill.skillName,
+            result: {
+              success: false,
+              error: `Skill not found in database: ${skill.skillName}`
+            }
+          });
+          failed++;
+          continue;
+        }
+      }
+
+      // Import unified skill content
+      const unifiedContentData = {
+        theory: skill.content?.theory ? {
+          theory_text: skill.content.theory.introduction || '',
+          key_formulas: skill.content.theory.keyConceptsLaTex || [],
+          time_estimate: skill.content.theory.timeEstimate || 300,
+          difficulty_level: skill.generatorParams?.difficultyRange?.[0] || 1,
+          created_at: new Date().toISOString()
+        } : null,
+        examples: skill.content?.examples?.map((example: any, index: number) => ({
+          example_code: `${skill.skillName.toLowerCase().replace(/\s+/g, '_')}_ex_${index + 1}`,
+          problem_statement: example.problem || '',
+          solution_steps: example.solution?.steps?.map((step: any) => step.step) || [],
+          final_answer: example.solution?.final_answer || '',
+          explanation: example.explanation || example.maturaConnection || '',
+          difficulty_level: example.difficulty || skill.generatorParams?.difficultyRange?.[0] || 1,
+          time_estimate: example.timeEstimate || 120
+        })) || [],
+        exercises: skill.content?.practiceExercises?.map((exercise: any) => ({
+          exercise_code: exercise.exerciseId || `${skill.skillName.toLowerCase().replace(/\s+/g, '_')}_${Math.random().toString(36).substr(2, 6)}`,
+          problem_statement: exercise.problem || '',
+          expected_answer: exercise.expectedAnswer || '',
+          difficulty_level: exercise.difficulty || 1,
+          time_estimate: exercise.timeEstimate || 180,
+          misconception_map: exercise.misconceptionTriggers || {},
+          hints: exercise.hints?.map((hint: any) => hint.hint) || []
+        })) || [],
+        pedagogical_notes: skill.pedagogicalNotes ? {
+          scaffolding_questions: skill.pedagogicalNotes.teachingTips || [],
+          teaching_flow: ["theory", "examples", "practice", "assessment"],
+          estimated_total_time: skill.pedagogicalNotes.estimatedTime || 3600,
+          prerequisite_description: skill.pedagogicalNotes.prerequisites?.join(', ') || '',
+          next_topic_description: skill.pedagogicalNotes.universityConnection || ''
+        } : null,
+        assessment_rubric: skill.assessmentRubric || {
+          mastery_threshold: 80,
+          skill_levels: {
+            "beginner": "0-40% poprawnych odpowiedzi",
+            "developing": "41-70% poprawnych odpowiedzi", 
+            "proficient": "71-90% poprawnych odpowiedzi",
+            "advanced": "91-100% poprawnych odpowiedzi"
+          },
+          total_questions: 10,
+          scope_description: skill.skillName
+        },
+        phases: []
+      };
+
+      const metadata = {
+        skill_name: skill.skillName,
+        description: skill.skillName,
+        department: skill.department || 'mathematics',
+        level: 'primary',
+        class_level: skill.class_level || 1,
+        men_code: skill.skillId || '',
+        difficulty_rating: skill.generatorParams?.difficultyRange?.[0] || 1,
+        estimated_time_minutes: Math.round((skill.pedagogicalNotes?.estimatedTime || 3600) / 60),
+        prerequisites: skill.pedagogicalNotes?.prerequisites || [],
+        learning_objectives: [],
+        chapter_tag: skill.department || ''
+      };
+
+      // Check if content is complete
+      const isComplete = !!(
+        unifiedContentData.theory?.theory_text && 
+        unifiedContentData.examples?.length > 0 &&
+        unifiedContentData.exercises?.length > 0
+      );
+
+      const { error: unifiedError } = await supabase
+        .from('unified_skill_content')
+        .upsert([{
+          skill_id: targetSkillId,
+          content_data: unifiedContentData,
+          metadata: metadata,
+          is_complete: isComplete,
+          version: 1
+        }]);
+
+      if (unifiedError) {
+        console.error(`Error inserting unified content for ${skill.skillName}:`, unifiedError);
+        results.push({
+          skillName: skill.skillName,
+          result: {
+            success: false,
+            error: `Failed to import: ${unifiedError.message}`
+          }
+        });
+        failed++;
+        continue;
+      }
+
+      console.log(`Successfully imported skill: ${skill.skillName}`);
+      results.push({
+        skillName: skill.skillName,
+        result: {
+          success: true,
+          skillId: targetSkillId
+        }
+      });
+      successful++;
+
+    } catch (error) {
+      console.error(`Failed to import skill ${skill.skillName}:`, error);
+      results.push({
+        skillName: skill.skillName,
+        result: {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        }
+      });
+      failed++;
+    }
+  }
+
+  const batchResult: BatchImportResult = {
+    totalProcessed: chatGPTData.contentDatabase.length,
+    successful,
+    failed,
+    details: results
+  };
+
+  console.log('Batch import completed:', batchResult);
+  return batchResult;
+}
+
+// Generate ChatGPT prompts for missing skills
+export async function generateChatGPTPrompts(): Promise<{ prompts: string[], skillCounts: Record<string, number> }> {
+  // Get missing skills grouped by class level
+  const { data: missingSkills } = await supabase
+    .from('skills')
+    .select('id, name, class_level, department')
+    .not('id', 'in', `(SELECT skill_id FROM unified_skill_content WHERE is_complete = true)`)
+    .order('class_level, department, name');
+
+  if (!missingSkills) return { prompts: [], skillCounts: {} };
+
+  // Group skills by class level for batch processing
+  const skillsByLevel: Record<number, typeof missingSkills> = {};
+  const skillCounts: Record<string, number> = {};
+
+  missingSkills.forEach(skill => {
+    if (!skillsByLevel[skill.class_level]) {
+      skillsByLevel[skill.class_level] = [];
+    }
+    skillsByLevel[skill.class_level].push(skill);
+    
+    const key = `Class ${skill.class_level}`;
+    skillCounts[key] = (skillCounts[key] || 0) + 1;
+  });
+
+  const prompts: string[] = [];
+  
+  // Generate prompts for each class level batch (max 20 skills per prompt)
+  Object.entries(skillsByLevel).forEach(([level, skills]) => {
+    const classLevel = parseInt(level);
+    const chunks = [];
+    
+    // Split into chunks of 20 skills
+    for (let i = 0; i < skills.length; i += 20) {
+      chunks.push(skills.slice(i, i + 20));
+    }
+
+    chunks.forEach((chunk, chunkIndex) => {
+      const prompt = `# Generowanie Treści dla Klasy ${classLevel} - Batch ${chunkIndex + 1}
+
+Wygeneruj pełną treść edukacyjną dla poniższych ${chunk.length} umiejętności z klasy ${classLevel} polskiej szkoły podstawowej/średniej.
+
+## Umiejętności do wygenerowania:
+
+${chunk.map((skill, index) => `${index + 1}. **${skill.name}** (ID: ${skill.id}, Dział: ${skill.department})`).join('\n')}
+
+## Wymagania:
+
+1. **Format**: Zwróć TYLKO prawidłowy JSON w formacie:
+\`\`\`json
+{
+  "contentDatabase": [
+    // ... ${chunk.length} umiejętności z pełną strukturą
+  ]
+}
+\`\`\`
+
+2. **Struktura każdej umiejętności**:
+   - skillId: użyj dokładnie podanego ID z listy powyżej
+   - skillName: użyj dokładnie podanej nazwy z listy powyżej  
+   - class_level: ${classLevel}
+   - department: użyj podanego działu
+   - generatorParams: { microSkill: "default", difficultyRange: [1, ${Math.min(classLevel + 2, 10)}], fallbackTrigger: "standard_approach" }
+
+3. **Zawartość (content)**:
+   - theory: wprowadzenie (maks 100 słów), keyConceptsLaTex (wzory inline $...$)
+   - examples: 2-3 przykłady z rozwiązaniem krok po kroku
+   - practiceExercises: 3-5 ćwiczeń o rosnącej trudności
+
+4. **Polskie nazewnictwo**: Wszystko w języku polskim, dostosowane do poziomu klasy ${classLevel}
+
+5. **LaTeX**: TYLKO inline $wzory$ (maks 50 znaków), NO display math $$...$$
+
+6. **Czas**: Wszystkie timeEstimate w sekundach (60-300 dla teorii, 120-600 dla ćwiczeń)
+
+**UWAGA**: Odpowiedz TYLKO prawidłowym JSON bez dodatkowych komentarzy!`;
+
+      prompts.push(prompt);
+    });
+  });
+
+  return { prompts, skillCounts };
+}
