@@ -4021,7 +4021,7 @@ export async function generateChatGPTPrompts(groupNumber: number = 1): Promise<{
         department,
         unified_skill_content!left(skill_id, is_complete)
       `)
-      .or('unified_skill_content.skill_id.is.null,unified_skill_content.is_complete.is.false')
+      .or('unified_skill_content.skill_id.is.null,unified_skill_content.is_complete.eq.false')
       .order('class_level')
       .order('department')  
       .order('name')
