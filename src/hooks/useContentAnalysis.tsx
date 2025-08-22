@@ -28,35 +28,31 @@ export const useContentAnalysis = () => {
       try {
         setLoading(true);
         
-        // Fetch all skills with content status
+        // Fetch all skills
         const { data: skills, error: skillsError } = await supabase
           .from('skills')
-          .select('id, name, class_level, department, content_structure')
+          .select('id, name, class_level, department')
           .eq('is_active', true);
 
         if (skillsError) throw skillsError;
 
+        // Fetch content from separate tables
+        const [theoryData, examplesData, exercisesData] = await Promise.all([
+          supabase.from('skill_theory_content').select('skill_id').then(res => res.data || []),
+          supabase.from('skill_examples').select('skill_id').then(res => res.data || []),
+          supabase.from('skill_practice_exercises').select('skill_id').then(res => res.data || [])
+        ]);
+
+        // Create sets for faster lookup
+        const skillsWithTheory = new Set(theoryData.map(t => t.skill_id));
+        const skillsWithExamples = new Set(examplesData.map(e => e.skill_id));
+        const skillsWithExercises = new Set(exercisesData.map(e => e.skill_id));
+
         // Process skills to determine REAL content status
         const processedSkills: SkillContent[] = skills.map(skill => {
-          let hasTheory = false;
-          let hasExamples = false;
-          let hasPractice = false;
-
-          if (skill.content_structure && typeof skill.content_structure === 'object' && skill.content_structure !== null) {
-            const content = skill.content_structure as any;
-            
-            hasTheory = content.theory?.sections && 
-                       Array.isArray(content.theory.sections) && 
-                       content.theory.sections.length > 0;
-            
-            hasExamples = content.examples?.solved && 
-                         Array.isArray(content.examples.solved) && 
-                         content.examples.solved.length > 0;
-            
-            hasPractice = content.practiceExercises && 
-                         Array.isArray(content.practiceExercises) && 
-                         content.practiceExercises.length > 0;
-          }
+          const hasTheory = skillsWithTheory.has(skill.id);
+          const hasExamples = skillsWithExamples.has(skill.id);
+          const hasPractice = skillsWithExercises.has(skill.id);
 
           return {
             id: skill.id,
