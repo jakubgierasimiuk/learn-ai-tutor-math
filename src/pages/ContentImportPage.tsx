@@ -692,6 +692,67 @@ export const ContentImportPage = () => {
 
   return (
     <div className="container mx-auto py-8 space-y-8">
+      {/* Updated Missing Skills Status Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Stan Bazy Danych - Braki w Umiejętnościach</CardTitle>
+          <CardDescription>
+            Aktualny status pokrycia umiejętności w bazie danych (ostatnia aktualizacja: 22.01.2025)
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* COMPLETE SKILLS */}
+          <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+            <h4 className="font-semibold text-green-800 mb-2">✅ UKOŃCZONE UMIEJĘTNOŚCI (42/198):</h4>
+            <div className="text-sm text-green-700 space-y-1">
+              <div><strong>Klasa 1 (13):</strong> Działania na liczbach rzeczywistych, Funkcja liniowa, Funkcje — definicja i własności, Liczby rzeczywiste, Nierówności kwadratowe, Nierówności liniowe z jedną niewiadomą, Prawdopodobieństwo warunkowe, Równania i nierówności kwadratowe, Rozwiązywanie równań liniowych, Trygonometria — funkcje i wzory, Twierdzenie Pitagorasa, Wartość bezwzględna - definicja i własności, Ciągi arytmetyczne i geometryczne</div>
+              <div><strong>Klasa 2 (13):</strong> Ciągi arytmetyczne, Ciągi liczbowe, Funkcja wykładnicza i logarytmiczna, Funkcje trygonometryczne, Geometria analityczna – okrąg i parabola, Granica funkcji, Kombinatoryka zaawansowana, Liczby zespolone, Planimetria – wielokąty i okręgi, Równania i nierówności wielomianowe, Równania i nierówności z wartością bezwzględną, Równania kwadratowe, Wyrażenia algebraiczne</div>
+              <div><strong>Klasa 3 (16):</strong> Całka nieoznaczona — podstawowe techniki, Całka oznaczona - definicja i obliczanie, Funkcje wykładnicze i logarytmiczne, Granice funkcji, Kombinatoryka i prawdopodobieństwo, Pochodna funkcji, Pochodna funkcji — definicja, obliczanie, interpretacje, Prawdopodobieństwo klasyczne, Równania różniczkowe, Równania różniczkowe — podstawy, Rozkłady prawdopodobieństwa, Rozkłady prawdopodobieństwa — dyskretne i ciągłe, Stereometria, Stereometria – bryły, Stereometria — objętości i pola powierzchni, Zastosowania całki oznaczonej</div>
+            </div>
+          </div>
+
+          {/* CRITICAL MISSING SKILLS */}
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <h4 className="font-semibold text-red-800 mb-2">🚨 BRAKI KRYTYCZNE (wymagają natychmiastowej uwagi):</h4>
+            <div className="text-sm text-red-700 space-y-1">
+              <div><strong>Klasa 2:</strong> Funkcje – własności ogólne, Funkcje potęgowe, Funkcje odwrotne, Równania kwadratowe - metody rozwiązywania</div>
+              <div><strong>Klasa 3:</strong> Funkcje ciągłe, Asymptoty funkcji, Badanie przebiegu zmienności funkcji</div>
+              <div><strong>Klasa 4-6:</strong> Podstawy arytmetyki (89 umiejętności), Geometria podstawowa (34 umiejętności), Ułamki i liczby dziesiętne (28 umiejętności)</div>
+            </div>
+          </div>
+
+          {/* HIGH PRIORITY MISSING */}
+          <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <h4 className="font-semibold text-orange-800 mb-2">⚠️ BRAKI WYSOKIEGO PRIORYTETU:</h4>
+            <div className="text-sm text-orange-700 space-y-1">
+              <div><strong>Klasa 1:</strong> Procenty i proporcje, Jednozmienne statystyki opisowe</div>
+              <div><strong>Klasa 2:</strong> Funkcje wymierne, Przekształcenia wykresów funkcji, Równania i nierówności irracjonalne</div>
+              <div><strong>Klasa 3:</strong> Metody całkowania, Równania trygonometryczne, Analiza kombinatoryczna</div>
+            </div>
+          </div>
+
+          {/* MEDIUM PRIORITY MISSING */}
+          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <h4 className="font-semibold text-yellow-800 mb-2">📋 BRAKI ŚREDNIEGO PRIORYTETU:</h4>
+            <div className="text-sm text-yellow-700">
+              Geometria analityczna zaawansowana, Liczby zespolone - zastosowania, Logika matematyczna, 
+              Indukcja matematyczna, Teoria grafów podstawy, Macierze i determinanty
+            </div>
+          </div>
+
+          {/* PROGRESS STATS */}
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h4 className="font-semibold text-blue-800 mb-2">📊 STATYSTYKI POKRYCIA:</h4>
+            <div className="text-sm text-blue-700 space-y-1">
+              <div>• <strong>Ukończone:</strong> 42/198 umiejętności (21.2%)</div>
+              <div>• <strong>Klasy liceum (1-3):</strong> 42/45 umiejętności (93.3%) ✅</div>
+              <div>• <strong>Klasy podstawowe (4-8):</strong> 0/153 umiejętności (0%) ❌</div>
+              <div>• <strong>Najbliższe cele:</strong> Funkcje – własności ogólne, Funkcje potęgowe, Podstawy arytmetyki</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Skill Gap Analysis Dashboard */}
       <SkillGapDashboard />
       
