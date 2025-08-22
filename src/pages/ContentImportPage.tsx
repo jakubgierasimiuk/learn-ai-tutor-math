@@ -105,11 +105,23 @@ export const ContentImportPage = () => {
             {criticalSkills.map((skill, index) => (
               <div key={index} className="flex items-start justify-between p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
                 <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                      skill.class <= 3 
+                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' 
+                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                    }`}>
+                      {skill.class <= 3 ? 'LICEUM' : 'PODSTAWÓWKA'}
+                    </span>
+                    <span className="text-xs text-red-600 dark:text-red-400">
+                      Klasa {skill.class}
+                    </span>
+                  </div>
                   <div className="font-medium text-red-900 dark:text-red-100">
                     {skill.name}
                   </div>
                   <div className="text-xs text-red-600 dark:text-red-400 mt-1">
-                    Klasa {skill.class} • {skill.department}
+                    {skill.department}
                   </div>
                 </div>
                 <div className="ml-4 text-xs text-red-500 dark:text-red-500 font-medium">
@@ -140,11 +152,23 @@ export const ContentImportPage = () => {
             {highPrioritySkills.map((skill, index) => (
               <div key={index} className="flex items-start justify-between p-2 bg-orange-50 dark:bg-orange-950/20 rounded border border-orange-200 dark:border-orange-800">
                 <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                      skill.class <= 3 
+                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' 
+                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                    }`}>
+                      {skill.class <= 3 ? 'LICEUM' : 'PODSTAWÓWKA'}
+                    </span>
+                    <span className="text-xs text-orange-600 dark:text-orange-400">
+                      Klasa {skill.class}
+                    </span>
+                  </div>
                   <div className="font-medium text-orange-900 dark:text-orange-100 text-sm">
                     {skill.name}
                   </div>
-                  <div className="text-xs text-orange-600 dark:text-orange-400">
-                    Klasa {skill.class} • {skill.department}
+                  <div className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+                    {skill.department}
                   </div>
                 </div>
                 <div className="ml-4 text-xs text-orange-500 dark:text-orange-500">
