@@ -207,6 +207,42 @@ export const BatchImportRunner = () => {
                   onClick={async () => {
                     setImporting(true);
                     try {
+                      const { importSkillsData } = await import('@/lib/importSkillsData');
+                      const result = await importSkillsData();
+                      setResults({
+                        totalProcessed: result.imported + result.failed,
+                        successful: result.imported,
+                        failed: result.failed,
+                        details: result.details?.map(r => ({
+                          skillName: r.skill || 'Unknown',
+                          result: r
+                        })) || []
+                      });
+                      toast({
+                        title: "Skills Data import zakończony!",
+                        description: `Zaimportowano ${result.imported}/${result.imported + result.failed} umiejętności`,
+                      });
+                    } catch (error) {
+                      toast({
+                        title: "Błąd importu Skills Data",
+                        description: error instanceof Error ? error.message : "Nieznany błąd",
+                        variant: "destructive"
+                      });
+                    } finally {
+                      setImporting(false);
+                    }
+                  }}
+                  disabled={importing}
+                  variant="outline"
+                  className="w-full mt-4"
+                >
+                  📚 Uruchom Skills Data Import (7 umiejętności)
+                </Button>
+
+                <Button 
+                  onClick={async () => {
+                    setImporting(true);
+                    try {
                       const { runAlgebralno2Import } = await import('@/lib/algebralno2ImportRunner');
                       const result = await runAlgebralno2Import();
                       setResults({
