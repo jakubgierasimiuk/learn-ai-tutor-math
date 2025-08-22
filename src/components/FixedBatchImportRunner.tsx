@@ -317,6 +317,8 @@ export const FixedBatchImportRunner = () => {
 
     const runCompleteImport = async () => {
       try {
+        console.log('🔥 STARTUJEMY IMPORT!', COMPLETE_25_SKILLS_JSON);
+        console.log('🔥 Calling batchImportSkillContent...');
         const result = await batchImportSkillContent(COMPLETE_25_SKILLS_JSON);
         console.log('✅ COMPLETE IMPORT SUCCESS!', result);
         
@@ -328,9 +330,10 @@ export const FixedBatchImportRunner = () => {
         setResults(result);
       } catch (error) {
         console.error('❌ COMPLETE IMPORT FAILED:', error);
+        console.error('❌ Error details:', error);
         toast({
           title: "❌ Import Failed",
-          description: "Check console for details",
+          description: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
           variant: "destructive"
         });
       }
