@@ -3861,7 +3861,7 @@ export async function batchImportSkillContent(chatGPTData: { contentDatabase: Ch
 
       console.log(`  Final is_complete: ${isComplete ? '✅' : '❌'}`);
 
-      // 6. WSTAWIENIE DO BAZY
+      // 6. UPSERT DO BAZY - nadpisuj istniejące
       const { error: unifiedError } = await supabase
         .from('unified_skill_content')
         .upsert([{
@@ -3870,7 +3870,9 @@ export async function batchImportSkillContent(chatGPTData: { contentDatabase: Ch
           metadata: metadata,
           is_complete: isComplete, // ⭐ KLUCZ DO SUKCESU
           version: 1
-        }]);
+        }], {
+          onConflict: 'skill_id'
+        });
 
       if (unifiedError) {
         console.error(`❌ Error inserting ${skill.skillName}:`, unifiedError);
