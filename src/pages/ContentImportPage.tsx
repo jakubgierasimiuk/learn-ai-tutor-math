@@ -1,250 +1,297 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, Clock, CheckCircle2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { AlertTriangle, Users, BookOpen, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { useContentAnalysis } from "@/hooks/useContentAnalysis";
 
-export const ContentImportPage = () => {
-  const criticalSkills = [
-    // Klasa 1
-    { name: 'Funkcje — definicja i własności', class: 1, department: 'mathematics' },
-    { name: 'Równania i nierówności kwadratowe', class: 1, department: 'mathematics' },
-    { name: 'Trygonometria — funkcje i wzory', class: 1, department: 'mathematics' },
-    { name: 'Ciągi arytmetyczne i geometryczne', class: 1, department: 'mathematics' },
-    { name: 'Prawdopodobieństwo warunkowe', class: 1, department: 'mathematics' },
-    { name: 'Liczby rzeczywiste', class: 1, department: 'real_numbers' },
-    { name: 'Twierdzenie Pitagorasa', class: 1, department: 'geometry' },
-    
-    // Klasa 2
-    { name: 'Funkcja wykładnicza i logarytmiczna', class: 2, department: 'mathematics' },
-    { name: 'Geometria analityczna – okrąg i parabola', class: 2, department: 'mathematics' },
-    { name: 'Równania kwadratowe', class: 2, department: 'algebra' },
-    { name: 'Wyrażenia algebraiczne', class: 2, department: 'algebraic_expressions' },
-    { name: 'Ciągi arytmetyczne', class: 2, department: 'sequences' },
-    
-    // Klasa 3 
-    { name: 'Pochodna funkcji — definicja, obliczanie, interpretacje', class: 3, department: 'calculus' },
-    { name: 'Całka nieoznaczona — podstawowe techniki', class: 3, department: 'calculus' },
-    { name: 'Stereometria — objętości i pola powierzchni', class: 3, department: 'geometry' },
-    { name: 'Prawdopodobieństwo klasyczne', class: 3, department: 'statistics' },
-  ];
+const ContentImportPage = () => {
+  const { stats, loading, error } = useContentAnalysis();
 
-  const highPrioritySkills = [
-    // Klasa 4 - podstawy arytmetyki
-    { name: 'Wartość miejsca w systemie dziesiętnym (do milionów)', class: 4, department: 'arithmetic' },
-    { name: 'Liczby dziesiętne – zapis, porównywanie i oś liczbowa', class: 4, department: 'arithmetic' },
-    { name: 'Tabliczka mnożenia do 100', class: 4, department: 'arithmetic' },
-    { name: 'Ułamki zwykłe – pojęcie i reprezentacje', class: 4, department: 'arithmetic' },
-    { name: 'Dodawanie pisemne liczb naturalnych (z przeniesieniem)', class: 4, department: 'arithmetic' },
-    { name: 'Odejmowanie pisemne liczb naturalnych (z pożyczką)', class: 4, department: 'arithmetic' },
-    { name: 'Mnożenie pisemne przez liczbę jednocyfrową', class: 4, department: 'arithmetic' },
-    { name: 'Dzielenie pisemne przez liczbę jednocyfrową (z resztą)', class: 4, department: 'arithmetic' },
-    { name: 'Kolejność wykonywania działań z nawiasami', class: 4, department: 'arithmetic' },
-    { name: 'Dodawanie i odejmowanie liczb dziesiętnych', class: 4, department: 'arithmetic' },
-    
-    // Pozostałe klasy 4-6
-    { name: 'Porównywanie i porządkowanie liczb naturalnych', class: 4, department: 'arithmetic' },
-    { name: 'Oś liczbowa – podstawy', class: 4, department: 'arithmetic' },
-    { name: 'Ułamki niewłaściwe i liczby mieszane', class: 4, department: 'arithmetic' },
-    { name: 'Czynniki i wielokrotności, parzystość i nieparzystość', class: 4, department: 'arithmetic' },
-  ];
+  if (loading) {
+    return (
+      <div className="container mx-auto p-6 max-w-7xl">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+            <p className="text-muted-foreground">Ładowanie analizy treści...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const remainingSkills = [
-    // Wszystkie pozostałe umiejętności z klasy 4-6 oraz inne
-    'Własności działań: przemienność i łączność',
-    'Figury płaskie – podstawowe pojęcia',
-    'Pomiary długości i obwodu',
-    'Pole prostokąta i kwadratu',
-    'Jednostki długości i ich zamiany',
-    'Liczby ujemne – wprowadzenie',
-    'Procenty podstawowe',
-    'Proporcjonalność prosta',
-    'Skala i mapy',
-    'Wykresy słupkowe i kołowe',
-    'Średnia arytmetyczna',
-    'Układy równań liniowych',
-    'Funkcje liniowe',
-    'Geometria przestrzenna podstawy',
-    'Trójkąty – rodzaje i własności',
-    'Wielokąty foremne',
-    'Okrąg i koło',
-    'Prawdopodobieństwo i statystyka podstawy',
-    // ... i wiele innych
-  ];
+  if (error) {
+    return (
+      <div className="container mx-auto p-6 max-w-7xl">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <XCircle className="h-8 w-8 mx-auto mb-4 text-destructive" />
+            <p className="text-destructive">Błąd ładowania danych: {error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const totalMissing = criticalSkills.length + highPrioritySkills.length + remainingSkills.length;
+  if (!stats) return null;
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 max-w-7xl">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-foreground mb-4">
           Analiza brakujących umiejętności
         </h1>
         <div className="text-xl text-muted-foreground">
-          <strong className="text-red-600">204 umiejętności</strong> wymaga uzupełnienia treści
+          {stats.missingContent === 0 ? (
+            <span className="text-green-600 font-bold">
+              🎉 Wszystkie umiejętności mają treść!
+            </span>
+          ) : (
+            <span>
+              <strong className="text-red-600">{stats.missingContent} umiejętności</strong> wymaga uzupełnienia treści
+            </span>
+          )}
         </div>
         <div className="text-sm text-muted-foreground mt-2">
-          Stan bazy: 26/230 umiejętności ma pełną zawartość (11.3% pokrycia)
+          Stan bazy: {stats.withContent}/{stats.total} umiejętności ma pełną zawartość ({Math.round((stats.withContent/stats.total)*100)}% pokrycia)
         </div>
       </div>
 
-      {/* CRITICAL PRIORITY */}
-      <Card className="border-red-500 border-2">
-        <CardHeader className="bg-red-50 dark:bg-red-950/30">
-          <CardTitle className="flex items-center gap-2 text-red-700 dark:text-red-300">
-            <AlertTriangle className="h-6 w-6" />
-            PRIORYTET KRYTYCZNY
-            <span className="ml-auto text-sm font-normal">
-              {criticalSkills.length} umiejętności
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <div className="text-sm text-red-600 dark:text-red-400 mb-4 font-medium">
-            Fundamentalne umiejętności wymagane do dalszej nauki. Brak tych treści blokuje rozwój ucznia.
-          </div>
-          <div className="grid gap-3">
-            {criticalSkills.map((skill, index) => (
-              <div key={index} className="flex items-start justify-between p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                      skill.class <= 3 
-                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' 
-                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                    }`}>
-                      {skill.class <= 3 ? 'LICEUM' : 'PODSTAWÓWKA'}
-                    </span>
-                    <span className="text-xs text-red-600 dark:text-red-400">
-                      Klasa {skill.class}
-                    </span>
-                  </div>
-                  <div className="font-medium text-red-900 dark:text-red-100">
-                    {skill.name}
-                  </div>
-                  <div className="text-xs text-red-600 dark:text-red-400 mt-1">
-                    {skill.department}
-                  </div>
-                </div>
-                <div className="ml-4 text-xs text-red-500 dark:text-red-500 font-medium">
-                  BRAK TREŚCI
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* HIGH PRIORITY */}
-      <Card className="border-orange-500 border-2">
-        <CardHeader className="bg-orange-50 dark:bg-orange-950/30">
-          <CardTitle className="flex items-center gap-2 text-orange-700 dark:text-orange-300">
-            <Clock className="h-6 w-6" />
-            PRIORYTET WYSOKI
-            <span className="ml-auto text-sm font-normal">
-              {highPrioritySkills.length} umiejętności
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <div className="text-sm text-orange-600 dark:text-orange-400 mb-4 font-medium">
-            Ważne umiejętności podstawowe, szczególnie z klas 4-6. Konieczne do solidnego fundamentu matematycznego.
-          </div>
-          <div className="grid gap-2">
-            {highPrioritySkills.map((skill, index) => (
-              <div key={index} className="flex items-start justify-between p-2 bg-orange-50 dark:bg-orange-950/20 rounded border border-orange-200 dark:border-orange-800">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                      skill.class <= 3 
-                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' 
-                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                    }`}>
-                      {skill.class <= 3 ? 'LICEUM' : 'PODSTAWÓWKA'}
-                    </span>
-                    <span className="text-xs text-orange-600 dark:text-orange-400">
-                      Klasa {skill.class}
-                    </span>
-                  </div>
-                  <div className="font-medium text-orange-900 dark:text-orange-100 text-sm">
-                    {skill.name}
-                  </div>
-                  <div className="text-xs text-orange-600 dark:text-orange-400 mt-1">
-                    {skill.department}
-                  </div>
-                </div>
-                <div className="ml-4 text-xs text-orange-500 dark:text-orange-500">
-                  BRAK TREŚCI
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* REMAINING SKILLS */}
-      <Card className="border-yellow-500">
-        <CardHeader className="bg-yellow-50 dark:bg-yellow-950/30">
-          <CardTitle className="flex items-center gap-2 text-yellow-700 dark:text-yellow-300">
-            <CheckCircle2 className="h-6 w-6" />
-            POZOSTAŁE UMIEJĘTNOŚCI
-            <span className="ml-auto text-sm font-normal">
-              ~{remainingSkills.length}+ umiejętności
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <div className="text-sm text-yellow-600 dark:text-yellow-400 mb-4 font-medium">
-            Dodatkowe umiejętności uzupełniające program. Mogą być implementowane po uzupełnieniu priorytetów.
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {remainingSkills.slice(0, 20).map((skill, index) => (
-              <div key={index} className="p-2 bg-yellow-50 dark:bg-yellow-950/20 rounded text-sm text-yellow-800 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-800">
-                {skill}
-              </div>
-            ))}
-            <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded text-sm text-yellow-700 dark:text-yellow-300 border border-yellow-300 dark:border-yellow-700 italic">
-              ... i {remainingSkills.length - 20} dodatkowych umiejętności
+      {stats.missingContent === 0 ? (
+        <Card className="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/20 border-green-200 dark:border-green-800">
+          <CardContent className="p-8 text-center">
+            <CheckCircle className="h-16 w-16 mx-auto mb-4 text-green-600" />
+            <h2 className="text-2xl font-bold text-green-900 dark:text-green-100 mb-2">
+              Baza danych jest kompletna!
+            </h2>
+            <p className="text-green-700 dark:text-green-300">
+              Wszystkie {stats.total} umiejętności w systemie mają kompletną treść edukacyjną.
+            </p>
+            <div className="mt-6 p-4 bg-green-100 dark:bg-green-900/30 rounded-lg">
+              <p className="text-sm text-green-800 dark:text-green-200">
+                ✅ <strong>Pochodna funkcji — definicja, obliczanie, interpretacje</strong> - w bazie<br/>
+                ✅ <strong>Stereometria — objętości i pola powierzchni</strong> - w bazie
+              </p>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <Card className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/30 dark:to-red-900/20 border-red-200 dark:border-red-800">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-red-600 dark:text-red-400">Krytyczne</p>
+                    <p className="text-2xl font-bold text-red-900 dark:text-red-100">{stats.critical.length}</p>
+                  </div>
+                  <AlertTriangle className="h-8 w-8 text-red-500" />
+                </div>
+              </CardContent>
+            </Card>
 
-      {/* SUMMARY STATS */}
-      <Card className="border-slate-300">
+            <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/30 dark:to-orange-900/20 border-orange-200 dark:border-orange-800">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-orange-600 dark:text-orange-400">Wysoki priorytet</p>
+                    <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">{stats.highPriority.length}</p>
+                  </div>
+                  <Users className="h-8 w-8 text-orange-500" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 border-blue-200 dark:border-blue-800">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Pozostałe</p>
+                    <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{stats.remaining.length}</p>
+                  </div>
+                  <BookOpen className="h-8 w-8 text-blue-500" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/20 border-green-200 dark:border-green-800">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-green-600 dark:text-green-400">Razem brakuje</p>
+                    <p className="text-2xl font-bold text-green-900 dark:text-green-100">{stats.missingContent}</p>
+                  </div>
+                  <XCircle className="h-8 w-8 text-green-500" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Critical Skills Section */}
+          <Card className="mb-6 border-red-200 dark:border-red-800">
+            <CardHeader className="bg-red-50 dark:bg-red-950/20">
+              <CardTitle className="flex items-center gap-2 text-red-900 dark:text-red-100">
+                <AlertTriangle className="h-5 w-5" />
+                PRIORYTET KRYTYCZNY
+                <Badge variant="destructive" className="ml-2">
+                  {stats.critical.length} umiejętności
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              {stats.critical.length === 0 ? (
+                <div className="text-center py-8 text-green-600 dark:text-green-400">
+                  <CheckCircle className="h-12 w-12 mx-auto mb-2" />
+                  <p className="font-medium">Wszystkie krytyczne umiejętności mają treść!</p>
+                </div>
+              ) : (
+                stats.critical.map((skill, index) => (
+                  <div key={index} className="flex items-start justify-between p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          skill.class_level <= 3 
+                            ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' 
+                            : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                        }`}>
+                          {skill.class_level <= 3 ? 'LICEUM' : 'PODSTAWÓWKA'}
+                        </span>
+                        <span className="text-xs text-red-600 dark:text-red-400">
+                          Klasa {skill.class_level}
+                        </span>
+                      </div>
+                      <div className="font-medium text-red-900 dark:text-red-100">
+                        {skill.name}
+                      </div>
+                      <div className="text-xs text-red-600 dark:text-red-400 mt-1">
+                        {skill.department}
+                      </div>
+                    </div>
+                    <div className="ml-4 text-xs text-red-500 dark:text-red-500 font-medium">
+                      BRAK TREŚCI
+                    </div>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+
+          {/* High Priority Skills Section */}
+          <Card className="mb-6 border-orange-200 dark:border-orange-800">
+            <CardHeader className="bg-orange-50 dark:bg-orange-950/20">
+              <CardTitle className="flex items-center gap-2 text-orange-900 dark:text-orange-100">
+                <Users className="h-5 w-5" />
+                PRIORYTET WYSOKI
+                <Badge variant="secondary" className="ml-2 bg-orange-200 text-orange-800 dark:bg-orange-800 dark:text-orange-200">
+                  {stats.highPriority.length} umiejętności
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 space-y-2">
+              {stats.highPriority.length === 0 ? (
+                <div className="text-center py-8 text-green-600 dark:text-green-400">
+                  <CheckCircle className="h-12 w-12 mx-auto mb-2" />
+                  <p className="font-medium">Wszystkie wysokopriorytetowe umiejętności mają treść!</p>
+                </div>
+              ) : (
+                stats.highPriority.map((skill, index) => (
+                  <div key={index} className="flex items-start justify-between p-2 bg-orange-50 dark:bg-orange-950/20 rounded border border-orange-200 dark:border-orange-800">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          skill.class_level <= 3 
+                            ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' 
+                            : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                        }`}>
+                          {skill.class_level <= 3 ? 'LICEUM' : 'PODSTAWÓWKA'}
+                        </span>
+                        <span className="text-xs text-orange-600 dark:text-orange-400">
+                          Klasa {skill.class_level}
+                        </span>
+                      </div>
+                      <div className="font-medium text-orange-900 dark:text-orange-100 text-sm">
+                        {skill.name}
+                      </div>
+                      <div className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+                        {skill.department}
+                      </div>
+                    </div>
+                    <div className="ml-4 text-xs text-orange-500 dark:text-orange-500">
+                      BRAK TREŚCI
+                    </div>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Remaining Skills Section */}
+          <Card className="mb-6 border-blue-200 dark:border-blue-800">
+            <CardHeader className="bg-blue-50 dark:bg-blue-950/20">
+              <CardTitle className="flex items-center gap-2 text-blue-900 dark:text-blue-100">
+                <BookOpen className="h-5 w-5" />
+                POZOSTAŁE UMIEJĘTNOŚCI
+                <Badge variant="outline" className="ml-2 border-blue-300 dark:border-blue-700">
+                  {stats.remaining.length} umiejętności
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              {stats.remaining.length === 0 ? (
+                <div className="text-center py-8 text-green-600 dark:text-green-400">
+                  <CheckCircle className="h-12 w-12 mx-auto mb-2" />
+                  <p className="font-medium">Wszystkie pozostałe umiejętności mają treść!</p>
+                </div>
+              ) : (
+                <div className="grid gap-2">
+                  {stats.remaining.map((skill, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-950/20 rounded text-sm border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-center gap-3">
+                        <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                          skill.class_level <= 3 
+                            ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' 
+                            : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                        }`}>
+                          {skill.class_level <= 3 ? 'LICEUM' : 'PODSTAWÓWKA'}
+                        </span>
+                        <span className="font-medium text-blue-900 dark:text-blue-100">{skill.name}</span>
+                        <span className="text-xs text-blue-600 dark:text-blue-400">Klasa {skill.class_level} • {skill.department}</span>
+                      </div>
+                      <span className="text-xs text-blue-500 dark:text-blue-500">BRAK TREŚCI</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </>
+      )}
+
+      {/* Summary Card */}
+      <Card className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-800/50 border-slate-200 dark:border-slate-700">
         <CardHeader>
-          <CardTitle className="text-slate-700 dark:text-slate-300">
+          <CardTitle className="flex items-center gap-2 text-slate-900 dark:text-slate-100">
+            <CheckCircle className="h-5 w-5" />
             Podsumowanie stanu bazy
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-            <div className="p-4 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
-              <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-                {criticalSkills.length}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="text-center p-4 bg-white dark:bg-slate-800 rounded-lg shadow-sm">
+              <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                {stats.missingContent}
               </div>
-              <div className="text-sm text-red-600 dark:text-red-400">
-                Krytyczne braki
-              </div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">Umiejętności bez treści</div>
             </div>
-            <div className="p-4 bg-orange-50 dark:bg-orange-950/20 rounded-lg border border-orange-200 dark:border-orange-800">
-              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                {highPrioritySkills.length}
+            <div className="text-center p-4 bg-white dark:bg-slate-800 rounded-lg shadow-sm">
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                {stats.withContent}
               </div>
-              <div className="text-sm text-orange-600 dark:text-orange-400">
-                Wysokie braki
-              </div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">Umiejętności z treścią</div>
             </div>
-            <div className="p-4 bg-slate-50 dark:bg-slate-950/20 rounded-lg border border-slate-200 dark:border-slate-800">
-              <div className="text-2xl font-bold text-slate-600 dark:text-slate-400">
-                204
-              </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">
-                Łączne braki
-              </div>
+            <div className="text-center p-4 bg-white dark:bg-slate-800 rounded-lg shadow-sm">
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.total}</div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">Wszystkie umiejętności</div>
             </div>
-          </div>
-          <div className="mt-4 text-center text-sm text-muted-foreground">
-            <strong>Pokrycie treści:</strong> 26/230 umiejętności (11.3%) • 
-            <strong className="text-red-600"> Wymagany masowy import treści</strong>
           </div>
         </CardContent>
       </Card>
