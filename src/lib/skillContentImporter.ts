@@ -50,80 +50,8 @@ async function importSkillWithContent(skill: SkillContent) {
   try {
     console.log(`Importing skill: ${skill.skillName}`);
     
-    // Check if skill already exists
-    const { data: existingSkill } = await supabase
-      .from('skills')
-      .select('id')
-      .eq('name', skill.skillName)
-      .single();
-
-    let skillData;
-    let skillError;
-
-    if (existingSkill) {
-      console.log(`Skill ${skill.skillName} already exists, updating...`);
-      // Update existing skill
-      const { data, error } = await supabase
-        .from('skills')
-        .update({
-          class_level: skill.class_level,
-          department: skill.department,
-          generator_params: skill.generatorParams || {},
-          teaching_flow: skill.teachingFlow?.phase1 ? [
-            skill.teachingFlow.phase1.activities,
-            skill.teachingFlow.phase2?.activities || [],
-            skill.teachingFlow.phase3?.activities || []
-          ].flat() : ["theory", "example", "guided_practice", "independent_practice"],
-          content_data: skill.content || {},
-          description: skill.content?.theory?.introduction || skill.skillName,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', existingSkill.id)
-        .select()
-        .single();
-      
-      skillData = data;
-      skillError = error;
-    } else {
-      console.log(`Creating new skill: ${skill.skillName}`);
-      // Insert new skill
-      const { data, error } = await supabase
-        .from('skills')
-        .insert([{
-          name: skill.skillName,
-          class_level: skill.class_level,
-          department: skill.department,
-          generator_params: skill.generatorParams || {},
-          teaching_flow: skill.teachingFlow?.phase1 ? [
-            skill.teachingFlow.phase1.activities,
-            skill.teachingFlow.phase2?.activities || [],
-            skill.teachingFlow.phase3?.activities || []
-          ].flat() : ["theory", "example", "guided_practice", "independent_practice"],
-          content_data: skill.content || {},
-          description: skill.content?.theory?.introduction || skill.skillName
-        }])
-        .select()
-        .single();
-      
-      skillData = data;
-      skillError = error;
-    }
-
-    if (skillError) {
-      console.error(`Error inserting skill ${skill.skillName}:`, skillError);
-      return {
-        success: false,
-        error: `Skill insert error: ${skillError.message}`
-      };
-    }
-
-    const skillId = skillData?.id;
-    if (!skillId) {
-      return {
-        success: false,
-        error: 'No skill ID returned from insert'
-      };
-    }
+    // Use skill.skillId as the skill ID - no need to create separate skills table
+    const skillId = skill.skillId;
 
     // Import to unified skill content table
     const unifiedContentData = {
@@ -175,17 +103,20 @@ async function importSkillWithContent(skill: SkillContent) {
 
     const metadata = {
       skill_name: skill.skillName,
-      description: skill.skillName, // Use skillName as description since description doesn't exist
+      description: skill.skillName,
       department: skill.department || 'matematyka',
-      level: 'high_school', // Default level since it doesn't exist in interface
+      level: 'high_school',
       class_level: skill.class_level || 1,
-      men_code: skill.skillId || '', // Use skillId as men_code since menCode doesn't exist
+      men_code: skill.skillId || '',
       difficulty_rating: skill.generatorParams?.difficulty || 1,
-      estimated_time_minutes: 30, // Default since estimatedTime doesn't exist
-      prerequisites: [], // Default since prerequisites doesn't exist
-      learning_objectives: [], // Default since learningObjectives doesn't exist
-      chapter_tag: skill.department || '' // Use department since chapterTag doesn't exist
+      estimated_time_minutes: 30,
+      prerequisites: [],
+      learning_objectives: [],
+      chapter_tag: skill.department || ''
     };
+
+    // Also add skillName directly to content_data for easier access
+    (unifiedContentData as any).skillName = skill.skillName;
 
     // Check if content is complete - LOG DETAILED VALIDATION
     console.log(`Checking completeness for ${skill.skillName}:`);
@@ -209,7 +140,9 @@ async function importSkillWithContent(skill: SkillContent) {
         metadata: metadata,
         is_complete: isComplete,
         version: 1
-      }]);
+      }], {
+        onConflict: 'skill_id'
+      });
 
     if (unifiedError) {
       console.error(`Error inserting unified content for ${skill.skillName}:`, unifiedError);
