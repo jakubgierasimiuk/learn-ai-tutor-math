@@ -4014,20 +4014,28 @@ export async function generateChatGPTPrompts(groupNumber: number = 1): Promise<{
     // Get exactly 20 skills without content for the selected group
     const { data: skillsWithoutContent, error } = await supabase
       .from('skills')
-      .select('id, name, class_level, department')
-      .is('content_data', null)
+      .select(`
+        id, 
+        name, 
+        class_level, 
+        department,
+        unified_skill_content!left(skill_id, is_complete)
+      `)
+      .or('unified_skill_content.skill_id.is.null,unified_skill_content.is_complete.is.false')
       .order('class_level')
       .order('department')  
       .order('name')
       .range(offset, offset + 19); // range is inclusive, so 0-19 gives us 20 items
 
     if (error) {
-      console.error('Error fetching skills:', error);
+      console.error('Error fetching skills for group', groupNumber, ':', error);
       throw error;
     }
 
+    console.log(`Query executed for group ${groupNumber}, offset: ${offset}, found: ${skillsWithoutContent?.length || 0} skills`);
+
     if (!skillsWithoutContent || skillsWithoutContent.length === 0) {
-      console.log(`No skills found for group ${groupNumber}`);
+      console.log(`No skills found for group ${groupNumber} (offset: ${offset})`);
       return { prompts: [], totalSkillsCount: {} };
     }
 
