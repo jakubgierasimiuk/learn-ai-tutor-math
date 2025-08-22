@@ -3841,8 +3841,16 @@ export async function batchImportSkillContent(chatGPTData: { contentDatabase: Ch
     throw new Error('Invalid data structure: expected { contentDatabase: [...] }');
   }
 
+  console.log(`Found ${chatGPTData.contentDatabase.length} skills to import`);
+
+  // Add default department for skills that don't have it
+  const skillsWithDepartment = chatGPTData.contentDatabase.map(skill => ({
+    ...skill,
+    department: skill.department || 'matematyka' // Default to 'matematyka' if not provided
+  }));
+
   // Process each skill from ChatGPT
-  for (const skill of chatGPTData.contentDatabase) {
+  for (const skill of skillsWithDepartment) {
     try {
       // Map skillId to existing skill in database
       let targetSkillId = skill.skillId;
