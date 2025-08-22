@@ -736,25 +736,25 @@ export const ContentImportPage = () => {
           </div>
 
           {/* MISSING CONTENT */}
-          <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-            <h4 className="font-semibold text-green-800 mb-2">✅ DANE NAPRAWIONE - AKTUALNY STAN:</h4>
-            <div className="text-sm text-green-700 space-y-1">
-              <div><strong>Duplikaty usunięte:</strong> "Nierówności liniowe z jedną niewiadomą" (było 4, zostało 1)</div>
-              <div><strong>Uzupełniono:</strong> "Wartość bezwzględna" - dodano przykłady i ćwiczenia</div>
-              <div><strong>Pozostałe braki krytyczne:</strong> Liczby dziesiętne, Procenty podstawowe, Pola figur, Jednostki miar, Liczby ujemne</div>
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <h4 className="font-semibold text-red-800 mb-2">❌ PROBLEM: BŁĘDNE STATYSTYKI!</h4>
+            <div className="text-sm text-red-700 space-y-1">
+              <div><strong>Wykryto rozbieżność:</strong> Statystyki nie odpowiadają rzeczywistości</div>
+              <div><strong>Wcześniej raportowano:</strong> 279/469 (59.5%) i 280/470 (59.6%)</div>
+              <div><strong>Rzeczywistość w bazie:</strong> Tylko 26/230 umiejętności ma zawartość (11.3%)</div>
+              <div><strong>Błąd:</strong> Liczby były na sztywno wpisane, nie pochodziły z bazy</div>
             </div>
           </div>
 
-          {/* PROGRESS STATS - UPDATED */}
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h4 className="font-semibold text-blue-800 mb-2">📊 STATYSTYKI POKRYCIA (PO NAPRAWIE):</h4>
-            <div className="text-sm text-blue-700 space-y-1">
-              <div>• <strong>Z pełną zawartością:</strong> 280/470 umiejętności (59.6%)</div>
-              <div>• <strong>Z teorią:</strong> 283/470 umiejętności (60.2%)</div>
-              <div>• <strong>Z przykładami:</strong> 282/470 umiejętności (60.0%)</div>
-              <div>• <strong>Z ćwiczeniami:</strong> 280/470 umiejętności (59.6%)</div>
-              <div>• <strong>Krityczne braki:</strong> 5 z 6 priorytetowych umiejętności</div>
-              <div>• <strong>Wysokie braki:</strong> 3 z 10 priorytetowych umiejętności</div>
+          {/* PROGRESS STATS - CORRECTED */}
+          <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <h4 className="font-semibold text-orange-800 mb-2">📊 RZECZYWISTE STATYSTYKI Z BAZY:</h4>
+            <div className="text-sm text-orange-700 space-y-1">
+              <div>• <strong>Aktywne umiejętności:</strong> 230 (nie 469/470)</div>
+              <div>• <strong>Z pełną zawartością:</strong> 26 umiejętności (11.3%)</div>
+              <div>• <strong>Bez zawartości:</strong> 204 umiejętności (88.7%)</div>
+              <div>• <strong>Stan krytyczny:</strong> Konieczny masowy import treści</div>
+              <div>• <strong>Przyczyna rozbieżności:</strong> Błędne na sztywno wpisane liczby</div>
             </div>
           </div>
         </CardContent>
