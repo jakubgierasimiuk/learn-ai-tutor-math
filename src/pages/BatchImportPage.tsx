@@ -1,5 +1,5 @@
 import React from 'react';
-import { BatchImportRunner } from '@/components/BatchImportRunner';
+import { FixedBatchImportRunner } from '@/components/FixedBatchImportRunner';
 import { Seo } from '@/components/Seo';
 
 const BatchImportPage = () => {
@@ -10,7 +10,7 @@ const BatchImportPage = () => {
         description="System importu treści edukacyjnych z ChatGPT dla uzupełnienia brakujących umiejętności w bazie danych."
       />
       <div className="min-h-screen bg-background">
-        <BatchImportRunner />
+        <FixedBatchImportRunner />
       </div>
     </>
   );
