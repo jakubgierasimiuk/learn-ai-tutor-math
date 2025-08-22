@@ -28,7 +28,14 @@ export const useContentAnalysis = () => {
       try {
         setLoading(true);
         
-        // Fetch all skills
+        // Fetch all skills from unified content table
+        const { data: unifiedContent, error: unifiedError } = await supabase
+          .from('unified_skill_content')
+          .select('skill_id, is_complete, metadata');
+
+        if (unifiedError) throw unifiedError;
+
+        // Fetch all skills metadata
         const { data: skills, error: skillsError } = await supabase
           .from('skills')
           .select('id, name, class_level, department')
@@ -36,30 +43,19 @@ export const useContentAnalysis = () => {
 
         if (skillsError) throw skillsError;
 
-        // Fetch content from separate tables
-        const [theoryData, examplesData, exercisesData] = await Promise.all([
-          supabase.from('skill_theory_content').select('skill_id').then(res => res.data || []),
-          supabase.from('skill_examples').select('skill_id').then(res => res.data || []),
-          supabase.from('skill_practice_exercises').select('skill_id').then(res => res.data || [])
-        ]);
+        // Create lookup for unified content
+        const unifiedLookup = new Map(unifiedContent.map(uc => [uc.skill_id, uc]));
 
-        // Create sets for faster lookup
-        const skillsWithTheory = new Set(theoryData.map(t => t.skill_id));
-        const skillsWithExamples = new Set(examplesData.map(e => e.skill_id));
-        const skillsWithExercises = new Set(exercisesData.map(e => e.skill_id));
-
-        // Process skills to determine REAL content status
+        // Process skills to determine content status
         const processedSkills: SkillContent[] = skills.map(skill => {
-          const hasTheory = skillsWithTheory.has(skill.id);
-          const hasExamples = skillsWithExamples.has(skill.id);
-          const hasPractice = skillsWithExercises.has(skill.id);
-
+          const unifiedData = unifiedLookup.get(skill.id);
+          
           return {
             id: skill.id,
             name: skill.name,
             class_level: skill.class_level,
             department: skill.department,
-            has_content: hasTheory || hasExamples || hasPractice
+            has_content: unifiedData?.is_complete || false
           };
         });
 

@@ -1,55 +1,66 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-export interface SkillTheory {
-  id: string;
+// Unified skill content interfaces
+export interface UnifiedSkillTheory {
   theory_text: string;
-  key_formulas: any; // JSONB from database
+  key_formulas: any[];
   time_estimate: number;
   difficulty_level: number;
+  created_at: string;
 }
 
-export interface SkillExample {
-  id: string;
+export interface UnifiedSkillExample {
   example_code: string;
   problem_statement: string;
-  solution_steps: any; // JSONB from database
+  solution_steps: any;
   final_answer: string;
   explanation: string;
-  time_estimate: number;
   difficulty_level: number;
+  time_estimate: number;
 }
 
-export interface SkillExercise {
-  id: string;
+export interface UnifiedSkillExercise {
   exercise_code: string;
   problem_statement: string;
   expected_answer: string;
   difficulty_level: number;
   time_estimate: number;
-  misconception_map: any; // JSONB from database
+  misconception_map: any;
+  hints: any[];
 }
 
-export interface SkillMisconception {
-  id: string;
-  pattern_code: string;
-  description: string;
-  example_error: string;
-  intervention_strategy: string;
+export interface UnifiedPedagogicalNotes {
+  scaffolding_questions: any[];
+  teaching_flow: any[];
+  estimated_total_time: number;
+  prerequisite_description: string;
+  next_topic_description: string;
+}
+
+export interface UnifiedAssessmentRubric {
+  mastery_threshold: number;
+  skill_levels: any;
+  total_questions: number;
+  scope_description: string;
+}
+
+export interface UnifiedSkillPhase {
+  phase_number: number;
+  phase_name: string;
+  phase_description: string;
+  ai_instructions: string;
+  success_criteria: any;
+  estimated_duration_minutes: number;
 }
 
 export interface SkillContent {
-  theory: SkillTheory | null;
-  examples: SkillExample[];
-  exercises: SkillExercise[];
-  misconceptions: SkillMisconception[];
-  applications: Array<{
-    id: string;
-    context: string;
-    problem_description: string;
-    age_group: string;
-    connection_explanation: string;
-  }>;
+  theory: UnifiedSkillTheory | null;
+  examples: UnifiedSkillExample[];
+  exercises: UnifiedSkillExercise[];
+  pedagogical_notes: UnifiedPedagogicalNotes | null;
+  assessment_rubric: UnifiedAssessmentRubric | null;
+  phases: UnifiedSkillPhase[];
 }
 
 export const useSkillContent = (skillId: string | null) => {
@@ -63,68 +74,42 @@ export const useSkillContent = (skillId: string | null) => {
       return;
     }
 
-    const fetchSkillContent = async () => {
-      setLoading(true);
-      setError(null);
-
+    const fetchContent = async () => {
       try {
-        // Fetch all content in parallel
-        const [theoryRes, examplesRes, exercisesRes, misconceptionsRes, applicationsRes] = await Promise.all([
-          supabase
-            .from('skill_theory_content')
-            .select('*')
-            .eq('skill_id', skillId)
-            .eq('is_active', true)
-            .maybeSingle(),
-          
-          supabase
-            .from('skill_examples')
-            .select('*')
-            .eq('skill_id', skillId)
-            .eq('is_active', true)
-            .order('difficulty_level', { ascending: true }),
-          
-          supabase
-            .from('skill_practice_exercises')
-            .select('*')
-            .eq('skill_id', skillId)
-            .eq('is_active', true)
-            .order('difficulty_level', { ascending: true }),
-          
-          supabase
-            .from('skill_misconception_patterns')
-            .select('*')
-            .eq('skill_id', skillId)
-            .eq('is_active', true),
-          
-          supabase
-            .from('skill_real_world_applications')
-            .select('*')
-            .eq('skill_id', skillId)
-            .eq('is_active', true)
-        ]);
+        setLoading(true);
+        setError(null);
 
-        // Check for errors
-        if (theoryRes.error) throw theoryRes.error;
-        if (examplesRes.error) throw examplesRes.error;
-        if (exercisesRes.error) throw exercisesRes.error;
-        if (misconceptionsRes.error) throw misconceptionsRes.error;
-        if (applicationsRes.error) throw applicationsRes.error;
+        // Fetch from unified skill content table
+        const { data: unifiedContent, error: unifiedError } = await supabase
+          .from('unified_skill_content')
+          .select('content_data, metadata, is_complete')
+          .eq('skill_id', skillId)
+          .maybeSingle();
 
+        if (unifiedError) throw unifiedError;
+
+        if (!unifiedContent) {
+          setContent({
+            theory: null,
+            examples: [],
+            exercises: [],
+            pedagogical_notes: null,
+            assessment_rubric: null,
+            phases: []
+          });
+          return;
+        }
+
+        const contentData = unifiedContent.content_data;
+        
         setContent({
-          theory: theoryRes.data,
-          examples: (examplesRes.data || []).map(ex => ({
-            ...ex,
-            solution_steps: Array.isArray(ex.solution_steps) ? ex.solution_steps : []
-          })),
-          exercises: (exercisesRes.data || []).map(ex => ({
-            ...ex,
-            misconception_map: Array.isArray(ex.misconception_map) ? ex.misconception_map : []
-          })),
-          misconceptions: misconceptionsRes.data || [],
-          applications: applicationsRes.data || []
+          theory: contentData.theory && Object.keys(contentData.theory).length > 0 ? contentData.theory : null,
+          examples: contentData.examples || [],
+          exercises: contentData.exercises || [],
+          pedagogical_notes: contentData.pedagogical_notes && Object.keys(contentData.pedagogical_notes).length > 0 ? contentData.pedagogical_notes : null,
+          assessment_rubric: contentData.assessment_rubric && Object.keys(contentData.assessment_rubric).length > 0 ? contentData.assessment_rubric : null,
+          phases: contentData.phases || []
         });
-
       } catch (err) {
         console.error('Error fetching skill content:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch skill content');
@@ -133,7 +118,7 @@ export const useSkillContent = (skillId: string | null) => {
       }
     };
 
-    fetchSkillContent();
+    fetchContent();
   }, [skillId]);
 
   return { content, loading, error };

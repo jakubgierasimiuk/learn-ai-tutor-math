@@ -2715,6 +2715,39 @@ export type Database = {
           },
         ]
       }
+      unified_skill_content: {
+        Row: {
+          content_data: Json
+          created_at: string
+          id: string
+          is_complete: boolean
+          metadata: Json
+          skill_id: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          content_data?: Json
+          created_at?: string
+          id?: string
+          is_complete?: boolean
+          metadata?: Json
+          skill_id: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          content_data?: Json
+          created_at?: string
+          id?: string
+          is_complete?: boolean
+          metadata?: Json
+          skill_id?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
       universal_learner_profiles: {
         Row: {
           class_level: number | null
