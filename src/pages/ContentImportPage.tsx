@@ -701,53 +701,61 @@ export const ContentImportPage = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* COMPLETE SKILLS */}
+          {/* DATABASE STATUS - UPDATED */}
+          <div className="mb-6 p-6 bg-card rounded-lg border">
+            <h3 className="text-xl font-semibold mb-4">Aktualny stan bazy danych</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary">230</div>
+                <div className="text-sm text-muted-foreground">Łącznie umiejętności</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">40</div>
+                <div className="text-sm text-muted-foreground">Z teorią</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-600">39</div>
+                <div className="text-sm text-muted-foreground">Z przykładami</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">37</div>
+                <div className="text-sm text-muted-foreground">Z ćwiczeniami</div>
+              </div>
+            </div>
+          </div>
+
+          {/* COMPLETE SKILLS - UPDATED */}
           <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-            <h4 className="font-semibold text-green-800 mb-2">✅ UKOŃCZONE UMIEJĘTNOŚCI (42/198):</h4>
+            <h4 className="font-semibold text-green-800 mb-2">✅ UMIEJĘTNOŚCI Z PEŁNĄ ZAWARTOŚCIĄ (37 z teorią, przykładami i ćwiczeniami):</h4>
             <div className="text-sm text-green-700 space-y-1">
-              <div><strong>Klasa 1 (13):</strong> Działania na liczbach rzeczywistych, Funkcja liniowa, Funkcje — definicja i własności, Liczby rzeczywiste, Nierówności kwadratowe, Nierówności liniowe z jedną niewiadomą, Prawdopodobieństwo warunkowe, Równania i nierówności kwadratowe, Rozwiązywanie równań liniowych, Trygonometria — funkcje i wzory, Twierdzenie Pitagorasa, Wartość bezwzględna - definicja i własności, Ciągi arytmetyczne i geometryczne</div>
-              <div><strong>Klasa 2 (13):</strong> Ciągi arytmetyczne, Ciągi liczbowe, Funkcja wykładnicza i logarytmiczna, Funkcje trygonometryczne, Geometria analityczna – okrąg i parabola, Granica funkcji, Kombinatoryka zaawansowana, Liczby zespolone, Planimetria – wielokąty i okręgi, Równania i nierówności wielomianowe, Równania i nierówności z wartością bezwzględną, Równania kwadratowe, Wyrażenia algebraiczne</div>
-              <div><strong>Klasa 3 (16):</strong> Całka nieoznaczona — podstawowe techniki, Całka oznaczona - definicja i obliczanie, Funkcje wykładnicze i logarytmiczne, Granice funkcji, Kombinatoryka i prawdopodobieństwo, Pochodna funkcji, Pochodna funkcji — definicja, obliczanie, interpretacje, Prawdopodobieństwo klasyczne, Równania różniczkowe, Równania różniczkowe — podstawy, Rozkłady prawdopodobieństwa, Rozkłady prawdopodobieństwa — dyskretne i ciągłe, Stereometria, Stereometria – bryły, Stereometria — objętości i pola powierzchni, Zastosowania całki oznaczonej</div>
+              <div><strong>Klasy 4-6 (10):</strong> Działania na liczbach naturalnych, Ułamki zwykłe, Figury geometryczne, Pomiary długości, Liczby dziesiętne, Procenty podstawowe, Pola figur, Jednostki miar, Liczby ujemne, Proporcjonalność</div>
+              <div><strong>Klasa 1 (5):</strong> Funkcje — definicja i własności, Równania i nierówności kwadratowe, Trygonometria — funkcje i wzory, Ciągi arytmetyczne i geometryczne, Prawdopodobieństwo warunkowe</div>
+              <div><strong>Klasa 2 (7):</strong> Funkcja wykładnicza i logarytmiczna, Geometria analityczna – okrąg i parabola, Ciągi liczbowe, Granice funkcji, Równania i nierówności z wartością bezwzględną, Równania i nierówności wielomianowe, Planimetria – wielokąty i okręgi</div>
+              <div><strong>Klasa 3 (15):</strong> Pochodna funkcji, Całka nieoznaczona, Całka oznaczona, Zastosowania całki, Funkcje wykładnicze i logarytmiczne, Równania różniczkowe, Rozkłady prawdopodobieństwa, Stereometria — objętości i pola powierzchni, Kombinatoryka i prawdopodobieństwo, Stereometria – bryły</div>
             </div>
           </div>
 
-          {/* CRITICAL MISSING SKILLS */}
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-            <h4 className="font-semibold text-red-800 mb-2">🚨 BRAKI KRYTYCZNE (wymagają natychmiastowej uwagi):</h4>
-            <div className="text-sm text-red-700 space-y-1">
-              <div><strong>Klasa 2:</strong> Funkcje – własności ogólne, Funkcje potęgowe, Funkcje odwrotne, Równania kwadratowe - metody rozwiązywania</div>
-              <div><strong>Klasa 3:</strong> Funkcje ciągłe, Asymptoty funkcji, Badanie przebiegu zmienności funkcji</div>
-              <div><strong>Klasa 4-6:</strong> Podstawy arytmetyki (89 umiejętności), Geometria podstawowa (34 umiejętności), Ułamki i liczby dziesiętne (28 umiejętności)</div>
-            </div>
-          </div>
-
-          {/* HIGH PRIORITY MISSING */}
+          {/* MISSING CONTENT */}
           <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-            <h4 className="font-semibold text-orange-800 mb-2">⚠️ BRAKI WYSOKIEGO PRIORYTETU:</h4>
+            <h4 className="font-semibold text-orange-800 mb-2">⚠️ UMIEJĘTNOŚCI BEZ PEŁNEJ ZAWARTOŚCI (193):</h4>
             <div className="text-sm text-orange-700 space-y-1">
-              <div><strong>Klasa 1:</strong> Procenty i proporcje, Jednozmienne statystyki opisowe</div>
-              <div><strong>Klasa 2:</strong> Funkcje wymierne, Przekształcenia wykresów funkcji, Równania i nierówności irracjonalne</div>
-              <div><strong>Klasa 3:</strong> Metody całkowania, Równania trygonometryczne, Analiza kombinatoryczna</div>
+              <div><strong>Brak teorii:</strong> 190 umiejętności</div>
+              <div><strong>Brak przykładów:</strong> 191 umiejętności</div>
+              <div><strong>Brak ćwiczeń:</strong> 193 umiejętności</div>
+              <div><strong>Priorytetowe braki:</strong> Nierówności liniowe z jedną niewiadomą (tylko teoria), Wartość bezwzględna - definicja i własności (tylko teoria)</div>
             </div>
           </div>
 
-          {/* MEDIUM PRIORITY MISSING */}
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <h4 className="font-semibold text-yellow-800 mb-2">📋 BRAKI ŚREDNIEGO PRIORYTETU:</h4>
-            <div className="text-sm text-yellow-700">
-              Geometria analityczna zaawansowana, Liczby zespolone - zastosowania, Logika matematyczna, 
-              Indukcja matematyczna, Teoria grafów podstawy, Macierze i determinanty
-            </div>
-          </div>
-
-          {/* PROGRESS STATS */}
+          {/* PROGRESS STATS - UPDATED */}
           <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <h4 className="font-semibold text-blue-800 mb-2">📊 STATYSTYKI POKRYCIA:</h4>
             <div className="text-sm text-blue-700 space-y-1">
-              <div>• <strong>Ukończone:</strong> 42/198 umiejętności (21.2%)</div>
-              <div>• <strong>Klasy liceum (1-3):</strong> 42/45 umiejętności (93.3%) ✅</div>
-              <div>• <strong>Klasy podstawowe (4-8):</strong> 0/153 umiejętności (0%) ❌</div>
-              <div>• <strong>Najbliższe cele:</strong> Funkcje – własności ogólne, Funkcje potęgowe, Podstawy arytmetyki</div>
+              <div>• <strong>Z pełną zawartością:</strong> 37/230 umiejętności (16.1%)</div>
+              <div>• <strong>Z teorią:</strong> 40/230 umiejętności (17.4%)</div>
+              <div>• <strong>Z przykładami:</strong> 39/230 umiejętności (17.0%)</div>
+              <div>• <strong>Z ćwiczeniami:</strong> 37/230 umiejętności (16.1%)</div>
+              <div>• <strong>Pokrycie klas 4-6:</strong> 10/34 umiejętności (29.4%)</div>
+              <div>• <strong>Pokrycie liceum:</strong> 27/40+ umiejętności (67.5%)</div>
             </div>
           </div>
         </CardContent>
