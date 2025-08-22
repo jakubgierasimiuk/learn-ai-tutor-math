@@ -13,7 +13,7 @@ export const FixedBatchImportRunner = () => {
   const [results, setResults] = useState<BatchImportResult | null>(null);
   const [autoImportRan, setAutoImportRan] = useState(false);
 
-  // NAPRAWIONY JSON - wszystkie 25 umiejętności z poprawnym class_level (bez backslash)
+  // WSZYSTKIE 25 UMIEJĘTNOŚCI Z POPRAWNYM JSON
   useEffect(() => {
     if (autoImportRan) return;
 
@@ -312,7 +312,7 @@ export const FixedBatchImportRunner = () => {
       ]
     };
 
-    console.log('🚀 IMPORTING WSZYSTKICH 25 UMIEJĘTNOŚCI (NAPRAWIONY JSON)...');
+    console.log('🚀 IMPORTING 25 UMIEJĘTNOŚCI...');
     setAutoImportRan(true);
 
     const runCompleteImport = async () => {
@@ -375,16 +375,16 @@ export const FixedBatchImportRunner = () => {
     <div className="container mx-auto p-6 space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Fixed Batch Import - Grupa 2 (25 umiejętności klasa 4)</CardTitle>
+          <CardTitle>Fixed Batch Import - Wszystkie 25 umiejętności klasa 4</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium">JSON z ChatGPT:</label>
+              <label className="text-sm font-medium">JSON z ChatGPT (wszystkie 25 umiejętności):</label>
               <Textarea
                 value={jsonInput}
                 onChange={(e) => setJsonInput(e.target.value)}
-                placeholder='Wklej JSON w formacie: {"contentDatabase": [...]}'
+                placeholder='Wklej pełny JSON z wszystkimi 25 umiejętnościami...'
                 className="min-h-[200px] font-mono text-sm"
               />
             </div>
@@ -402,7 +402,7 @@ export const FixedBatchImportRunner = () => {
               ) : (
                 <>
                   <FileText className="w-4 h-4 mr-2" />
-                  Importuj Dane z ChatGPT
+                  Importuj Wszystkie 25 Umiejętności
                 </>
               )}
             </Button>
