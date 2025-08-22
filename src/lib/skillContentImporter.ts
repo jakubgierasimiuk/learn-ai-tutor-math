@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { v4 as uuidv4 } from 'uuid';
 
 // Type definitions
 export interface SkillImportResult {
@@ -3747,9 +3748,9 @@ export const importCombinatoricsProbabilitySkill = async (): Promise<SkillImport
   }
 };
 
-// Batch import function for ChatGPT generated content
+// Batch import function for ChatGPT generated content - WORKING VERSION
 export async function batchImportSkillContent(chatGPTData: { contentDatabase: ChatGPTSkillContent[] }): Promise<BatchImportResult> {
-  console.log('Starting batch import from ChatGPT data...');
+  console.log('🚀 Starting batch import from ChatGPT data...');
   
   const results: SkillImportResult[] = [];
   let successful = 0;
@@ -3760,45 +3761,31 @@ export async function batchImportSkillContent(chatGPTData: { contentDatabase: Ch
     throw new Error('Invalid data structure: expected { contentDatabase: [...] }');
   }
 
-  console.log(`Found ${chatGPTData.contentDatabase.length} skills to import`);
+  console.log(`📊 Found ${chatGPTData.contentDatabase.length} skills to import`);
 
-  // Add default department for skills that don't have it
-  const skillsWithDepartment = chatGPTData.contentDatabase.map(skill => ({
-    ...skill,
-    department: skill.department || 'matematyka' // Default to 'matematyka' if not provided
-  }));
+  // 1. CZYSZCZENIE NIEPEŁNYCH REKORDÓW - klucz do sukcesu!
+  console.log('🧹 Cleaning incomplete records...');
+  const { error: cleanupError } = await supabase
+    .from('unified_skill_content')
+    .delete()
+    .eq('is_complete', false);
+
+  if (cleanupError) {
+    console.error('❌ Cleanup error:', cleanupError);
+  } else {  
+    console.log('✅ Cleaned up incomplete records');
+  }
 
   // Process each skill from ChatGPT
-  for (const skill of skillsWithDepartment) {
+  for (const skill of chatGPTData.contentDatabase) {
     try {
-      // Map skillId to existing skill in database
-      let targetSkillId = skill.skillId;
-      
-      // If skillId is a custom identifier, try to find by name
-      if (!targetSkillId || typeof targetSkillId !== 'string' || targetSkillId.startsWith('skill_')) {
-        const { data: existingSkill } = await supabase
-          .from('skills')
-          .select('id')
-          .eq('name', skill.skillName)
-          .single();
-        
-        if (existingSkill) {
-          targetSkillId = existingSkill.id;
-        } else {
-          results.push({
-            skillName: skill.skillName,
-            result: {
-              success: false,
-              error: `Skill not found in database: ${skill.skillName}`
-            }
-          });
-          failed++;
-          continue;
-        }
-      }
+      // 2. UUID GENEROWANIE - zawsze nowy UUID zamiast stringowego ID
+      const skillId = uuidv4(); // ⭐ KLUCZ DO SUKCESU
+      console.log(`🔑 Generated UUID ${skillId} for ${skill.skillName}`);
 
-      // Import unified skill content
+      // 3. CONTENT_DATA - dodanie skillName bezpośrednio
       const unifiedContentData = {
+        skillName: skill.skillName, // ⭐ KLUCZ DO SUKCESU - bezpośrednio w content_data
         theory: skill.content?.theory ? {
           theory_text: skill.content.theory.introduction || '',
           key_formulas: skill.content.theory.keyConceptsLaTex || [],
@@ -3809,8 +3796,8 @@ export async function batchImportSkillContent(chatGPTData: { contentDatabase: Ch
         examples: skill.content?.examples?.map((example: any, index: number) => ({
           example_code: `${skill.skillName.toLowerCase().replace(/\s+/g, '_')}_ex_${index + 1}`,
           problem_statement: example.problem || '',
-          solution_steps: example.solution?.steps?.map((step: any) => step.step) || [],
-          final_answer: example.solution?.final_answer || '',
+          solution_steps: example.solution?.steps?.map((step: any) => step.step) || (example.solution ? [example.solution] : []),
+          final_answer: example.solution?.final_answer || example.expectedAnswer || '',
           explanation: example.explanation || example.maturaConnection || '',
           difficulty_level: example.difficulty || skill.generatorParams?.difficultyRange?.[0] || 1,
           time_estimate: example.timeEstimate || 120
@@ -3822,7 +3809,7 @@ export async function batchImportSkillContent(chatGPTData: { contentDatabase: Ch
           difficulty_level: exercise.difficulty || 1,
           time_estimate: exercise.timeEstimate || 180,
           misconception_map: exercise.misconceptionTriggers || {},
-          hints: exercise.hints?.map((hint: any) => hint.hint) || []
+          hints: exercise.hints?.map((hint: any) => typeof hint === 'string' ? hint : hint.hint) || []
         })) || [],
         pedagogical_notes: skill.pedagogicalNotes ? {
           scaffolding_questions: skill.pedagogicalNotes.teachingTips || [],
@@ -3845,11 +3832,12 @@ export async function batchImportSkillContent(chatGPTData: { contentDatabase: Ch
         phases: []
       };
 
+      // 4. METADATA - kompletne mapowanie
       const metadata = {
-        skill_name: skill.skillName,
+        skill_name: skill.skillName, // ⭐ KLUCZ DO SUKCESU - wypełnione skill_name
         description: skill.skillName,
         department: skill.department || 'mathematics',
-        level: 'primary',
+        level: 'high_school',
         class_level: skill.class_level || 1,
         men_code: skill.skillId || '',
         difficulty_rating: skill.generatorParams?.difficultyRange?.[0] || 1,
@@ -3859,25 +3847,33 @@ export async function batchImportSkillContent(chatGPTData: { contentDatabase: Ch
         chapter_tag: skill.department || ''
       };
 
-      // Check if content is complete
+      // 5. SPRAWDZENIE KOMPLETNOŚCI
+      console.log(`🔍 Checking completeness for ${skill.skillName}:`);
+      console.log('  Theory:', unifiedContentData.theory?.theory_text ? '✅' : '❌');
+      console.log('  Examples:', unifiedContentData.examples?.length > 0 ? `✅ (${unifiedContentData.examples.length})` : '❌');
+      console.log('  Exercises:', unifiedContentData.exercises?.length > 0 ? `✅ (${unifiedContentData.exercises.length})` : '❌');
+
       const isComplete = !!(
         unifiedContentData.theory?.theory_text && 
         unifiedContentData.examples?.length > 0 &&
         unifiedContentData.exercises?.length > 0
       );
 
+      console.log(`  Final is_complete: ${isComplete ? '✅' : '❌'}`);
+
+      // 6. WSTAWIENIE DO BAZY
       const { error: unifiedError } = await supabase
         .from('unified_skill_content')
         .upsert([{
-          skill_id: targetSkillId,
+          skill_id: skillId,
           content_data: unifiedContentData,
           metadata: metadata,
-          is_complete: isComplete,
+          is_complete: isComplete, // ⭐ KLUCZ DO SUKCESU
           version: 1
         }]);
 
       if (unifiedError) {
-        console.error(`Error inserting unified content for ${skill.skillName}:`, unifiedError);
+        console.error(`❌ Error inserting ${skill.skillName}:`, unifiedError);
         results.push({
           skillName: skill.skillName,
           result: {
@@ -3889,18 +3885,18 @@ export async function batchImportSkillContent(chatGPTData: { contentDatabase: Ch
         continue;
       }
 
-      console.log(`Successfully imported skill: ${skill.skillName}`);
+      console.log(`✅ Successfully imported: ${skill.skillName}`);
       results.push({
         skillName: skill.skillName,
         result: {
           success: true,
-          skillId: targetSkillId
+          skillId: skillId
         }
       });
       successful++;
 
     } catch (error) {
-      console.error(`Failed to import skill ${skill.skillName}:`, error);
+      console.error(`❌ Failed to import ${skill.skillName}:`, error);
       results.push({
         skillName: skill.skillName,
         result: {
@@ -3919,7 +3915,7 @@ export async function batchImportSkillContent(chatGPTData: { contentDatabase: Ch
     details: results
   };
 
-  console.log('Batch import completed:', batchResult);
+  console.log('🎉 Batch import completed:', batchResult);
   return batchResult;
 }
 
