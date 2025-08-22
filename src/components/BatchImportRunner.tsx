@@ -165,13 +165,43 @@ export const BatchImportRunner = () => {
                   </div>
                 )}
 
-                <Button 
-                  onClick={runBatchImport} 
-                  disabled={importing || !jsonInput.trim()}
-                  className="w-full"
-                >
-                  {importing ? 'Importowanie...' : 'Importuj Dane z ChatGPT'}
-                </Button>
+                <div className="grid grid-cols-2 gap-4">
+                  <Button 
+                    onClick={runBatchImport} 
+                    disabled={importing || !jsonInput.trim()}
+                    className="w-full"
+                  >
+                    {importing ? 'Importowanie...' : 'Importuj Dane z ChatGPT'}
+                  </Button>
+                  
+                  <Button 
+                    onClick={async () => {
+                      setImporting(true);
+                      try {
+                        const { runFixedImport } = await import('@/lib/fixedImportRunner');
+                        const result = await runFixedImport();
+                        setResults(result);
+                        toast({
+                          title: "Import naprawiony zakończony",
+                          description: `Zaimportowano ${result.successful}/${result.totalProcessed} umiejętności`,
+                        });
+                      } catch (error) {
+                        toast({
+                          title: "Błąd naprawionego importu",
+                          description: error instanceof Error ? error.message : "Nieznany błąd",
+                          variant: "destructive"
+                        });
+                      } finally {
+                        setImporting(false);
+                      }
+                    }}
+                    disabled={importing}
+                    variant="secondary"
+                    className="w-full"
+                  >
+                    🚀 Uruchom Naprawiony Import (4 umiejętności)
+                  </Button>
+                </div>
               </div>
             </TabsContent>
 
