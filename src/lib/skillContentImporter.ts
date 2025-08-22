@@ -31,27 +31,6 @@ interface ChatGPTSkillContent {
   assessmentRubric: any;
 }
 
-export interface BatchImportResult {
-  totalProcessed: number;
-  successful: number;
-  failed: number;
-  details: SkillImportResult[];
-}
-
-interface ChatGPTSkillContent {
-  skillId: string;
-  skillName: string;
-  class_level: number;
-  department: string;
-  generatorParams: any;
-  teachingFlow: any;
-  content: any;
-  pedagogicalNotes: any;
-  misconceptionPatterns: any;
-  realWorldApplications: any;
-  assessmentRubric: any;
-}
-
 interface SkillContent {
   skillId: string;
   skillName: string;
@@ -158,7 +137,7 @@ async function importSkillWithContent(skill: SkillContent) {
       examples: skill.content?.examples?.map(example => ({
         example_code: example.title || '',
         problem_statement: example.problem || '',
-        solution_steps: example.solution ? [example.solution] : [],
+        solution_steps: example.solution?.steps || (example.solution ? [example.solution] : []),
         final_answer: example.expectedAnswer || '',
         explanation: example.maturaConnection || '',
         difficulty_level: example.difficulty || skill.generatorParams?.difficulty || 1,
@@ -208,12 +187,19 @@ async function importSkillWithContent(skill: SkillContent) {
       chapter_tag: skill.department || '' // Use department since chapterTag doesn't exist
     };
 
-    // Check if content is complete
+    // Check if content is complete - LOG DETAILED VALIDATION
+    console.log(`Checking completeness for ${skill.skillName}:`);
+    console.log('Theory text:', unifiedContentData.theory?.theory_text ? 'EXISTS' : 'MISSING');
+    console.log('Examples count:', unifiedContentData.examples?.length || 0);
+    console.log('Exercises count:', unifiedContentData.exercises?.length || 0);
+    
     const isComplete = !!(
       unifiedContentData.theory?.theory_text && 
       unifiedContentData.examples?.length > 0 &&
       unifiedContentData.exercises?.length > 0
     );
+    
+    console.log(`Final is_complete status for ${skill.skillName}:`, isComplete);
 
     const { error: unifiedError } = await supabase
       .from('unified_skill_content')
