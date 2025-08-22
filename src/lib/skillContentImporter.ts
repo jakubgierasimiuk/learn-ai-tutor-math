@@ -158,8 +158,8 @@ async function importSkillWithContent(skill: SkillContent) {
       examples: skill.content?.examples?.map(example => ({
         example_code: example.title || '',
         problem_statement: example.problem || '',
-        solution_steps: example.solution?.steps || [],
-        final_answer: example.solution?.final_answer || example.expectedAnswer || '',
+        solution_steps: example.solution ? [example.solution] : [],
+        final_answer: example.expectedAnswer || '',
         explanation: example.maturaConnection || '',
         difficulty_level: example.difficulty || skill.generatorParams?.difficulty || 1,
         time_estimate: example.timeEstimate || 0

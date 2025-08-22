@@ -304,4 +304,10 @@ export async function runSimpleImport() {
 }
 
 // Auto run
-runSimpleImport();
+runSimpleImport()
+  .then(result => {
+    console.log('Import completed successfully:', result);
+  })
+  .catch(error => {
+    console.error('Import failed:', error);
+  });
