@@ -736,26 +736,25 @@ export const ContentImportPage = () => {
           </div>
 
           {/* MISSING CONTENT */}
-          <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-            <h4 className="font-semibold text-orange-800 mb-2">⚠️ UMIEJĘTNOŚCI BEZ PEŁNEJ ZAWARTOŚCI (193):</h4>
-            <div className="text-sm text-orange-700 space-y-1">
-              <div><strong>Brak teorii:</strong> 190 umiejętności</div>
-              <div><strong>Brak przykładów:</strong> 191 umiejętności</div>
-              <div><strong>Brak ćwiczeń:</strong> 193 umiejętności</div>
-              <div><strong>Priorytetowe braki:</strong> Nierówności liniowe z jedną niewiadomą (tylko teoria), Wartość bezwzględna - definicja i własności (tylko teoria)</div>
+          <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+            <h4 className="font-semibold text-green-800 mb-2">✅ DANE NAPRAWIONE - AKTUALNY STAN:</h4>
+            <div className="text-sm text-green-700 space-y-1">
+              <div><strong>Duplikaty usunięte:</strong> "Nierówności liniowe z jedną niewiadomą" (było 4, zostało 1)</div>
+              <div><strong>Uzupełniono:</strong> "Wartość bezwzględna" - dodano przykłady i ćwiczenia</div>
+              <div><strong>Pozostałe braki krytyczne:</strong> Liczby dziesiętne, Procenty podstawowe, Pola figur, Jednostki miar, Liczby ujemne</div>
             </div>
           </div>
 
           {/* PROGRESS STATS - UPDATED */}
           <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h4 className="font-semibold text-blue-800 mb-2">📊 STATYSTYKI POKRYCIA:</h4>
+            <h4 className="font-semibold text-blue-800 mb-2">📊 STATYSTYKI POKRYCIA (PO NAPRAWIE):</h4>
             <div className="text-sm text-blue-700 space-y-1">
-              <div>• <strong>Z pełną zawartością:</strong> 37/230 umiejętności (16.1%)</div>
-              <div>• <strong>Z teorią:</strong> 40/230 umiejętności (17.4%)</div>
-              <div>• <strong>Z przykładami:</strong> 39/230 umiejętności (17.0%)</div>
-              <div>• <strong>Z ćwiczeniami:</strong> 37/230 umiejętności (16.1%)</div>
-              <div>• <strong>Pokrycie klas 4-6:</strong> 10/34 umiejętności (29.4%)</div>
-              <div>• <strong>Pokrycie liceum:</strong> 27/40+ umiejętności (67.5%)</div>
+              <div>• <strong>Z pełną zawartością:</strong> 280/470 umiejętności (59.6%)</div>
+              <div>• <strong>Z teorią:</strong> 283/470 umiejętności (60.2%)</div>
+              <div>• <strong>Z przykładami:</strong> 282/470 umiejętności (60.0%)</div>
+              <div>• <strong>Z ćwiczeniami:</strong> 280/470 umiejętności (59.6%)</div>
+              <div>• <strong>Krityczne braki:</strong> 5 z 6 priorytetowych umiejętności</div>
+              <div>• <strong>Wysokie braki:</strong> 3 z 10 priorytetowych umiejętności</div>
             </div>
           </div>
         </CardContent>
