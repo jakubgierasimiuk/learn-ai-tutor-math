@@ -104,82 +104,93 @@ async function importSkillWithContent(skill: SkillContent) {
       };
     }
 
-    // Import pedagogical notes to separate table
-    if (skill.pedagogicalNotes) {
-      const { error: pedagogicalError } = await supabase
-        .from('skill_pedagogical_notes')
-        .upsert([{
-          skill_id: skillId,
-          scaffolding_questions: skill.pedagogicalNotes.teachingTips || [],
-          estimated_total_time: skill.pedagogicalNotes.estimatedTime || 3600,
-          teaching_flow: ["theory", "examples", "practice", "assessment"],
-          prerequisite_description: skill.pedagogicalNotes.prerequisites?.join(', ') || '',
-          next_topic_description: skill.pedagogicalNotes.universityConnection || ''
-        }]);
+    // Import to unified skill content table
+    const unifiedContentData = {
+      theory: skill.content?.theory ? {
+        theory_text: skill.content.theory.introduction || '',
+        key_formulas: skill.content.theory.keyConceptsLaTex || [],
+        time_estimate: skill.content.theory.timeEstimate || 0,
+        difficulty_level: skill.generatorParams?.difficulty || 1,
+        created_at: new Date().toISOString()
+      } : null,
+      examples: skill.content?.examples?.map(example => ({
+        example_code: example.title || '',
+        problem_statement: example.problem || '',
+        solution_steps: example.solution?.steps || [],
+        final_answer: example.solution?.final_answer || example.expectedAnswer || '',
+        explanation: example.maturaConnection || '',
+        difficulty_level: example.difficulty || skill.generatorParams?.difficulty || 1,
+        time_estimate: example.timeEstimate || 0
+      })) || [],
+      exercises: skill.content?.practiceExercises?.map(exercise => ({
+        exercise_code: exercise.exerciseId || '',
+        problem_statement: exercise.problem || '',
+        expected_answer: exercise.expectedAnswer || '',
+        difficulty_level: exercise.difficulty || 1,
+        time_estimate: exercise.timeEstimate || 0,
+        misconception_map: exercise.misconceptionTriggers || {},
+        hints: exercise.hints || []
+      })) || [],
+      pedagogical_notes: skill.pedagogicalNotes ? {
+        scaffolding_questions: skill.pedagogicalNotes.teachingTips || [],
+        teaching_flow: ["theory", "examples", "practice", "assessment"],
+        estimated_total_time: skill.pedagogicalNotes.estimatedTime || 3600,
+        prerequisite_description: skill.pedagogicalNotes.prerequisites?.join(', ') || '',
+        next_topic_description: skill.pedagogicalNotes.universityConnection || ''
+      } : null,
+      assessment_rubric: {
+        mastery_threshold: 80,
+        skill_levels: {
+          "beginner": "0-40% poprawnych odpowiedzi",
+          "developing": "41-70% poprawnych odpowiedzi", 
+          "proficient": "71-90% poprawnych odpowiedzi",
+          "advanced": "91-100% poprawnych odpowiedzi"
+        },
+        total_questions: 10,
+        scope_description: skill.skillName
+      },
+      phases: []
+    };
 
-      if (pedagogicalError) {
-        console.error(`Error inserting pedagogical notes for ${skill.skillName}:`, pedagogicalError);
-      }
+    const metadata = {
+      skill_name: skill.skillName,
+      description: skill.skillName, // Use skillName as description since description doesn't exist
+      department: skill.department || 'matematyka',
+      level: 'high_school', // Default level since it doesn't exist in interface
+      class_level: skill.class_level || 1,
+      men_code: skill.skillId || '', // Use skillId as men_code since menCode doesn't exist
+      difficulty_rating: skill.generatorParams?.difficulty || 1,
+      estimated_time_minutes: 30, // Default since estimatedTime doesn't exist
+      prerequisites: [], // Default since prerequisites doesn't exist
+      learning_objectives: [], // Default since learningObjectives doesn't exist
+      chapter_tag: skill.department || '' // Use department since chapterTag doesn't exist
+    };
+
+    // Check if content is complete
+    const isComplete = !!(
+      unifiedContentData.theory?.theory_text && 
+      unifiedContentData.examples?.length > 0 &&
+      unifiedContentData.exercises?.length > 0
+    );
+
+    const { error: unifiedError } = await supabase
+      .from('unified_skill_content')
+      .upsert([{
+        skill_id: skillId,
+        content_data: unifiedContentData,
+        metadata: metadata,
+        is_complete: isComplete,
+        version: 1
+      }]);
+
+    if (unifiedError) {
+      console.error(`Error inserting unified content for ${skill.skillName}:`, unifiedError);
+      return {
+        success: false,
+        error: `Failed to import unified content: ${unifiedError.message}`
+      };
     }
-
-    // Import theory content
-    if (skill.content?.theory) {
-      const { error: theoryError } = await supabase
-        .from('skill_theory_content')
-        .upsert([{
-          skill_id: skillId,
-          theory_text: skill.content.theory.introduction || '',
-          key_formulas: skill.content.theory.keyConceptsLaTex || [],
-          time_estimate: skill.content.theory.timeEstimate || 0
-        }]);
-
-      if (theoryError) {
-        console.error(`Error inserting theory for ${skill.skillName}:`, theoryError);
-      }
-    }
-
-    // Import examples
-    if (skill.content?.examples) {
-      for (const example of skill.content.examples) {
-        const { error: exampleError } = await supabase
-          .from('skill_examples')
-          .upsert([{
-            skill_id: skillId,
-            problem_statement: example.problem || '',
-            solution_steps: example.solution?.steps || [],
-            example_code: example.title || '',
-            explanation: example.maturaConnection || '',
-            final_answer: example.solution?.final_answer || example.expectedAnswer || '',
-            time_estimate: example.timeEstimate || 0
-          }]);
-
-        if (exampleError) {
-          console.error(`Error inserting example for ${skill.skillName}:`, exampleError);
-        }
-      }
-    }
-
-    // Import exercises to practice exercises table  
-    if (skill.content?.practiceExercises) {
-      for (const exercise of skill.content.practiceExercises) {
-        const { error: exerciseError } = await supabase
-          .from('skill_practice_exercises')
-          .upsert([{
-            skill_id: skillId,
-            exercise_code: exercise.exerciseId || '',
-            difficulty_level: exercise.difficulty || 1,
-            problem_statement: exercise.problem || '',
-            expected_answer: exercise.expectedAnswer || '',
-            hints: exercise.hints || [],
-            misconception_map: {},
-            time_estimate: exercise.timeEstimate || 0
-          }]);
-
-        if (exerciseError) {
-          console.error(`Error inserting exercise for ${skill.skillName}:`, exerciseError);
-        }
-      }
-    }
+    console.log(`Successfully imported unified content for skill: ${skill.skillName}`);
 
     // Import real world applications
     if (skill.realWorldApplications) {

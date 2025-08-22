@@ -100,7 +100,7 @@ export const useSkillContent = (skillId: string | null) => {
           return;
         }
 
-        const contentData = unifiedContent.content_data;
+        const contentData = unifiedContent.content_data as any;
         
         setContent({
           theory: contentData.theory && Object.keys(contentData.theory).length > 0 ? contentData.theory : null,

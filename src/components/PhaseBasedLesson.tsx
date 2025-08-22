@@ -74,16 +74,18 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
       if (skillError) throw skillError;
       setSkill(skillData);
 
-      // Load skill phases
-      const { data: phasesData, error: phasesError } = await supabase
-        .from('skill_phases')
-        .select('*')
+      // Load skill phases from unified content
+      const { data: unifiedContent, error: unifiedError } = await supabase
+        .from('unified_skill_content')
+        .select('content_data')
         .eq('skill_id', skillId)
-        .eq('is_active', true)
-        .order('phase_number');
+        .maybeSingle();
 
-      if (phasesError) throw phasesError;
-      setPhases(phasesData || []);
+      if (unifiedError) throw unifiedError;
+      
+      const contentData = unifiedContent?.content_data as any;
+      const phases = contentData?.phases || [];
+      setPhases(phases);
 
       // Check for existing session or create new one
       await initializeSession();
