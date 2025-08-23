@@ -42,7 +42,7 @@ export function OnboardingChecklist() {
       description: 'krótkie intro, 8 minut',
       completed: false,
       action: 'Zacznij lekcję',
-      route: '/lesson/start',
+      route: '/study',
       icon: Rocket
     }
   ]);
