@@ -489,22 +489,37 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
                 />
                 
                 <div className="flex items-center gap-2">
-                  <Button 
-                    onClick={sendMessage}
-                    disabled={!userInput.trim() || isLoading}
-                    className="flex-1"
-                  >
-                    {isLoading ? 'Wysyłam...' : 'Wyślij odpowiedź'}
-                  </Button>
-                  
-                  <Button 
-                    variant="outline"
-                    onClick={askForHint}
-                    disabled={isLoading || chatHistory.length === 0}
-                  >
-                    <HelpCircle className="h-4 w-4 mr-2" />
-                    Podpowiedź
-                  </Button>
+                  {chatHistory.length === 0 ? (
+                    <Button 
+                      onClick={() => {
+                        setUserInput('Rozpocznij lekcję');
+                        setTimeout(() => sendMessage(), 100);
+                      }}
+                      disabled={isLoading}
+                      className="flex-1"
+                    >
+                      {isLoading ? 'Rozpoczynam...' : 'Rozpocznij lekcję'}
+                    </Button>
+                  ) : (
+                    <>
+                      <Button 
+                        onClick={sendMessage}
+                        disabled={!userInput.trim() || isLoading}
+                        className="flex-1"
+                      >
+                        {isLoading ? 'Wysyłam...' : 'Wyślij odpowiedź'}
+                      </Button>
+                      
+                      <Button 
+                        variant="outline"
+                        onClick={askForHint}
+                        disabled={isLoading}
+                      >
+                        <HelpCircle className="h-4 w-4 mr-2" />
+                        Podpowiedź
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </CardContent>
