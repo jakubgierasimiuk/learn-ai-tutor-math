@@ -39,15 +39,16 @@ export const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/10 flex items-center justify-center p-6">
-      <div className="absolute top-6 left-6">
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/10 flex items-center justify-center p-6 relative">
+      <div className="absolute top-6 left-6 z-10">
         <Button
-          variant="ghost"
+          variant="outline"
+          size="sm"
           onClick={() => navigate("/")}
-          className="text-muted-foreground hover:text-foreground"
+          className="bg-background/80 backdrop-blur-sm border-primary/20 text-foreground hover:bg-primary/10 hover:border-primary/40 shadow-md"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Powrót do strony głównej
+          Strona główna
         </Button>
       </div>
       
