@@ -6,6 +6,9 @@ verify_jwt = true
 [functions.ai-chat]
 verify_jwt = true
 
+[functions.skill-recognition]
+verify_jwt = true
+
 [functions.study-tutor]
 verify_jwt = true
 

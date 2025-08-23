@@ -44,7 +44,7 @@ export const AIChat = () => {
 
     try {
       // Step 1: Recognize skill from user message
-      const { data: skillRecognition, error: recognitionError } = await supabase.functions.invoke('study-tutor/recognize-skill', {
+      const { data: skillRecognition, error: recognitionError } = await supabase.functions.invoke('skill-recognition', {
         body: { 
           message: userInput
         }
