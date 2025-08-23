@@ -65,7 +65,7 @@ export const AIChat = () => {
           .from('study_sessions')
           .insert({
             user_id: user.id,
-            skill_id: '00000000-0000-0000-0000-000000000000', // Placeholder for general chat
+            skill_id: null, // No skill required for general chat
             session_type: 'chat',
             status: 'in_progress'
           })
