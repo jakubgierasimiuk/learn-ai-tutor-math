@@ -78,8 +78,11 @@ export const AIChat = () => {
         body: { 
           message: userInput,
           skillId: skillId,
+          sessionId: `chat_${Date.now()}`,
           sessionType: 'ai_chat',
-          stepType: 'initial_question'
+          stepType: 'initial_question',
+          currentPhase: 1,
+          department: skillRecognition?.department || 'math'
         }
       });
 

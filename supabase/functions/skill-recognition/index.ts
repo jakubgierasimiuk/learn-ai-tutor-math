@@ -39,8 +39,8 @@ serve(async (req) => {
 
     // Get all active skills from the database
     const { data: skills, error: skillsError } = await supabase
-      .from('unified_skill_content')
-      .select('id, skill_name, department, skill_description')
+      .from('skills')
+      .select('id, name, department, description')
       .eq('is_active', true);
 
     if (skillsError) {
@@ -54,9 +54,9 @@ serve(async (req) => {
     // Create a simplified skills list for AI
     const skillsList = skills.map(skill => ({
       id: skill.id,
-      name: skill.skill_name,
+      name: skill.name,
       department: skill.department,
-      description: skill.skill_description
+      description: skill.description
     }));
 
     // Prepare prompt for OpenAI
@@ -81,7 +81,7 @@ If confidence is below 0.6, set skillId to null.`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4.1-2025-04-14',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: message }
