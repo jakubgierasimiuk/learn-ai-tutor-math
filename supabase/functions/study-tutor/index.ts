@@ -128,7 +128,7 @@ async function handleTutor(req: Request): Promise<Response> {
       })
     }
 
-    const url = 'https://api.openai.com/v1/completions'
+    const url = 'https://api.openai.com/v1/chat/completions'
     const init = {
       method: 'POST',
       headers: {
@@ -137,10 +137,12 @@ async function handleTutor(req: Request): Promise<Response> {
         Authorization: `Bearer ${openAiKey}`,
       },
       body: JSON.stringify({
-        model: 'text-davinci-003',
-        prompt: prompt,
-        temperature: 0.7,
-        max_tokens: 150,
+        model: 'gpt-5-2025-08-07',
+        messages: [
+          { role: 'system', content: 'You are a helpful math tutor. Follow the guidelines exactly as provided.' },
+          { role: 'user', content: prompt }
+        ],
+        max_completion_tokens: 150,
         top_p: 1,
         frequency_penalty: 0,
         presence_penalty: 0,
@@ -159,7 +161,7 @@ async function handleTutor(req: Request): Promise<Response> {
     }
 
     const json = await response.json()
-    const explanation = json.choices[0].text.trim()
+    const explanation = json.choices[0].message.content.trim()
 
     return new Response(JSON.stringify({ data: explanation }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
