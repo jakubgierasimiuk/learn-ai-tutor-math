@@ -224,8 +224,144 @@ async function handleGetSkillContent(req: Request): Promise<Response> {
   }
 }
 
+async function handlePhaseBasedLesson(req: Request): Promise<Response> {
+  try {
+    const { 
+      message, 
+      sessionId, 
+      skillId, 
+      responseTime, 
+      stepType, 
+      currentPhase, 
+      sessionType, 
+      department 
+    } = await req.json()
+
+    console.log('Phase-based lesson request:', { 
+      message, 
+      sessionId, 
+      skillId, 
+      currentPhase, 
+      stepType 
+    });
+
+    if (!message || !skillId) {
+      console.error('Missing required parameters')
+      return new Response(JSON.stringify({ error: 'Missing required parameters' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const openAiKey = Deno.env.get('OPENAI_API_KEY')
+    if (!openAiKey) {
+      console.error('OpenAI API key is missing')
+      return new Response(JSON.stringify({ error: 'OpenAI API key is missing' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // Get skill information
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('Supabase configuration missing')
+      return new Response(JSON.stringify({ error: 'Supabase configuration missing' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const supabaseClient = createClient(supabaseUrl, supabaseKey, {
+      auth: { persistSession: false }
+    })
+
+    // Fetch skill content
+    const { data: skillData, error: skillError } = await supabaseClient
+      .from('skills')
+      .select('name, description')
+      .eq('id', skillId)
+      .single()
+
+    if (skillError) {
+      console.error('Error fetching skill:', skillError)
+      return new Response(JSON.stringify({ error: 'Skill not found' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // Create AI prompt for phase-based learning
+    const prompt = `Jesteś pomocnym nauczycielem matematyki prowadzącym lekcję na temat: "${skillData.name}".
+
+Uczeń napisał: "${message}"
+
+Odpowiedz w przyjazny i zachęcający sposób. Jeśli uczeń chce rozpocząć lekcję, zacznij od podstawowych pojęć związanych z "${skillData.name}". 
+
+Wskazówki:
+- Odpowiadaj po polsku
+- Bądź cierpliwy i zachęcający
+- Zadawaj pytania, które pomogą uczniowi zrozumieć temat
+- Nie podawaj od razu odpowiedzi, ale prowadź ucznia do odkrycia
+- Ogranicz odpowiedź do 100 słów
+- Jeśli uczeń pyta o podpowiedź, daj subtelną wskazówkę
+
+Rozpocznij lekcję!`
+
+    // Call OpenAI
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-5-2025-08-07',
+        messages: [
+          { role: 'system', content: 'Jesteś pomocnym nauczycielem matematyki. Odpowiadaj zawsze po polsku.' },
+          { role: 'user', content: prompt }
+        ],
+        max_completion_tokens: 200,
+        temperature: 0.7,
+      }),
+    })
+
+    if (!response.ok) {
+      console.error('OpenAI API error:', response.status)
+      return new Response(JSON.stringify({ error: 'AI response failed' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const aiData = await response.json()
+    const aiMessage = aiData.choices[0].message.content.trim()
+
+    return new Response(JSON.stringify({ 
+      message: aiMessage,
+      isCorrect: message.toLowerCase().includes('rozpocznij') 
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+
+  } catch (error) {
+    console.error('Error in handlePhaseBasedLesson:', error)
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+}
+
 serve(async (req) => {
   const { pathname } = new URL(req.url)
+
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
 
   if (pathname === '/tutor') {
     return handleTutor(req)
@@ -234,7 +370,8 @@ serve(async (req) => {
   } else if (pathname === '/get-skill-content') {
     return handleGetSkillContent(req)
   } else {
-    return new Response('Not Found', { status: 404 })
+    // Handle phase-based lesson requests (default endpoint)
+    return handlePhaseBasedLesson(req)
   }
 })
 
