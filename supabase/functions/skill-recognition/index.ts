@@ -271,6 +271,19 @@ serve(async (req) => {
       });
     }
 
+    if (!skills || skills.length === 0) {
+      console.error('No active skills found in database');
+      return new Response(JSON.stringify({ 
+        stage: 'direct',
+        skill_id: null,
+        skill_name: null,
+        confidence: 0,
+        reasoning: 'No active skills available in database'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // ENHANCED FUZZY MATCHING AND INTELLIGENT FILTERING
     const extractedConcepts = extractMathConcepts(message);
     console.log('Extracted concepts from message:', extractedConcepts);
@@ -413,9 +426,16 @@ FALLBACK: Jeśli brak dopasowania: stage="direct", skill_id=null, confidence=0`;
         recognitionResult.skill_name = null;
         
         // Generate fallback candidates from top matches if not provided
-        if (!recognitionResult.candidates) {
+        if (!recognitionResult.candidates && skillMatches.length > 0) {
           recognitionResult.candidates = skillMatches.slice(0, 5).map(m => m.skill.name);
           recognitionResult.clarificationQuestion = `Widzę, że potrzebujesz pomocy z matematyką! 📚 Oto obszary, z którymi mogę pomóc: ${recognitionResult.candidates.slice(0, 3).join(', ')}. Co Cię najbardziej interesuje? 🤔`;
+          
+          // Also set candidatesWithIds for frontend use
+          recognitionResult.candidatesWithIds = skillMatches.slice(0, 5).map(m => ({
+            id: m.skill.id,
+            name: m.skill.name,
+            department: m.skill.department
+          }));
         }
       }
 
@@ -426,7 +446,17 @@ FALLBACK: Jeśli brak dopasowania: stage="direct", skill_id=null, confidence=0`;
           console.log('Skill ID not found in database, switching to clarification.');
           recognitionResult.stage = 'clarification';
           recognitionResult.skill_id = null;
-          recognitionResult.candidates = skillMatches.slice(0, 5).map(m => m.skill.name);
+          recognitionResult.skill_name = null;
+          
+          if (skillMatches.length > 0) {
+            recognitionResult.candidates = skillMatches.slice(0, 5).map(m => m.skill.name);
+            recognitionResult.candidatesWithIds = skillMatches.slice(0, 5).map(m => ({
+              id: m.skill.id,
+              name: m.skill.name,
+              department: m.skill.department
+            }));
+            recognitionResult.clarificationQuestion = `Nie mogłem znaleźć dokładnej umiejętności. Oto podobne opcje: ${recognitionResult.candidates.slice(0, 3).join(', ')}. Którą wybierasz? 🤔`;
+          }
         }
       }
 
@@ -435,8 +465,8 @@ FALLBACK: Jeśli brak dopasowania: stage="direct", skill_id=null, confidence=0`;
       console.error('Raw response was:', aiResponse.choices[0].message.content);
       return new Response(JSON.stringify({ 
         stage: 'direct',
-        skillId: null, 
-        skillName: null, 
+        skill_id: null, 
+        skill_name: null, 
         confidence: 0,
         reasoning: 'Failed to parse skill recognition - AI response was malformed'
       }), {
