@@ -73,11 +73,14 @@ export const AIChat = () => {
 
       console.log(`Rozpoznana umiejętność: ${skillName} (${skillId})`);
 
-      // Step 2: Start chat with recognized skill
-      const { data: chatData, error: chatError } = await supabase.functions.invoke('study-tutor/chat', {
+      // Step 2: Start chat with recognized skill  
+      console.log('Calling study-tutor with endpoint /chat, skillId:', skillId);
+      
+      const { data: chatData, error: chatError } = await supabase.functions.invoke('study-tutor', {
         body: { 
           message: userInput,
-          skillId: skillId
+          skillId: skillId,
+          endpoint: 'chat' // Add endpoint parameter instead of URL path
         }
       });
 

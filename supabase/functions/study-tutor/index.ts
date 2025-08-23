@@ -521,10 +521,27 @@ Odpowiedz!`
 
 serve(async (req) => {
   const { pathname } = new URL(req.url)
-
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
+  }
+
+  console.log('Request pathname:', pathname);
+  
+  // Check for endpoint parameter in body for POST requests
+  if (req.method === 'POST') {
+    try {
+      const body = await req.clone().json();
+      console.log('Request body endpoint:', body.endpoint);
+      
+      if (body.endpoint === 'chat') {
+        console.log('Routing to chat handler');
+        return handleChat(req);
+      }
+    } catch (e) {
+      console.log('No endpoint parameter found, continuing with pathname routing');
+    }
   }
 
   if (pathname === '/tutor') {
