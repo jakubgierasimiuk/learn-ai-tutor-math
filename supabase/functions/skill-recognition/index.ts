@@ -2,63 +2,224 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1"
 
-// Inline fuzzy matching utilities (simplified for edge function)
+// Enhanced skill matching utilities integrated from skillMatcher.ts
+interface SkillMatch {
+  skill: {
+    id: string;
+    name: string;
+    department: string;
+    description?: string;
+  };
+  score: number;
+  matchReason: string;
+}
+
+// Comprehensive synonym mapping for Polish math skills
+const SKILL_SYNONYMS: Record<string, string[]> = {
+  // Pochodne i analiza matematyczna
+  "pochodne": ["pochodna", "różniczkowanie", "derivative", "pochodna funkcji", "różniczka", "tangent", "definicja pochodnej"],
+  "całki": ["całka", "całkowanie", "integration", "pole pod krzywą", "antiderivative", "całka oznaczona", "całka nieoznaczona"],
+  "granice": ["granica", "granicy", "limit", "zbieganie", "divergence", "granica funkcji"],
+  "ciągłość": ["ciągłość funkcji", "funkcje ciągłe", "continuity", "nieciągłość"],
+  
+  // Algebra
+  "równania": ["równanie", "rozwiązywanie równań", "equation", "solutions", "równanie liniowe", "równanie kwadratowe"],
+  "nierówności": ["nierówność", "inequality", "układ nierówności", "nierówność kwadratowa"],
+  "funkcje": ["funkcja", "function", "wykres funkcji", "dziedzina", "przeciwdziedzina", "f(x)", "funkcja liniowa"],
+  "wielomiany": ["wielomian", "polynomial", "rozkład na czynniki", "factorization", "wielomian stopnia"],
+  
+  // Geometria
+  "trójkąty": ["trójkąt", "triangle", "trigonometry", "trygonometria", "trójkąt prostokątny"],
+  "czworokąty": ["czworokąt", "quadrilateral", "prostokąt", "kwadrat", "romb", "równoległobok"],
+  "okręgi": ["okrąg", "circle", "koło", "promień", "średnica", "obwód koła"],
+  "bryły": ["bryła", "solid", "objętość", "pole powierzchni", "graniastosłupy", "ostrosłupy"],
+  
+  // Prawdopodobieństwo i statystyka  
+  "prawdopodobieństwo": ["probability", "szansa", "zdarzenie", "event", "prawdopodobieństwo warunkowe"],
+  "statystyka": ["statistics", "średnia", "mediana", "odchylenie standardowe", "statystyka opisowa"],
+  
+  // Liczby i działania
+  "ułamki": ["ułamek", "fraction", "dzielenie", "procent", "percentage", "ułamki zwykłe"],
+  "potęgi": ["potęga", "power", "exponent", "pierwiastki", "roots", "potęgowanie"],
+  "logarytmy": ["logarytm", "logarithm", "log", "ln", "lg", "logarytm naturalny"],
+  "wartość bezwzględna": ["wartość bezwzględna", "moduł", "absolute value", "|x|"]
+};
+
+// Keywords that indicate specific skill areas
+const SKILL_KEYWORDS: Record<string, string[]> = {
+  algebra: ["równanie", "x", "y", "zmienna", "rozwiąż", "solve", "funkcja", "wykres"],
+  geometry: ["kąt", "długość", "pole", "objętość", "trójkąt", "okrąg", "bryła", "figura"],
+  calculus: ["pochodna", "całka", "granica", "różniczka", "tangent", "pole pod krzywą"],
+  probability: ["prawdopodobieństwo", "szansa", "zdarzenie", "losowy", "statystyka"]
+};
+
+// Common learning intent phrases
+const LEARNING_INTENTS = [
+  "chcę się nauczyć", "nie rozumiem", "pomóż mi z", "wytłumacz mi",
+  "jak rozwiązać", "co to jest", "czym jest", "nie wiem jak"
+];
+
 function extractMathConcepts(message: string): string[] {
   const normalizedMessage = message.toLowerCase().trim();
   const concepts: string[] = [];
   
-  const synonymMap = {
-    "pochodne": ["pochodna", "różniczkowanie", "derivative", "tangent"],
-    "całki": ["całka", "całkowanie", "integration", "pole pod krzywą"],
-    "równania": ["równanie", "rozwiązywanie", "equation", "x ="],
-    "funkcje": ["funkcja", "function", "wykres", "f(x)"],
-    "geometria": ["trójkąt", "okrąg", "pole", "objętość", "kąt"],
-    "algebra": ["wielomian", "ułamek", "potęga", "logarytm"]
-  };
+  // Check for direct skill synonym matches
+  Object.entries(SKILL_SYNONYMS).forEach(([skill, synonyms]) => {
+    synonyms.forEach(synonym => {
+      if (normalizedMessage.includes(synonym.toLowerCase())) {
+        concepts.push(skill);
+      }
+    });
+  });
   
-  Object.entries(synonymMap).forEach(([concept, synonyms]) => {
-    if (synonyms.some(synonym => normalizedMessage.includes(synonym))) {
-      concepts.push(concept);
+  // Check for subject-specific keywords
+  Object.entries(SKILL_KEYWORDS).forEach(([subject, keywords]) => {
+    const matchCount = keywords.filter(keyword => 
+      normalizedMessage.includes(keyword.toLowerCase())
+    ).length;
+    
+    if (matchCount >= 2) { // Multiple keywords suggest this subject
+      concepts.push(subject);
     }
   });
   
-  return concepts;
+  return [...new Set(concepts)]; // Remove duplicates
 }
 
-function calculateSkillRelevance(skill: any, message: string, concepts: string[]): number {
-  const normalizedMessage = message.toLowerCase();
-  const skillName = skill.name.toLowerCase();
-  let score = 0;
+function calculateStringSimilarity(str1: string, str2: string): number {
+  // Simple Levenshtein distance based similarity
+  const longer = str1.length > str2.length ? str1 : str2;
+  const shorter = str1.length > str2.length ? str2 : str1;
   
-  // Exact name match
-  if (normalizedMessage.includes(skillName) || skillName.includes(normalizedMessage.slice(0, 10))) {
-    score += 50;
+  if (longer.length === 0) return 1.0;
+  
+  const editDistance = levenshteinDistance(longer, shorter);
+  return (longer.length - editDistance) / longer.length;
+}
+
+function levenshteinDistance(str1: string, str2: string): number {
+  const matrix = Array(str2.length + 1).fill(null).map(() => 
+    Array(str1.length + 1).fill(null)
+  );
+  
+  for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
+  for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
+  
+  for (let j = 1; j <= str2.length; j++) {
+    for (let i = 1; i <= str1.length; i++) {
+      if (str1[i - 1] === str2[j - 1]) {
+        matrix[j][i] = matrix[j - 1][i - 1];
+      } else {
+        matrix[j][i] = Math.min(
+          matrix[j - 1][i - 1] + 1, // substitution
+          matrix[j][i - 1] + 1,     // insertion
+          matrix[j - 1][i] + 1      // deletion
+        );
+      }
+    }
   }
   
-  // Concept matching
-  concepts.forEach(concept => {
-    if (skillName.includes(concept) || (skill.description || '').toLowerCase().includes(concept)) {
-      score += 20;
+  return matrix[str2.length][str1.length];
+}
+
+function calculateSkillRelevance(skill: any, message: string, extractedConcepts: string[]): SkillMatch {
+  const normalizedMessage = message.toLowerCase();
+  const skillName = skill.name.toLowerCase();
+  const skillDesc = (skill.description || '').toLowerCase();
+  
+  let score = 0;
+  let matchReasons: string[] = [];
+  
+  // 1. Direct name similarity (fuzzy matching)
+  const nameWords = skillName.split(' ');
+  const messageWords = normalizedMessage.split(' ');
+  
+  nameWords.forEach(nameWord => {
+    messageWords.forEach(messageWord => {
+      if (nameWord.length > 3 && messageWord.length > 3) {
+        const similarity = calculateStringSimilarity(nameWord, messageWord);
+        if (similarity > 0.7) {
+          score += similarity * 30; // High weight for name matches
+          matchReasons.push(`name similarity: ${nameWord} ≈ ${messageWord}`);
+        }
+      }
+    });
+  });
+  
+  // 2. Exact keyword matches in name
+  if (normalizedMessage.includes(skillName)) {
+    score += 50;
+    matchReasons.push('exact name match');
+  }
+  
+  // 3. Synonym matching
+  Object.entries(SKILL_SYNONYMS).forEach(([concept, synonyms]) => {
+    if (extractedConcepts.includes(concept)) {
+      synonyms.forEach(synonym => {
+        if (skillName.includes(synonym) || skillDesc.includes(synonym)) {
+          score += 25;
+          matchReasons.push(`synonym match: ${concept}`);
+        }
+      });
     }
   });
   
-  // Department relevance
-  if (concepts.includes('geometria') && skill.department === 'geometry') score += 15;
-  if (concepts.includes('algebra') && skill.department === 'algebra') score += 15;
-  if (concepts.includes('pochodne') && skill.department === 'calculus') score += 15;
+  // 4. Department-specific boost
+  const department = skill.department.toLowerCase();
+  if (department === 'algebra' && extractedConcepts.includes('algebra')) score += 15;
+  if (department === 'geometry' && extractedConcepts.includes('geometry')) score += 15;
+  if (department === 'calculus' && extractedConcepts.includes('calculus')) score += 15;
   
-  return score;
+  // 5. Description content matching
+  extractedConcepts.forEach(concept => {
+    if (skillDesc.includes(concept)) {
+      score += 10;
+      matchReasons.push(`description contains: ${concept}`);
+    }
+  });
+  
+  // 6. Learning intent detection
+  const hasLearningIntent = LEARNING_INTENTS.some(intent => 
+    normalizedMessage.includes(intent)
+  );
+  
+  if (hasLearningIntent) {
+    score += 5; // Small boost for learning intent
+  }
+  
+  return {
+    skill,
+    score: Math.min(score, 100), // Cap at 100
+    matchReason: matchReasons.join(', ') || 'no specific match'
+  };
 }
 
 function filterSkillsByDepartment(skills: any[], concepts: string[]): any[] {
-  if (concepts.length === 0) return skills.slice(0, 50);
+  // If specific department concepts are detected, filter to relevant departments
+  const departmentMap = {
+    algebra: ['algebra'],
+    geometry: ['geometry'],  
+    calculus: ['calculus'],
+    probability: ['probability']
+  };
   
-  const relevantSkills = skills.filter(skill => {
-    const relevance = calculateSkillRelevance(skill, '', concepts);
-    return relevance > 0;
+  let relevantDepartments: string[] = [];
+  
+  Object.entries(departmentMap).forEach(([dept, deptConcepts]) => {
+    if (deptConcepts.some(concept => concepts.includes(concept))) {
+      relevantDepartments.push(dept);
+    }
   });
   
-  return relevantSkills.length > 0 ? relevantSkills : skills.slice(0, 50);
+  if (relevantDepartments.length === 0) {
+    // No specific department detected, return top skills from each major department
+    const majorDepts = ['algebra', 'geometry', 'calculus'];
+    return skills.filter(skill => majorDepts.includes(skill.department));
+  }
+  
+  return skills.filter(skill => 
+    relevantDepartments.some(dept => skill.department.includes(dept))
+  );
 }
 
 const corsHeaders = {
@@ -110,26 +271,32 @@ serve(async (req) => {
       });
     }
 
-    // FUZZY MATCHING AND INTELLIGENT FILTERING
+    // ENHANCED FUZZY MATCHING AND INTELLIGENT FILTERING
     const extractedConcepts = extractMathConcepts(message);
     console.log('Extracted concepts from message:', extractedConcepts);
     
-    // Filter skills to most relevant ones (max 50)
-    const filteredSkills = filterSkillsByDepartment(skills, extractedConcepts);
-    const skillMatches = filteredSkills
+    // Filter skills to most relevant ones first
+    const filteredSkills = filterSkillsByDepartment(skills || [], extractedConcepts);
+    console.log(`Filtered skills from ${skills?.length || 0} to ${filteredSkills.length}`);
+    
+    // Calculate skill relevance using enhanced matching
+    const skillMatches: SkillMatch[] = filteredSkills
       .map(skill => calculateSkillRelevance(skill, message, extractedConcepts))
       .sort((a, b) => b.score - a.score)
-      .slice(0, 50); // Top 50 most relevant
+      .slice(0, 30); // Top 30 most relevant for prompt optimization
       
-    console.log('Top skill matches:', skillMatches.slice(0, 5));
+    console.log('Top 5 skill matches with scores:', skillMatches.slice(0, 5).map(m => ({
+      name: m.skill.name,
+      score: m.score,
+      reason: m.matchReason
+    })));
     
-    // Create skills map for quick lookups
+    // Create skills map for quick lookups (use all skills, not just filtered)
     const skillsMap = new Map(skills.map(skill => [skill.name, skill]));
     
     // Prepare optimized skills list for AI prompt
-    const topSkills = skillMatches.slice(0, 30); // Even more focused for prompt
-    const skillsForPrompt = topSkills.map(match => 
-      `${match.skill.name} (${match.skill.department})`
+    const skillsForPrompt = skillMatches.map(match => 
+      `${match.skill.name} (${match.skill.department}, score: ${Math.round(match.score)})`
     ).join(', ');
 
     // Enhanced AI prompt with better structure and empathetic questioning
@@ -137,7 +304,7 @@ serve(async (req) => {
 
 KONTEKST: Wykryte koncepty z wiadomości ucznia: ${extractedConcepts.join(', ') || 'ogólne'}
 
-NAJLEPSZE DOPASOWANIA (${topSkills.length} umiejętności): ${skillsForPrompt}
+NAJLEPSZE DOPASOWANIA (${skillMatches.length} umiejętności): ${skillsForPrompt}
 
 ZADANIE: Przeanalizuj wiadomość ucznia i określ umiejętność lub zadaj pytanie doprecyzujące.
 
@@ -197,18 +364,23 @@ FALLBACK: Jeśli brak dopasowania: stage="direct", skill_id=null, confidence=0`;
       console.log('Raw AI response:', aiResponse.choices[0].message.content);
       console.log('Parsed recognition result:', recognitionResult);
 
-      // Enhanced candidate matching with fuzzy search
+      // Enhanced candidate matching with advanced fuzzy search
       if (recognitionResult.stage === 'clarification' && recognitionResult.candidates) {
         const candidatesWithIds = recognitionResult.candidates.map((candidateName: string) => {
           // First try exact match
           let skill = skillsMap.get(candidateName);
           
-          // If no exact match, try fuzzy matching within top skills
+          // If no exact match, try advanced fuzzy matching
           if (!skill) {
-            const fuzzyMatch = topSkills.find(match => 
-              match.skill.name.toLowerCase().includes(candidateName.toLowerCase()) ||
-              candidateName.toLowerCase().includes(match.skill.name.toLowerCase())
-            );
+            const fuzzyMatch = skillMatches.find(match => {
+              const skillName = match.skill.name.toLowerCase();
+              const candidateNameLower = candidateName.toLowerCase();
+              
+              // Try various matching strategies
+              return skillName.includes(candidateNameLower) ||
+                     candidateNameLower.includes(skillName) ||
+                     calculateStringSimilarity(skillName, candidateNameLower) > 0.6;
+            });
             skill = fuzzyMatch?.skill;
           }
           
@@ -242,7 +414,7 @@ FALLBACK: Jeśli brak dopasowania: stage="direct", skill_id=null, confidence=0`;
         
         // Generate fallback candidates from top matches if not provided
         if (!recognitionResult.candidates) {
-          recognitionResult.candidates = topSkills.slice(0, 5).map(m => m.skill.name);
+          recognitionResult.candidates = skillMatches.slice(0, 5).map(m => m.skill.name);
           recognitionResult.clarificationQuestion = `Widzę, że potrzebujesz pomocy z matematyką! 📚 Oto obszary, z którymi mogę pomóc: ${recognitionResult.candidates.slice(0, 3).join(', ')}. Co Cię najbardziej interesuje? 🤔`;
         }
       }
@@ -254,7 +426,7 @@ FALLBACK: Jeśli brak dopasowania: stage="direct", skill_id=null, confidence=0`;
           console.log('Skill ID not found in database, switching to clarification.');
           recognitionResult.stage = 'clarification';
           recognitionResult.skill_id = null;
-          recognitionResult.candidates = topSkills.slice(0, 5).map(m => m.skill.name);
+          recognitionResult.candidates = skillMatches.slice(0, 5).map(m => m.skill.name);
         }
       }
 
