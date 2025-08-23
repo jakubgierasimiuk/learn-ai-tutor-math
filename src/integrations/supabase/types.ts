@@ -2017,6 +2017,7 @@ export type Database = {
         Row: {
           chapter_tag: string | null
           class_level: number
+          class_level_text: string | null
           created_at: string
           department: string
           description: string | null
@@ -2025,18 +2026,21 @@ export type Database = {
           generator_params: Json | null
           id: string
           is_active: boolean | null
+          is_hidden: boolean | null
           learning_objectives: Json | null
           level: string
           men_code: string | null
           name: string
           phases: Json | null
           prerequisites: string[] | null
+          school_type: string | null
           teaching_flow: Json | null
           updated_at: string
         }
         Insert: {
           chapter_tag?: string | null
           class_level?: number
+          class_level_text?: string | null
           created_at?: string
           department: string
           description?: string | null
@@ -2045,18 +2049,21 @@ export type Database = {
           generator_params?: Json | null
           id?: string
           is_active?: boolean | null
+          is_hidden?: boolean | null
           learning_objectives?: Json | null
           level?: string
           men_code?: string | null
           name: string
           phases?: Json | null
           prerequisites?: string[] | null
+          school_type?: string | null
           teaching_flow?: Json | null
           updated_at?: string
         }
         Update: {
           chapter_tag?: string | null
           class_level?: number
+          class_level_text?: string | null
           created_at?: string
           department?: string
           description?: string | null
@@ -2065,12 +2072,14 @@ export type Database = {
           generator_params?: Json | null
           id?: string
           is_active?: boolean | null
+          is_hidden?: boolean | null
           learning_objectives?: Json | null
           level?: string
           men_code?: string | null
           name?: string
           phases?: Json | null
           prerequisites?: string[] | null
+          school_type?: string | null
           teaching_flow?: Json | null
           updated_at?: string
         }

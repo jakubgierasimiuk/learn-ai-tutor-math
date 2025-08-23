@@ -31,13 +31,15 @@ export default function StudyDashboard() {
         return [];
       }
 
-      // Get all skills
+      // Get all skills (only high school topics)
       const { data: skills, error: skillsError } = await supabase
         .from('skills')
         .select('*')
         .eq('is_active', true)
+        .eq('school_type', 'liceum')
+        .eq('is_hidden', false)
         .order('department', { ascending: true })
-        .order('class_level', { ascending: true });
+        .order('class_level_text', { ascending: true });
 
       console.log('Skills fetched:', skills);
       if (skillsError) {
@@ -118,11 +120,30 @@ export default function StudyDashboard() {
       geometry: 'Geometria',
       trigonometry: 'Trygonometria',
       calculus: 'Analiza matematyczna',
+      analiza_matematyczna: 'Analiza matematyczna',
       statistics: 'Statystyka i prawdopodobieństwo',
       sequences: 'Ciągi',
+      functions: 'Funkcje',
       funkcje: 'Funkcje'
     };
     return names[department] || department;
+  };
+
+  const getLevelLabel = (level: string) => {
+    switch (level) {
+      case 'basic':
+        return 'Podstawowy';
+      case 'intermediate':
+        return 'Średniozaawansowany';
+      case 'advanced':
+        return 'Zaawansowany';
+      case 'extended':
+        return 'Rozszerzony';
+      case 'expert':
+        return 'Ekspercki';
+      default:
+        return 'Podstawowy';
+    }
   };
 
   if (isLoading) {
@@ -277,10 +298,10 @@ export default function StudyDashboard() {
                 
                 <div className="flex flex-wrap gap-2 mt-2">
                   <Badge variant="outline" className="text-xs">
-                    Klasa {skill.class_level}
+                    {skill.class_level_text || `Klasa ${skill.class_level}`}
                   </Badge>
                   <Badge variant={skill.level === 'extended' ? 'default' : 'secondary'} className="text-xs">
-                    {skill.level === 'extended' ? 'Rozszerzona' : 'Podstawa'}
+                    {skill.level === 'extended' ? 'Rozszerzony' : getLevelLabel(skill.level)}
                   </Badge>
                   <Badge variant="outline" className="text-xs">
                     ~{skill.estimated_time_minutes} min
