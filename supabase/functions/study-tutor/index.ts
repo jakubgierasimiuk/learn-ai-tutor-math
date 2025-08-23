@@ -226,6 +226,18 @@ async function handleGetSkillContent(req: Request): Promise<Response> {
 
 async function handlePhaseBasedLesson(req: Request): Promise<Response> {
   try {
+    // Extract JWT token from Authorization header
+    const authHeader = req.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.error('Missing or invalid authorization header')
+      return new Response(JSON.stringify({ error: 'Authorization required' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const jwt = authHeader.replace('Bearer ', '')
+    
     const { 
       message, 
       sessionId, 
@@ -262,7 +274,7 @@ async function handlePhaseBasedLesson(req: Request): Promise<Response> {
       })
     }
 
-    // Get skill information
+    // Get skill information with authenticated client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')
     
@@ -274,9 +286,27 @@ async function handlePhaseBasedLesson(req: Request): Promise<Response> {
       })
     }
 
+    // Create authenticated Supabase client
     const supabaseClient = createClient(supabaseUrl, supabaseKey, {
-      auth: { persistSession: false }
+      auth: { persistSession: false },
+      global: {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      },
     })
+
+    // Verify user authentication
+    const { data: user, error: userError } = await supabaseClient.auth.getUser(jwt)
+    if (userError || !user) {
+      console.error('Invalid user token:', userError)
+      return new Response(JSON.stringify({ error: 'Invalid authentication' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    console.log('Authenticated user:', user.user?.id)
 
     // Fetch skill content
     const { data: skillData, error: skillError } = await supabaseClient
