@@ -84,14 +84,28 @@ export const AIChat = () => {
         }
       });
 
+      // DETAILED DEBUGGING LOGS
+      console.log('=== CHAT RESPONSE DEBUG ===');
+      console.log('chatError:', chatError);
+      console.log('chatData type:', typeof chatData);
+      console.log('chatData (full object):', JSON.stringify(chatData, null, 2));
+      console.log('chatData.message:', chatData?.message);
+      console.log('chatData keys:', chatData ? Object.keys(chatData) : 'no keys');
+      console.log('=== END DEBUG ===');
+
       if (chatError) {
-        console.error('Chat error:', chatError);
+        console.error('Chat error details:', JSON.stringify(chatError, null, 2));
         throw new Error('Wystąpił problem podczas rozmowy z AI.');
+      }
+
+      if (!chatData) {
+        console.error('No chatData received');
+        throw new Error('Brak odpowiedzi z AI.');
       }
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: chatData.message || 'Rozpocznijmy naukę tej umiejętności!',
+        content: chatData.message || chatData || 'Rozpocznijmy naukę tej umiejętności!',
         role: 'assistant',
         timestamp: new Date()
       };

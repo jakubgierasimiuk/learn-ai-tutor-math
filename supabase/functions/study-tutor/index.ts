@@ -406,7 +406,11 @@ async function handleChat(req: Request): Promise<Response> {
   try {
     const { message, skillId } = await req.json()
 
+    // DETAILED DEBUGGING LOGS
+    console.log('=== CHAT HANDLER DEBUG ===');
     console.log('Chat request:', { message, skillId });
+    console.log('Input message type:', typeof message);
+    console.log('Input skillId type:', typeof skillId);
 
     if (!message) {
       console.error('Missing message parameter')
@@ -493,6 +497,8 @@ Odpowiedz!`
     }
 
     const aiData = await response.json()
+    console.log('OpenAI response status:', response.status);
+    console.log('OpenAI response data:', JSON.stringify(aiData, null, 2));
     
     if (!aiData.choices || aiData.choices.length === 0) {
       console.error('No choices in OpenAI response:', aiData)
@@ -503,10 +509,13 @@ Odpowiedz!`
     }
     
     const aiMessage = aiData.choices[0]?.message?.content?.trim() || 'Przepraszam, nie mogę teraz odpowiedzieć. Spróbuj ponownie.'
+    console.log('Extracted AI message:', aiMessage);
 
-    return new Response(JSON.stringify({ 
-      message: aiMessage
-    }), {
+    const finalResponse = { message: aiMessage };
+    console.log('Final response object:', JSON.stringify(finalResponse, null, 2));
+    console.log('=== END CHAT HANDLER DEBUG ===');
+
+    return new Response(JSON.stringify(finalResponse), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
 
