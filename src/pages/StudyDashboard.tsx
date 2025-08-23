@@ -271,9 +271,6 @@ export default function StudyDashboard() {
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1">
                     <CardTitle className="text-base leading-tight">{skill.name}</CardTitle>
-                    <CardDescription className="text-sm">
-                      {skill.description}
-                    </CardDescription>
                   </div>
                   {getDepartmentIcon(skill.department)}
                 </div>
