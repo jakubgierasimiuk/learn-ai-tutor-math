@@ -392,6 +392,56 @@ export const AIChat = () => {
     return candidates.length > 0 ? candidates[0].id : null;
   };
 
+  const endSession = async () => {
+    if (!sessionId || !user?.id) return;
+
+    try {
+      setIsLoading(true);
+      
+      // Generate session summary
+      const { data, error } = await supabase.functions.invoke('session-summary', {
+        body: {
+          sessionId: sessionId,
+          sessionType: 'chat',
+          userId: user.id
+        }
+      });
+
+      if (error) {
+        console.error('Error generating session summary:', error);
+      }
+
+      // Reset chat state for new session
+      setMessages([{
+        id: '1',
+        content: 'Cześć! Jestem Twoim AI korepetytorem. Mogę pomóc Ci z matematyką, wytłumaczyć pojęcia i rozwiązać zadania. W czym mogę Ci dzisiaj pomóc?',
+        role: 'assistant',
+        timestamp: new Date()
+      }]);
+      setSessionId(null);
+      setSequenceNumber(0);
+      setClarificationContext(null);
+
+      // Initialize new session
+      await initializeSession();
+
+      toast({
+        title: "Sesja zakończona",
+        description: "Rozpoczęto nową sesję. Poprzednia sesja została zapisana.",
+      });
+
+    } catch (error) {
+      console.error('Error ending session:', error);
+      toast({
+        title: "Błąd",
+        description: "Nie udało się zakończyć sesji",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -464,26 +514,39 @@ export const AIChat = () => {
           </div>
         </ScrollArea>
         
-        <div className="flex gap-2">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder={
-              clarificationContext?.isWaitingForResponse 
-                ? "Wybierz jedną z opcji powyżej..." 
-                : "Zadaj pytanie o matematykę..."
-            }
-            disabled={isLoading}
-            className="flex-1"
-          />
-          <Button 
-            onClick={sendMessage} 
-            disabled={!input.trim() || isLoading}
-            size="icon"
-          >
-            <Send className="w-4 h-4" />
-          </Button>
+        <div className="space-y-3">
+          <div className="flex gap-2">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder={
+                clarificationContext?.isWaitingForResponse 
+                  ? "Wybierz jedną z opcji powyżej..." 
+                  : "Zadaj pytanie o matematykę..."
+              }
+              disabled={isLoading}
+              className="flex-1"
+            />
+            <Button 
+              onClick={sendMessage} 
+              disabled={!input.trim() || isLoading}
+              size="icon"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
+          
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={endSession}
+              disabled={isLoading}
+              className="flex-1"
+            >
+              Zakończ sesję
+            </Button>
+          </div>
         </div>
         
         {clarificationContext?.isWaitingForResponse && (

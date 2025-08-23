@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +54,7 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
   const [responseTime, setResponseTime] = useState<number>(0);
   const [startTime, setStartTime] = useState<number>(Date.now());
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     loadSkillData();
@@ -339,6 +341,49 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
     }
   };
 
+  const endSession = async () => {
+    if (!session || !user?.id) return;
+
+    try {
+      setIsLoading(true);
+      
+      // Generate session summary
+      const { data, error } = await supabase.functions.invoke('session-summary', {
+        body: {
+          sessionId: session.id,
+          sessionType: 'lesson',
+          userId: user.id
+        }
+      });
+
+      if (error) {
+        console.error('Error generating session summary:', error);
+      }
+
+      toast({
+        title: "Sesja zakończona",
+        description: "Sesja została pomyślnie zakończona i zapisana.",
+      });
+
+      // Navigate back or to sessions page
+      if (onComplete) {
+        onComplete();
+      } else {
+        window.history.back();
+      }
+
+    } catch (error) {
+      console.error('Error ending session:', error);
+      toast({
+        title: "Błąd",
+        description: "Nie udało się zakończyć sesji",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getCurrentPhaseData = () => {
     return phases.find(p => p.phase_number === currentPhase);
   };
@@ -511,6 +556,14 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
                       >
                         <HelpCircle className="h-4 w-4 mr-2" />
                         Podpowiedź
+                      </Button>
+                      
+                      <Button 
+                        variant="outline"
+                        onClick={endSession}
+                        disabled={isLoading}
+                      >
+                        Zakończ sesję
                       </Button>
                     </>
                   )}

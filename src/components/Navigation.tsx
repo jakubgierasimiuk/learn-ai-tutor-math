@@ -137,6 +137,26 @@ export const Navigation = () => {
                 <Database className="w-4 h-4" />
                 AI Logs
               </Link>
+              <Link 
+                to="/sessions" 
+                className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
+                  isActive('/sessions') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
+                }`}
+                onClick={() => setIsOpen(false)}
+              >
+                <MessageCircle className="w-4 h-4" />
+                Sesje
+              </Link>
+              <Link 
+                to="/sessions" 
+                className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
+                  isActive('/sessions') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
+                }`}
+                onClick={() => setIsOpen(false)}
+              >
+                <MessageCircle className="w-4 h-4" />
+                Sesje
+              </Link>
             </div>
             <div className="flex flex-col gap-2 pt-4 border-t border-border">
               <span className="text-sm text-muted-foreground px-2">
