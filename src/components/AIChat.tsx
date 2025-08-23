@@ -38,39 +38,77 @@ export const AIChat = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const userInput = input.trim();
     setInput('');
     setIsLoading(true);
 
     try {
-      // Enhanced chat through unified study-tutor with cognitive profiling
-      const { data, error } = await supabase.functions.invoke('study-tutor', {
+      // Step 1: Recognize skill from user message
+      const { data: skillRecognition, error: recognitionError } = await supabase.functions.invoke('study-tutor/recognize-skill', {
         body: { 
-          message: input.trim(),
-          actionType: 'chat_message',
-          department: 'mathematics',
-          responseTime: Date.now() - new Date().getTime(), // Simple timing
-          sessionType: 'chat',
-          skillId: 'basic_math' // Default for chat
+          message: userInput
         }
       });
 
-      if (error) throw error;
+      if (recognitionError) {
+        console.error('Skill recognition error:', recognitionError);
+        throw new Error('Nie mogłem rozpoznać umiejętności z Twojego pytania.');
+      }
+
+      let skillId = skillRecognition?.skillId;
+      let skillName = skillRecognition?.skillName;
+
+      // If no skill recognized, ask for clarification
+      if (!skillId || skillRecognition.confidence < 0.6) {
+        const clarificationMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: `Nie jestem pewien, z której umiejętności matematycznej potrzebujesz pomocy. Czy możesz być bardziej konkretny? Na przykład: "potrzebuję pomocy z równaniami kwadratowymi" lub "mam problemy z pochodnymi".`,
+          role: 'assistant',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, clarificationMessage]);
+        setIsLoading(false);
+        return;
+      }
+
+      console.log(`Rozpoznana umiejętność: ${skillName} (${skillId})`);
+
+      // Step 2: Start lesson with recognized skill
+      const { data: lessonData, error: lessonError } = await supabase.functions.invoke('study-tutor', {
+        body: { 
+          message: userInput,
+          skillId: skillId,
+          sessionType: 'ai_chat',
+          stepType: 'initial_question'
+        }
+      });
+
+      if (lessonError) {
+        console.error('Lesson error:', lessonError);
+        throw new Error('Wystąpił problem podczas rozpoczynania lekcji.');
+      }
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: data.message || 'Przepraszam, wystąpił problem z odpowiedzią.',
+        content: lessonData.message || 'Rozpocznijmy naukę tej umiejętności!',
         role: 'assistant',
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, assistantMessage]);
+
     } catch (error) {
       console.error('Chat error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Nie mogę się połączyć z AI. Spróbuj ponownie.';
+      
       toast({
         title: "Błąd",
-        description: "Nie mogę się połączyć z AI. Spróbuj ponownie.",
+        description: errorMessage,
         variant: "destructive"
       });
+
+      // Remove user message if there was an error
+      setMessages(prev => prev.slice(0, -1));
     } finally {
       setIsLoading(false);
     }
