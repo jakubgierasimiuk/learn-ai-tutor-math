@@ -53,6 +53,60 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_conversation_log: {
+        Row: {
+          ai_response: string
+          created_at: string
+          endpoint: string | null
+          full_prompt: string
+          function_name: string
+          id: string
+          model_used: string | null
+          parameters: Json | null
+          processing_time_ms: number | null
+          sequence_number: number
+          session_id: string | null
+          timestamp: string
+          tokens_used: number | null
+          user_id: string | null
+          user_input: string | null
+        }
+        Insert: {
+          ai_response: string
+          created_at?: string
+          endpoint?: string | null
+          full_prompt: string
+          function_name: string
+          id?: string
+          model_used?: string | null
+          parameters?: Json | null
+          processing_time_ms?: number | null
+          sequence_number?: number
+          session_id?: string | null
+          timestamp?: string
+          tokens_used?: number | null
+          user_id?: string | null
+          user_input?: string | null
+        }
+        Update: {
+          ai_response?: string
+          created_at?: string
+          endpoint?: string | null
+          full_prompt?: string
+          function_name?: string
+          id?: string
+          model_used?: string | null
+          parameters?: Json | null
+          processing_time_ms?: number | null
+          sequence_number?: number
+          session_id?: string | null
+          timestamp?: string
+          tokens_used?: number | null
+          user_id?: string | null
+          user_input?: string | null
+        }
+        Relationships: []
+      }
       app_error_logs: {
         Row: {
           created_at: string
