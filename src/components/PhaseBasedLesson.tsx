@@ -357,7 +357,7 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
     }));
   };
 
-  if (!skill || phases.length === 0) {
+  if (!skill) {
     return (
       <div className={`animate-pulse space-y-4 ${className}`}>
         <Card>
