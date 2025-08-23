@@ -28,6 +28,14 @@ export const AIChat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [sequenceNumber, setSequenceNumber] = useState(0);
+  
+  // CLARIFICATION CONTEXT STATE
+  const [clarificationContext, setClarificationContext] = useState<{
+    isWaitingForResponse: boolean;
+    candidates: Array<{ id: string; name: string; department: string }>;
+    originalMessage: string;
+  } | null>(null);
+  
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -180,42 +188,61 @@ export const AIChat = () => {
     userMessageTime = Date.now();
 
     try {
-      // Step 1: Recognize skill from user message with new two-stage system
-      console.log('Calling skill-recognition for:', userInput);
-      const { data: skillRecognition, error: recognitionError } = await supabase.functions.invoke('skill-recognition', {
-        body: { 
-          message: userInput
+      let skill_id: string | null = null;
+      let skill_name: string | null = null;
+
+      // Check if we're responding to clarification
+      if (clarificationContext?.isWaitingForResponse) {
+        skill_id = await processClarificationResponse(userInput);
+        skill_name = clarificationContext.candidates.find(c => c.id === skill_id)?.name || null;
+        setClarificationContext(null); // Clear context
+        console.log('Processed clarification response:', { skill_id, skill_name });
+      } else {
+        // Step 1: Normal skill recognition
+        console.log('Calling skill-recognition for:', userInput);
+        const { data: skillRecognition, error: recognitionError } = await supabase.functions.invoke('skill-recognition', {
+          body: { 
+            message: userInput
+          }
+        });
+
+        if (recognitionError) {
+          console.error('Skill recognition error:', recognitionError);
+          throw new Error('Nie mogłem rozpoznać umiejętności z Twojego pytania.');
         }
-      });
 
-      if (recognitionError) {
-        console.error('Skill recognition error:', recognitionError);
-        throw new Error('Nie mogłem rozpoznać umiejętności z Twojego pytania.');
+        console.log('Skill recognition result:', skillRecognition);
+
+        // Handle two-stage recognition system
+        if (skillRecognition?.stage === 'clarification' && skillRecognition.clarificationQuestion) {
+          // AI needs clarification - show empathetic question and save context
+          const clarificationMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            content: skillRecognition.clarificationQuestion,
+            role: 'assistant',
+            timestamp: new Date()
+          };
+          setMessages(prev => [...prev, clarificationMessage]);
+          
+          // Save clarification context for next message
+          setClarificationContext({
+            isWaitingForResponse: true,
+            candidates: skillRecognition.candidatesWithIds || [],
+            originalMessage: userInput
+          });
+          
+          setIsLoading(false);
+          return; // Wait for user's clarification response
+        }
+
+        skill_id = skillRecognition?.skill_id;
+        skill_name = skillRecognition?.skill_name;
       }
 
-      console.log('Skill recognition result:', skillRecognition);
+      console.log(`Rozpoznana umiejętność: ${skill_name} (${skill_id})`);
 
-      // Handle two-stage recognition system
-      if (skillRecognition?.stage === 'clarification' && skillRecognition.clarificationQuestion) {
-        // AI needs clarification - show the empathetic question to user
-        const clarificationMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          content: skillRecognition.clarificationQuestion,
-          role: 'assistant',
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, clarificationMessage]);
-        setIsLoading(false);
-        return; // Wait for user's clarification response
-      }
-
-      let skillId = skillRecognition?.skillId;
-      let skillName = skillRecognition?.skillName;
-
-      console.log(`Rozpoznana umiejętność: ${skillName} (${skillId}) z pewnością: ${skillRecognition?.confidence}`);
-
-      // Step 2: Start chat with recognized skill
-      console.log('Calling study-tutor with endpoint /chat, skillId:', skillId);
+      // Step 2: Start chat with recognized skill (using snake_case)
+      console.log('Calling study-tutor with endpoint /chat, skill_id:', skill_id);
       
       // Prepare message history and context
       const messageHistory = getMessageHistory();
@@ -223,7 +250,7 @@ export const AIChat = () => {
       const { data: chatData, error: chatError } = await supabase.functions.invoke('study-tutor', {
         body: { 
           message: userInput,
-          skillId: skillId,
+          skill_id: skill_id, // Use snake_case consistently
           sessionId: sessionId,
           messages: messageHistory,
           endpoint: 'chat'
@@ -261,7 +288,7 @@ export const AIChat = () => {
       setMessages(prev => [...prev, assistantMessage]);
       
       // Save interaction to database
-      await saveInteraction(userInput, aiResponseContent, skillId);
+      await saveInteraction(userInput, aiResponseContent, skill_id);
 
     } catch (error) {
       console.error('Chat error:', error);
@@ -278,6 +305,42 @@ export const AIChat = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Process user's response to clarification question
+  const processClarificationResponse = async (userResponse: string): Promise<string | null> => {
+    if (!clarificationContext?.candidates) return null;
+    
+    const normalizedResponse = userResponse.toLowerCase().trim();
+    const { candidates } = clarificationContext;
+    
+    // Try to match user response to one of the candidates
+    for (const candidate of candidates) {
+      const candidateName = candidate.name.toLowerCase();
+      
+      // Check for direct mentions of skill name
+      if (normalizedResponse.includes(candidateName) || 
+          candidateName.includes(normalizedResponse.slice(0, 10))) {
+        return candidate.id;
+      }
+      
+      // Check for keywords in department
+      if (normalizedResponse.includes(candidate.department.toLowerCase())) {
+        return candidate.id;
+      }
+    }
+    
+    // Try to match by number if user selected option by number
+    const numberMatch = normalizedResponse.match(/(\d+)/);
+    if (numberMatch) {
+      const selectedIndex = parseInt(numberMatch[1]) - 1;
+      if (selectedIndex >= 0 && selectedIndex < candidates.length) {
+        return candidates[selectedIndex].id;
+      }
+    }
+    
+    // Fallback: return first candidate or null
+    return candidates.length > 0 ? candidates[0].id : null;
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -357,7 +420,11 @@ export const AIChat = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Zadaj pytanie o matematykę..."
+            placeholder={
+              clarificationContext?.isWaitingForResponse 
+                ? "Wybierz jedną z opcji powyżej..." 
+                : "Zadaj pytanie o matematykę..."
+            }
             disabled={isLoading}
             className="flex-1"
           />
@@ -369,6 +436,12 @@ export const AIChat = () => {
             <Send className="w-4 h-4" />
           </Button>
         </div>
+        
+        {clarificationContext?.isWaitingForResponse && (
+          <div className="text-xs text-muted-foreground text-center mt-2">
+            💡 Wybierz jedną z opcji powyżej lub opisz konkretnie, czego potrzebujesz
+          </div>
+        )}
       </CardContent>
     </Card>
   );

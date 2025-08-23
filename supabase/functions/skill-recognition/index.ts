@@ -2,6 +2,65 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1"
 
+// Inline fuzzy matching utilities (simplified for edge function)
+function extractMathConcepts(message: string): string[] {
+  const normalizedMessage = message.toLowerCase().trim();
+  const concepts: string[] = [];
+  
+  const synonymMap = {
+    "pochodne": ["pochodna", "różniczkowanie", "derivative", "tangent"],
+    "całki": ["całka", "całkowanie", "integration", "pole pod krzywą"],
+    "równania": ["równanie", "rozwiązywanie", "equation", "x ="],
+    "funkcje": ["funkcja", "function", "wykres", "f(x)"],
+    "geometria": ["trójkąt", "okrąg", "pole", "objętość", "kąt"],
+    "algebra": ["wielomian", "ułamek", "potęga", "logarytm"]
+  };
+  
+  Object.entries(synonymMap).forEach(([concept, synonyms]) => {
+    if (synonyms.some(synonym => normalizedMessage.includes(synonym))) {
+      concepts.push(concept);
+    }
+  });
+  
+  return concepts;
+}
+
+function calculateSkillRelevance(skill: any, message: string, concepts: string[]): number {
+  const normalizedMessage = message.toLowerCase();
+  const skillName = skill.name.toLowerCase();
+  let score = 0;
+  
+  // Exact name match
+  if (normalizedMessage.includes(skillName) || skillName.includes(normalizedMessage.slice(0, 10))) {
+    score += 50;
+  }
+  
+  // Concept matching
+  concepts.forEach(concept => {
+    if (skillName.includes(concept) || (skill.description || '').toLowerCase().includes(concept)) {
+      score += 20;
+    }
+  });
+  
+  // Department relevance
+  if (concepts.includes('geometria') && skill.department === 'geometry') score += 15;
+  if (concepts.includes('algebra') && skill.department === 'algebra') score += 15;
+  if (concepts.includes('pochodne') && skill.department === 'calculus') score += 15;
+  
+  return score;
+}
+
+function filterSkillsByDepartment(skills: any[], concepts: string[]): any[] {
+  if (concepts.length === 0) return skills.slice(0, 50);
+  
+  const relevantSkills = skills.filter(skill => {
+    const relevance = calculateSkillRelevance(skill, '', concepts);
+    return relevance > 0;
+  });
+  
+  return relevantSkills.length > 0 ? relevantSkills : skills.slice(0, 50);
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -51,44 +110,60 @@ serve(async (req) => {
       });
     }
 
-    // Create a simplified skills list for AI
-    const skillsList = skills.map(skill => ({
-      id: skill.id,
-      name: skill.name,
-      department: skill.department,
-      description: skill.description
-    }));
-
+    // FUZZY MATCHING AND INTELLIGENT FILTERING
+    const extractedConcepts = extractMathConcepts(message);
+    console.log('Extracted concepts from message:', extractedConcepts);
+    
+    // Filter skills to most relevant ones (max 50)
+    const filteredSkills = filterSkillsByDepartment(skills, extractedConcepts);
+    const skillMatches = filteredSkills
+      .map(skill => calculateSkillRelevance(skill, message, extractedConcepts))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 50); // Top 50 most relevant
+      
+    console.log('Top skill matches:', skillMatches.slice(0, 5));
+    
     // Create skills map for quick lookups
-    const skillsMap = new Map(skills.map(skill => [skill.id, skill]));
+    const skillsMap = new Map(skills.map(skill => [skill.name, skill]));
+    
+    // Prepare optimized skills list for AI prompt
+    const topSkills = skillMatches.slice(0, 30); // Even more focused for prompt
+    const skillsForPrompt = topSkills.map(match => 
+      `${match.skill.name} (${match.skill.department})`
+    ).join(', ');
 
-    // Create a simplified skills list for AI (name + department only for shorter prompt)
-    const simplifiedSkills = skillsList.map(skill => `${skill.name} (${skill.department})`).join(', ');
+    // Enhanced AI prompt with better structure and empathetic questioning
+    const systemPrompt = `Jesteś empatycznym systemem rozpoznawania umiejętności matematycznych dla polskiej aplikacji edukacyjnej.
 
-    // Prepare prompt for OpenAI - much shorter and focused
-    const systemPrompt = `Jesteś systemem rozpoznawania umiejętności matematycznych dla polskiej aplikacji edukacyjnej.
+KONTEKST: Wykryte koncepty z wiadomości ucznia: ${extractedConcepts.join(', ') || 'ogólne'}
 
-Dostępne umiejętności: ${simplifiedSkills}
+NAJLEPSZE DOPASOWANIA (${topSkills.length} umiejętności): ${skillsForPrompt}
 
-Zadanie: Przeanalizuj wiadomość ucznia i określ, której umiejętności potrzebuje.
+ZADANIE: Przeanalizuj wiadomość ucznia i określ umiejętność lub zadaj pytanie doprecyzujące.
 
-Odpowiedz JSON:
+ODPOWIEDŹ JSON:
 {
   "stage": "direct" | "clarification",
-  "skillId": "exact-skill-id" | null,
-  "skillName": "skill-name" | null,
+  "skill_id": "exact-skill-id" | null,
+  "skill_name": "skill-name" | null,
   "confidence": 0.0-1.0,
   "candidates": ["skill-name-1", "skill-name-2", ...] | null,
-  "clarificationQuestion": "question for student" | null,
+  "clarificationQuestion": "empathetic question" | null,
   "reasoning": "brief explanation"
 }
 
-ZASADY:
-- Jeśli pewność ≥ 0.75: stage="direct", podaj skillId
-- Jeśli pewność < 0.75: stage="clarification", podaj candidates (1-15 najlepszych) + empatyczne pytanie po polsku
-- Pytanie MUSI być zrozumiałe dla ucznia, używaj prostego języka
-- W pytaniu zawsze dodaj: "Chciałbyś zacząć od podstaw czy od trudniejszych przykładów?"
-- Jeśli brak dopasowania: stage="direct", skillId=null`;
+ZASADY ROZPOZNAWANIA:
+- Jeśli pewność ≥ 0.75: stage="direct", podaj skill_id i skill_name
+- Jeśli pewność < 0.75: stage="clarification", podaj candidates (3-8 najlepszych) 
+- Dla "clarification" generuj empatyczne pytanie z opcjami poziomów trudności
+
+ZASADY EMPATYCZNEGO PYTANIA:
+- Używaj ciepłego, wspierającego tonu: "Widzę, że...", "Pomogę Ci z..."
+- Podaj 2-3 konkretne opcje z różnymi poziomami: podstawy → średni → zaawansowany
+- Zakończ: "Co Cię najbardziej interesuje? 🤔"
+- Przykład: "Widzę, że chcesz się nauczyć o funkcjach! 📈 Mogę pomóc Ci z: (1) Podstawami - co to jest funkcja, (2) Wykresami funkcji, (3) Zaawansowanymi właściwościami. Co Cię najbardziej interesuje? 🤔"
+
+FALLBACK: Jeśli brak dopasowania: stage="direct", skill_id=null, confidence=0`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -122,22 +197,65 @@ ZASADY:
       console.log('Raw AI response:', aiResponse.choices[0].message.content);
       console.log('Parsed recognition result:', recognitionResult);
 
-      // If stage is clarification, prepare candidates with their IDs
+      // Enhanced candidate matching with fuzzy search
       if (recognitionResult.stage === 'clarification' && recognitionResult.candidates) {
         const candidatesWithIds = recognitionResult.candidates.map((candidateName: string) => {
-          const skill = skills.find(s => s.name === candidateName);
-          return skill ? { id: skill.id, name: skill.name, department: skill.department } : null;
+          // First try exact match
+          let skill = skillsMap.get(candidateName);
+          
+          // If no exact match, try fuzzy matching within top skills
+          if (!skill) {
+            const fuzzyMatch = topSkills.find(match => 
+              match.skill.name.toLowerCase().includes(candidateName.toLowerCase()) ||
+              candidateName.toLowerCase().includes(match.skill.name.toLowerCase())
+            );
+            skill = fuzzyMatch?.skill;
+          }
+          
+          return skill ? { 
+            id: skill.id, 
+            name: skill.name, 
+            department: skill.department 
+          } : null;
         }).filter(Boolean);
 
         recognitionResult.candidatesWithIds = candidatesWithIds;
-        console.log('Candidates with IDs:', candidatesWithIds);
+        console.log('Enhanced candidates with IDs:', candidatesWithIds);
       }
 
-      // Validate confidence level
-      if (recognitionResult.confidence !== undefined && recognitionResult.confidence < 0.75 && recognitionResult.stage === 'direct') {
-        console.log('Confidence below threshold, but stage is direct. Switching to clarification.');
+      // Standardize field names to snake_case and validate logic
+      if (recognitionResult.skillId) {
+        recognitionResult.skill_id = recognitionResult.skillId;
+        delete recognitionResult.skillId;
+      }
+      if (recognitionResult.skillName) {
+        recognitionResult.skill_name = recognitionResult.skillName;
+        delete recognitionResult.skillName;
+      }
+
+      // Enhanced confidence validation
+      if (recognitionResult.confidence < 0.75 && recognitionResult.stage === 'direct') {
+        console.log('Confidence below threshold, switching to clarification mode.');
         recognitionResult.stage = 'clarification';
-        recognitionResult.skillId = null;
+        recognitionResult.skill_id = null;
+        recognitionResult.skill_name = null;
+        
+        // Generate fallback candidates from top matches if not provided
+        if (!recognitionResult.candidates) {
+          recognitionResult.candidates = topSkills.slice(0, 5).map(m => m.skill.name);
+          recognitionResult.clarificationQuestion = `Widzę, że potrzebujesz pomocy z matematyką! 📚 Oto obszary, z którymi mogę pomóc: ${recognitionResult.candidates.slice(0, 3).join(', ')}. Co Cię najbardziej interesuje? 🤔`;
+        }
+      }
+
+      // Validate skill_id exists in database
+      if (recognitionResult.skill_id && recognitionResult.stage === 'direct') {
+        const skillExists = skills.some(s => s.id === recognitionResult.skill_id);
+        if (!skillExists) {
+          console.log('Skill ID not found in database, switching to clarification.');
+          recognitionResult.stage = 'clarification';
+          recognitionResult.skill_id = null;
+          recognitionResult.candidates = topSkills.slice(0, 5).map(m => m.skill.name);
+        }
       }
 
     } catch (parseError) {
