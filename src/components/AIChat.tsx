@@ -73,27 +73,22 @@ export const AIChat = () => {
 
       console.log(`Rozpoznana umiejętność: ${skillName} (${skillId})`);
 
-      // Step 2: Start lesson with recognized skill
-      const { data: lessonData, error: lessonError } = await supabase.functions.invoke('study-tutor', {
+      // Step 2: Start chat with recognized skill
+      const { data: chatData, error: chatError } = await supabase.functions.invoke('study-tutor/chat', {
         body: { 
           message: userInput,
-          skillId: skillId,
-          sessionId: `chat_${Date.now()}`,
-          sessionType: 'ai_chat',
-          stepType: 'initial_question',
-          currentPhase: 1,
-          department: skillRecognition?.department || 'math'
+          skillId: skillId
         }
       });
 
-      if (lessonError) {
-        console.error('Lesson error:', lessonError);
-        throw new Error('Wystąpił problem podczas rozpoczynania lekcji.');
+      if (chatError) {
+        console.error('Chat error:', chatError);
+        throw new Error('Wystąpił problem podczas rozmowy z AI.');
       }
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: lessonData.message || 'Rozpocznijmy naukę tej umiejętności!',
+        content: chatData.message || 'Rozpocznijmy naukę tej umiejętności!',
         role: 'assistant',
         timestamp: new Date()
       };

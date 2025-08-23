@@ -397,6 +397,128 @@ Rozpocznij lekcję!`
   }
 }
 
+// Public chat endpoint (no JWT required)
+async function handleChat(req: Request): Promise<Response> {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
+  try {
+    const { message, skillId } = await req.json()
+
+    console.log('Chat request:', { message, skillId });
+
+    if (!message) {
+      console.error('Missing message parameter')
+      return new Response(JSON.stringify({ error: 'Message is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const openAiKey = Deno.env.get('OPENAI_API_KEY')
+    if (!openAiKey) {
+      console.error('OpenAI API key is missing')
+      return new Response(JSON.stringify({ error: 'OpenAI API key is missing' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // Get skill information if skillId provided
+    let skillName = 'matematyka';
+    if (skillId) {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')
+      const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')
+      
+      if (supabaseUrl && supabaseKey) {
+        const supabaseClient = createClient(supabaseUrl, supabaseKey, {
+          auth: { persistSession: false },
+        })
+
+        const { data: skillData, error: skillError } = await supabaseClient
+          .from('skills')
+          .select('name')
+          .eq('id', skillId)
+          .single()
+
+        if (!skillError && skillData) {
+          skillName = skillData.name;
+        }
+      }
+    }
+
+    // Create AI prompt for chat
+    const prompt = `Jesteś pomocnym nauczycielem matematyki. ${skillId ? `Tematem rozmowy jest: "${skillName}".` : ''}
+
+Uczeń napisał: "${message}"
+
+Odpowiedz w przyjazny i zachęcający sposób. 
+
+Wskazówki:
+- Odpowiadaj po polsku
+- Bądź cierpliwy i zachęcający
+- Zadawaj pytania, które pomogą uczniowi zrozumieć temat
+- Nie podawaj od razu odpowiedzi, ale prowadź ucznia do odkrycia
+- Ogranicz odpowiedź do 150 słów
+- Jeśli uczeń pyta o podpowiedź, daj subtelną wskazówkę
+- Jeśli nie znasz tematu, przyznaj się i zaproponuj pomoc w podstawowych zagadnieniach
+
+Odpowiedz!`
+
+    // Call OpenAI
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-5-2025-08-07',
+        messages: [
+          { role: 'system', content: 'Jesteś pomocnym nauczycielem matematyki. Odpowiadaj zawsze po polsku.' },
+          { role: 'user', content: prompt }
+        ],
+        max_completion_tokens: 250,
+      }),
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('OpenAI API error:', response.status, errorText)
+      return new Response(JSON.stringify({ error: 'AI response failed' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const aiData = await response.json()
+    
+    if (!aiData.choices || aiData.choices.length === 0) {
+      console.error('No choices in OpenAI response:', aiData)
+      return new Response(JSON.stringify({ error: 'No AI response generated' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    
+    const aiMessage = aiData.choices[0]?.message?.content?.trim() || 'Przepraszam, nie mogę teraz odpowiedzieć. Spróbuj ponownie.'
+
+    return new Response(JSON.stringify({ 
+      message: aiMessage
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+
+  } catch (error) {
+    console.error('Error in handleChat:', error)
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+}
+
 serve(async (req) => {
   const { pathname } = new URL(req.url)
 
@@ -411,6 +533,8 @@ serve(async (req) => {
     return handleGetTasks(req)
   } else if (pathname === '/get-skill-content') {
     return handleGetSkillContent(req)
+  } else if (pathname === '/chat') {
+    return handleChat(req)
   } else {
     // Handle phase-based lesson requests (default endpoint)
     return handlePhaseBasedLesson(req)
