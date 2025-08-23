@@ -306,29 +306,23 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/study-tutor`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({
+      // Use supabase client instead of direct fetch to ensure proper auth
+      const { data, error } = await supabase.functions.invoke('study-tutor', {
+        body: {
           message: "Poproś o podpowiedź",
           sessionId: session.id,
           skillId: skillId,
           responseTime: 0,
           stepType: 'hint',
           currentPhase: currentPhase
-        }),
+        }
       });
 
-      if (!response.ok) throw new Error('Failed to get hint');
-
-      const data = await response.json();
+      if (error) throw error;
 
       setChatHistory(prev => [...prev, {
         role: 'assistant',
-        content: data.message,
+        content: data.message || 'Przepraszam, nie mogę teraz udzielić podpowiedzi.',
         timestamp: new Date().toISOString(),
         isHint: true
       }]);

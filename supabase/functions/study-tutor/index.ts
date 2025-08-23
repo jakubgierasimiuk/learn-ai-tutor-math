@@ -328,7 +328,8 @@ Rozpocznij lekcję!`
     })
 
     if (!response.ok) {
-      console.error('OpenAI API error:', response.status)
+      const errorText = await response.text()
+      console.error('OpenAI API error:', response.status, errorText)
       return new Response(JSON.stringify({ error: 'AI response failed' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -336,7 +337,18 @@ Rozpocznij lekcję!`
     }
 
     const aiData = await response.json()
-    const aiMessage = aiData.choices[0].message.content.trim()
+    console.log('OpenAI response:', JSON.stringify(aiData, null, 2))
+    
+    // Defensive parsing of OpenAI response
+    if (!aiData.choices || aiData.choices.length === 0) {
+      console.error('No choices in OpenAI response:', aiData)
+      return new Response(JSON.stringify({ error: 'No AI response generated' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    
+    const aiMessage = aiData.choices[0]?.message?.content?.trim() || 'Przepraszam, nie mogę teraz odpowiedzieć. Spróbuj ponownie.'
 
     return new Response(JSON.stringify({ 
       message: aiMessage,
