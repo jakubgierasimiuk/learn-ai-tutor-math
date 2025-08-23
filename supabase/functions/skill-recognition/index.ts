@@ -2,6 +2,42 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1"
 
+// Helper function to log AI conversation
+async function logAIConversation(
+  supabase: any,
+  sessionId: string | undefined,
+  userId: string | undefined,
+  sequenceNumber: number,
+  functionName: string,
+  endpoint: string,
+  fullPrompt: string,
+  aiResponse: string,
+  parameters: any = {},
+  userInput?: string,
+  processingTime?: number,
+  tokensUsed?: number,
+  modelUsed?: string
+) {
+  try {
+    await supabase.from('ai_conversation_log').insert({
+      session_id: sessionId,
+      user_id: userId,
+      sequence_number: sequenceNumber,
+      function_name: functionName,
+      endpoint: endpoint,
+      full_prompt: fullPrompt,
+      ai_response: aiResponse,
+      parameters: parameters,
+      user_input: userInput,
+      processing_time_ms: processingTime,
+      tokens_used: tokensUsed,
+      model_used: modelUsed
+    });
+  } catch (error) {
+    console.error('Failed to log AI conversation:', error);
+  }
+}
+
 // Enhanced skill matching utilities integrated from skillMatcher.ts
 interface SkillMatch {
   skill: {
@@ -234,7 +270,8 @@ serve(async (req) => {
   }
 
   try {
-    const { message } = await req.json();
+    const { message, sessionId, userId } = await req.json();
+    const startTime = Date.now();
 
     if (!message) {
       return new Response(JSON.stringify({ error: 'Message is required' }), {
@@ -345,6 +382,9 @@ ZASADY EMPATYCZNEGO PYTANIA:
 
 FALLBACK: Jeśli brak dopasowania: stage="direct", skill_id=null, confidence=0`;
 
+    // Create full prompt for logging
+    const fullPrompt = `SYSTEM: ${systemPrompt}\n\nUSER: ${message}`;
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -370,11 +410,39 @@ FALLBACK: Jeśli brak dopasowania: stage="direct", skill_id=null, confidence=0`;
     }
 
     const aiResponse = await response.json();
+    const rawResponse = aiResponse.choices[0].message.content;
+    const processingTime = Date.now() - startTime;
+    
+    console.log('Raw AI response:', rawResponse);
+
+    // Log AI conversation
+    await logAIConversation(
+      supabase,
+      sessionId,
+      userId,
+      1,
+      'skill-recognition',
+      'main',
+      fullPrompt,
+      rawResponse,
+      {
+        extractedConcepts,
+        topSkillMatches: skillMatches.slice(0, 5).map(sm => ({
+          name: sm.skill?.name,
+          score: sm.score,
+          reason: sm.matchReason
+        })),
+        model: 'gpt-5-2025-08-07'
+      },
+      message,
+      processingTime,
+      aiResponse.usage?.total_tokens,
+      'gpt-5-2025-08-07'
+    );
     
     let recognitionResult;
     try {
-      recognitionResult = JSON.parse(aiResponse.choices[0].message.content);
-      console.log('Raw AI response:', aiResponse.choices[0].message.content);
+      recognitionResult = JSON.parse(rawResponse);
       console.log('Parsed recognition result:', recognitionResult);
 
       // Enhanced candidate matching with advanced fuzzy search

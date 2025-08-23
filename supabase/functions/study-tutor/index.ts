@@ -7,6 +7,42 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Helper function to log AI conversation
+async function logAIConversation(
+  supabase: any,
+  sessionId: string | undefined,
+  userId: string | undefined,
+  sequenceNumber: number,
+  functionName: string,
+  endpoint: string,
+  fullPrompt: string,
+  aiResponse: string,
+  parameters: any = {},
+  userInput?: string,
+  processingTime?: number,
+  tokensUsed?: number,
+  modelUsed?: string
+) {
+  try {
+    await supabase.from('ai_conversation_log').insert({
+      session_id: sessionId,
+      user_id: userId,
+      sequence_number: sequenceNumber,
+      function_name: functionName,
+      endpoint: endpoint,
+      full_prompt: fullPrompt,
+      ai_response: aiResponse,
+      parameters: parameters,
+      user_input: userInput,
+      processing_time_ms: processingTime,
+      tokens_used: tokensUsed,
+      model_used: modelUsed
+    });
+  } catch (error) {
+    console.error('Failed to log AI conversation:', error);
+  }
+}
+
 const generatePrompt = async (
   skillName: string,
   difficulty: number,
@@ -412,6 +448,8 @@ async function handleChat(req: Request): Promise<Response> {
     console.log('Input message type:', typeof message);
     console.log('Input skillId type:', typeof skillId);
     console.log('Message history length:', messageHistory?.length || 0);
+    
+    const startTime = Date.now();
 
     if (!message) {
       console.error('Missing message parameter')
@@ -499,6 +537,9 @@ async function handleChat(req: Request): Promise<Response> {
 
     console.log('Sending to OpenAI with conversation length:', conversationMessages.length);
 
+    // Create full prompt for logging
+    const fullPrompt = conversationMessages.map(msg => `${msg.role.toUpperCase()}: ${msg.content}`).join('\n\n');
+
     // Call OpenAI
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -535,7 +576,41 @@ async function handleChat(req: Request): Promise<Response> {
     }
     
     const aiMessage = aiData.choices[0]?.message?.content?.trim() || 'Przepraszam, nie mogę teraz odpowiedzieć. Spróbuj ponownie.'
+    const processingTime = Date.now() - startTime;
     console.log('Extracted AI message:', aiMessage);
+
+    // Get user ID from auth header
+    const authHeader = req.headers.get('authorization');
+    let userId = undefined;
+    if (authHeader) {
+      try {
+        const { data: { user } } = await supabaseClient.auth.getUser(authHeader.replace('Bearer ', ''));
+        userId = user?.id;
+      } catch (error) {
+        console.log("Could not get user from auth header:", error);
+      }
+    }
+
+    // Log AI conversation
+    await logAIConversation(
+      supabaseClient,
+      sessionId,
+      userId,
+      1,
+      'study-tutor',
+      'chat',
+      fullPrompt,
+      aiMessage,
+      {
+        skillId,
+        messageHistoryLength: messageHistory?.length || 0,
+        model: 'gpt-5-2025-08-07'
+      },
+      message,
+      processingTime,
+      aiData.usage?.total_tokens,
+      'gpt-5-2025-08-07'
+    );
 
     const finalResponse = { message: aiMessage };
     console.log('Final response object:', JSON.stringify(finalResponse, null, 2));

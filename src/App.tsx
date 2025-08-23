@@ -27,6 +27,7 @@ import ProgressPage from "./pages/ProgressPage";
 import { RealLearningPage } from "./pages/RealLearningPage";
 import ContentImportPage from "./pages/ContentImportPage";
 import BatchImportPage from "./pages/BatchImportPage";
+import AILogsPage from "./pages/AILogsPage";
 import { OnboardingWelcome } from "@/components/onboarding/OnboardingWelcome";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 import { QuickDiagnostic } from "@/components/onboarding/QuickDiagnostic";
@@ -97,6 +98,7 @@ function RouteSeo() {
     '/ux-test': { title: 'UX Testy – Panel', description: 'Zestaw testów użyteczności i jakości UI.' },
     '/ux-audit': { title: 'UX Audyt – Raport', description: 'Wyniki audytu UX i priorytety działań.' },
     '/study': { title: 'Panel nauki – AI Tutor', description: 'Twoje umiejętności i ścieżka nauki.' },
+    '/ai-logs': { title: 'Logi AI – Rejestr konwersacji', description: 'Szczegółowe logi wszystkich interakcji z AI.' },
   };
   if (path === '/' || path.startsWith('/postepy')) return null;
   const match = Object.entries(map).find(([k]) => path === k || path.startsWith(k + '/'))?.[1];
@@ -223,6 +225,11 @@ const App = () => (
             <Route path="/study" element={
               <AuthenticatedLayout>
                 <StudyDashboard />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/ai-logs" element={
+              <AuthenticatedLayout>
+                <AILogsPage />
               </AuthenticatedLayout>
             } />
             {/* Real Learning Engine - UNDER DEVELOPMENT - DO NOT USE */}

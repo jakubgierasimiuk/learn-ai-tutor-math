@@ -53,6 +53,15 @@ export const Navigation = () => {
               <Database className="w-4 h-4" />
               Content
             </Link>
+            <Link 
+              to="/ai-logs" 
+              className={`flex items-center gap-2 transition-smooth ${
+                isActive('/ai-logs') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
+              }`}
+            >
+              <Database className="w-4 h-4" />
+              AI Logs
+            </Link>
             <Button asChild size="sm" className="shadow-primary" onClick={() => logEvent('cta_click', { source: 'nav' })}>
               <Link to="/chat">
                 <span className="inline-flex items-center"><MessageCircle className="w-4 h-4 mr-2" />AI Korepetytor</span>
@@ -117,6 +126,16 @@ export const Navigation = () => {
               >
                 <Database className="w-4 h-4" />
                 Content Manager
+              </Link>
+              <Link 
+                to="/ai-logs" 
+                className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
+                  isActive('/ai-logs') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
+                }`}
+                onClick={() => setIsOpen(false)}
+              >
+                <Database className="w-4 h-4" />
+                AI Logs
               </Link>
             </div>
             <div className="flex flex-col gap-2 pt-4 border-t border-border">
