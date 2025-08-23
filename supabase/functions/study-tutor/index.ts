@@ -147,7 +147,7 @@ async function handleTutor(req: Request): Promise<Response> {
           { role: 'system', content: 'You are a helpful math tutor. Follow the guidelines exactly as provided.' },
           { role: 'user', content: prompt }
         ],
-        max_completion_tokens: 150,
+        max_completion_tokens: 10000,
         top_p: 1,
         frequency_penalty: 0,
         presence_penalty: 0,
@@ -354,7 +354,7 @@ Rozpocznij lekcję!`
           { role: 'system', content: 'Jesteś pomocnym nauczycielem matematyki. Odpowiadaj zawsze po polsku.' },
           { role: 'user', content: prompt }
         ],
-        max_completion_tokens: 200,
+        max_completion_tokens: 10000,
       }),
     })
 
@@ -483,7 +483,7 @@ Odpowiedz!`
           { role: 'system', content: 'Jesteś pomocnym nauczycielem matematyki. Odpowiadaj zawsze po polsku.' },
           { role: 'user', content: prompt }
         ],
-        max_completion_tokens: 250,
+        max_completion_tokens: 10000,
       }),
     })
 
