@@ -324,7 +324,6 @@ Rozpocznij lekcję!`
           { role: 'user', content: prompt }
         ],
         max_completion_tokens: 200,
-        temperature: 0.7,
       }),
     })
 
