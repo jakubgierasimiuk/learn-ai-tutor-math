@@ -180,7 +180,8 @@ export const AIChat = () => {
     userMessageTime = Date.now();
 
     try {
-      // Step 1: Recognize skill from user message
+      // Step 1: Recognize skill from user message with new two-stage system
+      console.log('Calling skill-recognition for:', userInput);
       const { data: skillRecognition, error: recognitionError } = await supabase.functions.invoke('skill-recognition', {
         body: { 
           message: userInput
@@ -192,23 +193,26 @@ export const AIChat = () => {
         throw new Error('Nie mogłem rozpoznać umiejętności z Twojego pytania.');
       }
 
-      let skillId = skillRecognition?.skillId;
-      let skillName = skillRecognition?.skillName;
+      console.log('Skill recognition result:', skillRecognition);
 
-      // If no skill recognized, ask for clarification
-      if (!skillId || skillRecognition.confidence < 0.6) {
+      // Handle two-stage recognition system
+      if (skillRecognition?.stage === 'clarification' && skillRecognition.clarificationQuestion) {
+        // AI needs clarification - show the empathetic question to user
         const clarificationMessage: Message = {
           id: (Date.now() + 1).toString(),
-          content: `Nie jestem pewien, z której umiejętności matematycznej potrzebujesz pomocy. Czy możesz być bardziej konkretny? Na przykład: "potrzebuję pomocy z równaniami kwadratowymi" lub "mam problemy z pochodnymi".`,
+          content: skillRecognition.clarificationQuestion,
           role: 'assistant',
           timestamp: new Date()
         };
         setMessages(prev => [...prev, clarificationMessage]);
         setIsLoading(false);
-        return;
+        return; // Wait for user's clarification response
       }
 
-      console.log(`Rozpoznana umiejętność: ${skillName} (${skillId})`);
+      let skillId = skillRecognition?.skillId;
+      let skillName = skillRecognition?.skillName;
+
+      console.log(`Rozpoznana umiejętność: ${skillName} (${skillId}) z pewnością: ${skillRecognition?.confidence}`);
 
       // Step 2: Start chat with recognized skill
       console.log('Calling study-tutor with endpoint /chat, skillId:', skillId);

@@ -59,20 +59,36 @@ serve(async (req) => {
       description: skill.description
     }));
 
-    // Prepare prompt for OpenAI
-    const systemPrompt = `You are a skill recognition system for a Polish math tutoring app. 
-Your task is to analyze a student's message and identify which mathematical skill they need help with.
+    // Create skills map for quick lookups
+    const skillsMap = new Map(skills.map(skill => [skill.id, skill]));
 
-Available skills:
-${skillsList.map(skill => `- ${skill.name} (${skill.department}): ${skill.description}`).join('\n')}
+    // Create a simplified skills list for AI (name + department only for shorter prompt)
+    const simplifiedSkills = skillsList.map(skill => `${skill.name} (${skill.department})`).join(', ');
 
-Respond with a JSON object containing:
-- skillId: the exact ID of the best matching skill (or null if no good match)
-- skillName: the name of the matched skill
-- confidence: a number between 0 and 1 indicating how confident you are
-- reasoning: brief explanation of why you chose this skill
+    // Prepare prompt for OpenAI - much shorter and focused
+    const systemPrompt = `Jesteś systemem rozpoznawania umiejętności matematycznych dla polskiej aplikacji edukacyjnej.
 
-If confidence is below 0.6, set skillId to null.`;
+Dostępne umiejętności: ${simplifiedSkills}
+
+Zadanie: Przeanalizuj wiadomość ucznia i określ, której umiejętności potrzebuje.
+
+Odpowiedz JSON:
+{
+  "stage": "direct" | "clarification",
+  "skillId": "exact-skill-id" | null,
+  "skillName": "skill-name" | null,
+  "confidence": 0.0-1.0,
+  "candidates": ["skill-name-1", "skill-name-2", ...] | null,
+  "clarificationQuestion": "question for student" | null,
+  "reasoning": "brief explanation"
+}
+
+ZASADY:
+- Jeśli pewność ≥ 0.75: stage="direct", podaj skillId
+- Jeśli pewność < 0.75: stage="clarification", podaj candidates (1-15 najlepszych) + empatyczne pytanie po polsku
+- Pytanie MUSI być zrozumiałe dla ucznia, używaj prostego języka
+- W pytaniu zawsze dodaj: "Chciałbyś zacząć od podstaw czy od trudniejszych przykładów?"
+- Jeśli brak dopasowania: stage="direct", skillId=null`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -81,13 +97,12 @@ If confidence is below 0.6, set skillId to null.`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-5-2025-08-07',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: message }
         ],
-        temperature: 0.3,
-        max_tokens: 300,
+        max_completion_tokens: 500,
       }),
     });
 
@@ -104,19 +119,40 @@ If confidence is below 0.6, set skillId to null.`;
     let recognitionResult;
     try {
       recognitionResult = JSON.parse(aiResponse.choices[0].message.content);
+      console.log('Raw AI response:', aiResponse.choices[0].message.content);
+      console.log('Parsed recognition result:', recognitionResult);
+
+      // If stage is clarification, prepare candidates with their IDs
+      if (recognitionResult.stage === 'clarification' && recognitionResult.candidates) {
+        const candidatesWithIds = recognitionResult.candidates.map((candidateName: string) => {
+          const skill = skills.find(s => s.name === candidateName);
+          return skill ? { id: skill.id, name: skill.name, department: skill.department } : null;
+        }).filter(Boolean);
+
+        recognitionResult.candidatesWithIds = candidatesWithIds;
+        console.log('Candidates with IDs:', candidatesWithIds);
+      }
+
+      // Validate confidence level
+      if (recognitionResult.confidence !== undefined && recognitionResult.confidence < 0.75 && recognitionResult.stage === 'direct') {
+        console.log('Confidence below threshold, but stage is direct. Switching to clarification.');
+        recognitionResult.stage = 'clarification';
+        recognitionResult.skillId = null;
+      }
+
     } catch (parseError) {
       console.error('Failed to parse AI response:', parseError);
+      console.error('Raw response was:', aiResponse.choices[0].message.content);
       return new Response(JSON.stringify({ 
+        stage: 'direct',
         skillId: null, 
         skillName: null, 
         confidence: 0,
-        reasoning: 'Failed to parse skill recognition'
+        reasoning: 'Failed to parse skill recognition - AI response was malformed'
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-
-    console.log('Skill recognition result:', recognitionResult);
 
     return new Response(JSON.stringify(recognitionResult), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

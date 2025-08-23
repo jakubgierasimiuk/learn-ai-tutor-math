@@ -2187,7 +2187,7 @@ export type Database = {
           mastery_score: number | null
           pseudo_activity_strikes: number | null
           session_type: string
-          skill_id: string
+          skill_id: string | null
           started_at: string
           status: string
           summary_compact: string | null
@@ -2212,7 +2212,7 @@ export type Database = {
           mastery_score?: number | null
           pseudo_activity_strikes?: number | null
           session_type?: string
-          skill_id: string
+          skill_id?: string | null
           started_at?: string
           status?: string
           summary_compact?: string | null
@@ -2237,7 +2237,7 @@ export type Database = {
           mastery_score?: number | null
           pseudo_activity_strikes?: number | null
           session_type?: string
-          skill_id?: string
+          skill_id?: string | null
           started_at?: string
           status?: string
           summary_compact?: string | null
