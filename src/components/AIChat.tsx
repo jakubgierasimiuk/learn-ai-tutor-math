@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,6 +6,7 @@ import { MessageCircle, Send, Bot, User } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Message {
   id: string;
@@ -25,10 +26,145 @@ export const AIChat = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [sequenceNumber, setSequenceNumber] = useState(0);
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  // Initialize or load session on component mount
+  useEffect(() => {
+    if (user?.id) {
+      initializeSession();
+    }
+  }, [user]);
+
+  const initializeSession = async () => {
+    if (!user?.id) return;
+
+    try {
+      // Check for existing active session or create new one
+      const { data: existingSessions, error: sessionError } = await supabase
+        .from('study_sessions')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('session_type', 'chat')
+        .eq('status', 'in_progress')
+        .order('started_at', { ascending: false })
+        .limit(1);
+
+      if (sessionError) throw sessionError;
+
+      let currentSession;
+      if (existingSessions && existingSessions.length > 0) {
+        currentSession = existingSessions[0];
+        // Load existing chat history
+        await loadChatHistory(currentSession.id);
+      } else {
+        // Create new session
+        const { data: newSession, error: createError } = await supabase
+          .from('study_sessions')
+          .insert({
+            user_id: user.id,
+            skill_id: '00000000-0000-0000-0000-000000000000', // Placeholder for general chat
+            session_type: 'chat',
+            status: 'in_progress'
+          })
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        currentSession = newSession;
+      }
+
+      setSessionId(currentSession.id);
+    } catch (error) {
+      console.error('Error initializing session:', error);
+    }
+  };
+
+  const loadChatHistory = async (sessionId: string) => {
+    try {
+      const { data: interactions, error } = await supabase
+        .from('learning_interactions')
+        .select('*')
+        .eq('session_id', sessionId)
+        .order('sequence_number', { ascending: true });
+
+      if (error) throw error;
+
+      if (interactions && interactions.length > 0) {
+        // Convert interactions to messages format
+        const historyMessages = interactions.flatMap((interaction) => {
+          const msgs = [];
+          if (interaction.user_input) {
+            msgs.push({
+              id: `${interaction.id}-user`,
+              content: interaction.user_input,
+              role: 'user' as const,
+              timestamp: new Date(interaction.interaction_timestamp)
+            });
+          }
+          if (interaction.ai_response) {
+            msgs.push({
+              id: `${interaction.id}-assistant`,
+              content: interaction.ai_response,
+              role: 'assistant' as const,
+              timestamp: new Date(interaction.interaction_timestamp)
+            });
+          }
+          return msgs;
+        });
+
+        // Keep only the initial greeting and add history
+        const initialMessage = messages[0];
+        setMessages([initialMessage, ...historyMessages]);
+        setSequenceNumber(interactions.length);
+      }
+    } catch (error) {
+      console.error('Error loading chat history:', error);
+    }
+  };
+
+  const saveInteraction = async (userInput: string, aiResponse: string, skillId?: string) => {
+    if (!sessionId || !user?.id) return;
+
+    try {
+      await supabase
+        .from('learning_interactions')
+        .insert({
+          user_id: user.id,
+          session_id: sessionId,
+          sequence_number: sequenceNumber + 1,
+          user_input: userInput,
+          ai_response: aiResponse,
+          interaction_type: 'chat',
+          content_id: skillId || null,
+          response_time_ms: Date.now() - userMessageTime
+        });
+
+      setSequenceNumber(prev => prev + 1);
+    } catch (error) {
+      console.error('Error saving interaction:', error);
+    }
+  };
+
+  const getMessageHistory = () => {
+    // Get last 8 messages (excluding initial greeting)
+    const conversationMessages = messages.slice(1);
+    const last8Messages = conversationMessages.slice(-8);
+    
+    return last8Messages.map(msg => ({
+      user: msg.role === 'user' ? msg.content : undefined,
+      assistant: msg.role === 'assistant' ? msg.content : undefined,
+      sequence: 0, // Will be handled in backend
+      tokens_estimate: Math.ceil(msg.content.length / 4) // Rough estimate
+    }));
+  };
+
+  let userMessageTime = Date.now();
 
   const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || !sessionId || !user?.id) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -41,6 +177,7 @@ export const AIChat = () => {
     const userInput = input.trim();
     setInput('');
     setIsLoading(true);
+    userMessageTime = Date.now();
 
     try {
       // Step 1: Recognize skill from user message
@@ -73,14 +210,19 @@ export const AIChat = () => {
 
       console.log(`Rozpoznana umiejętność: ${skillName} (${skillId})`);
 
-      // Step 2: Start chat with recognized skill  
+      // Step 2: Start chat with recognized skill
       console.log('Calling study-tutor with endpoint /chat, skillId:', skillId);
+      
+      // Prepare message history and context
+      const messageHistory = getMessageHistory();
       
       const { data: chatData, error: chatError } = await supabase.functions.invoke('study-tutor', {
         body: { 
           message: userInput,
           skillId: skillId,
-          endpoint: 'chat' // Add endpoint parameter instead of URL path
+          sessionId: sessionId,
+          messages: messageHistory,
+          endpoint: 'chat'
         }
       });
 
@@ -103,14 +245,19 @@ export const AIChat = () => {
         throw new Error('Brak odpowiedzi z AI.');
       }
 
+      const aiResponseContent = chatData.message || chatData || 'Rozpocznijmy naukę tej umiejętności!';
+      
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: chatData.message || chatData || 'Rozpocznijmy naukę tej umiejętności!',
+        content: aiResponseContent,
         role: 'assistant',
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, assistantMessage]);
+      
+      // Save interaction to database
+      await saveInteraction(userInput, aiResponseContent, skillId);
 
     } catch (error) {
       console.error('Chat error:', error);

@@ -404,13 +404,14 @@ async function handleChat(req: Request): Promise<Response> {
   }
 
   try {
-    const { message, skillId } = await req.json()
+    const { message, skillId, sessionId, messages: messageHistory } = await req.json()
 
     // DETAILED DEBUGGING LOGS
     console.log('=== CHAT HANDLER DEBUG ===');
-    console.log('Chat request:', { message, skillId });
+    console.log('Chat request:', { message, skillId, sessionId, messageHistory: messageHistory?.length });
     console.log('Input message type:', typeof message);
     console.log('Input skillId type:', typeof skillId);
+    console.log('Message history length:', messageHistory?.length || 0);
 
     if (!message) {
       console.error('Missing message parameter')
@@ -429,46 +430,74 @@ async function handleChat(req: Request): Promise<Response> {
       })
     }
 
+    // Initialize Supabase client for data access
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')
+    let supabaseClient = null;
+    
+    if (supabaseUrl && supabaseKey) {
+      supabaseClient = createClient(supabaseUrl, supabaseKey, {
+        auth: { persistSession: false },
+      })
+    }
+
     // Get skill information if skillId provided
     let skillName = 'matematyka';
+    if (skillId && supabaseClient) {
+      const { data: skillData, error: skillError } = await supabaseClient
+        .from('skills')
+        .select('name')
+        .eq('id', skillId)
+        .single()
+
+      if (!skillError && skillData) {
+        skillName = skillData.name;
+      }
+    }
+
+    // Build conversation history and context
+    let conversationMessages = [];
+    let systemPrompt = 'Jesteś pomocnym nauczycielem matematyki. Odpowiadaj zawsze po polsku.';
+    
     if (skillId) {
-      const supabaseUrl = Deno.env.get('SUPABASE_URL')
-      const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')
-      
-      if (supabaseUrl && supabaseKey) {
-        const supabaseClient = createClient(supabaseUrl, supabaseKey, {
-          auth: { persistSession: false },
-        })
+      systemPrompt += ` Pomagasz z umiejętnością: ${skillName}. Dostosuj swoje odpowiedzi do tej konkretnej umiejętności matematycznej.`;
+    }
 
-        const { data: skillData, error: skillError } = await supabaseClient
-          .from('skills')
-          .select('name')
-          .eq('id', skillId)
-          .single()
+    // Add session summary context if available
+    if (sessionId && supabaseClient) {
+      try {
+        const { data: sessionData } = await supabaseClient
+          .from('study_sessions')
+          .select('summary_compact')
+          .eq('id', sessionId)
+          .single();
+        
+        if (sessionData?.summary_compact) {
+          systemPrompt += ` Kontekst z poprzednich sesji: ${sessionData.summary_compact}`;
+        }
+      } catch (error) {
+        console.log('No session summary available');
+      }
+    }
 
-        if (!skillError && skillData) {
-          skillName = skillData.name;
+    conversationMessages.push({ role: 'system', content: systemPrompt });
+
+    // Add message history to conversation
+    if (messageHistory && Array.isArray(messageHistory)) {
+      for (const msgPair of messageHistory) {
+        if (msgPair.user) {
+          conversationMessages.push({ role: 'user', content: msgPair.user });
+        }
+        if (msgPair.assistant) {
+          conversationMessages.push({ role: 'assistant', content: msgPair.assistant });
         }
       }
     }
 
-    // Create AI prompt for chat
-    const prompt = `Jesteś pomocnym nauczycielem matematyki. ${skillId ? `Tematem rozmowy jest: "${skillName}".` : ''}
+    // Add current message
+    conversationMessages.push({ role: 'user', content: message });
 
-Uczeń napisał: "${message}"
-
-Odpowiedz w przyjazny i zachęcający sposób. 
-
-Wskazówki:
-- Odpowiadaj po polsku
-- Bądź cierpliwy i zachęcający
-- Zadawaj pytania, które pomogą uczniowi zrozumieć temat
-- Nie podawaj od razu odpowiedzi, ale prowadź ucznia do odkrycia
-- Ogranicz odpowiedź do 150 słów
-- Jeśli uczeń pyta o podpowiedź, daj subtelną wskazówkę
-- Jeśli nie znasz tematu, przyznaj się i zaproponuj pomoc w podstawowych zagadnieniach
-
-Odpowiedz!`
+    console.log('Sending to OpenAI with conversation length:', conversationMessages.length);
 
     // Call OpenAI
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -479,10 +508,7 @@ Odpowiedz!`
       },
       body: JSON.stringify({
         model: 'gpt-5-2025-08-07',
-        messages: [
-          { role: 'system', content: 'Jesteś pomocnym nauczycielem matematyki. Odpowiadaj zawsze po polsku.' },
-          { role: 'user', content: prompt }
-        ],
+        messages: conversationMessages,
         max_completion_tokens: 10000,
       }),
     })
