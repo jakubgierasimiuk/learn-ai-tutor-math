@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Brain, BookOpen, MessageCircle, LogOut, Upload, TrendingUp, Database } from "lucide-react";
+import { Brain, BookOpen, MessageCircle, LogOut, Upload, TrendingUp, Database, Clock } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { logEvent } from "@/lib/logger";
@@ -61,6 +61,15 @@ export const Navigation = () => {
             >
               <Database className="w-4 h-4" />
               AI Logs
+            </Link>
+            <Link 
+              to="/sessions" 
+              className={`flex items-center gap-2 transition-smooth ${
+                isActive('/sessions') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
+              }`}
+            >
+              <Clock className="w-4 h-4" />
+              Sesje
             </Link>
             <Button asChild size="sm" className="shadow-primary" onClick={() => logEvent('cta_click', { source: 'nav' })}>
               <Link to="/chat">
@@ -144,17 +153,7 @@ export const Navigation = () => {
                 }`}
                 onClick={() => setIsOpen(false)}
               >
-                <MessageCircle className="w-4 h-4" />
-                Sesje
-              </Link>
-              <Link 
-                to="/sessions" 
-                className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                  isActive('/sessions') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                }`}
-                onClick={() => setIsOpen(false)}
-              >
-                <MessageCircle className="w-4 h-4" />
+                <Clock className="w-4 h-4" />
                 Sesje
               </Link>
             </div>
