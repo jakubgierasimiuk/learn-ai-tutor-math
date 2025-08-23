@@ -94,12 +94,7 @@ const HomePage = () => {
           description="Ucz się matematyki z AI Tutorem 24/7. Dopasowane lekcje, quizy i pełna podstawa programowa liceum. Darmowy okres próbny 7 dni."
           jsonLd={landingJsonLd}
         />
-        <div className="space-y-8">
-          <div className="container mx-auto py-8">
-            <AutoImportRunner />
-          </div>
-          <LandingPage />
-        </div>
+        <LandingPage />
       </>
     );
   }
