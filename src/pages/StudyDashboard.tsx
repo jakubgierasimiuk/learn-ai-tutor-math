@@ -197,62 +197,6 @@ export default function StudyDashboard() {
         </div>
       </div>
 
-      {/* Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Opanowane umiejętności</CardTitle>
-            <Trophy className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary">
-              {departmentStats.reduce((sum, dept) => sum + dept.mastered_skills, 0)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              z {departmentStats.reduce((sum, dept) => sum + dept.total_skills, 0)} dostępnych
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">W trakcie nauki</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-accent">
-              {departmentStats.reduce((sum, dept) => sum + dept.in_progress_skills, 0)}
-            </div>
-            <p className="text-xs text-muted-foreground">umiejętności</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Średni postęp</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {departmentStats.length > 0 
-                ? Math.round(departmentStats.reduce((sum, dept) => sum + dept.mastery_percentage, 0) / departmentStats.length)
-                : 0}%
-            </div>
-            <p className="text-xs text-muted-foreground">opanowania materiału</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Aktywne działy</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{departmentStats.length}</div>
-            <p className="text-xs text-muted-foreground">dostępnych działów</p>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Department Filter */}
       <div className="flex gap-2 overflow-x-auto whitespace-nowrap -mx-4 md:mx-0 px-4">
