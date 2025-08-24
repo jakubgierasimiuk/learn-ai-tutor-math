@@ -2,11 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MessageCircle, Send, Bot, User } from 'lucide-react';
+import { MessageCircle, Send, Bot, User, Brain, Settings } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 interface Message {
   id: string;
@@ -28,6 +30,7 @@ export const AIChat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [sequenceNumber, setSequenceNumber] = useState(0);
+  const [enrichedContext, setEnrichedContext] = useState(false);
   
   // CLARIFICATION CONTEXT STATE
   const [clarificationContext, setClarificationContext] = useState<{
@@ -270,6 +273,7 @@ export const AIChat = () => {
           skill_id: skill_id, // Use snake_case consistently
           sessionId: sessionId,
           messages: messageHistory,
+          enrichedContext: enrichedContext,
           endpoint: 'chat'
         }
       });
@@ -469,9 +473,22 @@ export const AIChat = () => {
   return (
     <Card className="w-full max-w-4xl mx-auto h-[600px] flex flex-col">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MessageCircle className="w-5 h-5" />
-          AI Korepetytor
+        <CardTitle className="flex items-center gap-2 justify-between">
+          <div className="flex items-center gap-2">
+            <MessageCircle className="w-5 h-5" />
+            AI Korepetytor
+          </div>
+          <div className="flex items-center gap-2 text-sm font-normal">
+            <Brain className="h-4 w-4" />
+            <Label htmlFor="enriched-context" className="text-sm">
+              Bogaty kontekst
+            </Label>
+            <Switch
+              id="enriched-context"
+              checked={enrichedContext}
+              onCheckedChange={setEnrichedContext}
+            />
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col flex-1 gap-4">

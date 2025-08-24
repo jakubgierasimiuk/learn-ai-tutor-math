@@ -7,6 +7,304 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Educational context building functions
+async function buildEducationalContext(params: {
+  userId: string;
+  skillId?: string;
+  sessionId?: string;
+  supabaseClient: any;
+  interactionType: 'initial' | 'ongoing' | 'response_analysis';
+}): Promise<{ systemPromptAddition: string } | null> {
+  const { userId, skillId, sessionId, supabaseClient, interactionType } = params;
+  
+  try {
+    console.log('Building educational context for:', { userId, skillId, sessionId, interactionType });
+    
+    const contextParts: string[] = [];
+    
+    // Level 1: Basic cognitive profile and skill content (always when enabled)
+    const [cognitiveProfile, skillContent, progressData] = await Promise.all([
+      fetchCognitiveProfile(supabaseClient, userId),
+      skillId ? fetchSkillContent(supabaseClient, skillId) : null,
+      skillId ? fetchSkillProgress(supabaseClient, userId, skillId) : null
+    ]);
+    
+    if (cognitiveProfile) {
+      contextParts.push(formatCognitiveProfileContext(cognitiveProfile));
+    }
+    
+    if (skillContent) {
+      contextParts.push(formatSkillContentContext(skillContent));
+    }
+    
+    if (progressData) {
+      contextParts.push(formatProgressContext(progressData));
+    }
+    
+    // Level 2: Misconceptions and learning patterns (if available)
+    if (interactionType !== 'initial') {
+      const [misconceptions, sessionHistory] = await Promise.all([
+        fetchActiveMisconceptions(supabaseClient, userId),
+        sessionId ? fetchSessionHistory(supabaseClient, sessionId) : null
+      ]);
+      
+      if (misconceptions && misconceptions.length > 0) {
+        contextParts.push(formatMisconceptionsContext(misconceptions));
+      }
+      
+      if (sessionHistory) {
+        contextParts.push(formatSessionHistoryContext(sessionHistory));
+      }
+    }
+    
+    // Level 3: Advanced pedagogical guidance (for ongoing interactions)
+    if (interactionType === 'ongoing' && skillContent) {
+      const pedagogicalGuidance = buildPedagogicalInstructions(skillContent, cognitiveProfile);
+      if (pedagogicalGuidance) {
+        contextParts.push(pedagogicalGuidance);
+      }
+    }
+    
+    if (contextParts.length === 0) {
+      return null;
+    }
+    
+    const systemPromptAddition = `
+=== KONTEKST EDUKACYJNY ===
+${contextParts.join('\n\n')}
+=== KONIEC KONTEKSTU ===
+
+INSTRUKCJE PEDAGOGICZNE:
+- Wykorzystaj powyższy kontekst do personalizacji swojej odpowiedzi
+- Dostosuj trudność i styl wyjaśnień do profilu kognitywnego ucznia
+- Unikaj powtarzania błędnych koncepcji, które już zidentyfikowałeś
+- Jeśli uczeń pokazuje wzorce trudności, zastosuj odpowiednie strategie wsparcia
+`;
+    
+    console.log('Educational context built successfully, total length:', systemPromptAddition.length);
+    return { systemPromptAddition };
+    
+  } catch (error) {
+    console.error('Error building educational context:', error);
+    return null;
+  }
+}
+
+async function fetchCognitiveProfile(supabaseClient: any, userId: string) {
+  try {
+    const { data, error } = await supabaseClient
+      .from('learner_intelligence')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle();
+    
+    if (error) {
+      console.log('No cognitive profile found:', error);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error fetching cognitive profile:', error);
+    return null;
+  }
+}
+
+async function fetchSkillContent(supabaseClient: any, skillId: string) {
+  try {
+    const { data, error } = await supabaseClient
+      .from('unified_skill_content')
+      .select('content_data')
+      .eq('skill_id', skillId)
+      .maybeSingle();
+    
+    if (error || !data) {
+      console.log('No skill content found');
+      return null;
+    }
+    
+    return data.content_data;
+  } catch (error) {
+    console.error('Error fetching skill content:', error);
+    return null;
+  }
+}
+
+async function fetchSkillProgress(supabaseClient: any, userId: string, skillId: string) {
+  try {
+    const { data, error } = await supabaseClient
+      .from('skill_progress')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('skill_id', skillId)
+      .maybeSingle();
+    
+    if (error) {
+      console.log('No skill progress found');
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error fetching skill progress:', error);
+    return null;
+  }
+}
+
+async function fetchActiveMisconceptions(supabaseClient: any, userId: string) {
+  try {
+    const { data, error } = await supabaseClient
+      .from('misconception_networks')
+      .select('*')
+      .eq('user_id', userId)
+      .gte('strength', 0.3)
+      .order('strength', { ascending: false })
+      .limit(5);
+    
+    if (error) {
+      console.log('No misconceptions found');
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching misconceptions:', error);
+    return [];
+  }
+}
+
+async function fetchSessionHistory(supabaseClient: any, sessionId: string) {
+  try {
+    const { data, error } = await supabaseClient
+      .from('study_sessions')
+      .select('summary_state, mastery_score, hints_used, pseudo_activity_strikes')
+      .eq('id', sessionId)
+      .maybeSingle();
+    
+    if (error) {
+      console.log('No session history found');
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error fetching session history:', error);
+    return null;
+  }
+}
+
+function formatCognitiveProfileContext(profile: any): string {
+  const parts = [];
+  
+  if (profile.processing_speed_percentile) {
+    const speed = profile.processing_speed_percentile < 25 ? 'wolne' : 
+                  profile.processing_speed_percentile < 75 ? 'średnie' : 'szybkie';
+    parts.push(`Tempo przetwarzania: ${speed} (${profile.processing_speed_percentile} percentyl)`);
+  }
+  
+  if (profile.working_memory_span) {
+    parts.push(`Pojemność pamięci roboczej: ${profile.working_memory_span} elementów`);
+  }
+  
+  if (profile.attention_span_minutes) {
+    parts.push(`Czas koncentracji: ${profile.attention_span_minutes} minut`);
+  }
+  
+  if (profile.cognitive_load_capacity) {
+    parts.push(`Próg przeciążenia kognitywnego: ${profile.cognitive_load_capacity}`);
+  }
+  
+  return `PROFIL KOGNITYWNY UCZNIA:\n${parts.join('\n')}`;
+}
+
+function formatSkillContentContext(skillContent: any): string {
+  const parts = [];
+  
+  if (skillContent.theory) {
+    parts.push(`Teoria: ${skillContent.theory.theory_text?.substring(0, 200)}...`);
+  }
+  
+  if (skillContent.examples && skillContent.examples.length > 0) {
+    parts.push(`Dostępne przykłady: ${skillContent.examples.length}`);
+  }
+  
+  if (skillContent.exercises && skillContent.exercises.length > 0) {
+    parts.push(`Dostępne ćwiczenia: ${skillContent.exercises.length}`);
+  }
+  
+  return `ZAWARTOŚĆ UMIEJĘTNOŚCI:\n${parts.join('\n')}`;
+}
+
+function formatProgressContext(progress: any): string {
+  const parts = [];
+  
+  if (progress.mastery_level !== undefined) {
+    parts.push(`Poziom opanowania: ${progress.mastery_level}/5`);
+  }
+  
+  if (progress.total_attempts && progress.correct_attempts) {
+    const accuracy = (progress.correct_attempts / progress.total_attempts * 100).toFixed(1);
+    parts.push(`Dokładność: ${accuracy}% (${progress.correct_attempts}/${progress.total_attempts})`);
+  }
+  
+  if (progress.consecutive_correct) {
+    parts.push(`Poprawne z rzędu: ${progress.consecutive_correct}`);
+  }
+  
+  return `POSTĘP W UMIEJĘTNOŚCI:\n${parts.join('\n')}`;
+}
+
+function formatMisconceptionsContext(misconceptions: any[]): string {
+  const parts = misconceptions.slice(0, 3).map(m => 
+    `- ${m.misconception_cluster_id} (siła: ${(m.strength * 100).toFixed(0)}%)`
+  );
+  
+  return `AKTYWNE BŁĘDNE KONCEPCJE:\n${parts.join('\n')}`;
+}
+
+function formatSessionHistoryContext(sessionData: any): string {
+  const parts = [];
+  
+  if (sessionData.mastery_score !== undefined) {
+    parts.push(`Wynik opanowania: ${(sessionData.mastery_score * 100).toFixed(0)}%`);
+  }
+  
+  if (sessionData.hints_used) {
+    parts.push(`Użyte podpowiedzi: ${sessionData.hints_used}`);
+  }
+  
+  if (sessionData.pseudo_activity_strikes > 0) {
+    parts.push(`Oznaki powierzchownej aktywności: ${sessionData.pseudo_activity_strikes}`);
+  }
+  
+  return `HISTORIA SESJI:\n${parts.join('\n')}`;
+}
+
+function buildPedagogicalInstructions(skillContent: any, cognitiveProfile: any): string {
+  const instructions = [];
+  
+  if (cognitiveProfile?.processing_speed_percentile < 25) {
+    instructions.push('- Dawaj więcej czasu na przemyślenie odpowiedzi');
+    instructions.push('- Rozbijaj skomplikowane problemy na mniejsze kroki');
+  }
+  
+  if (cognitiveProfile?.working_memory_span < 4) {
+    instructions.push('- Ograniczaj ilość informacji prezentowanych jednocześnie');
+    instructions.push('- Używaj wizualnych pomocy naukowych');
+  }
+  
+  if (cognitiveProfile?.attention_span_minutes < 15) {
+    instructions.push('- Utrzymuj krótkie, skoncentrowane interakcje');
+    instructions.push('- Regularnie sprawdzaj zrozumienie');
+  }
+  
+  if (instructions.length === 0) {
+    return '';
+  }
+  
+  return `DOSTOSOWANIA PEDAGOGICZNE:\n${instructions.join('\n')}`;
+}
+
 // Helper function to log AI conversation
 async function logAIConversation(
   sessionId: string | undefined,
@@ -451,14 +749,21 @@ async function handleChat(req: Request): Promise<Response> {
   }
 
   try {
-    const { message, skillId, sessionId, messages: messageHistory } = await req.json()
+    const { 
+      message, 
+      skillId, 
+      sessionId, 
+      messages: messageHistory, 
+      enrichedContext = false 
+    } = await req.json()
 
     // DETAILED DEBUGGING LOGS
     console.log('=== CHAT HANDLER DEBUG ===');
-    console.log('Chat request:', { message, skillId, sessionId, messageHistory: messageHistory?.length });
+    console.log('Chat request:', { message, skillId, sessionId, messageHistory: messageHistory?.length, enrichedContext });
     console.log('Input message type:', typeof message);
     console.log('Input skillId type:', typeof skillId);
     console.log('Message history length:', messageHistory?.length || 0);
+    console.log('Enriched context enabled:', enrichedContext);
     
     const startTime = Date.now();
 
@@ -504,6 +809,31 @@ async function handleChat(req: Request): Promise<Response> {
       }
     }
 
+    // Get user ID from auth header first
+    const authHeader = req.headers.get('authorization');
+    let userId = undefined;
+    if (authHeader) {
+      try {
+        const { data: { user } } = await supabaseClient.auth.getUser(authHeader.replace('Bearer ', ''));
+        userId = user?.id;
+      } catch (error) {
+        console.log("Could not get user from auth header:", error);
+      }
+    }
+
+    // Build enriched educational context if enabled
+    let enrichedContextData = null;
+    if (enrichedContext && userId && supabaseClient) {
+      enrichedContextData = await buildEducationalContext({
+        userId,
+        skillId,
+        sessionId,
+        supabaseClient,
+        interactionType: messageHistory?.length > 0 ? 'ongoing' : 'initial'
+      });
+      console.log('Enriched context built:', !!enrichedContextData);
+    }
+
     // Build conversation history and context
     let conversationMessages = [];
     let systemPrompt = 'Jesteś pomocnym nauczycielem matematyki. Odpowiadaj zawsze po polsku.';
@@ -512,20 +842,26 @@ async function handleChat(req: Request): Promise<Response> {
       systemPrompt += ` Pomagasz z umiejętnością: ${skillName}. Dostosuj swoje odpowiedzi do tej konkretnej umiejętności matematycznej.`;
     }
 
-    // Add session summary context if available
-    if (sessionId && supabaseClient) {
-      try {
-        const { data: sessionData } = await supabaseClient
-          .from('study_sessions')
-          .select('summary_compact')
-          .eq('id', sessionId)
-          .single();
-        
-        if (sessionData?.summary_compact) {
-          systemPrompt += ` Kontekst z poprzednich sesji: ${sessionData.summary_compact}`;
+    // Add enriched context if enabled and available
+    if (enrichedContextData) {
+      systemPrompt += '\n\n' + enrichedContextData.systemPromptAddition;
+      console.log('Added enriched context to system prompt, length:', enrichedContextData.systemPromptAddition.length);
+    } else {
+      // Fallback to basic session summary if enriched context is disabled
+      if (sessionId && supabaseClient) {
+        try {
+          const { data: sessionData } = await supabaseClient
+            .from('study_sessions')
+            .select('summary_compact')
+            .eq('id', sessionId)
+            .single();
+          
+          if (sessionData?.summary_compact) {
+            systemPrompt += ` Kontekst z poprzednich sesji: ${sessionData.summary_compact}`;
+          }
+        } catch (error) {
+          console.log('No session summary available');
         }
-      } catch (error) {
-        console.log('No session summary available');
       }
     }
 
@@ -590,17 +926,6 @@ async function handleChat(req: Request): Promise<Response> {
     const processingTime = Date.now() - startTime;
     console.log('Extracted AI message:', aiMessage);
 
-    // Get user ID from auth header
-    const authHeader = req.headers.get('authorization');
-    let userId = undefined;
-    if (authHeader) {
-      try {
-        const { data: { user } } = await supabaseClient.auth.getUser(authHeader.replace('Bearer ', ''));
-        userId = user?.id;
-      } catch (error) {
-        console.log("Could not get user from auth header:", error);
-      }
-    }
 
     // Log AI conversation
     await logAIConversation(
@@ -614,7 +939,9 @@ async function handleChat(req: Request): Promise<Response> {
       {
         skillId,
         messageHistoryLength: messageHistory?.length || 0,
-        model: 'gpt-5-2025-08-07'
+        model: 'gpt-5-2025-08-07',
+        enrichedContext,
+        contextDataSize: enrichedContextData ? enrichedContextData.systemPromptAddition.length : 0
       },
       message,
       processingTime,
