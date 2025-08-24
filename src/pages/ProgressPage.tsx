@@ -5,8 +5,8 @@ const ProgressPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect to analytics since progress is now tracked there
-    navigate("/analytics");
+    // Redirect to dashboard since analytics is removed
+    navigate("/dashboard");
   }, [navigate]);
 
   return (

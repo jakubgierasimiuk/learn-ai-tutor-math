@@ -11,7 +11,7 @@ import HomePage from "./pages/HomePage";
 import QuizPage from "./pages/QuizPage";
 import DashboardPage from "./pages/DashboardPage";
 import ChatPage from "./pages/ChatPage";
-import AnalyticsPage from "./pages/AnalyticsPage";
+
 import AuthPage from "./pages/AuthPage";
 import SmartRecommendations from "./pages/SmartRecommendations";
 import SocialPage from "./pages/SocialPage";
@@ -91,7 +91,7 @@ function RouteSeo() {
     
     '/dashboard': { title: 'Panel ucznia – AI Tutor', description: 'Twoje postępy, aktywność i szybkie skróty.' },
     '/chat': { title: 'AI Korepetytor – Chat', description: 'Rozmawiaj z AI Tutorem i rozwiązuj zadania krok po kroku.' },
-    '/analytics': { title: 'Analityka nauki – AI Tutor', description: 'Wgląd w metryki nauki i efektywność.' },
+    
     '/materials': { title: 'Materiały ucznia – AI Tutor', description: 'Dodawaj i analizuj własne materiały do nauki.' },
     '/social': { title: 'Społeczność – AI Tutor', description: 'Rankingi, aktywność i interakcje społeczne.' },
     '/gamification': { title: 'Gamifikacja – AI Tutor', description: 'Zdobywaj punkty, odznaki i nagrody.' },
@@ -186,11 +186,6 @@ const App = () => (
             <Route path="/materials" element={
               <AuthenticatedLayout>
                 <MaterialsPage />
-              </AuthenticatedLayout>
-            } />
-            <Route path="/analytics" element={
-              <AuthenticatedLayout>
-                <AnalyticsPage />
               </AuthenticatedLayout>
             } />
             <Route path="/social" element={
