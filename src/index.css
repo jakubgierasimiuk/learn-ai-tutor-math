@@ -2,65 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
-/* AI Tutor Design System - Educational & Modern */
+/* AI Tutor Design System - Professional & Elegant */
 
 @layer base {
   :root {
     /* Core background and text */
-    --background: 220 15% 97%;
-    --foreground: 220 10% 15%;
+    --background: 0 0% 98%;
+    --foreground: 225 15% 15%;
 
     /* Cards and surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 220 10% 15%;
+    --card-foreground: 225 15% 15%;
 
     /* Popover elements */
     --popover: 0 0% 100%;
-    --popover-foreground: 220 10% 15%;
+    --popover-foreground: 225 15% 15%;
 
-    /* Primary brand color - Education Blue */
-    --primary: 214 88% 52%;
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 214 88% 65%;
+    /* Primary brand color - Professional Navy */
+    --primary: 225 40% 25%;
+    --primary-foreground: 0 0% 98%;
+    --primary-glow: 225 35% 35%;
 
-    /* Secondary - Soft neutral */
-    --secondary: 220 15% 94%;
-    --secondary-foreground: 220 10% 25%;
+    /* Secondary - Warm neutral */
+    --secondary: 225 8% 92%;
+    --secondary-foreground: 225 15% 30%;
 
     /* Muted elements */
-    --muted: 220 15% 92%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 225 8% 94%;
+    --muted-foreground: 225 8% 50%;
 
-    /* Accent - AI Purple */
-    --accent: 267 84% 65%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent - Sophisticated Teal */
+    --accent: 195 40% 45%;
+    --accent-foreground: 0 0% 98%;
 
-    /* Success - Learning Green */
-    --success: 142 76% 48%;
-    --success-foreground: 0 0% 100%;
+    /* Success - Muted Green */
+    --success: 155 35% 45%;
+    --success-foreground: 0 0% 98%;
 
-    /* Warning - Energy Orange */
-    --warning: 32 95% 60%;
-    --warning-foreground: 0 0% 100%;
+    /* Warning - Elegant Amber */
+    --warning: 45 85% 55%;
+    --warning-foreground: 225 15% 15%;
 
     /* Destructive */
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 0 0% 98%;
 
     /* UI elements */
-    --border: 220 13% 87%;
-    --input: 220 13% 90%;
-    --ring: 214 88% 52%;
+    --border: 225 12% 88%;
+    --input: 225 8% 92%;
+    --ring: 225 40% 25%;
 
-    /* Gradients for AI Tutor */
-    --gradient-hero: linear-gradient(135deg, hsl(214 88% 52%), hsl(267 84% 65%));
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(220 15% 96%));
-    --gradient-success: linear-gradient(135deg, hsl(142 76% 48%), hsl(142 76% 58%));
+    /* Elegant gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(225 40% 25%), hsl(195 40% 45%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(225 8% 96%));
+    --gradient-success: linear-gradient(135deg, hsl(155 35% 45%), hsl(155 35% 55%));
+    --gradient-elegant: linear-gradient(135deg, hsl(225 8% 96%), hsl(195 20% 92%));
     
-    /* Shadows with brand colors */
-    --shadow-primary: 0 10px 30px -10px hsl(214 88% 52% / 0.3);
-    --shadow-accent: 0 10px 30px -10px hsl(267 84% 65% / 0.3);
-    --shadow-card: 0 4px 20px -8px hsl(220 10% 15% / 0.1);
+    /* Elegant shadows */
+    --shadow-primary: 0 8px 32px -8px hsl(225 40% 25% / 0.15);
+    --shadow-accent: 0 8px 32px -8px hsl(195 40% 45% / 0.15);
+    --shadow-card: 0 2px 16px -4px hsl(225 15% 15% / 0.08);
 
     /* Animation variables */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -177,48 +178,49 @@
   }
 
   .dark {
-    --background: 220 15% 8%;
-    --foreground: 220 15% 92%;
+    --background: 225 25% 6%;
+    --foreground: 225 8% 90%;
 
-    --card: 220 15% 10%;
-    --card-foreground: 220 15% 92%;
+    --card: 225 25% 8%;
+    --card-foreground: 225 8% 90%;
 
-    --popover: 220 15% 10%;
-    --popover-foreground: 220 15% 92%;
+    --popover: 225 25% 8%;
+    --popover-foreground: 225 8% 90%;
 
-    --primary: 214 88% 58%;
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 214 88% 70%;
+    --primary: 225 40% 70%;
+    --primary-foreground: 225 25% 6%;
+    --primary-glow: 225 35% 75%;
 
-    --secondary: 220 15% 15%;
-    --secondary-foreground: 220 15% 85%;
+    --secondary: 225 15% 12%;
+    --secondary-foreground: 225 8% 80%;
 
-    --muted: 220 15% 12%;
-    --muted-foreground: 220 10% 55%;
+    --muted: 225 15% 10%;
+    --muted-foreground: 225 8% 60%;
 
-    --accent: 267 84% 70%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 195 40% 65%;
+    --accent-foreground: 225 25% 6%;
 
-    --success: 142 76% 55%;
-    --success-foreground: 0 0% 100%;
+    --success: 155 35% 60%;
+    --success-foreground: 225 25% 6%;
 
-    --warning: 32 95% 65%;
-    --warning-foreground: 0 0% 100%;
+    --warning: 45 85% 65%;
+    --warning-foreground: 225 25% 6%;
 
-    --destructive: 0 84% 65%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 65% 60%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 220 15% 18%;
-    --input: 220 15% 15%;
-    --ring: 214 88% 58%;
+    --border: 225 15% 15%;
+    --input: 225 15% 12%;
+    --ring: 225 40% 70%;
 
-    --gradient-hero: linear-gradient(135deg, hsl(214 88% 58%), hsl(267 84% 70%));
-    --gradient-card: linear-gradient(145deg, hsl(220 15% 10%), hsl(220 15% 12%));
-    --gradient-success: linear-gradient(135deg, hsl(142 76% 55%), hsl(142 76% 65%));
+    --gradient-hero: linear-gradient(135deg, hsl(225 40% 70%), hsl(195 40% 65%));
+    --gradient-card: linear-gradient(145deg, hsl(225 25% 8%), hsl(225 15% 10%));
+    --gradient-success: linear-gradient(135deg, hsl(155 35% 60%), hsl(155 35% 70%));
+    --gradient-elegant: linear-gradient(135deg, hsl(225 15% 10%), hsl(195 20% 12%));
     
-    --shadow-primary: 0 10px 30px -10px hsl(214 88% 58% / 0.4);
-    --shadow-accent: 0 10px 30px -10px hsl(267 84% 70% / 0.4);
-    --shadow-card: 0 4px 20px -8px hsl(0 0% 0% / 0.3);
+    --shadow-primary: 0 8px 32px -8px hsl(225 40% 70% / 0.2);
+    --shadow-accent: 0 8px 32px -8px hsl(195 40% 65% / 0.2);
+    --shadow-card: 0 2px 16px -4px hsl(0 0% 0% / 0.4);
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -258,6 +260,10 @@
   .gradient-success {
     background: var(--gradient-success);
   }
+
+  .gradient-elegant {
+    background: var(--gradient-elegant);
+  }
   
   .shadow-primary {
     box-shadow: var(--shadow-primary);
@@ -285,6 +291,15 @@
   
   .animate-glow {
     animation: glow 2s ease-in-out infinite alternate;
+  }
+
+  .hover-lift {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-primary);
   }
 }
 

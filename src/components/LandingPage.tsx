@@ -9,67 +9,61 @@ export function LandingPage() {
       action
     });
   };
-  return <div className="font-sans text-foreground bg-background overflow-hidden">
+  return <div className="min-h-screen bg-background text-foreground">
       {/* Navigation Bar */}
-      <nav className="relative z-50 flex justify-between items-center px-6 py-4 bg-background/80 backdrop-blur-sm border-b border-border/20">
-        <div className="flex items-center gap-2">
-          <GraduationCap className="w-8 h-8 text-primary" />
-          <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+      <nav className="relative z-50 flex justify-between items-center px-6 py-6 bg-background/95 backdrop-blur-sm border-b border-border/50">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center">
+            <GraduationCap className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <span className="text-xl font-semibold text-foreground">
             AI Tutor
           </span>
         </div>
         
         <div className="flex items-center gap-4">
           <Link to="/auth">
-            <Button variant="outline" className="hover-scale">
+            <Button variant="outline" className="hover-lift">
               Zaloguj się
             </Button>
           </Link>
           <Link to="/auth">
-            <Button className="button-glow hover-scale" onClick={() => handleCtaClick('header_signup')}>
-              Darmowy dostęp
+            <Button className="shadow-primary hover-lift" onClick={() => handleCtaClick('header_signup')}>
+              Rozpocznij za darmo
             </Button>
           </Link>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="relative py-20 px-6 text-center overflow-hidden">
-        {/* Animated background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-glow to-accent">
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
-        </div>
+      <section className="relative py-24 px-6 overflow-hidden">
+        {/* Elegant background */}
+        <div className="absolute inset-0 gradient-elegant opacity-50"></div>
         
-        {/* Floating geometric shapes */}
-        <div className="absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full animate-float"></div>
-        <div className="absolute top-40 right-20 w-16 h-16 bg-accent/20 rounded-lg rotate-45 animate-float" style={{
-        animationDelay: '2s'
-      }}></div>
-        <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-success/20 rounded-full animate-float" style={{
-        animationDelay: '4s'
+        {/* Subtle geometric elements */}
+        <div className="absolute top-32 right-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 left-10 w-48 h-48 bg-accent/5 rounded-full blur-2xl animate-float" style={{
+        animationDelay: '3s'
       }}></div>
         
-        {/* Hero image with overlay */}
-        <img src={heroImage} alt="Edukacja" className="absolute inset-0 w-full h-full object-cover opacity-15 mix-blend-overlay" />
-        
-        <div className="relative z-10 max-w-6xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 mb-6 border border-white/20 animate-fadeIn">
-            <Sparkles className="w-4 h-4 text-warning" />
-            <span className="text-primary-foreground font-medium">Najnowsza technologia AI</span>
+        <div className="relative z-10 max-w-6xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 bg-card/80 backdrop-blur-sm rounded-full px-6 py-3 mb-8 border border-border shadow-card animate-fadeIn">
+            <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
+            <span className="text-muted-foreground font-medium">Najnowsza technologia AI</span>
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 text-primary-foreground leading-tight animate-fadeIn" style={{
+          <h1 className="text-5xl md:text-7xl font-bold mb-8 text-foreground leading-tight animate-fadeIn" style={{
           animationDelay: '0.2s'
         }}>
-            Twój prywatny <span className="bg-gradient-to-r from-warning to-success bg-clip-text text-transparent">nauczyciel matematyki</span> 24/7
+            Twój <span className="text-primary">osobisty nauczyciel</span><br />
+            matematyki zawsze pod ręką
           </h1>
           
-          <p className="text-xl md:text-2xl max-w-4xl mx-auto mb-10 font-medium text-primary-foreground/90 leading-relaxed animate-fadeIn" style={{
+          <p className="text-xl md:text-2xl max-w-4xl mx-auto mb-12 text-muted-foreground leading-relaxed animate-fadeIn" style={{
           animationDelay: '0.4s'
         }}>
-            Ucz się we własnym tempie – AI tłumaczy krok po kroku, powtarza, gdy tego potrzebujesz
-            i dopasowuje się do Twojego stylu nauki. Krótkie lekcje, szybkie powtórki i pełna podstawa
-            programowa w jednym miejscu.
+            Ucz się matematyki we własnym tempie z AI, które rozumie Twoje potrzeby. 
+            Personalizowane wyjaśnienia, interaktywne zadania i stały dostęp do pomocy.
           </p>
           
           
@@ -77,67 +71,61 @@ export function LandingPage() {
           <div className="max-w-4xl mx-auto animate-fadeIn" style={{
           animationDelay: '0.6s'
         }}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Chat z AI Tutorem */}
-              <div className="group relative p-6 rounded-xl bg-gradient-to-br from-white/20 via-white/10 to-transparent border border-white/30 hover:border-white/50 transition-all duration-300 hover:scale-105 backdrop-blur-sm">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div className="relative">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 rounded-lg bg-white/20">
-                      <span className="text-2xl">🤖</span>
-                    </div>
-                    <h3 className="text-lg font-semibold text-primary-foreground">Chat z AI Tutorem</h3>
+              <div className="group relative p-8 rounded-2xl bg-card border border-border hover-lift shadow-card">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-xl flex items-center justify-center">
+                    <span className="text-2xl">🤖</span>
                   </div>
-                  <p className="text-sm text-primary-foreground/80 mb-4 leading-relaxed">
-                    Zadaj pytanie, wyślij zdjęcie zadania lub po prostu powiedz czego nie rozumiesz. 
-                    AI pomoże Ci krok po kroku.
-                  </p>
-                  <Button asChild className="w-full bg-warning text-warning-foreground hover:bg-warning/90 group-hover:shadow-warning transition-all" onClick={() => handleCtaClick('start_ai_tutor')}>
-                    <Link to="/auth">
-                      Rozpocznij rozmowę
-                    </Link>
-                  </Button>
+                  <h3 className="text-xl font-semibold text-foreground">Chat z AI Tutorem</h3>
                 </div>
+                <p className="text-muted-foreground mb-6 leading-relaxed">
+                  Zadaj pytanie, wyślij zdjęcie zadania lub po prostu powiedz czego nie rozumiesz. 
+                  AI pomoże Ci krok po kroku.
+                </p>
+                <Button asChild className="w-full shadow-primary" onClick={() => handleCtaClick('start_ai_tutor')}>
+                  <Link to="/auth">
+                    Rozpocznij rozmowę
+                  </Link>
+                </Button>
               </div>
 
               {/* Study & Learn */}
-              <div className="group relative p-6 rounded-xl bg-gradient-to-br from-white/20 via-white/10 to-transparent border border-white/30 hover:border-white/50 transition-all duration-300 hover:scale-105 backdrop-blur-sm">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div className="relative">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 rounded-lg bg-white/20">
-                      <BookOpen className="w-6 h-6 text-primary-foreground" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-primary-foreground">Study & Learn</h3>
+              <div className="group relative p-8 rounded-2xl bg-card border border-border hover-lift shadow-card">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-br from-accent to-accent rounded-xl flex items-center justify-center">
+                    <BookOpen className="w-6 h-6 text-accent-foreground" />
                   </div>
-                  <p className="text-sm text-primary-foreground/80 mb-4 leading-relaxed">
-                    Systematyczna nauka z AI. Wybierz temat, rozwiązuj zadania dopasowane do Twojego poziomu
-                    i śledź postępy.
-                  </p>
-                  <Button asChild variant="outline" className="w-full bg-white/10 text-primary-foreground border-white/30 hover:bg-white/20 group-hover:shadow-accent transition-all" onClick={() => handleCtaClick('discover_study_learn')}>
-                    <Link to="/auth">
-                      Zacznij naukę
-                    </Link>
-                  </Button>
+                  <h3 className="text-xl font-semibold text-foreground">Study & Learn</h3>
                 </div>
+                <p className="text-muted-foreground mb-6 leading-relaxed">
+                  Systematyczna nauka z AI. Wybierz temat, rozwiązuj zadania dopasowane do Twojego poziomu
+                  i śledź postępy.
+                </p>
+                <Button asChild variant="outline" className="w-full hover-lift" onClick={() => handleCtaClick('discover_study_learn')}>
+                  <Link to="/auth">
+                    Zacznij naukę
+                  </Link>
+                </Button>
               </div>
             </div>
           </div>
           
           {/* Stats badges */}
-          <div className="flex justify-center gap-8 mt-12 flex-wrap animate-fadeIn" style={{
+          <div className="flex justify-center gap-8 mt-16 flex-wrap animate-fadeIn" style={{
           animationDelay: '0.8s'
         }}>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-6 py-3 border border-white/20">
-              <div className="flex items-center gap-2">
+            <div className="bg-card/80 backdrop-blur-sm rounded-xl px-6 py-4 border border-border shadow-card">
+              <div className="flex items-center gap-3">
                 <Users className="w-5 h-5 text-success" />
-                <span className="text-primary-foreground font-semibold">10,000+ uczniów</span>
+                <span className="text-foreground font-semibold">500+ zadań</span>
               </div>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-6 py-3 border border-white/20">
-              <div className="flex items-center gap-2">
+            <div className="bg-card/80 backdrop-blur-sm rounded-xl px-6 py-4 border border-border shadow-card">
+              <div className="flex items-center gap-3">
                 <Trophy className="w-5 h-5 text-warning" />
-                <span className="text-primary-foreground font-semibold">Natychmiastowy feedback</span>
+                <span className="text-foreground font-semibold">Natychmiastowe feedback</span>
               </div>
             </div>
           </div>
@@ -148,47 +136,47 @@ export function LandingPage() {
       
 
       {/* AI Tutor Section */}
-      <section className="py-20 px-6 text-center max-w-6xl mx-auto animate-fadeIn">
-        <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-3xl p-12 border border-primary/10">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary to-primary-glow rounded-2xl mb-8 shadow-lg animate-float">
-            <GraduationCap className="w-10 h-10 text-primary-foreground" />
+      <section className="py-24 px-6 bg-muted/30">
+        <div className="max-w-6xl mx-auto text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary to-primary-glow rounded-2xl mb-8 shadow-primary animate-float">
+            <GraduationCap className="w-8 h-8 text-primary-foreground" />
           </div>
           
-          <h2 className="text-4xl md:text-5xl font-bold mb-8 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
             Twój nauczyciel, który zawsze ma czas
           </h2>
           
-          <p className="text-xl mb-10 max-w-3xl mx-auto text-muted-foreground leading-relaxed">
-            AI Tutor dostosowuje się do Ciebie:
+          <p className="text-xl mb-16 max-w-3xl mx-auto text-muted-foreground leading-relaxed">
+            AI Tutor dostosowuje się do Ciebie i Twojego stylu nauki
           </p>
           
-          <div className="grid md:grid-cols-3 gap-8 mb-10">
-            <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50 hover:shadow-lg transition-all duration-300 hover:scale-105">
-              <div className="w-12 h-12 bg-gradient-to-br from-success to-success/70 rounded-xl flex items-center justify-center mb-4 mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            <div className="bg-card rounded-2xl p-8 border border-border hover-lift shadow-card">
+              <div className="w-14 h-14 bg-gradient-to-br from-success to-success rounded-xl flex items-center justify-center mb-6 mx-auto">
                 <span className="text-2xl">📚</span>
               </div>
-              <h3 className="font-semibold text-lg mb-2">Krok po kroku</h3>
-              <p className="text-muted-foreground">Tłumaczy zadania w prosty sposób</p>
+              <h3 className="font-semibold text-xl mb-4 text-foreground">Krok po kroku</h3>
+              <p className="text-muted-foreground">Tłumaczy zadania w prosty i zrozumiały sposób</p>
             </div>
             
-            <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50 hover:shadow-lg transition-all duration-300 hover:scale-105">
-              <div className="w-12 h-12 bg-gradient-to-br from-accent to-accent/70 rounded-xl flex items-center justify-center mb-4 mx-auto">
+            <div className="bg-card rounded-2xl p-8 border border-border hover-lift shadow-card">
+              <div className="w-14 h-14 bg-gradient-to-br from-accent to-accent rounded-xl flex items-center justify-center mb-6 mx-auto">
                 <span className="text-2xl">🎯</span>
               </div>
-              <h3 className="font-semibold text-lg mb-2">Dopasowany poziom</h3>
+              <h3 className="font-semibold text-xl mb-4 text-foreground">Dopasowany poziom</h3>
               <p className="text-muted-foreground">Dostosowuje trudność do Twojej wiedzy</p>
             </div>
             
-            <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border/50 hover:shadow-lg transition-all duration-300 hover:scale-105">
-              <div className="w-12 h-12 bg-gradient-to-br from-warning to-warning/70 rounded-xl flex items-center justify-center mb-4 mx-auto">
+            <div className="bg-card rounded-2xl p-8 border border-border hover-lift shadow-card">
+              <div className="w-14 h-14 bg-gradient-to-br from-warning to-warning rounded-xl flex items-center justify-center mb-6 mx-auto">
                 <span className="text-2xl">⚡</span>
               </div>
-              <h3 className="font-semibold text-lg mb-2">Szybka pomoc</h3>
-              <p className="text-muted-foreground">Przygotowuje do sprawdzianów i kartkówek</p>
+              <h3 className="font-semibold text-xl mb-4 text-foreground">Szybka pomoc</h3>
+              <p className="text-muted-foreground">Przygotowuje do sprawdzianów i egzaminów</p>
             </div>
           </div>
           
-          <Button asChild className="bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary text-lg px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300" size="lg" onClick={() => handleCtaClick('see_ai_tutor_demo')}>
+          <Button asChild className="shadow-primary hover-lift text-lg px-8 py-4" size="lg" onClick={() => handleCtaClick('see_ai_tutor_demo')}>
             <Link to="/chat">
               Zobacz, jak działa AI Tutor
             </Link>
@@ -197,49 +185,49 @@ export function LandingPage() {
       </section>
 
       {/* Study & Learn Section */}
-      <section className="py-20 px-6 text-center bg-gradient-to-br from-muted/30 to-accent/5">
+      <section className="py-24 px-6 text-center">
         <div className="max-w-6xl mx-auto">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-accent to-secondary rounded-2xl mb-8 shadow-lg animate-float" style={{
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-accent to-accent rounded-2xl mb-8 shadow-accent animate-float" style={{
           animationDelay: '1s'
         }}>
-            <BookOpen className="w-10 h-10 text-accent-foreground" />
+            <BookOpen className="w-8 h-8 text-accent-foreground" />
           </div>
           
-          <h2 className="text-4xl md:text-5xl font-bold mb-8 bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
-            Cała matematyka liceum zawsze pod ręką
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
+            Cała matematyka liceum w jednym miejscu
           </h2>
           
-          <p className="text-xl mb-12 max-w-3xl mx-auto text-muted-foreground leading-relaxed">
-            Study & Learn to interaktywna baza tematów zgodna z programem MEN:
+          <p className="text-xl mb-16 max-w-3xl mx-auto text-muted-foreground leading-relaxed">
+            Study & Learn to interaktywna baza tematów zgodna z programem MEN
           </p>
           
           <div className="grid md:grid-cols-3 gap-8 mb-12">
-            <div className="bg-card rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-border">
+            <div className="bg-card rounded-2xl p-8 border border-border hover-lift shadow-card">
               <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-glow rounded-2xl flex items-center justify-center mb-6 mx-auto">
                 <span className="text-3xl">📖</span>
               </div>
-              <h3 className="font-bold text-xl mb-4">Wszystkie działy</h3>
+              <h3 className="font-bold text-xl mb-4 text-foreground">Wszystkie działy</h3>
               <p className="text-muted-foreground text-lg">Od równań po całki - kompletny materiał</p>
             </div>
             
-            <div className="bg-card rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-border">
-              <div className="w-16 h-16 bg-gradient-to-br from-success to-success/70 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+            <div className="bg-card rounded-2xl p-8 border border-border hover-lift shadow-card">
+              <div className="w-16 h-16 bg-gradient-to-br from-success to-success rounded-2xl flex items-center justify-center mb-6 mx-auto">
                 <span className="text-3xl">📊</span>
               </div>
-              <h3 className="font-bold text-xl mb-4">Czytelny progres</h3>
+              <h3 className="font-bold text-xl mb-4 text-foreground">Czytelny progres</h3>
               <p className="text-muted-foreground text-lg">Raporty pokazują co już umiesz</p>
             </div>
             
-            <div className="bg-card rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-border">
-              <div className="w-16 h-16 bg-gradient-to-br from-accent to-accent/70 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+            <div className="bg-card rounded-2xl p-8 border border-border hover-lift shadow-card">
+              <div className="w-16 h-16 bg-gradient-to-br from-accent to-accent rounded-2xl flex items-center justify-center mb-6 mx-auto">
                 <span className="text-3xl">⚡</span>
               </div>
-              <h3 className="font-bold text-xl mb-4">Krótkie lekcje</h3>
-              <p className="text-muted-foreground text-lg">Quizy zamiast nudnych samouczków</p>
+              <h3 className="font-bold text-xl mb-4 text-foreground">Krótkie lekcje</h3>
+              <p className="text-muted-foreground text-lg">Quizy zamiast nudnych podręczników</p>
             </div>
           </div>
           
-          <Button asChild variant="default" className="bg-gradient-to-r from-accent to-secondary hover:from-secondary hover:to-accent text-lg px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300" size="lg" onClick={() => handleCtaClick('check_progress')}>
+          <Button asChild variant="outline" className="hover-lift text-lg px-8 py-4" size="lg" onClick={() => handleCtaClick('check_progress')}>
             <Link to="/progress">
               Sprawdź swoje postępy
             </Link>
@@ -248,55 +236,57 @@ export function LandingPage() {
       </section>
 
       {/* Why Us Section */}
-      <section className="py-20 px-6 text-center max-w-6xl mx-auto">
-        <h2 className="text-4xl md:text-5xl font-bold mb-12 bg-gradient-to-r from-primary via-accent to-success bg-clip-text text-transparent">
-          Dlaczego uczniowie kochają tę aplikację?
-        </h2>
-        
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="group bg-gradient-to-br from-card to-muted/20 rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 border border-border/50 hover:border-primary/30">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-glow rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:animate-float">
-              <Layers className="w-8 h-8 text-primary-foreground" />
-            </div>
-            <h3 className="font-bold text-2xl mb-4 group-hover:text-primary transition-colors">Uczysz się tak, jak lubisz</h3>
-            <p className="text-muted-foreground text-lg leading-relaxed">Aplikacja dopasowuje tempo i sposób tłumaczenia do Ciebie.</p>
-          </div>
+      <section className="py-24 px-6 bg-muted/30">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-4xl md:text-5xl font-bold mb-16 text-foreground">
+            Dlaczego uczniowie wybierają AI Tutor?
+          </h2>
           
-          <div className="group bg-gradient-to-br from-card to-accent/10 rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 border border-border/50 hover:border-accent/30">
-            <div className="w-16 h-16 bg-gradient-to-br from-accent to-secondary rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:animate-float" style={{
-            animationDelay: '0.5s'
-          }}>
-              <GraduationCap className="w-8 h-8 text-accent-foreground" />
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="group bg-card rounded-3xl p-8 border border-border hover-lift shadow-card">
+              <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-glow rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:animate-float">
+                <Layers className="w-8 h-8 text-primary-foreground" />
+              </div>
+              <h3 className="font-bold text-2xl mb-4 text-foreground">Uczysz się tak, jak lubisz</h3>
+              <p className="text-muted-foreground text-lg leading-relaxed">Aplikacja dopasowuje tempo i sposób tłumaczenia do Ciebie.</p>
             </div>
-            <h3 className="font-bold text-2xl mb-4 group-hover:text-accent transition-colors">Dostęp zawsze i wszędzie</h3>
-            <p className="text-muted-foreground text-lg leading-relaxed">Na telefonie i komputerze, bez ograniczeń czasowych.</p>
-          </div>
-          
-          <div className="group bg-gradient-to-br from-card to-success/10 rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 border border-border/50 hover:border-success/30">
-            <div className="w-16 h-16 bg-gradient-to-br from-success to-success/70 rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:animate-float" style={{
-            animationDelay: '1s'
-          }}>
-              <BookOpen className="w-8 h-8 text-success-foreground" />
+            
+            <div className="group bg-card rounded-3xl p-8 border border-border hover-lift shadow-card">
+              <div className="w-16 h-16 bg-gradient-to-br from-accent to-accent rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:animate-float" style={{
+              animationDelay: '0.5s'
+            }}>
+                <GraduationCap className="w-8 h-8 text-accent-foreground" />
+              </div>
+              <h3 className="font-bold text-2xl mb-4 text-foreground">Dostęp zawsze i wszędzie</h3>
+              <p className="text-muted-foreground text-lg leading-relaxed">Na telefonie i komputerze, bez ograniczeń czasowych.</p>
             </div>
-            <h3 className="font-bold text-2xl mb-4 group-hover:text-success transition-colors">Pełna podstawa programowa</h3>
-            <p className="text-muted-foreground text-lg leading-relaxed">Wszystko od podstaw po rozszerzenie, w jednym miejscu.</p>
+            
+            <div className="group bg-card rounded-3xl p-8 border border-border hover-lift shadow-card">
+              <div className="w-16 h-16 bg-gradient-to-br from-success to-success rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:animate-float" style={{
+              animationDelay: '1s'
+            }}>
+                <BookOpen className="w-8 h-8 text-success-foreground" />
+              </div>
+              <h3 className="font-bold text-2xl mb-4 text-foreground">Pełna podstawa programowa</h3>
+              <p className="text-muted-foreground text-lg leading-relaxed">Wszystko od podstaw po rozszerzenie, w jednym miejscu.</p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Pricing Section */}
-      <section className="py-20 px-6 text-center bg-gradient-to-br from-primary/5 via-accent/5 to-success/5 relative overflow-hidden">
+      <section className="py-24 px-6 bg-gradient-elegant relative overflow-hidden">
         {/* Background decoration */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-primary/10 to-transparent rounded-full"></div>
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-accent/10 to-transparent rounded-full"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-accent/5 rounded-full blur-2xl"></div>
         
-        <div className="max-w-4xl mx-auto relative z-10">
-          <h2 className="text-4xl md:text-5xl font-bold mb-8 bg-gradient-to-r from-primary to-success bg-clip-text text-transparent">
+        <div className="max-w-4xl mx-auto relative z-10 text-center">
+          <h2 className="text-4xl md:text-5xl font-bold mb-8 text-foreground">
             Pełen dostęp za jedną niską cenę
           </h2>
           
-          <div className="bg-gradient-to-br from-card to-card/50 rounded-3xl p-12 shadow-2xl border border-border/50 backdrop-blur-sm">
-            <div className="text-6xl md:text-7xl font-black mb-4 bg-gradient-to-r from-warning to-success bg-clip-text text-transparent">
+          <div className="bg-card rounded-3xl p-12 border border-border shadow-primary backdrop-blur-sm">
+            <div className="text-6xl md:text-7xl font-black mb-4 text-primary">
               49,99 zł
             </div>
             <p className="text-lg text-muted-foreground mb-2">miesięcznie</p>
@@ -306,11 +296,11 @@ export function LandingPage() {
               To mniej niż koszt jednej godziny korepetycji – a korzystasz ile chcesz, kiedy chcesz.
             </p>
             
-            <Button size="lg" className="bg-gradient-to-r from-success to-warning hover:from-warning hover:to-success text-xl px-12 py-6 rounded-2xl shadow-2xl hover:shadow-3xl hover:scale-110 transition-all duration-300 text-white font-bold border-2 border-success/20 animate-glow" onClick={() => handleCtaClick('start_trial')}>
+            <Button size="lg" className="shadow-primary hover-lift text-xl px-12 py-6 font-bold" onClick={() => handleCtaClick('start_trial')}>
               <span className="flex items-center gap-3">
                 <Sparkles className="w-6 h-6" />
                 Rozpocznij darmowy okres próbny
-                <span className="bg-white/20 rounded-full px-3 py-1 text-sm">7 dni</span>
+                <span className="bg-accent/20 rounded-full px-3 py-1 text-sm">7 dni</span>
               </span>
             </Button>
           </div>
@@ -318,8 +308,8 @@ export function LandingPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 px-6 max-w-5xl mx-auto">
-        <h2 className="text-4xl md:text-5xl font-bold mb-12 text-center bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+      <section className="py-24 px-6 max-w-5xl mx-auto">
+        <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center text-foreground">
           Najczęściej zadawane pytania
         </h2>
         
@@ -339,9 +329,9 @@ export function LandingPage() {
         }, {
           question: "Czy mogę zobaczyć raporty postępów?",
           answer: "Tak – każdy uczeń ma panel z procentami opanowania materiału."
-        }].map((faq, index) => <div key={index} className="group bg-gradient-to-r from-card to-card/80 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-border/50 hover:border-primary/30 hover:scale-[1.02]">
-              <h3 className="font-bold text-xl mb-4 flex items-center gap-3 group-hover:text-primary transition-colors">
-                <HelpCircle className="w-6 h-6 text-primary group-hover:animate-float" />
+        }].map((faq, index) => <div key={index} className="group bg-card rounded-2xl p-8 border border-border hover-lift shadow-card">
+              <h3 className="font-bold text-xl mb-4 flex items-center gap-3 text-foreground">
+                <HelpCircle className="w-6 h-6 text-accent group-hover:animate-float" />
                 {faq.question}
               </h3>
               <p className="text-muted-foreground text-lg leading-relaxed pl-9">
@@ -352,18 +342,18 @@ export function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gradient-to-r from-foreground to-foreground/90 text-primary-foreground py-12 px-6 text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5"></div>
+      <footer className="bg-muted py-16 px-6 text-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-elegant opacity-30"></div>
         <div className="max-w-5xl mx-auto relative z-10">
-          <div className="mb-6">
-            <div className="inline-flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
-                <GraduationCap className="w-5 h-5 text-white" />
+          <div className="mb-8">
+            <div className="inline-flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center">
+                <GraduationCap className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="text-2xl font-bold">AI Tutor</span>
+              <span className="text-2xl font-bold text-foreground">AI Tutor</span>
             </div>
           </div>
-          <p className="text-muted-foreground mb-6">© 2025 AI Tutor. Wszelkie prawa zastrzeżone.</p>
+          <p className="text-muted-foreground mb-8">© 2025 AI Tutor. Wszelkie prawa zastrzeżone.</p>
           <div className="flex justify-center gap-8 text-muted-foreground">
             <a href="#" className="hover:text-primary transition-colors hover:underline">O nas</a>
             <a href="#" className="hover:text-primary transition-colors hover:underline">Kontakt</a>
