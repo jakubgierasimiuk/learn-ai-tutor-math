@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -55,6 +55,7 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
   const [startTime, setStartTime] = useState<number>(Date.now());
   const { toast } = useToast();
   const { user } = useAuth();
+  const chatScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadSkillData();
@@ -232,6 +233,13 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
         timestamp: new Date().toISOString()
       }]);
 
+      // Scroll to bottom after adding messages
+      setTimeout(() => {
+        if (chatScrollRef.current) {
+          chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+        }
+      }, 100);
+
       // Update phase progress
       await updatePhaseProgress(isCorrect);
 
@@ -328,6 +336,13 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
         timestamp: new Date().toISOString(),
         isHint: true
       }]);
+
+      // Scroll to bottom after adding hint
+      setTimeout(() => {
+        if (chatScrollRef.current) {
+          chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+        }
+      }, 100);
 
     } catch (error) {
       console.error('Error getting hint:', error);
@@ -474,7 +489,7 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Chat History */}
-              <div className="space-y-3 max-h-80 overflow-y-auto">
+              <div ref={chatScrollRef} className="space-y-3 max-h-80 overflow-y-auto scroll-smooth">
                 {chatHistory.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     <Lightbulb className="h-12 w-12 mx-auto mb-3" />
