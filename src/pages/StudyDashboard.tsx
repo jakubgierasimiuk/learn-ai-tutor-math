@@ -200,23 +200,11 @@ export default function StudyDashboard() {
         }}
       />
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-        <div className="space-y-2">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Study & Learn</h1>
-          <p className="text-muted-foreground">
-            Interaktywny tutor matematyki - ucz się w swoim tempie z metodą sokratejską
-          </p>
-        </div>
-        <div className="w-full md:w-auto flex items-center gap-2 flex-wrap md:flex-nowrap md:justify-end">
-          <Link to="/chat">
-            <Button size="sm" className="w-full md:w-auto flex items-center gap-2 shadow-primary" onClick={() => console.log('cta_chat_clicked', { source: 'study-dashboard' })}>
-              <Brain className="w-4 h-4" /> Zapytaj korepetytora
-            </Button>
-          </Link>
-          <Button variant="outline" size="sm" className="w-full md:w-auto flex items-center gap-2" onClick={() => setMaterialsOpen(true)}>
-            <Upload className="w-4 h-4" /> Dodaj materiały
-          </Button>
-        </div>
+      <div className="space-y-2">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Study & Learn</h1>
+        <p className="text-muted-foreground">
+          Interaktywny tutor matematyki - ucz się w swoim tempie z metodą sokratejską
+        </p>
       </div>
 
 
