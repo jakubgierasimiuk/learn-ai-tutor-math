@@ -73,9 +73,9 @@ export const Features = () => {
               className="p-8 hover:shadow-primary transition-all duration-300 hover:-translate-y-2 group animate-fadeIn h-full"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="flex items-start gap-6 h-full">
+              <div className="flex flex-col h-full">
                 <div className={`
-                  w-16 h-16 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110
+                  w-16 h-16 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 mb-6
                   ${feature.color === 'primary' ? 'bg-primary/10 text-primary' : ''}
                   ${feature.color === 'accent' ? 'bg-accent/10 text-accent' : ''}
                   ${feature.color === 'success' ? 'bg-success/10 text-success' : ''}
