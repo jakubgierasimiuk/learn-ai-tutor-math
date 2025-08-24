@@ -43,8 +43,8 @@ const features = [
 ];
 
 const stats = [
-  { number: "15,000+", label: "Aktywnych uczniów", icon: Users },
-  { number: "98%", label: "Zadowolenia użytkowników", icon: CheckCircle },
+  { number: "Beta", label: "Wersja testowa", icon: Users },
+  { number: "AI", label: "Personalizacja", icon: CheckCircle },
   { number: "50+", label: "Dostępnych tematów", icon: Target },
   { number: "24/7", label: "Wsparcie AI", icon: Zap }
 ];
