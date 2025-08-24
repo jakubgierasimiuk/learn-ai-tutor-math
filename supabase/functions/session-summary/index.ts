@@ -44,6 +44,17 @@ serve(async (req) => {
 
       if (sessionError) throw sessionError;
       sessionData = session;
+    } else if (sessionType === 'lesson') {
+      // Handle lesson type sessions - they're stored in study_sessions table
+      const { data: session, error: sessionError } = await supabase
+        .from('study_sessions')
+        .select('*')
+        .eq('id', sessionId)
+        .eq('user_id', userId)
+        .single();
+
+      if (sessionError) throw sessionError;
+      sessionData = session;
     } else if (sessionType === 'unified') {
       const { data: session, error: sessionError } = await supabase
         .from('unified_learning_sessions')
@@ -165,7 +176,7 @@ Keep the summary concise but informative, focusing on learning progress and peda
       generated_at: new Date().toISOString()
     };
 
-    if (sessionType === 'chat') {
+    if (sessionType === 'chat' || sessionType === 'lesson') {
       const { error: updateError } = await supabase
         .from('study_sessions')
         .update({
@@ -178,7 +189,7 @@ Keep the summary concise but informative, focusing on learning progress and peda
         .eq('user_id', userId);
 
       if (updateError) throw updateError;
-    } else {
+    } else if (sessionType === 'unified') {
       const { error: updateError } = await supabase
         .from('unified_learning_sessions')
         .update({
