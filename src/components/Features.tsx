@@ -35,10 +35,10 @@ const features = [
   },
   {
     icon: Trophy,
-    title: "Gamifikacja",
-    description: "Zdobywaj punkty, poziomy i osiągnięcia w trakcie nauki.",
+    title: "Śledzenie postępów",
+    description: "Monitoruj swoje osiągnięcia i postępy w nauce matematyki.",
     color: "warning",
-    benefits: ["System punktów", "Awanse na wyższe poziomy", "Motivacja do nauki"]
+    benefits: ["Wizualizacja postępów", "Historia rozwiązanych zadań", "Identyfikacja mocnych stron"]
   }
 ];
 
