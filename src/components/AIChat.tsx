@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,6 +38,23 @@ export const AIChat = () => {
   
   const { toast } = useToast();
   const { user } = useAuth();
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    const scrollToBottom = () => {
+      if (scrollAreaRef.current) {
+        const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+        if (scrollContainer) {
+          scrollContainer.scrollTop = scrollContainer.scrollHeight;
+        }
+      }
+    };
+
+    // Small delay to ensure DOM has updated
+    const timeoutId = setTimeout(scrollToBottom, 100);
+    return () => clearTimeout(timeoutId);
+  }, [messages, isLoading]);
 
   // Initialize or load session on component mount
   useEffect(() => {
@@ -458,7 +475,7 @@ export const AIChat = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col flex-1 gap-4">
-        <ScrollArea className="flex-1 pr-4">
+        <ScrollArea ref={scrollAreaRef} className="flex-1 pr-4">
           <div className="space-y-4">
             {messages.map((message) => (
               <div
