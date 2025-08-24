@@ -45,15 +45,6 @@ export const Navigation = () => {
               Postępy
             </Link>
             <Link 
-              to="/content-manager" 
-              className={`flex items-center gap-2 transition-smooth ${
-                isActive('/content-manager') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
-              }`}
-            >
-              <Database className="w-4 h-4" />
-              Content
-            </Link>
-            <Link 
               to="/ai-logs" 
               className={`flex items-center gap-2 transition-smooth ${
                 isActive('/ai-logs') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
@@ -125,16 +116,6 @@ export const Navigation = () => {
               >
                 <MessageCircle className="w-4 h-4" />
                 AI Korepetytor
-              </Link>
-              <Link 
-                to="/content-manager" 
-                className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                  isActive('/content-manager') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                }`}
-                onClick={() => setIsOpen(false)}
-              >
-                <Database className="w-4 h-4" />
-                Content Manager
               </Link>
               <Link 
                 to="/ai-logs" 

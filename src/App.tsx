@@ -25,7 +25,6 @@ import MaterialsPage from "./pages/MaterialsPage";
 import UXAuditPage from "./pages/UXAuditPage";
 import ProgressPage from "./pages/ProgressPage";
 import { RealLearningPage } from "./pages/RealLearningPage";
-import ContentImportPage from "./pages/ContentImportPage";
 import BatchImportPage from "./pages/BatchImportPage";
 import AILogsPage from "./pages/AILogsPage";
 import SessionsPage from "./pages/SessionsPage";
@@ -239,7 +238,7 @@ const App = () => (
                 <RealLearningPage />
               </AuthenticatedLayout>
             } /> */}
-            <Route path="/content-manager" element={<ContentImportPage />} />
+            
             <Route path="/batch-import" element={<BatchImportPage />} />
             <Route path="/study/lesson/:skillId" element={
               <AuthenticatedLayout>
