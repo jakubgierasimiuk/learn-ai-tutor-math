@@ -223,7 +223,7 @@ export default function StudyDashboard() {
       <div className="space-y-4">
         {/* Class Level Filter - Main Element */}
         <div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
             <h3 className="text-sm font-medium">Wybierz klasę:</h3>
             <Button
               variant={selectedClass === null ? "default" : "outline"}
@@ -232,6 +232,8 @@ export default function StudyDashboard() {
             >
               Wszystkie klasy
             </Button>
+          </div>
+          <div className="flex flex-wrap gap-2">
             {classLevels.map(classLevel => (
               <Button
                 key={classLevel}
