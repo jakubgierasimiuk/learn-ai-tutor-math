@@ -98,6 +98,27 @@ export default function StudyDashboard() {
     return stats;
   }, [skillsWithProgress]);
 
+  // Get available class levels
+  const classLevels = React.useMemo(() => {
+    if (!skillsWithProgress) return [];
+    const levels = [...new Set(skillsWithProgress.map(s => s.class_level_text).filter(Boolean))];
+    return levels.sort();
+  }, [skillsWithProgress]);
+
+  const filteredSkills = React.useMemo(() => {
+    let filtered = skillsWithProgress || [];
+    
+    if (selectedClass) {
+      filtered = filtered.filter(s => s.class_level_text === selectedClass);
+    }
+    
+    if (selectedDepartment) {
+      filtered = filtered.filter(s => s.department === selectedDepartment);
+    }
+    
+    return filtered;
+  }, [skillsWithProgress, selectedClass, selectedDepartment]);
+
   const startLesson = (skillId: string) => {
     navigate(`/study/lesson/${skillId}`);
   };
@@ -164,26 +185,6 @@ export default function StudyDashboard() {
     );
   }
 
-  // Get available class levels
-  const classLevels = React.useMemo(() => {
-    if (!skillsWithProgress) return [];
-    const levels = [...new Set(skillsWithProgress.map(s => s.class_level_text).filter(Boolean))];
-    return levels.sort();
-  }, [skillsWithProgress]);
-
-  const filteredSkills = React.useMemo(() => {
-    let filtered = skillsWithProgress || [];
-    
-    if (selectedClass) {
-      filtered = filtered.filter(s => s.class_level_text === selectedClass);
-    }
-    
-    if (selectedDepartment) {
-      filtered = filtered.filter(s => s.department === selectedDepartment);
-    }
-    
-    return filtered;
-  }, [skillsWithProgress, selectedClass, selectedDepartment]);
 
   return (
     <div className="container mx-auto p-4 md:p-6 space-y-6">
