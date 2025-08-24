@@ -9,7 +9,6 @@ const corsHeaders = {
 
 // Helper function to log AI conversation
 async function logAIConversation(
-  supabase: any,
   sessionId: string | undefined,
   userId: string | undefined,
   sequenceNumber: number,
@@ -24,7 +23,13 @@ async function logAIConversation(
   modelUsed?: string
 ) {
   try {
-    await supabase.from('ai_conversation_log').insert({
+    // Use service role for logging to bypass RLS
+    const serviceSupabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    const { error } = await serviceSupabase.from('ai_conversation_log').insert({
       session_id: sessionId,
       user_id: userId,
       sequence_number: sequenceNumber,
@@ -38,6 +43,12 @@ async function logAIConversation(
       tokens_used: tokensUsed,
       model_used: modelUsed
     });
+
+    if (error) {
+      console.error('Error inserting AI conversation log:', error);
+    } else {
+      console.log('Successfully logged AI conversation');
+    }
   } catch (error) {
     console.error('Failed to log AI conversation:', error);
   }
@@ -593,7 +604,6 @@ async function handleChat(req: Request): Promise<Response> {
 
     // Log AI conversation
     await logAIConversation(
-      supabaseClient,
       sessionId,
       userId,
       1,

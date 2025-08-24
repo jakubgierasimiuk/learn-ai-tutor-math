@@ -4,7 +4,6 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1"
 
 // Helper function to log AI conversation
 async function logAIConversation(
-  supabase: any,
   sessionId: string | undefined,
   userId: string | undefined,
   sequenceNumber: number,
@@ -19,7 +18,13 @@ async function logAIConversation(
   modelUsed?: string
 ) {
   try {
-    await supabase.from('ai_conversation_log').insert({
+    // Use service role for logging to bypass RLS
+    const serviceSupabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    const { error } = await serviceSupabase.from('ai_conversation_log').insert({
       session_id: sessionId,
       user_id: userId,
       sequence_number: sequenceNumber,
@@ -33,6 +38,12 @@ async function logAIConversation(
       tokens_used: tokensUsed,
       model_used: modelUsed
     });
+
+    if (error) {
+      console.error('Error inserting AI conversation log:', error);
+    } else {
+      console.log('Successfully logged AI conversation');
+    }
   } catch (error) {
     console.error('Failed to log AI conversation:', error);
   }
@@ -417,7 +428,6 @@ FALLBACK: Jeśli brak dopasowania: stage="direct", skill_id=null, confidence=0`;
 
     // Log AI conversation
     await logAIConversation(
-      supabase,
       sessionId,
       userId,
       1,
