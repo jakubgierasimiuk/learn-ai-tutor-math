@@ -70,10 +70,10 @@ export const Features = () => {
           {features.map((feature, index) => (
             <Card 
               key={feature.title}
-              className="p-8 hover:shadow-primary transition-all duration-300 hover:-translate-y-2 group animate-fadeIn"
+              className="p-8 hover:shadow-primary transition-all duration-300 hover:-translate-y-2 group animate-fadeIn h-full"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="flex items-start gap-6">
+              <div className="flex items-start gap-6 h-full">
                 <div className={`
                   w-16 h-16 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110
                   ${feature.color === 'primary' ? 'bg-primary/10 text-primary' : ''}
