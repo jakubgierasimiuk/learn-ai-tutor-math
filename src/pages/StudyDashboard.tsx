@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Brain, Clock, TrendingUp, Play, Trophy, Target } from 'lucide-react';
+import { BookOpen, Brain, Clock, TrendingUp, Play, Trophy, Target, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import type { Skill, SkillProgress, DepartmentProgress } from '@/types';
@@ -20,6 +20,7 @@ export default function StudyDashboard() {
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [materialsOpen, setMaterialsOpen] = useState(false);
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
 
   // Fetch skills with progress
   const { data: skillsWithProgress, isLoading } = useQuery({
@@ -249,31 +250,51 @@ export default function StudyDashboard() {
 
         {/* Department Filter - Secondary */}
         <div>
-          <h3 className="text-sm font-medium mb-2">Filtruj po dziale:</h3>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex items-center gap-2 mb-2">
+            <h3 className="text-sm font-medium">Filtruj po dziale:</h3>
             <Button
-              variant={selectedDepartment === null ? "default" : "outline"}
+              variant="ghost"
               size="sm"
-              onClick={() => setSelectedDepartment(null)}
+              onClick={() => setFiltersExpanded(!filtersExpanded)}
+              className="flex items-center gap-1"
             >
-              Wszystkie działy
+              {filtersExpanded ? (
+                <>
+                  Zwiń <ChevronUp className="w-4 h-4" />
+                </>
+              ) : (
+                <>
+                  Rozwiń <ChevronDown className="w-4 h-4" />
+                </>
+              )}
             </Button>
-            {departmentStats.map(dept => (
-              <Button
-                key={dept.department}
-                variant={selectedDepartment === dept.department ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedDepartment(dept.department)}
-                className="flex items-center gap-2"
-              >
-                {getDepartmentIcon(dept.department)}
-                {getDepartmentName(dept.department)}
-                <Badge variant="secondary" className="ml-1">
-                  {dept.mastery_percentage}%
-                </Badge>
-              </Button>
-            ))}
           </div>
+          {filtersExpanded && (
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant={selectedDepartment === null ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedDepartment(null)}
+              >
+                Wszystkie działy
+              </Button>
+              {departmentStats.map(dept => (
+                <Button
+                  key={dept.department}
+                  variant={selectedDepartment === dept.department ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedDepartment(dept.department)}
+                  className="flex items-center gap-2"
+                >
+                  {getDepartmentIcon(dept.department)}
+                  {getDepartmentName(dept.department)}
+                  <Badge variant="secondary" className="ml-1">
+                    {dept.mastery_percentage}%
+                  </Badge>
+                </Button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
