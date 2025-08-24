@@ -18,6 +18,7 @@ export default function StudyDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
+  const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [materialsOpen, setMaterialsOpen] = useState(false);
 
   // Fetch skills with progress
@@ -117,14 +118,16 @@ export default function StudyDashboard() {
   const getDepartmentName = (department: string) => {
     const names: Record<string, string> = {
       algebra: 'Algebra',
-      geometry: 'Geometria',
-      trigonometry: 'Trygonometria',
-      calculus: 'Analiza matematyczna',
       analiza_matematyczna: 'Analiza matematyczna',
-      statistics: 'Statystyka i prawdopodobieństwo',
-      sequences: 'Ciągi',
+      calculus: 'Analiza matematyczna',
+      'Rachunek różniczkowy i całkowy': 'Analiza matematyczna',
+      geometry: 'Geometria',
       functions: 'Funkcje',
-      funkcje: 'Funkcje'
+      funkcje: 'Funkcje',
+      funkcje_elementarne: 'Funkcje elementarne',
+      sequences: 'Ciągi',
+      real_numbers: 'Liczby rzeczywiste',
+      mathematics: 'Matematyka'
     };
     return names[department] || department;
   };
@@ -161,9 +164,26 @@ export default function StudyDashboard() {
     );
   }
 
-  const filteredSkills = selectedDepartment 
-    ? skillsWithProgress?.filter(s => s.department === selectedDepartment)
-    : skillsWithProgress;
+  // Get available class levels
+  const classLevels = React.useMemo(() => {
+    if (!skillsWithProgress) return [];
+    const levels = [...new Set(skillsWithProgress.map(s => s.class_level_text).filter(Boolean))];
+    return levels.sort();
+  }, [skillsWithProgress]);
+
+  const filteredSkills = React.useMemo(() => {
+    let filtered = skillsWithProgress || [];
+    
+    if (selectedClass) {
+      filtered = filtered.filter(s => s.class_level_text === selectedClass);
+    }
+    
+    if (selectedDepartment) {
+      filtered = filtered.filter(s => s.department === selectedDepartment);
+    }
+    
+    return filtered;
+  }, [skillsWithProgress, selectedClass, selectedDepartment]);
 
   return (
     <div className="container mx-auto p-4 md:p-6 space-y-6">
@@ -198,30 +218,60 @@ export default function StudyDashboard() {
       </div>
 
 
-      {/* Department Filter */}
-      <div className="flex gap-2 overflow-x-auto whitespace-nowrap -mx-4 md:mx-0 px-4">
-        <Button
-          variant={selectedDepartment === null ? "default" : "outline"}
-          size="sm" className="shrink-0"
-          onClick={() => setSelectedDepartment(null)}
-        >
-          Wszystkie działy
-        </Button>
-        {departmentStats.map(dept => (
-          <Button
-            key={dept.department}
-            variant={selectedDepartment === dept.department ? "default" : "outline"}
-            size="sm"
-            onClick={() => setSelectedDepartment(dept.department)}
-            className="flex items-center gap-2 shrink-0"
-          >
-            {getDepartmentIcon(dept.department)}
-            {getDepartmentName(dept.department)}
-            <Badge variant="secondary" className="ml-1">
-              {dept.mastery_percentage}%
-            </Badge>
-          </Button>
-        ))}
+      {/* Filters */}
+      <div className="space-y-4">
+        {/* Class Level Filter - Main Element */}
+        <div>
+          <h3 className="text-sm font-medium mb-2">Wybierz klasę:</h3>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant={selectedClass === null ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedClass(null)}
+            >
+              Wszystkie klasy
+            </Button>
+            {classLevels.map(classLevel => (
+              <Button
+                key={classLevel}
+                variant={selectedClass === classLevel ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedClass(classLevel)}
+              >
+                {classLevel}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        {/* Department Filter - Secondary */}
+        <div>
+          <h3 className="text-sm font-medium mb-2">Filtruj po dziale:</h3>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant={selectedDepartment === null ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedDepartment(null)}
+            >
+              Wszystkie działy
+            </Button>
+            {departmentStats.map(dept => (
+              <Button
+                key={dept.department}
+                variant={selectedDepartment === dept.department ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedDepartment(dept.department)}
+                className="flex items-center gap-2"
+              >
+                {getDepartmentIcon(dept.department)}
+                {getDepartmentName(dept.department)}
+                <Badge variant="secondary" className="ml-1">
+                  {dept.mastery_percentage}%
+                </Badge>
+              </Button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Skills Grid */}
