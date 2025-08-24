@@ -1,4 +1,4 @@
-import { BookOpen, GraduationCap, Layers, HelpCircle, Sparkles, Users, Trophy, Database } from "lucide-react";
+import { BookOpen, GraduationCap, Layers, HelpCircle, Sparkles, Users, Trophy, Database, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-education.jpg";
@@ -132,14 +132,14 @@ export function LandingPage() {
           <div className="flex justify-center gap-8 mt-12 flex-wrap animate-fadeIn" style={{animationDelay: '0.8s'}}>
             <div className="bg-white/10 backdrop-blur-sm rounded-xl px-6 py-3 border border-white/20">
               <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-success" />
-                <span className="text-primary-foreground font-semibold">10,000+ uczniów</span>
+                <BookOpen className="w-5 h-5 text-success" />
+                <span className="text-primary-foreground font-semibold">500+ zadań</span>
               </div>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-xl px-6 py-3 border border-white/20">
               <div className="flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-warning" />
-                <span className="text-primary-foreground font-semibold">98% zadowolenia</span>
+                <Zap className="w-5 h-5 text-warning" />
+                <span className="text-primary-foreground font-semibold">Natychmiastowe feedback</span>
               </div>
             </div>
           </div>
