@@ -9,7 +9,7 @@ import { useReferral } from "@/hooks/useReferral";
 import { Navigation } from "@/components/Navigation";
 import HomePage from "./pages/HomePage";
 import QuizPage from "./pages/QuizPage";
-import DashboardPage from "./pages/DashboardPage";
+import { Dashboard } from "@/components/Dashboard";
 import ChatPage from "./pages/ChatPage";
 
 import AuthPage from "./pages/AuthPage";
@@ -174,7 +174,7 @@ const App = () => (
             } />
             <Route path="/dashboard" element={
               <AuthenticatedLayout>
-                <DashboardPage />
+                <Dashboard />
               </AuthenticatedLayout>
             } />
             <Route path="/chat" element={

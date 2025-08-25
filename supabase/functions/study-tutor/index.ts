@@ -821,6 +821,27 @@ async function handleChat(req: Request): Promise<Response> {
       }
     }
 
+    // Check token usage limit for authenticated users
+    if (userId) {
+      const { data: subscription } = await supabaseClient
+        .from('user_subscriptions')
+        .select('tokens_used_this_month, monthly_token_limit, subscription_type')
+        .eq('user_id', userId)
+        .single();
+
+      if (subscription && subscription.tokens_used_this_month >= subscription.monthly_token_limit) {
+        console.log('🚫 Token limit exceeded:', subscription);
+        return new Response(JSON.stringify({
+          error: 'Token limit exceeded',
+          message: `Osiągnięto limit ${subscription.monthly_token_limit} tokenów na miesiąc. Rozważ upgrade planu.`,
+          subscription_type: subscription.subscription_type
+        }), {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
     // Build enriched educational context if enabled
     let enrichedContextData = null;
     if (enrichedContext && userId && supabaseClient) {
@@ -924,7 +945,22 @@ async function handleChat(req: Request): Promise<Response> {
     
     const aiMessage = aiData.choices[0]?.message?.content?.trim() || 'Przepraszam, nie mogę teraz odpowiedzieć. Spróbuj ponownie.'
     const processingTime = Date.now() - startTime;
+    const tokensUsed = aiData.usage?.total_tokens || 0;
     console.log('Extracted AI message:', aiMessage);
+
+    // Update token usage if user is identified
+    if (userId && tokensUsed > 0) {
+      const { error: tokenError } = await supabaseClient.rpc('update_token_usage', {
+        p_user_id: userId,
+        p_tokens_used: tokensUsed
+      });
+      
+      if (tokenError) {
+        console.log('⚠️ Error updating token usage:', tokenError);
+      } else {
+        console.log('✅ Updated token usage:', tokensUsed);
+      }
+    }
 
 
     // Log AI conversation
@@ -945,7 +981,7 @@ async function handleChat(req: Request): Promise<Response> {
       },
       message,
       processingTime,
-      aiData.usage?.total_tokens,
+      aiData.usage?.total_tokens || tokensUsed,
       'gpt-5-2025-08-07'
     );
 
