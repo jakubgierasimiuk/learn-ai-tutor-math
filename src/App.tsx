@@ -28,6 +28,7 @@ import { RealLearningPage } from "./pages/RealLearningPage";
 import BatchImportPage from "./pages/BatchImportPage";
 import AILogsPage from "./pages/AILogsPage";
 import SessionsPage from "./pages/SessionsPage";
+import AccountPage from "./pages/AccountPage";
 import { OnboardingWelcome } from "@/components/onboarding/OnboardingWelcome";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 import { QuickDiagnostic } from "@/components/onboarding/QuickDiagnostic";
@@ -230,6 +231,11 @@ const App = () => (
             <Route path="/sessions" element={
               <AuthenticatedLayout>
                 <SessionsPage />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/account" element={
+              <AuthenticatedLayout>
+                <AccountPage />
               </AuthenticatedLayout>
             } />
             {/* Real Learning Engine - UNDER DEVELOPMENT - DO NOT USE */}

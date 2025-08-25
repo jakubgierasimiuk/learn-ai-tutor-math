@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Brain, BookOpen, MessageCircle, LogOut, Upload, TrendingUp, Database, Clock } from "lucide-react";
+import { Brain, BookOpen, MessageCircle, LogOut, Upload, TrendingUp, Database, Clock, Settings } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { logEvent } from "@/lib/logger";
@@ -74,6 +74,12 @@ export const Navigation = () => {
             <span className="text-sm text-muted-foreground">
               {user?.email}
             </span>
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/account" className="flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                Konto
+              </Link>
+            </Button>
             <Button variant="outline" onClick={signOut} className="flex items-center gap-2">
               <LogOut className="w-4 h-4" />
               Wyloguj
@@ -142,6 +148,12 @@ export const Navigation = () => {
               <span className="text-sm text-muted-foreground px-2">
                 {user?.email}
               </span>
+              <Button asChild variant="ghost" className="w-full flex items-center gap-2" onClick={() => setIsOpen(false)}>
+                <Link to="/account">
+                  <Settings className="w-4 h-4" />
+                  Konto
+                </Link>
+              </Button>
               <Button variant="outline" onClick={signOut} className="w-full flex items-center gap-2">
                 <LogOut className="w-4 h-4" />
                 Wyloguj
