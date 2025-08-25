@@ -44,12 +44,12 @@ export const SubscriptionManager = () => {
     }
   };
 
-  const handleUpgrade = async (plan: 'paid' | 'super') => {
+  const handleUpgrade = async () => {
     if (!user) return;
     
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { plan }
+        body: { plan: 'paid' }
       });
       
       if (error) throw error;
@@ -131,15 +131,15 @@ export const SubscriptionManager = () => {
         return {
           name: 'Plan Płatny',
           tokens: '10,000 tokenów/miesiąc',
-          price: '29.99 PLN/miesiąc',
+          price: '49.99 PLN/miesiąc',
           features: ['10,000 tokenów AI', 'Wsparcie email', 'Wszystkie funkcje']
         };
       case 'super':
         return {
           name: 'Plan Super',
           tokens: '50,000 tokenów/miesiąc',
-          price: '99.99 PLN/miesiąc',
-          features: ['50,000 tokenów AI', 'Priorytetowe wsparcie', 'Wszystkie funkcje', 'Beta dostęp']
+          price: 'Przydzielany przez administratora',
+          features: ['50,000 tokenów AI', 'Priorytetowe wsparcie', 'Wszystkie funkcje', 'Beta dostęp', 'VIP status']
         };
       default:
         return {
@@ -212,9 +212,9 @@ export const SubscriptionManager = () => {
         </CardContent>
       </Card>
 
-      {/* Upgrade Options */}
+      {/* Upgrade Options - Only show paid plan for upgrade */}
       {(!subscription || subscription.subscription_type === 'free') && (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="max-w-md mx-auto">
           <Card className="border-blue-200">
             <CardHeader>
               <CardTitle className="flex items-center">
@@ -224,7 +224,7 @@ export const SubscriptionManager = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <div className="text-2xl font-bold text-blue-600">29.99 PLN</div>
+                <div className="text-2xl font-bold text-blue-600">49.99 PLN</div>
                 <div className="text-sm text-muted-foreground">miesięcznie</div>
               </div>
               <ul className="space-y-2 text-sm">
@@ -233,7 +233,7 @@ export const SubscriptionManager = () => {
                 <li>✓ Wszystkie funkcje</li>
               </ul>
               <Button 
-                onClick={() => handleUpgrade('paid')} 
+                onClick={handleUpgrade} 
                 className="w-full"
                 variant="default"
               >
@@ -241,34 +241,17 @@ export const SubscriptionManager = () => {
               </Button>
             </CardContent>
           </Card>
-
-          <Card className="border-purple-200">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Crown className="w-5 h-5 mr-2 text-purple-600" />
-                Plan Super
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <div className="text-2xl font-bold text-purple-600">99.99 PLN</div>
-                <div className="text-sm text-muted-foreground">miesięcznie</div>
-              </div>
-              <ul className="space-y-2 text-sm">
-                <li>✓ 50,000 tokenów AI</li>
-                <li>✓ Priorytetowe wsparcie</li>
-                <li>✓ Wszystkie funkcje</li>
-                <li>✓ Beta dostęp</li>
-              </ul>
-              <Button 
-                onClick={() => handleUpgrade('super')} 
-                className="w-full"
-                variant="default"
-              >
-                Wybierz Plan
-              </Button>
-            </CardContent>
-          </Card>
+          
+          {/* Info about Super plan - not purchasable */}
+          <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+            <div className="flex items-center mb-2">
+              <Crown className="w-4 h-4 text-purple-600 mr-2" />
+              <span className="font-medium text-purple-800">Plan Super</span>
+            </div>
+            <p className="text-sm text-purple-700">
+              50,000 tokenów miesięcznie + VIP wsparcie. Przydzielany przez administratora na specjalne okazje.
+            </p>
+          </div>
         </div>
       )}
     </div>

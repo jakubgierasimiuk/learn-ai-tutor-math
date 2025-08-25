@@ -42,6 +42,11 @@ serve(async (req) => {
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     const { plan = 'paid' } = await req.json();
+    
+    // Only allow paid plan to be purchased
+    if (plan !== 'paid') {
+      throw new Error('Only paid plan is available for purchase');
+    }
     logStep("Plan selected", { plan });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
@@ -55,10 +60,9 @@ serve(async (req) => {
       logStep("No existing customer found");
     }
 
-    // Define plan pricing
+    // Define plan pricing - only paid plan available for purchase
     const planPricing = {
-      paid: { amount: 2999, name: "Plan Płatny", tokens: 10000 }, // 29.99 PLN
-      super: { amount: 9999, name: "Plan Super", tokens: 50000 }, // 99.99 PLN
+      paid: { amount: 4999, name: "Plan Płatny", tokens: 10000 }, // 49.99 PLN
     };
 
     const selectedPlan = planPricing[plan as keyof typeof planPricing];
