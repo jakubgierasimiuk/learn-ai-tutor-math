@@ -138,8 +138,8 @@ export const SubscriptionManager = () => {
         return {
           name: 'Plan Super',
           tokens: '50,000 tokenów/miesiąc',
-          price: 'Przydzielany przez administratora',
-          features: ['50,000 tokenów AI', 'Priorytetowe wsparcie', 'Wszystkie funkcje', 'Beta dostęp', 'VIP status']
+          price: 'Plan specjalny',
+          features: ['50,000 tokenów AI', 'VIP wsparcie', 'Wszystkie funkcje', 'Ekskluzywne funkcje']
         };
       default:
         return {
@@ -241,17 +241,6 @@ export const SubscriptionManager = () => {
               </Button>
             </CardContent>
           </Card>
-          
-          {/* Info about Super plan - not purchasable */}
-          <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-            <div className="flex items-center mb-2">
-              <Crown className="w-4 h-4 text-purple-600 mr-2" />
-              <span className="font-medium text-purple-800">Plan Super</span>
-            </div>
-            <p className="text-sm text-purple-700">
-              50,000 tokenów miesięcznie + VIP wsparcie. Przydzielany przez administratora na specjalne okazje.
-            </p>
-          </div>
         </div>
       )}
     </div>
