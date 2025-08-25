@@ -5,7 +5,7 @@ import { ProgressMiniBar } from "@/components/ProgressMiniBar";
 import { Hero } from "@/components/Hero";
 import { Features } from "@/components/Features";
 import { ReferralPromo } from "@/components/ReferralPromo";
-
+import { Navigation } from "@/components/Navigation";
 
 import { LandingPage } from "@/components/LandingPage";
 import { useAuth } from "@/hooks/useAuth";
@@ -94,7 +94,10 @@ const HomePage = () => {
           description="Ucz się matematyki z AI Tutorem 24/7. Dopasowane lekcje, quizy i pełna podstawa programowa liceum. Darmowy okres próbny 7 dni."
           jsonLd={landingJsonLd}
         />
-        <LandingPage />
+        <div className="min-h-screen bg-background">
+          <Navigation />
+          <LandingPage />
+        </div>
       </>
     );
   }
@@ -130,6 +133,7 @@ const HomePage = () => {
         jsonLd={dashboardJsonLd}
       />
       <div className="font-sans text-foreground bg-background overflow-hidden min-h-screen">
+        <Navigation />
         {/* Enhanced Hero Section for Authenticated Users */}
         <section className="relative py-16 px-6 overflow-hidden">
           {/* Animated background */}
