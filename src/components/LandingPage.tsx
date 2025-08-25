@@ -177,7 +177,7 @@ export function LandingPage() {
           </div>
           
           <Button asChild className="shadow-primary hover-lift text-lg px-8 py-4" size="lg" onClick={() => handleCtaClick('see_ai_tutor_demo')}>
-            <Link to="/chat">
+            <Link to="/auth">
               Zobacz, jak działa AI Tutor
             </Link>
           </Button>
@@ -228,7 +228,7 @@ export function LandingPage() {
           </div>
           
           <Button asChild variant="outline" className="hover-lift text-lg px-8 py-4" size="lg" onClick={() => handleCtaClick('check_progress')}>
-            <Link to="/progress">
+            <Link to="/auth">
               Sprawdź swoje postępy
             </Link>
           </Button>
@@ -296,12 +296,14 @@ export function LandingPage() {
               To mniej niż koszt jednej godziny korepetycji – a korzystasz ile chcesz, kiedy chcesz.
             </p>
             
-            <Button size="lg" className="shadow-primary hover-lift text-xl px-12 py-6 font-bold" onClick={() => handleCtaClick('start_trial')}>
-              <span className="flex items-center gap-3">
-                <Sparkles className="w-6 h-6" />
-                Rozpocznij darmowy okres próbny
-                <span className="bg-accent/20 rounded-full px-3 py-1 text-sm">7 dni</span>
-              </span>
+            <Button asChild size="lg" className="shadow-primary hover-lift text-xl px-12 py-6 font-bold" onClick={() => handleCtaClick('start_trial')}>
+              <Link to="/auth">
+                <span className="flex items-center gap-3">
+                  <Sparkles className="w-6 h-6" />
+                  Rozpocznij darmowy okres próbny
+                  <span className="bg-accent/20 rounded-full px-3 py-1 text-sm">7 dni</span>
+                </span>
+              </Link>
             </Button>
           </div>
         </div>
