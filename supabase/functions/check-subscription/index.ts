@@ -47,7 +47,7 @@ serve(async (req) => {
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     
     let subscriptionType: 'free' | 'paid' | 'super' = 'free';
-    let monthlyTokenLimit = 500; // Free tier
+    let monthlyTokenLimit = 10000; // Free tier
     let subscriptionEnd = null;
     let stripeCustomerId = null;
     
@@ -74,10 +74,10 @@ serve(async (req) => {
         
         if (amount >= 9999) { // Super plan
           subscriptionType = 'super';
-          monthlyTokenLimit = 50000;
+          monthlyTokenLimit = 15000000;
         } else if (amount >= 2999) { // Paid plan
           subscriptionType = 'paid';
-          monthlyTokenLimit = 10000;
+          monthlyTokenLimit = 5000000;
         }
         
         logStep("Determined subscription details", { subscriptionType, monthlyTokenLimit, amount });

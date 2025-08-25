@@ -130,23 +130,23 @@ export const SubscriptionManager = () => {
       case 'paid':
         return {
           name: 'Plan Płatny',
-          tokens: '10,000 tokenów/miesiąc',
+          tokens: '5,000,000 tokenów/miesiąc',
           price: '49.99 PLN/miesiąc',
-          features: ['10,000 tokenów AI', 'Wsparcie email', 'Wszystkie funkcje']
+          features: ['5,000,000 tokenów AI', 'Wsparcie email', 'Wszystkie funkcje']
         };
       case 'super':
         return {
           name: 'Plan Super',
-          tokens: '50,000 tokenów/miesiąc',
+          tokens: '15,000,000 tokenów/miesiąc',
           price: 'Plan specjalny',
-          features: ['50,000 tokenów AI', 'VIP wsparcie', 'Wszystkie funkcje', 'Ekskluzywne funkcje']
+          features: ['15,000,000 tokenów AI', 'VIP wsparcie', 'Wszystkie funkcje', 'Ekskluzywne funkcje']
         };
       default:
         return {
           name: 'Plan Darmowy',
-          tokens: '500 tokenów/miesiąc',
+          tokens: '10,000 tokenów/miesiąc',
           price: 'Darmowy',
-          features: ['500 tokenów AI', 'Podstawowe funkcje', 'Wsparcie społeczności']
+          features: ['10,000 tokenów AI', 'Podstawowe funkcje', 'Wsparcie społeczności']
         };
     }
   };
@@ -228,7 +228,7 @@ export const SubscriptionManager = () => {
                 <div className="text-sm text-muted-foreground">miesięcznie</div>
               </div>
               <ul className="space-y-2 text-sm">
-                <li>✓ 10,000 tokenów AI</li>
+                <li>✓ 5,000,000 tokenów AI</li>
                 <li>✓ Wsparcie email</li>
                 <li>✓ Wszystkie funkcje</li>
               </ul>
