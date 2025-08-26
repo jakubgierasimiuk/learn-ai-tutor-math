@@ -2430,6 +2430,57 @@ export type Database = {
           },
         ]
       }
+      token_limit_exceeded_logs: {
+        Row: {
+          attempted_tokens: number | null
+          context_size: number | null
+          conversation_length: number | null
+          created_at: string
+          enriched_context_enabled: boolean | null
+          id: string
+          monthly_limit: number | null
+          session_id: string | null
+          skill_id: string | null
+          subscription_type: string | null
+          timestamp: string
+          tokens_used_this_month: number | null
+          user_id: string | null
+          user_message: string | null
+        }
+        Insert: {
+          attempted_tokens?: number | null
+          context_size?: number | null
+          conversation_length?: number | null
+          created_at?: string
+          enriched_context_enabled?: boolean | null
+          id?: string
+          monthly_limit?: number | null
+          session_id?: string | null
+          skill_id?: string | null
+          subscription_type?: string | null
+          timestamp?: string
+          tokens_used_this_month?: number | null
+          user_id?: string | null
+          user_message?: string | null
+        }
+        Update: {
+          attempted_tokens?: number | null
+          context_size?: number | null
+          conversation_length?: number | null
+          created_at?: string
+          enriched_context_enabled?: boolean | null
+          id?: string
+          monthly_limit?: number | null
+          session_id?: string | null
+          skill_id?: string | null
+          subscription_type?: string | null
+          timestamp?: string
+          tokens_used_this_month?: number | null
+          user_id?: string | null
+          user_message?: string | null
+        }
+        Relationships: []
+      }
       unified_learning_sessions: {
         Row: {
           ai_model_used: string | null

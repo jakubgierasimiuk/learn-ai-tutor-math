@@ -943,6 +943,33 @@ async function handleChat(req: Request): Promise<Response> {
 
       if (subscription && subscription.tokens_used_this_month >= subscription.monthly_token_limit) {
         console.log('🚫 Token limit exceeded:', subscription);
+        
+        // Log detailed information about token limit exceeded
+        const conversationLength = messageHistory?.length || 0;
+        const contextSize = 0; // Will be calculated if enriched context was requested
+        
+        try {
+          await supabaseClient
+            .from('token_limit_exceeded_logs')
+            .insert({
+              user_id: userId,
+              session_id: sessionId,
+              attempted_tokens: 2000, // Our current token limit
+              monthly_limit: subscription.monthly_token_limit,
+              tokens_used_this_month: subscription.tokens_used_this_month,
+              subscription_type: subscription.subscription_type,
+              conversation_length: conversationLength,
+              skill_id: skillId,
+              user_message: message.substring(0, 500), // Truncate for storage
+              enriched_context_enabled: enrichedContext,
+              context_size: contextSize
+            });
+          
+          console.log(`🔍 Detailed token limit exceeded log created for user ${userId}: ${subscription.tokens_used_this_month}/${subscription.monthly_token_limit} tokens used this month`);
+        } catch (logError) {
+          console.error('Failed to log token limit exceeded event:', logError);
+        }
+        
         return new Response(JSON.stringify({
           error: 'Token limit exceeded',
           message: `Osiągnięto limit ${subscription.monthly_token_limit} tokenów na miesiąc. Rozważ upgrade planu.`,

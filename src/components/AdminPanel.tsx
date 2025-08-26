@@ -16,6 +16,7 @@ import {
   Target,
   Zap
 } from "lucide-react";
+import { TokenLimitDashboard } from "@/components/TokenLimitDashboard";
 
 export const AdminPanel = () => {
   const [selectedView, setSelectedView] = useState<"owner" | "admin">("owner");
@@ -264,9 +265,15 @@ export const AdminPanel = () => {
       )}
 
       {selectedView === "admin" && (
-        <div className="space-y-6">
-          {/* Admin KPIs */}
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="overview">Przegląd</TabsTrigger>
+            <TabsTrigger value="token-limits">Limity Tokenów</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="overview" className="space-y-6">
+            {/* Admin KPIs */}
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Czas AI</CardTitle>
@@ -405,8 +412,13 @@ export const AdminPanel = () => {
                 </div>
               </CardContent>
             </Card>
-          </div>
-        </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="token-limits">
+            <TokenLimitDashboard />
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   );
