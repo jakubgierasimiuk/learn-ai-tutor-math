@@ -1,7 +1,6 @@
 import { Dashboard } from "@/components/Dashboard";
-import { AdminRoleAssignment } from "@/components/AdminRoleAssignment";
+import { AdminPanel } from "@/components/AdminPanel";
 import { Seo } from "@/components/Seo";
-import { SystemMigrationPanel } from "@/components/SystemMigrationPanel";
 import { useRoles } from "@/hooks/useRoles";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -18,22 +17,16 @@ const DashboardPage = () => {
       {isAdmin ? (
         <div className="min-h-screen bg-background p-6">
           <Tabs defaultValue="dashboard" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-              <TabsTrigger value="admin">Zarządzanie</TabsTrigger>
-              <TabsTrigger value="migration">System Migration</TabsTrigger>
+              <TabsTrigger value="admin">Panel Zarządczy</TabsTrigger>
             </TabsList>
             <TabsContent value="dashboard">
               <Dashboard />
             </TabsContent>
             <TabsContent value="admin">
               <div className="mt-6">
-                <AdminRoleAssignment />
-              </div>
-            </TabsContent>
-            <TabsContent value="migration">
-              <div className="mt-6">
-                <SystemMigrationPanel />
+                <AdminPanel />
               </div>
             </TabsContent>
           </Tabs>
