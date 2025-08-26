@@ -10,6 +10,7 @@ import { Navigation } from "@/components/Navigation";
 import HomePage from "./pages/HomePage";
 import QuizPage from "./pages/QuizPage";
 import { Dashboard } from "@/components/Dashboard";
+import DashboardPage from "./pages/DashboardPage";
 import ChatPage from "./pages/ChatPage";
 
 import AuthPage from "./pages/AuthPage";
@@ -175,7 +176,7 @@ const App = () => (
             } />
             <Route path="/dashboard" element={
               <AuthenticatedLayout>
-                <Dashboard />
+                <DashboardPage />
               </AuthenticatedLayout>
             } />
             <Route path="/chat" element={
