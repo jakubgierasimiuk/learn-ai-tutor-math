@@ -10,30 +10,6 @@ export function LandingPage() {
     });
   };
   return <div className="min-h-screen bg-background text-foreground">
-      {/* Navigation Bar */}
-      <nav className="relative z-50 flex justify-between items-center px-6 py-6 bg-background/95 backdrop-blur-sm border-b border-border/50">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center">
-            <GraduationCap className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <span className="text-xl font-semibold text-foreground">
-            AI Tutor
-          </span>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <Link to="/auth">
-            <Button variant="outline" className="hover-lift">
-              Zaloguj się
-            </Button>
-          </Link>
-          <Link to="/auth">
-            <Button className="shadow-primary hover-lift" onClick={() => handleCtaClick('header_signup')}>
-              Rozpocznij za darmo
-            </Button>
-          </Link>
-        </div>
-      </nav>
 
       {/* Hero Section */}
       <section className="relative py-24 px-6 overflow-hidden">
