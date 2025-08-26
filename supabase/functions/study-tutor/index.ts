@@ -99,13 +99,35 @@ async function fetchCognitiveProfile(supabaseClient: any, userId: string) {
       .maybeSingle();
     
     if (error) {
-      console.log('No cognitive profile found:', error);
+      console.error('Error fetching cognitive profile:', error);
       return null;
     }
     
+    if (!data) {
+      console.log('No cognitive profile found for user:', userId, '- using default profile');
+      // Return default profile structure if none exists
+      return {
+        user_id: userId,
+        cognitive_load_capacity: 7.0,
+        processing_speed_percentile: 50,
+        working_memory_span: 4,
+        attention_span_minutes: 25.0,
+        learning_velocity: {"math": 1.0, "reading": 1.0, "reasoning": 1.0},
+        mastery_acquisition_rate: 0.8,
+        retention_half_life: {"long_term": 168, "short_term": 24},
+        emotional_state: {"flow_triggers": [], "baseline_arousal": 0.5, "stress_threshold": 0.7},
+        motivation_drivers: {"mastery": 0.5, "purpose": 0.5, "autonomy": 0.5},
+        frustration_patterns: {"triggers": [], "threshold": 3, "recovery_time": 5},
+        metacognitive_skills: {"planning": 3, "evaluating": 3, "monitoring": 3},
+        learning_strategies: {"avoided": [], "effective": [], "preferred": []},
+        self_regulation_score: 0.5
+      };
+    }
+    
+    console.log('Cognitive profile found for user:', userId);
     return data;
   } catch (error) {
-    console.error('Error fetching cognitive profile:', error);
+    console.error('Exception in fetchCognitiveProfile:', error);
     return null;
   }
 }
@@ -845,14 +867,35 @@ async function handleChat(req: Request): Promise<Response> {
     // Build enriched educational context if enabled
     let enrichedContextData = null;
     if (enrichedContext && userId && supabaseClient) {
+      console.log('Building educational context for:', { userId, skillId, sessionId, interactionType: messageHistory?.length > 0 ? 'ongoing' : 'initial' });
+      
+      // If no skillId provided, try to get from recent sessions
+      let contextSkillId = skillId;
+      if (!contextSkillId) {
+        const { data: recentSession } = await supabaseClient
+          .from('study_sessions')
+          .select('skill_id')
+          .eq('user_id', userId)
+          .not('skill_id', 'is', null)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        contextSkillId = recentSession?.skill_id;
+        console.log('No skillId provided, using from recent session:', contextSkillId);
+      }
+      
       enrichedContextData = await buildEducationalContext({
         userId,
-        skillId,
+        skillId: contextSkillId,
         sessionId,
         supabaseClient,
         interactionType: messageHistory?.length > 0 ? 'ongoing' : 'initial'
       });
       console.log('Enriched context built:', !!enrichedContextData);
+      if (enrichedContextData) {
+        console.log('Context length:', enrichedContextData.systemPromptAddition.length);
+      }
     }
 
     // Build conversation history and context
