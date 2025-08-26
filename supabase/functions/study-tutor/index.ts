@@ -1118,7 +1118,7 @@ MAKSYMALNIE 150 słów + JEDNO pytanie na końcu. NIGDY więcej! Jeśli musisz w
       body: JSON.stringify({
         model: 'gpt-5-2025-08-07',
         messages: conversationMessages,
-        max_completion_tokens: 2500, // Increased to allow proper responses
+        max_completion_tokens: 2000, // Set to 2000 for testing
       }),
     })
 
