@@ -303,27 +303,7 @@ async function fetchSessionHistory(supabaseClient: any, sessionId: string) {
 }
 
 function formatCognitiveProfileContext(profile: any): string {
-  const parts = [];
-  
-  if (profile.processing_speed_percentile) {
-    const speed = profile.processing_speed_percentile < 25 ? 'wolne' : 
-                  profile.processing_speed_percentile < 75 ? 'średnie' : 'szybkie';
-    parts.push(`Tempo przetwarzania: ${speed} (${profile.processing_speed_percentile} percentyl)`);
-  }
-  
-  if (profile.working_memory_span) {
-    parts.push(`Pojemność pamięci roboczej: ${profile.working_memory_span} elementów`);
-  }
-  
-  if (profile.attention_span_minutes) {
-    parts.push(`Czas koncentracji: ${profile.attention_span_minutes} minut`);
-  }
-  
-  if (profile.cognitive_load_capacity) {
-    parts.push(`Próg przeciążenia kognitywnego: ${profile.cognitive_load_capacity}`);
-  }
-  
-  return `PROFIL KOGNITYWNY UCZNIA:\n${parts.join('\n')}`;
+  return ''; // Disabled - using static defaults
 }
 
 function formatLearningInteractionsContext(interactions: any[]): string {
@@ -431,28 +411,7 @@ function formatSessionHistoryContext(sessionData: any): string {
 }
 
 function buildPedagogicalInstructions(skillContent: any, cognitiveProfile: any): string {
-  const instructions = [];
-  
-  if (cognitiveProfile?.processing_speed_percentile < 25) {
-    instructions.push('- Dawaj więcej czasu na przemyślenie odpowiedzi');
-    instructions.push('- Rozbijaj skomplikowane problemy na mniejsze kroki');
-  }
-  
-  if (cognitiveProfile?.working_memory_span < 4) {
-    instructions.push('- Ograniczaj ilość informacji prezentowanych jednocześnie');
-    instructions.push('- Używaj wizualnych pomocy naukowych');
-  }
-  
-  if (cognitiveProfile?.attention_span_minutes < 15) {
-    instructions.push('- Utrzymuj krótkie, skoncentrowane interakcje');
-    instructions.push('- Regularnie sprawdzaj zrozumienie');
-  }
-  
-  if (instructions.length === 0) {
-    return '';
-  }
-  
-  return `DOSTOSOWANIA PEDAGOGICZNE:\n${instructions.join('\n')}`;
+  return ''; // Disabled - cognitive profile uses static defaults
 }
 
 // Helper function to log AI conversation
