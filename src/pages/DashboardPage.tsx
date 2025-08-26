@@ -1,12 +1,11 @@
 import { Dashboard } from "@/components/Dashboard";
 import { Seo } from "@/components/Seo";
 import { SystemMigrationPanel } from "@/components/SystemMigrationPanel";
-import { useAuth } from "@/hooks/useAuth";
+import { useRoles } from "@/hooks/useRoles";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const DashboardPage = () => {
-  const { user } = useAuth();
-  const isAdmin = user?.email?.includes('admin') || user?.email?.includes('test'); // Simple admin check
+  const { isAdmin } = useRoles();
 
   return (
     <>
