@@ -30,7 +30,10 @@ async function buildEducationalContext(params: {
     ]);
     
     if (cognitiveProfile) {
+      console.log('Adding cognitive profile to context for user:', userId);
       contextParts.push(formatCognitiveProfileContext(cognitiveProfile));
+    } else {
+      console.log('No cognitive profile available for user:', userId);
     }
     
     if (skillContent) {
