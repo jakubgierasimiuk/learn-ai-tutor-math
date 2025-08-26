@@ -1,19 +1,1 @@
 project_id = "rfcjhdxsczcwbpknudyy"
-
-[functions.analyze-student-materials]
-verify_jwt = true
-
-[functions.ai-chat]
-verify_jwt = true
-
-[functions.skill-recognition]
-verify_jwt = true
-
-[functions.study-tutor]
-verify_jwt = false
-
-[functions.text-to-speech]
-verify_jwt = true
-
-[functions.voice-to-text]
-verify_jwt = true
