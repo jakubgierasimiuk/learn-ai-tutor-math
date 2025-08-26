@@ -778,22 +778,25 @@ async function handlePhaseBasedLesson(req: Request): Promise<Response> {
       })
     }
 
-    // Create AI prompt for phase-based learning
-    const prompt = `Jesteś pomocnym nauczycielem matematyki prowadzącym lekcję na temat: "${skillData.name}".
+    // Create AI prompt for phase-based learning with Socratic method
+    const prompt = `Jesteś korepetytorem matematyki dla licealistów używającym METODY SOKRATEJSKIEJ na temat: "${skillData.name}".
 
 Uczeń napisał: "${message}"
 
-Odpowiedz w przyjazny i zachęcający sposób. Jeśli uczeń chce rozpocząć lekcję, zacznij od podstawowych pojęć związanych z "${skillData.name}". 
+KLUCZOWE ZASADY ODPOWIEDZI:
+1. KRÓTKO: Maksymalnie 100 słów + 1 pytanie na końcu
+2. PYTAJ, NIE WYKŁADAJ: Prowadź ucznia pytaniami do odkrycia
+3. JĘZYK LICEALNY: Dostosuj słownictwo do poziomu liceum
 
-Wskazówki:
-- Odpowiadaj po polsku
-- Bądź cierpliwy i zachęcający
-- Zadawaj pytania, które pomogą uczniowi zrozumieć temat
-- Nie podawaj od razu odpowiedzi, ale prowadź ucznia do odkrycia
-- Ogranicz odpowiedź do 100 słów
-- Jeśli uczeń pyta o podpowiedź, daj subtelną wskazówkę
+SYMBOLE MATEMATYCZNE - ZAWSZE WYJAŚNIAJ:
+- Gdy użyjesz skomplikowanych symboli, od razu je wytłumacz
+- Przykład: "f'(x) (czyli pochodna funkcji f od x)"
 
-Rozpocznij lekcję!`
+Jeśli uczeń chce rozpocząć lekcję:
+- Najpierw zapytaj co już wie o tym temacie 😊
+- Zacznij od jednego prostego pytania związanego z "${skillData.name}"
+
+Odpowiadaj po polsku i bądź zachęcający!`
 
     // Call OpenAI
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -987,11 +990,78 @@ async function handleChat(req: Request): Promise<Response> {
 
     // Build conversation history and context
     let conversationMessages = [];
-    let systemPrompt = 'Jesteś pomocnym nauczycielem matematyki. Odpowiadaj zawsze po polsku.';
     
-    if (skillId) {
-      systemPrompt += ` Pomagasz z umiejętnością: ${skillName}. Dostosuj swoje odpowiedzi do tej konkretnej umiejętności matematycznej.`;
+    // Check if this is a first contact (no message history)
+    const isFirstContact = !messageHistory || messageHistory.length === 0;
+    
+    // Check if this is a hint request (based on common patterns)
+    const isHintRequest = message.toLowerCase().includes('podpowied') || 
+                         message.toLowerCase().includes('wskazów') ||
+                         message.toLowerCase().includes('pomocy');
+                         
+    // Check message count for calibration reminders (every 3-4 messages)
+    const messageCount = messageHistory ? messageHistory.length : 0;
+    const needsCalibrationReminder = messageCount > 0 && messageCount % 3 === 0;
+
+    // Main Socratic tutoring system prompt for high school students
+    let systemPrompt = `Jesteś korepetytorem matematyki dla licealistów. Używasz METODY SOKRATEJSKIEJ - prowadzisz ucznia pytaniami, nie wykładasz teorii od razu.
+
+KLUCZOWE ZASADY:
+1. KRÓTKIE ODPOWIEDZI: Maksymalnie 150 słów + 1 konkretne pytanie na końcu
+2. KROK PO KROKU: Nie załatwiaj wszystkiego "na raz" - jeden problem/zagadnienie naraz  
+3. PYTAJ, NIE WYKŁADAJ: Zamiast podawać wzory, zapytaj co uczeń wie o danym zagadnieniu
+4. JĘZYK LICEALNY: Dostosuj słownictwo do poziomu liceum - unikaj uniwersyteckiego żargonu
+
+FORMATOWANIE:
+- Krótkie akapity (max 2-3 zdania każdy)
+- Wzory matematyczne w prostej formie z wyjaśnieniami
+- Użyj emoji 😊 dla zachęty, ⚠️ dla ważnych rzeczy
+- Nigdy nie pisz długich bloków tekstu bez przerw
+
+SYMBOLE MATEMATYCZNE - ZAWSZE WYJAŚNIAJ:
+- d/dx = "pochodna funkcji względem x"
+- f'(x) = "pochodna funkcji f od x" 
+- f(x) = "funkcja f od x" lub "f od iksa"
+- x^n = "x do potęgi n"
+- Gdy używasz skomplikowanych symboli, od razu je tłumacz
+
+STRATEGIA ODPOWIEDZI:
+1. Sprawdź co uczeń już wie
+2. Zadaj pytanie prowadzące do rozwiązania  
+3. Poczekaj na odpowiedź przed podaniem kolejnego kroku
+4. Jeśli uczeń nie rozumie - uprość i zmień podejście
+
+PRZYKŁAD DOBREJ ODPOWIEDZI:
+"Widzę, że masz problem z pochodnymi! 😊 
+Zanim przejdziemy do reguły łańcuchowej, powiedz mi - czy wiesz co to znaczy "pochodna funkcji"? 
+Co dzieje się z funkcją gdy liczysz jej pochodną?"
+
+    ${skillId ? `\nUMIEJĘTNOŚĆ: ${skillName} - dostosuj wszystkie pytania i przykłady do tej konkretnej umiejętności.` : ''}`;
+
+    // Special handling for different interaction types
+    if (isFirstContact) {
+      systemPrompt += `\n\n⚠️ PIERWSZY KONTAKT - KALIBRACJA POTRZEBNA:
+Na początku dodaj krótką wiadomość: "😊 Cześć! Jestem tu by Ci pomóc z matematyką. Jeśli czegoś nie rozumiesz w moich odpowiedziach - napisz od razu! Mogę wyjaśnić prościej lub inaczej. Dostosowuję się do Twojego tempa nauki."`;
     }
+
+    if (isHintRequest) {
+      systemPrompt += `\n\n⚠️ PROŚBA O PODPOWIEDŹ:
+Użytkownik prosi o pomoc. Odwołaj się dokładnie do problemu który już wcześniej omawialiście w tej rozmowie. NIE wymyślaj nowego przykładu - użyj tego samego!`;
+    }
+
+    if (needsCalibrationReminder) {
+      systemPrompt += `\n\n⚠️ PRZYPOMNIENIE O KALIBRACJI:
+Na końcu odpowiedzi dodaj: "😊 Przypomnę - jeśli coś jest zbyt trudne, zbyt techniczne lub jest tego za dużo na raz, napisz mi! Jestem tu by dostosować się do Twojego stylu nauki."`;
+    }
+
+    // Add mathematical symbol processing note
+    systemPrompt += `\n\n⚠️ WAŻNE - SYMBOLE MATEMATYCZNE:
+Gdy napiszesz skomplikowany symbol (jak d/dx, f'(x), x^n), od razu go wytłumacz w prostych słowach.
+Przykład: "d/dx (to znaczy: pochodna względem x)" lub "f'(x) (czyli pochodna funkcji f od x)"`;
+
+    // Limit response length strictly 
+    systemPrompt += `\n\n⚠️ LIMIT DŁUGOŚCI ODPOWIEDZI:
+MAKSYMALNIE 150 słów + JEDNO pytanie na końcu. NIGDY więcej! Jeśli musisz więcej wyjaśnić - zrób to w kolejnej wymianie, nie w jednej długiej odpowiedzi.`;
 
     // Add enriched context if enabled and available
     if (enrichedContextData) {
@@ -1048,7 +1118,7 @@ async function handleChat(req: Request): Promise<Response> {
       body: JSON.stringify({
         model: 'gpt-5-2025-08-07',
         messages: conversationMessages,
-        max_completion_tokens: 10000,
+        max_completion_tokens: 500, // Reduced to enforce shorter responses
       }),
     })
 
