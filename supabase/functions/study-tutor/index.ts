@@ -44,7 +44,26 @@ async function buildEducationalContext(params: {
       contextParts.push(formatProgressContext(progressData));
     }
     
-    // Level 2: Misconceptions and learning patterns (if available)
+    // Level 2: Learning interactions and behavior patterns
+    const [recentInteractions, emotionalState, metacognitiveProfile] = await Promise.all([
+      fetchRecentLearningInteractions(supabaseClient, userId),
+      fetchEmotionalLearningState(supabaseClient, userId),
+      fetchMetacognitiveProfile(supabaseClient, userId)
+    ]);
+    
+    if (recentInteractions && recentInteractions.length > 0) {
+      contextParts.push(formatLearningInteractionsContext(recentInteractions));
+    }
+    
+    if (emotionalState) {
+      contextParts.push(formatEmotionalStateContext(emotionalState));
+    }
+    
+    if (metacognitiveProfile) {
+      contextParts.push(formatMetacognitiveContext(metacognitiveProfile));
+    }
+
+    // Level 3: Misconceptions and session history (if available)
     if (interactionType !== 'initial') {
       const [misconceptions, sessionHistory] = await Promise.all([
         fetchActiveMisconceptions(supabaseClient, userId),
@@ -60,7 +79,7 @@ async function buildEducationalContext(params: {
       }
     }
     
-    // Level 3: Advanced pedagogical guidance (for ongoing interactions)
+    // Level 4: Advanced pedagogical guidance (for ongoing interactions)
     if (interactionType === 'ongoing' && skillContent) {
       const pedagogicalGuidance = buildPedagogicalInstructions(skillContent, cognitiveProfile);
       if (pedagogicalGuidance) {
@@ -198,6 +217,71 @@ async function fetchActiveMisconceptions(supabaseClient: any, userId: string) {
   }
 }
 
+async function fetchRecentLearningInteractions(supabaseClient: any, userId: string) {
+  try {
+    const { data, error } = await supabaseClient
+      .from('learning_interactions')
+      .select('*')
+      .eq('user_id', userId)
+      .order('interaction_timestamp', { ascending: false })
+      .limit(10);
+    
+    if (error) {
+      console.log('No learning interactions found:', error);
+      return [];
+    }
+    
+    console.log(`Found ${data?.length || 0} recent learning interactions for user ${userId}`);
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching learning interactions:', error);
+    return [];
+  }
+}
+
+async function fetchEmotionalLearningState(supabaseClient: any, userId: string) {
+  try {
+    const { data, error } = await supabaseClient
+      .from('emotional_learning_states')
+      .select('*')
+      .eq('user_id', userId)
+      .order('detected_at', { ascending: false })
+      .limit(3);
+    
+    if (error) {
+      console.log('No emotional learning states found:', error);
+      return null;
+    }
+    
+    console.log(`Found ${data?.length || 0} emotional learning states for user ${userId}`);
+    return data && data.length > 0 ? data : null;
+  } catch (error) {
+    console.error('Error fetching emotional learning states:', error);
+    return null;
+  }
+}
+
+async function fetchMetacognitiveProfile(supabaseClient: any, userId: string) {
+  try {
+    const { data, error } = await supabaseClient
+      .from('metacognitive_development')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle();
+    
+    if (error) {
+      console.log('No metacognitive profile found:', error);
+      return null;
+    }
+    
+    console.log(`Metacognitive profile found for user ${userId}:`, !!data);
+    return data;
+  } catch (error) {
+    console.error('Error fetching metacognitive profile:', error);
+    return null;
+  }
+}
+
 async function fetchSessionHistory(supabaseClient: any, sessionId: string) {
   try {
     const { data, error } = await supabaseClient
@@ -240,6 +324,47 @@ function formatCognitiveProfileContext(profile: any): string {
   }
   
   return `PROFIL KOGNITYWNY UCZNIA:\n${parts.join('\n')}`;
+}
+
+function formatLearningInteractionsContext(interactions: any[]): string {
+  if (!interactions || interactions.length === 0) return '';
+  
+  const recentInteractions = interactions.slice(0, 5);
+  const avgResponseTime = recentInteractions.reduce((sum, int) => sum + (int.response_time_ms || 0), 0) / recentInteractions.length;
+  const avgEngagement = recentInteractions.reduce((sum, int) => sum + (int.engagement_score || 0.5), 0) / recentInteractions.length;
+  const avgCognitiveLoad = recentInteractions.reduce((sum, int) => sum + (int.cognitive_load_estimate || 0.5), 0) / recentInteractions.length;
+  
+  return `OSTATNIE INTERAKCJE UCZNIA:
+- Liczba interakcji: ${interactions.length}
+- Średni czas odpowiedzi: ${Math.round(avgResponseTime)}ms
+- Średni poziom zaangażowania: ${Math.round(avgEngagement * 100)}%
+- Średnie obciążenie kognitywne: ${Math.round(avgCognitiveLoad * 100)}%
+- Wykryte umiejętności: ${JSON.stringify(recentInteractions.flatMap(i => i.skills_demonstrated || []).slice(0, 3))}
+- Błędne koncepcje: ${JSON.stringify(recentInteractions.flatMap(i => i.misconceptions_activated || []).slice(0, 3))}`;
+}
+
+function formatEmotionalStateContext(emotionalStates: any[]): string {
+  if (!emotionalStates || emotionalStates.length === 0) return '';
+  
+  const recent = emotionalStates[0];
+  return `STAN EMOCJONALNY UCZNIA:
+- Ostatnia wykryta emocja: ${recent.detected_emotion || 'neutralna'}
+- Intensywność: ${Math.round((recent.emotion_intensity || 0.5) * 100)}%
+- Skuteczność nauki w tym stanie: ${Math.round((recent.learning_effectiveness_during_emotion || 0.5) * 100)}%
+- Odporność emocjonalna: ${Math.round((recent.emotional_resilience_score || 0.5) * 100)}%
+- Rekomendowane interwencje: ${JSON.stringify(recent.optimal_interventions || [])}`;
+}
+
+function formatMetacognitiveContext(profile: any): string {
+  if (!profile) return '';
+  
+  return `PROFIL METAKOGNITYWNY:
+- Umiejętności planowania: ${JSON.stringify(profile.planning_skills || {})}
+- Umiejętności monitorowania: ${JSON.stringify(profile.monitoring_skills || {})}
+- Umiejętności ewaluacji: ${JSON.stringify(profile.evaluation_skills || {})}
+- Kontrola impulsów: ${Math.round((profile.impulse_control_score || 0.5) * 100)}%
+- Wytrwałość: ${Math.round((profile.persistence_score || 0.5) * 100)}%
+- Poziom wsparcia potrzebny: ${profile.scaffolding_level_needed || 3}/5`;
 }
 
 function formatSkillContentContext(skillContent: any): string {
