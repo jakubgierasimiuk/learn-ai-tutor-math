@@ -6,6 +6,7 @@ import { CheckCircle, XCircle, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { areAnswersEquivalent, normalizeAnswer } from '@/lib/mathValidation';
 
 interface Question {
   id: string;
@@ -55,8 +56,8 @@ export function QuickDiagnostic() {
   const isLastQuestion = currentQuestion === questions.length - 1;
   
   const checkAnswer = () => {
-    const correct = userAnswer.toLowerCase().trim() === question.correctAnswer.toLowerCase().trim() ||
-                   userAnswer.trim() === question.correctAnswer.trim();
+    // Use mathematical validation to handle various answer formats
+    const correct = areAnswersEquivalent(userAnswer, question.correctAnswer);
     
     setIsCorrect(correct);
     setShowFeedback(true);
@@ -78,18 +79,35 @@ export function QuickDiagnostic() {
   const calculateLevel = async () => {
     const correctAnswers = answers.filter(a => a.correct).length + (isCorrect ? 1 : 0);
     
-    let calculatedLevel = 'easy';
-    if (correctAnswers >= 2) calculatedLevel = 'normal';
-    if (correctAnswers === 3) calculatedLevel = 'hard';
+    // Convert to unified numeric level (1-10 scale)
+    let numericLevel = Math.min(Math.max(1, correctAnswers * 3), 10);
+    let displayLevel = 'początkujący';
     
-    setLevel(calculatedLevel);
+    if (correctAnswers === 0) {
+      numericLevel = 1;
+      displayLevel = 'początkujący';
+    } else if (correctAnswers === 1) {
+      numericLevel = 4;
+      displayLevel = 'podstawowy';
+    } else if (correctAnswers === 2) {
+      numericLevel = 7;
+      displayLevel = 'średnio zaawansowany';
+    } else if (correctAnswers === 3) {
+      numericLevel = 10;
+      displayLevel = 'zaawansowany';
+    }
+    
+    setLevel(displayLevel);
     setCompleted(true);
     
-    // Save to database
+    // Save both formats to database for compatibility
     if (user) {
       await supabase
         .from('profiles')
-        .update({ initial_level: calculatedLevel })
+        .update({ 
+          initial_level: displayLevel,
+          current_level: numericLevel 
+        })
         .eq('user_id', user.id);
     }
   };
@@ -108,11 +126,17 @@ export function QuickDiagnostic() {
               Gratulacje! 
             </h1>
             <p className="text-lg text-primary font-semibold mb-2">
-              Twój poziom startowy: {level.toUpperCase()}
+              Twój poziom startowy: {level}
             </p>
-            <p className="text-muted-foreground">
-              AI dostosuje lekcje do Twojego poziomu
-            </p>
+            <div className="text-sm text-muted-foreground space-y-1">
+              <p>AI dostosuje lekcje do Twojego poziomu</p>
+              <p className="text-xs">
+                {level === 'początkujący' && 'Zaczniemy od podstaw z wieloma wyjaśnieniami'}
+                {level === 'podstawowy' && 'Skupimy się na podstawowych umiejętnościach'}
+                {level === 'średnio zaawansowany' && 'Przejdziemy do bardziej złożonych problemów'}
+                {level === 'zaawansowany' && 'Będziemy rozwiązywać trudne zadania z mniejszą pomocą'}
+              </p>
+            </div>
           </div>
           
           <Button onClick={handleComplete} className="w-full" size="lg">
