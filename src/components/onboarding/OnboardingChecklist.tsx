@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { CheckCircle, Circle, Target, Rocket, FileText } from 'lucide-react';
+import { CheckCircle, Circle, Target, Rocket, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,13 +19,13 @@ interface ChecklistStep {
 export function OnboardingChecklist() {
   const [steps, setSteps] = useState<ChecklistStep[]>([
     {
-      id: 'diagnostic',
-      title: 'Szybki test diagnostyczny',
-      description: '2-3 pytania, max 2 minuty',
+      id: 'ai-tutorial',
+      title: 'Naucz się rozmawiać z AI',
+      description: 'interaktywny tutorial, 3 minuty',
       completed: false,
-      action: 'Rozpocznij test',
-      route: '/onboarding/quick-diagnostic',
-      icon: FileText
+      action: 'Rozpocznij tutorial',
+      route: '/onboarding/ai-tutorial',
+      icon: MessageCircle
     },
     {
       id: 'goal',
@@ -39,7 +39,7 @@ export function OnboardingChecklist() {
     {
       id: 'lesson',
       title: 'Pierwsza lekcja',
-      description: 'krótkie intro, 8 minut',
+      description: 'krótkie intro z AI, 8 minut',
       completed: false,
       action: 'Zacznij lekcję',
       route: '/study',
@@ -61,7 +61,7 @@ export function OnboardingChecklist() {
     
     const { data: profile } = await supabase
       .from('profiles')
-      .select('initial_level, learning_goal')
+      .select('learning_goal, ai_tutorial_completed')
       .eq('user_id', user.id)
       .single();
       
@@ -69,7 +69,7 @@ export function OnboardingChecklist() {
       setSteps(prev => prev.map(step => ({
         ...step,
         completed: Boolean(
-          (step.id === 'diagnostic' && profile.initial_level) ||
+          (step.id === 'ai-tutorial' && profile.ai_tutorial_completed) ||
           (step.id === 'goal' && profile.learning_goal) ||
           step.completed
         )

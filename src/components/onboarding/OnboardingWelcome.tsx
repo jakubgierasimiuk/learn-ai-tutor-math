@@ -6,27 +6,27 @@ import { useNavigate } from 'react-router-dom';
 
 const welcomeScreens = [
   {
-    icon: GraduationCap,
-    title: "Twój osobisty AI-nauczyciel matematyki",
-    description: "Inteligentny system dostosuje się do Twojego tempa nauki i stylu uczenia się.",
+    icon: MessageCircle,
+    title: "Jak rozmawiać z AI-nauczycielem?",
+    description: "Naucz się, jak skutecznie komunikować z AI, aby maksymalnie wykorzystać swoją naukę.",
     color: "text-primary"
   },
   {
-    icon: MessageCircle,
-    title: "Rozmawia z Tobą jak korepetytor",
-    description: "Zadaje pytania krok po kroku, wyjaśnia bez stresu i dostosowuje się do Ciebie.",
+    icon: Search,
+    title: "Zadawaj pytania cierpliwie",
+    description: "Jeśli czegoś nie rozumiesz - pytaj! AI wyjaśni każdy krok tak długo, aż zrozumiesz.",
     color: "text-accent"
   },
   {
-    icon: Search,
-    title: "Szybki test → AI sprawdzi Twój poziom",
-    description: "Kilka pytań pozwoli AI ustalić idealne miejsce startu dla Twojej nauki.",
+    icon: GraduationCap,
+    title: "AI będzie naprawiać Twoje błędy",
+    description: "Nie martw się o pomyłki - AI je znajdzie, wyjaśni dlaczego są błędne i pokaże poprawną drogę.",
     color: "text-success"
   },
   {
     icon: Rocket,
-    title: "Zaczynasz pierwszą lekcję w mniej niż 10 minut",
-    description: "Wszystko jest gotowe – wystarczy wybrać swój cel i zacząć naukę!",
+    title: "Gotowy na interaktywną naukę?",
+    description: "Teraz przećwiczysz rozmowę z AI i rozpoczniesz swoją przygodę z matematyką!",
     color: "text-warning"
   }
 ];
