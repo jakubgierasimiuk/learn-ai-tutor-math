@@ -138,13 +138,6 @@ const AccountPage = () => {
               </div>
               
               <div className="space-y-2">
-                <Label className="text-sm font-medium">ID użytkownika</Label>
-                <span className="text-sm text-muted-foreground font-mono">
-                  {user?.id}
-                </span>
-              </div>
-
-              <div className="space-y-2">
                 <Label className="text-sm font-medium">Data utworzenia konta</Label>
                 <span className="text-base">
                   {user?.created_at ? formatDate(user.created_at) : 'Nieznana'}
