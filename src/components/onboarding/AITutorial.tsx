@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { MessageCircle, User, ArrowRight, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
   type: 'user' | 'ai';
@@ -45,6 +47,7 @@ export function AITutorial() {
   const [currentMessage, setCurrentMessage] = useState(0);
   const [completed, setCompleted] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const scenario = tutorialScenarios[currentScenario];
   const message = scenario.messages[currentMessage];
@@ -64,7 +67,13 @@ export function AITutorial() {
     }
   };
   
-  const handleComplete = () => {
+  const handleComplete = async () => {
+    if (user) {
+      await supabase
+        .from('profiles')
+        .update({ ai_tutorial_completed: true })
+        .eq('user_id', user.id);
+    }
     navigate('/onboarding/checklist');
   };
 

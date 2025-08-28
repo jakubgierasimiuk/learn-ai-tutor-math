@@ -19,6 +19,27 @@ interface GoalOption {
 
 const goalOptions: GoalOption[] = [
   {
+    id: 'school-improvement',
+    title: '📝 Poprawa ocen w szkole',
+    description: 'Nadrobienie zaległości i lepsza ocena na świadectwie',
+    icon: BookOpen,
+    value: 'poprawa_ocen'
+  },
+  {
+    id: 'practice-consolidation',
+    title: '📚 Przećwiczenie zadań i utrwalenie materiału',
+    description: 'Systematyczne ćwiczenie i utrwalanie już znanego materiału',
+    icon: RefreshCw,
+    value: 'utrwalenie_materialu'
+  },
+  {
+    id: 'specific-topic',
+    title: '🔄 Nadrabianie konkretnego działu',
+    description: 'Skupienie się na określonym dziale matematyki',
+    icon: RefreshCw,
+    value: 'konkretny_dzial'
+  },
+  {
     id: 'matura-basic',
     title: '📘 Matura podstawowa',
     description: 'Przygotowanie do matury na poziomie podstawowym',
@@ -33,25 +54,11 @@ const goalOptions: GoalOption[] = [
     value: 'matura_rozszerzona'
   },
   {
-    id: 'school-improvement',
-    title: '📝 Poprawa ocen w szkole',
-    description: 'Nadrobienie zaległości i lepsza ocena na świadectwie',
-    icon: BookOpen,
-    value: 'poprawa_ocen'
-  },
-  {
     id: 'olympiad',
     title: '🏆 Olimpiada',
     description: 'Przygotowanie do olimpiad matematycznych',
     icon: Trophy,
     value: 'olimpiada'
-  },
-  {
-    id: 'specific-topic',
-    title: '🔄 Nadrabianie konkretnego działu',
-    description: 'Skupienie się na określonym dziale matematyki',
-    icon: RefreshCw,
-    value: 'konkretny_dzial'
   }
 ];
 

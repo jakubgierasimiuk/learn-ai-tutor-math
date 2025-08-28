@@ -375,6 +375,12 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
         console.error('Error generating session summary:', error);
       }
 
+      // Mark first lesson as completed for onboarding
+      await supabase
+        .from('profiles')
+        .update({ first_lesson_completed: true })
+        .eq('user_id', user.id);
+
       toast({
         title: "Sesja zakończona",
         description: "Sesja została pomyślnie zakończona i zapisana.",

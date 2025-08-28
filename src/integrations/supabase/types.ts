@@ -1619,6 +1619,7 @@ export type Database = {
           current_level: number | null
           diagnosis_completed: boolean
           email: string
+          first_lesson_completed: boolean | null
           id: string
           initial_level: string | null
           learner_profile: Json | null
@@ -1636,6 +1637,7 @@ export type Database = {
           current_level?: number | null
           diagnosis_completed?: boolean
           email: string
+          first_lesson_completed?: boolean | null
           id?: string
           initial_level?: string | null
           learner_profile?: Json | null
@@ -1653,6 +1655,7 @@ export type Database = {
           current_level?: number | null
           diagnosis_completed?: boolean
           email?: string
+          first_lesson_completed?: boolean | null
           id?: string
           initial_level?: string | null
           learner_profile?: Json | null
