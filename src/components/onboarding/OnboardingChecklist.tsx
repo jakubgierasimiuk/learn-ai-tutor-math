@@ -58,14 +58,30 @@ export function OnboardingChecklist() {
 
   // Reload data when returning from other onboarding steps
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden && user) {
+    const handleFocus = () => {
+      if (user) {
+        console.log('Window focused, reloading profile data...');
         loadProfileData();
       }
     };
 
+    const handleVisibilityChange = () => {
+      if (!document.hidden && user) {
+        console.log('Page became visible, reloading profile data...');
+        loadProfileData();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Also reload when component mounts or user changes
+    if (user) {
+      loadProfileData();
+    }
+    
     return () => {
+      window.removeEventListener('focus', handleFocus);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [user]);
@@ -73,22 +89,37 @@ export function OnboardingChecklist() {
   const loadProfileData = async () => {
     if (!user) return;
     
-    const { data: profile } = await supabase
+    console.log('Loading profile data for user:', user.id);
+    
+    const { data: profile, error } = await supabase
       .from('profiles')
       .select('learning_goal, ai_tutorial_completed, first_lesson_completed')
       .eq('user_id', user.id)
       .single();
       
+    if (error) {
+      console.error('Error loading profile:', error);
+      return;
+    }
+    
+    console.log('Profile data:', profile);
+      
     if (profile) {
-      setSteps(prev => prev.map(step => ({
-        ...step,
-        completed: Boolean(
+      const updatedSteps = steps.map(step => {
+        const completed = 
           (step.id === 'ai-tutorial' && profile.ai_tutorial_completed) ||
           (step.id === 'goal' && profile.learning_goal) ||
-          (step.id === 'lesson' && profile.first_lesson_completed) ||
-          step.completed
-        )
-      })));
+          (step.id === 'lesson' && profile.first_lesson_completed);
+        
+        console.log(`Step ${step.id}: completed = ${completed}`);
+        
+        return {
+          ...step,
+          completed: Boolean(completed)
+        };
+      });
+      
+      setSteps(updatedSteps);
     }
   };
   
