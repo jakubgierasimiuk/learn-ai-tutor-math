@@ -61,7 +61,7 @@ export function OnboardingChecklist() {
     
     const { data: profile } = await supabase
       .from('profiles')
-      .select('learning_goal, ai_tutorial_completed')
+      .select('learning_goal')
       .eq('user_id', user.id)
       .single();
       
@@ -69,7 +69,6 @@ export function OnboardingChecklist() {
       setSteps(prev => prev.map(step => ({
         ...step,
         completed: Boolean(
-          (step.id === 'ai-tutorial' && profile.ai_tutorial_completed) ||
           (step.id === 'goal' && profile.learning_goal) ||
           step.completed
         )

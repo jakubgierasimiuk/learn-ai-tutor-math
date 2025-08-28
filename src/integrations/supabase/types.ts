@@ -1614,6 +1614,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          ai_tutorial_completed: boolean | null
           created_at: string
           current_level: number | null
           diagnosis_completed: boolean
@@ -1630,6 +1631,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          ai_tutorial_completed?: boolean | null
           created_at?: string
           current_level?: number | null
           diagnosis_completed?: boolean
@@ -1646,6 +1648,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          ai_tutorial_completed?: boolean | null
           created_at?: string
           current_level?: number | null
           diagnosis_completed?: boolean

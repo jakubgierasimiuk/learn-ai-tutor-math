@@ -32,7 +32,7 @@ import SessionsPage from "./pages/SessionsPage";
 import AccountPage from "./pages/AccountPage";
 import { OnboardingWelcome } from "@/components/onboarding/OnboardingWelcome";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
-import { QuickDiagnostic } from "@/components/onboarding/QuickDiagnostic";
+import { AITutorial } from "@/components/onboarding/AITutorial";
 import { GoalSelection } from "@/components/onboarding/GoalSelection";
 import { setupGlobalLogging, setupGlobalInteractionLogging, logEvent } from "@/lib/logger";
 import { Seo } from "@/components/Seo";
@@ -153,9 +153,9 @@ const App = () => (
                 <OnboardingChecklist />
               </AuthenticatedLayout>
             } />
-            <Route path="/onboarding/quick-diagnostic" element={
+            <Route path="/onboarding/ai-tutorial" element={
               <AuthenticatedLayout>
-                <QuickDiagnostic />
+                <AITutorial />
               </AuthenticatedLayout>
             } />
             <Route path="/onboarding/goal-selection" element={
