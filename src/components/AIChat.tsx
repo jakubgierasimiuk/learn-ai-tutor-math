@@ -9,6 +9,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { TokenUsageProgress } from '@/components/TokenUsageProgress';
+import { UpgradePrompts } from '@/components/UpgradePrompts';
+import { useTokenUsage } from '@/hooks/useTokenUsage';
 
 interface Message {
   id: string;
@@ -193,6 +196,17 @@ export const AIChat = () => {
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading || !sessionId || !user?.id) return;
+
+    // Check token limits before sending
+    const { shouldShowSoftPaywall } = useTokenUsage();
+    if (shouldShowSoftPaywall()) {
+      toast({
+        title: "Brak tokenów",
+        description: "Wykorzystałeś wszystkie tokeny w tym miesiącu. Ulepsz plan, aby kontynuować.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -492,6 +506,10 @@ export const AIChat = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col flex-1 gap-4">
+        {/* Token Usage & Upgrade Prompts */}
+        <UpgradePrompts context="chat" compact />
+        <TokenUsageProgress />
+        
         <ScrollArea ref={scrollAreaRef} className="flex-1 pr-4">
           <div className="space-y-4">
             {messages.map((message) => (

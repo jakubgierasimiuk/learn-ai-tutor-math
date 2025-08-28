@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { UpgradePrompts } from "@/components/UpgradePrompts";
 import { 
   Trophy, 
   Target, 
@@ -15,7 +16,8 @@ import {
   Star,
   Award,
   Calendar,
-  BarChart3
+  BarChart3,
+  Brain
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -333,6 +335,9 @@ export const Dashboard = () => {
           </Card>
         </div>
 
+        {/* Upgrade Promotion for Free Users */}
+        <UpgradePrompts context="dashboard" />
+
         {/* Quick Actions */}
         <Card>
           <CardHeader>
@@ -354,6 +359,15 @@ export const Dashboard = () => {
                 </Button>
               </Link>
               
+              <Link to="/chat">
+                <Button variant="outline" className="w-full h-auto p-4 flex-col gap-2">
+                  <Brain className="w-6 h-6" />
+                  <div className="text-center">
+                    <div className="font-medium">AI Korepetytor</div>
+                    <div className="text-xs opacity-80">Zadaj pytanie AI</div>
+                  </div>
+                </Button>
+              </Link>
 
               <Link to="/quiz">
                 <Button variant="outline" className="w-full h-auto p-4 flex-col gap-2">

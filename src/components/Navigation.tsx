@@ -1,14 +1,17 @@
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
-import { Brain, BookOpen, MessageCircle, LogOut, Upload, TrendingUp, Database, Clock, Settings } from "lucide-react";
+import { Brain, BookOpen, MessageCircle, LogOut, Upload, TrendingUp, Database, Clock, Settings, Crown } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { logEvent } from "@/lib/logger";
+import { useTokenUsage } from "@/hooks/useTokenUsage";
 
 export const Navigation = () => {
   const { user, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { subscription, getRemainingTokens, getTokenStatus } = useTokenUsage();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -77,6 +80,18 @@ export const Navigation = () => {
 
               {/* User Info & Logout */}
               <div className="hidden md:flex items-center gap-4">
+                {subscription?.subscription_type === 'free' && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="text-muted-foreground">
+                      {getRemainingTokens()} tokenów
+                    </span>
+                    {getTokenStatus() === 'critical' && (
+                      <Badge variant="destructive" className="text-xs">
+                        Niski poziom!
+                      </Badge>
+                    )}
+                  </div>
+                )}
                 <span className="text-sm text-muted-foreground">
                   {user?.email}
                 </span>
@@ -102,8 +117,8 @@ export const Navigation = () => {
                   </Button>
                 </Link>
                 <Link to="/auth">
-                  <Button className="shadow-primary hover-lift" onClick={() => handleCtaClick('header_signup')}>
-                    Rozpocznij za darmo
+                  <Button className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-primary hover-lift" onClick={() => handleCtaClick('header_signup')}>
+                    Odblokuj nieograniczoną naukę
                   </Button>
                 </Link>
               </div>
@@ -193,9 +208,9 @@ export const Navigation = () => {
                     Zaloguj się
                   </Link>
                 </Button>
-                <Button asChild className="w-full" onClick={() => { setIsOpen(false); handleCtaClick('mobile_signup'); }}>
+                <Button asChild className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90" onClick={() => { setIsOpen(false); handleCtaClick('mobile_signup'); }}>
                   <Link to="/auth">
-                    Rozpocznij za darmo
+                    Odblokuj nieograniczoną naukę
                   </Link>
                 </Button>
               </div>

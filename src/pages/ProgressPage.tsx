@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Flame, Clock, Trophy, Target, BookCheck, Calendar, TrendingUp, Award, Brain } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area } from 'recharts';
+import { UpgradePrompts } from "@/components/UpgradePrompts";
 
 interface DailyStats {
   date: string;
@@ -414,6 +415,35 @@ const ProgressPage = () => {
         </TabsContent>
 
         <TabsContent value="trends" className="space-y-6">
+          {/* Premium Insights Teaser */}
+          <Card className="glass-card border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Brain className="w-5 h-5 text-primary" />
+                    <h3 className="text-lg font-semibold">Premium Insights</h3>
+                    <Badge className="bg-gradient-to-r from-primary to-accent text-white text-xs">
+                      PRO
+                    </Badge>
+                  </div>
+                  <p className="text-muted-foreground mb-4">
+                    Odblokuj zaawansowane analizy swojego postępu: predykcje trudności, rekomendacje AI, szczegółowe raporty
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
+                    <span>• Predykcyjne modele nauki</span>
+                    <span>• Spersonalizowane strategie</span>
+                    <span>• Szczegółowe metryki</span>
+                    <span>• Porównania z benchmarkami</span>
+                  </div>
+                </div>
+                <div className="text-center ml-6">
+                  <UpgradePrompts context="progress" compact />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
           <Card className="glass-card">
             <CardHeader>
               <CardTitle>Dokładność w czasie</CardTitle>
