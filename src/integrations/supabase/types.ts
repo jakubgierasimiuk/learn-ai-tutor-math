@@ -374,6 +374,36 @@ export type Database = {
         }
         Relationships: []
       }
+      devices: {
+        Row: {
+          created_at: string
+          device_hash: string
+          first_ip: unknown
+          first_seen: string
+          id: string
+          last_seen: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_hash: string
+          first_ip: unknown
+          first_seen?: string
+          id?: string
+          last_seen?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_hash?: string
+          first_ip?: unknown
+          first_seen?: string
+          id?: string
+          last_seen?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       diagnostic_item_attempts: {
         Row: {
           answer: Json | null
@@ -718,6 +748,33 @@ export type Database = {
           session_id?: string
           skill_challenge_ratio?: number | null
           started_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      fraud_signals: {
+        Row: {
+          created_at: string
+          id: string
+          score_delta: number
+          signal_type: string
+          signal_value: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          score_delta?: number
+          signal_type: string
+          signal_value: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          score_delta?: number
+          signal_type?: string
+          signal_value?: string
           user_id?: string
         }
         Relationships: []
@@ -1625,8 +1682,13 @@ export type Database = {
           learner_profile: Json | null
           learning_goal: string | null
           level: number
+          marketing_consent: boolean | null
+          marketing_consent_at: string | null
           name: string | null
           onboarding_completed: boolean | null
+          phone_e164: string | null
+          phone_verified_at: string | null
+          referral_code: string | null
           total_points: number
           updated_at: string
           user_id: string
@@ -1643,8 +1705,13 @@ export type Database = {
           learner_profile?: Json | null
           learning_goal?: string | null
           level?: number
+          marketing_consent?: boolean | null
+          marketing_consent_at?: string | null
           name?: string | null
           onboarding_completed?: boolean | null
+          phone_e164?: string | null
+          phone_verified_at?: string | null
+          referral_code?: string | null
           total_points?: number
           updated_at?: string
           user_id: string
@@ -1661,8 +1728,13 @@ export type Database = {
           learner_profile?: Json | null
           learning_goal?: string | null
           level?: number
+          marketing_consent?: boolean | null
+          marketing_consent_at?: string | null
           name?: string | null
           onboarding_completed?: boolean | null
+          phone_e164?: string | null
+          phone_verified_at?: string | null
+          referral_code?: string | null
           total_points?: number
           updated_at?: string
           user_id?: string
@@ -1690,6 +1762,30 @@ export type Database = {
           id?: string
           is_active?: boolean
           user_id?: string
+        }
+        Relationships: []
+      }
+      referral_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          payload: Json | null
+          referral_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          payload?: Json | null
+          referral_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload?: Json | null
+          referral_id?: string
         }
         Relationships: []
       }
@@ -1767,6 +1863,33 @@ export type Database = {
         }
         Relationships: []
       }
+      reward_catalog: {
+        Row: {
+          active: boolean
+          cost_points: number
+          created_at: string
+          id: string
+          slug: string
+          title: string
+        }
+        Insert: {
+          active?: boolean
+          cost_points?: number
+          created_at?: string
+          id?: string
+          slug: string
+          title: string
+        }
+        Update: {
+          active?: boolean
+          cost_points?: number
+          created_at?: string
+          id?: string
+          slug?: string
+          title?: string
+        }
+        Relationships: []
+      }
       reward_claims: {
         Row: {
           claimed_at: string
@@ -1807,6 +1930,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      rewards: {
+        Row: {
+          amount: number
+          consumed_at: string | null
+          created_at: string
+          id: string
+          kind: string
+          meta: Json | null
+          released_at: string | null
+          source: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          consumed_at?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          meta?: Json | null
+          released_at?: string | null
+          source: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          consumed_at?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          meta?: Json | null
+          released_at?: string | null
+          source?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       rewards_catalog: {
         Row: {
