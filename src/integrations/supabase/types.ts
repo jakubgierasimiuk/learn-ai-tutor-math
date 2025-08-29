@@ -1787,7 +1787,15 @@ export type Database = {
           payload?: Json | null
           referral_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "referral_events_referral_id_fkey"
+            columns: ["referral_id"]
+            isOneToOne: false
+            referencedRelation: "referrals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       referral_rewards: {
         Row: {
@@ -1829,36 +1837,51 @@ export type Database = {
       }
       referrals: {
         Row: {
+          activated_at: string | null
+          converted_at: string | null
           created_at: string
+          device_hash: string | null
           id: string
+          ip: unknown | null
+          notes: Json | null
+          phone_hash: string | null
           referral_code: string
           referred_user_id: string
           referrer_id: string
-          status: string
-          subscription_activated_at: string | null
-          trial_started_at: string | null
+          risk_score: number | null
+          stage: string
           updated_at: string
         }
         Insert: {
+          activated_at?: string | null
+          converted_at?: string | null
           created_at?: string
+          device_hash?: string | null
           id?: string
+          ip?: unknown | null
+          notes?: Json | null
+          phone_hash?: string | null
           referral_code: string
           referred_user_id: string
           referrer_id: string
-          status?: string
-          subscription_activated_at?: string | null
-          trial_started_at?: string | null
+          risk_score?: number | null
+          stage?: string
           updated_at?: string
         }
         Update: {
+          activated_at?: string | null
+          converted_at?: string | null
           created_at?: string
+          device_hash?: string | null
           id?: string
+          ip?: unknown | null
+          notes?: Json | null
+          phone_hash?: string | null
           referral_code?: string
           referred_user_id?: string
           referrer_id?: string
-          status?: string
-          subscription_activated_at?: string | null
-          trial_started_at?: string | null
+          risk_score?: number | null
+          stage?: string
           updated_at?: string
         }
         Relationships: []
@@ -3143,6 +3166,18 @@ export type Database = {
       }
     }
     Functions: {
+      calculate_risk_score: {
+        Args: {
+          p_device_is_duplicate?: boolean
+          p_ip_is_vpn?: boolean
+          p_learning_time_minutes?: number
+          p_onboarding_completed?: boolean
+          p_phone_is_voip?: boolean
+          p_phone_verified?: boolean
+          p_user_id: string
+        }
+        Returns: number
+      }
       check_and_award_achievements: {
         Args: { p_user_id: string }
         Returns: undefined
@@ -3208,6 +3243,10 @@ export type Database = {
         Returns: undefined
       }
       update_referral_stats: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
+      update_referral_stats_v2: {
         Args: { p_user_id: string }
         Returns: undefined
       }

@@ -63,7 +63,7 @@ export const useReferral = () => {
         .from("referrals")
         .select("referral_code")
         .eq("referred_user_id", user.id)
-        .eq("status", "pending")
+        .eq("stage", "invited")
         .maybeSingle();
 
       if (referralData?.referral_code) {
@@ -88,7 +88,7 @@ export const useReferral = () => {
         .from("referrals")
         .select("referral_code")
         .eq("referred_user_id", user.id)
-        .eq("status", "trial")
+        .eq("stage", "activated")
         .maybeSingle();
 
       if (referralData?.referral_code) {
