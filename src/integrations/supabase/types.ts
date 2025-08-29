@@ -2336,6 +2336,42 @@ export type Database = {
         }
         Relationships: []
       }
+      sms_verifications: {
+        Row: {
+          attempts: number | null
+          code_hash: string
+          created_at: string
+          expires_at: string
+          id: string
+          max_attempts: number | null
+          phone_e164: string
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          attempts?: number | null
+          code_hash: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          max_attempts?: number | null
+          phone_e164: string
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          attempts?: number | null
+          code_hash?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          max_attempts?: number | null
+          phone_e164?: string
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       social_achievements: {
         Row: {
           achievement_type: string

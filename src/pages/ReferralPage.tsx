@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useReferralStats } from "@/hooks/useReferralStats";
+import { useReferralV2 } from "@/hooks/useReferralV2";
+import { ConvertibleRewardModal } from "@/components/ConvertibleRewardModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,23 +33,25 @@ export default function ReferralPage() {
   const { user } = useAuth();
   const {
     stats,
+    referrals,
     rewards,
     referralCode,
-    loading,
-    refreshing,
-    loadReferralData,
-    claimReward,
+    isLoading,
+    getReferralUrl,
     copyReferralUrl,
-    shareReferralUrl
-  } = useReferralStats();
+    shareReferralUrl,
+    getTierInfo,
+    getStageInfo,
+  } = useReferralV2();
 
-  const referralUrl = referralCode ? `${window.location.origin}?ref=${referralCode}` : "";
+  const [selectedReward, setSelectedReward] = useState<any>(null);
+  const referralUrl = getReferralUrl();
 
   const currentTier = stats?.current_tier || 'beginner';
   const TierIcon = tierInfo[currentTier]?.icon || Target;
 
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="container mx-auto p-6 space-y-6">
         <div className="animate-pulse space-y-4">
@@ -62,6 +65,12 @@ export default function ReferralPage() {
       </div>
     );
   }
+
+  const handleConvertibleReward = (reward: any) => {
+    if (reward.kind === 'convertible' && reward.status === 'released') {
+      setSelectedReward(reward);
+    }
+  };
 
 
   return (
@@ -116,14 +125,6 @@ export default function ReferralPage() {
           <CardTitle className="flex items-center gap-2">
             <Share2 className="w-5 h-5" />
             Twój Link Polecający
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={loadReferralData}
-              disabled={refreshing}
-            >
-              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-            </Button>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -182,34 +183,26 @@ export default function ReferralPage() {
       {/* Rewards Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Sklep z Nagrodami</CardTitle>
+          <CardTitle>Dostępne Nagrody</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Wymień punkty na atrakcyjne nagrody (dostępne po 10 poleceniach)
+            Twoje nagrody za polecenia
           </p>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {rewards.map((reward) => (
-              <Card key={reward.id} className="border border-border">
+            {rewards.filter(r => r.status === 'released' && r.kind === 'convertible').map((reward) => (
+              <Card key={reward.id} className="border border-border cursor-pointer hover:bg-muted/50" onClick={() => handleConvertibleReward(reward)}>
                 <CardContent className="p-4">
                   <div className="space-y-3">
                     <div className="text-center">
-                      <h3 className="font-semibold">{reward.name}</h3>
-                      <p className="text-sm text-muted-foreground">{reward.description}</p>
+                      <h3 className="font-semibold">Nagroda convertible</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {reward.meta?.days_amount || 3} dni lub {reward.meta?.tokens_amount || 1000} tokenów
+                      </p>
                     </div>
-                    <Separator />
-                    <div className="flex justify-between items-center">
-                      <Badge variant="secondary">
-                        {reward.points_required} pkt
-                      </Badge>
-                      <Button
-                        size="sm"
-                        onClick={() => claimReward(reward)}
-                        disabled={!stats || stats.available_points < reward.points_required}
-                      >
-                        {!stats || stats.available_points < reward.points_required ? "Za mało punktów" : "Wymień"}
-                      </Button>
-                    </div>
+                    <Button size="sm" className="w-full">
+                      Wykorzystaj
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -217,6 +210,17 @@ export default function ReferralPage() {
           </div>
         </CardContent>
       </Card>
+
+      {selectedReward && (
+        <ConvertibleRewardModal
+          isOpen={!!selectedReward}
+          onClose={() => setSelectedReward(null)}
+          reward={selectedReward}
+          onRewardConsumed={() => {
+            setSelectedReward(null);
+          }}
+        />
+      )}
     </div>
   );
 }
