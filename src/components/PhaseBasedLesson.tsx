@@ -455,103 +455,102 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
           <CardContent className="p-6 flex flex-col h-full">
             {/* Chat History */}
             <div ref={chatScrollRef} className="flex-1 space-y-4 max-h-[60vh] overflow-y-auto scroll-smooth mb-6">
-                {chatHistory.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Lightbulb className="h-12 w-12 mx-auto mb-3" />
-                    <p>Napisz "Rozpocznij lekcję" aby zacząć</p>
-                  </div>
-                )}
-                
-                {chatHistory.map((message, index) => (
+              {chatHistory.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Lightbulb className="h-12 w-12 mx-auto mb-3" />
+                  <p>Napisz "Rozpocznij lekcję" aby zacząć</p>
+                </div>
+              )}
+              
+              {chatHistory.map((message, index) => (
+                <div 
+                  key={index}
+                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
                   <div 
-                    key={index}
-                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    className={`max-w-[80%] p-3 rounded-lg ${
+                      message.role === 'user'
+                        ? 'bg-primary text-primary-foreground'
+                        : message.isHint
+                        ? 'bg-warning/10 border border-warning'
+                        : 'bg-muted'
+                    }`}
                   >
-                    <div 
-                      className={`max-w-[80%] p-3 rounded-lg ${
-                        message.role === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : message.isHint
-                          ? 'bg-warning/10 border border-warning'
-                          : 'bg-muted'
-                      }`}
-                    >
-                      <div className="flex items-start gap-2">
-                        {message.role === 'assistant' && message.isHint && (
-                          <HelpCircle className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
-                        )}
-                        {message.role === 'user' && message.isCorrect !== undefined && (
-                          message.isCorrect 
-                            ? <CheckCircle className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
-                            : <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
-                        )}
-                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                      </div>
+                    <div className="flex items-start gap-2">
+                      {message.role === 'assistant' && message.isHint && (
+                        <HelpCircle className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
+                      )}
+                      {message.role === 'user' && message.isCorrect !== undefined && (
+                        message.isCorrect 
+                          ? <CheckCircle className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
+                          : <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+                      )}
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
+            </div>
 
-              {/* Input Area */}
-              <div className="space-y-3 border-t pt-4">
-                <Textarea
-                  value={userInput}
-                  onChange={(e) => setUserInput(e.target.value)}
-                  placeholder={chatHistory.length === 0 ? "Napisz 'Rozpocznij lekcję' aby zacząć..." : "Wpisz swoją odpowiedź..."}
-                  className="min-h-[80px]"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      sendMessage();
-                    }
-                  }}
-                />
-                
-                <div className="flex items-center gap-2">
-                  {chatHistory.length === 0 ? (
+            {/* Input Area */}
+            <div className="space-y-3 border-t pt-4">
+              <Textarea
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                placeholder={chatHistory.length === 0 ? "Napisz 'Rozpocznij lekcję' aby zacząć..." : "Wpisz swoją odpowiedź..."}
+                className="min-h-[80px]"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                  }
+                }}
+              />
+              
+              <div className="flex items-center gap-2">
+                {chatHistory.length === 0 ? (
+                  <Button 
+                    onClick={() => {
+                      setUserInput('Rozpocznij lekcję');
+                      setTimeout(() => sendMessage(), 100);
+                    }}
+                    disabled={isLoading}
+                    className="flex-1"
+                  >
+                    {isLoading ? 'Rozpoczynam...' : 'Rozpocznij lekcję'}
+                  </Button>
+                ) : (
+                  <>
                     <Button 
-                      onClick={() => {
-                        setUserInput('Rozpocznij lekcję');
-                        setTimeout(() => sendMessage(), 100);
-                      }}
-                      disabled={isLoading}
+                      onClick={sendMessage}
+                      disabled={!userInput.trim() || isLoading}
                       className="flex-1"
                     >
-                      {isLoading ? 'Rozpoczynam...' : 'Rozpocznij lekcję'}
+                      {isLoading ? 'Wysyłam...' : 'Wyślij odpowiedź'}
                     </Button>
-                  ) : (
-                    <>
-                      <Button 
-                        onClick={sendMessage}
-                        disabled={!userInput.trim() || isLoading}
-                        className="flex-1"
-                      >
-                        {isLoading ? 'Wysyłam...' : 'Wyślij odpowiedź'}
-                      </Button>
-                      
-                      <Button 
-                        variant="outline"
-                        onClick={askForHint}
-                        disabled={isLoading}
-                      >
-                        <HelpCircle className="h-4 w-4 mr-2" />
-                        Podpowiedź
-                      </Button>
-                      
-                      <Button 
-                        variant="outline"
-                        onClick={endSession}
-                        disabled={isLoading}
-                      >
-                        Zakończ sesję
-                      </Button>
-                    </>
-                  )}
-                </div>
+                    
+                    <Button 
+                      variant="outline"
+                      onClick={askForHint}
+                      disabled={isLoading}
+                    >
+                      <HelpCircle className="h-4 w-4 mr-2" />
+                      Podpowiedź
+                    </Button>
+                    
+                    <Button 
+                      variant="outline"
+                      onClick={endSession}
+                      disabled={isLoading}
+                    >
+                      Zakończ sesję
+                    </Button>
+                  </>
+                )}
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
