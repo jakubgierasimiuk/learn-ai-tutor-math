@@ -240,27 +240,31 @@ export default function AuthPage() {
               </TabsList>
               
               <TabsContent value="signin" className="space-y-4">
-                <div className="space-y-2">
-                  <Input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                  <Input
-                    type="password"
-                    placeholder="Hasło"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-                <Button 
-                  onClick={handleSignIn} 
-                  className="w-full" 
-                  disabled={loading}
-                >
-                  {loading ? "Logowanie..." : "Zaloguj się"}
-                </Button>
+                <form onSubmit={(e) => { e.preventDefault(); handleSignIn(); }} className="space-y-4">
+                  <div className="space-y-2">
+                    <Input
+                      type="email"
+                      placeholder="Email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                    <Input
+                      type="password"
+                      placeholder="Hasło"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <Button 
+                    type="submit"
+                    className="w-full" 
+                    disabled={loading}
+                  >
+                    {loading ? "Logowanie..." : "Zaloguj się"}
+                  </Button>
+                </form>
                 <Button 
                   onClick={handleForgotPassword} 
                   variant="outline" 
@@ -272,27 +276,31 @@ export default function AuthPage() {
               </TabsContent>
               
               <TabsContent value="signup" className="space-y-4">
-                <div className="space-y-2">
-                  <Input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                  <Input
-                    type="password"
-                    placeholder="Hasło"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-                <Button 
-                  onClick={handleSignUp} 
-                  className="w-full" 
-                  disabled={loading}
-                >
-                  {loading ? "Tworzenie konta..." : "Utwórz konto"}
-                </Button>
+                <form onSubmit={(e) => { e.preventDefault(); handleSignUp(); }} className="space-y-4">
+                  <div className="space-y-2">
+                    <Input
+                      type="email"
+                      placeholder="Email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                    <Input
+                      type="password"
+                      placeholder="Hasło"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <Button 
+                    type="submit"
+                    className="w-full" 
+                    disabled={loading}
+                  >
+                    {loading ? "Tworzenie konta..." : "Utwórz konto"}
+                  </Button>
+                </form>
               </TabsContent>
             </Tabs>
           )}
