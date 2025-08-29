@@ -439,63 +439,22 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
   const currentPhaseData = getCurrentPhaseData();
 
   return (
-    <div className={`space-y-6 ${className}`}>
-      {/* Header */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-xl">{skill.name}</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                {skill.description}
-              </p>
-            </div>
-            <Badge variant="outline" className="text-sm">
-              {skill.department.replace('_', ' ')}
-            </Badge>
-          </div>
-        </CardHeader>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Phase Progress Sidebar */}
-        <div className="lg:col-span-1">
-          <PhaseProgress 
-            phases={getPhaseProgressData()}
-            currentPhase={currentPhase}
-          />
+    <div className={`min-h-screen bg-background ${className}`}>
+      {/* Centered Chat Container - OpenAI Style */}
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        {/* Minimal Header */}
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold mb-2">{skill.name}</h1>
+          <p className="text-muted-foreground">
+            {skill.description}
+          </p>
         </div>
 
-        {/* Main Learning Area */}
-        <div className="lg:col-span-2 space-y-4">
-          {/* Current Phase Info */}
-          {currentPhaseData && (
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">
-                    Faza {currentPhase}: {currentPhaseData.phase_name}
-                  </CardTitle>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    {currentPhaseData.estimated_duration_minutes} min
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {currentPhaseData.phase_description}
-                </p>
-              </CardHeader>
-            </Card>
-          )}
-
-          {/* Chat Area */}
-          <Card className="min-h-[400px]">
-            <CardHeader>
-              <CardTitle className="text-lg">Rozmowa z AI Tutorem</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Chat History */}
-              <div ref={chatScrollRef} className="space-y-3 max-h-80 overflow-y-auto scroll-smooth">
+        {/* Full Width Chat Area */}
+        <Card className="min-h-[70vh]">
+          <CardContent className="p-6 flex flex-col h-full">
+            {/* Chat History */}
+            <div ref={chatScrollRef} className="flex-1 space-y-4 max-h-[60vh] overflow-y-auto scroll-smooth mb-6">
                 {chatHistory.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     <Lightbulb className="h-12 w-12 mx-auto mb-3" />
