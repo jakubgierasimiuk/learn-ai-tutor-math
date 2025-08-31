@@ -80,6 +80,33 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_rate_limits: {
+        Row: {
+          action_type: string
+          attempt_count: number
+          created_at: string
+          id: string
+          user_id: string
+          window_start: string
+        }
+        Insert: {
+          action_type: string
+          attempt_count?: number
+          created_at?: string
+          id?: string
+          user_id: string
+          window_start?: string
+        }
+        Update: {
+          action_type?: string
+          attempt_count?: number
+          created_at?: string
+          id?: string
+          user_id?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       ai_conversation_log: {
         Row: {
           ai_response: string
@@ -3213,6 +3240,15 @@ export type Database = {
           p_user_id: string
         }
         Returns: number
+      }
+      check_admin_rate_limit: {
+        Args: {
+          p_action_type: string
+          p_max_attempts?: number
+          p_user_id: string
+          p_window_minutes?: number
+        }
+        Returns: boolean
       }
       check_and_award_achievements: {
         Args: { p_user_id: string }
