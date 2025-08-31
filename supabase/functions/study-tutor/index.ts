@@ -7,6 +7,30 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Input sanitization function
+function sanitizeInput(input: string): string {
+  if (typeof input !== 'string') return '';
+  return input
+    .replace(/[<>]/g, '') // Remove potential HTML tags
+    .trim()
+    .slice(0, 10000); // Limit input length
+}
+
+// Error handler that doesn't expose sensitive information
+function createSafeErrorResponse(error: any, message: string = 'An error occurred') {
+  console.error('Study-tutor error:', error);
+  return new Response(
+    JSON.stringify({ 
+      error: message,
+      timestamp: new Date().toISOString()
+    }),
+    { 
+      status: 500, 
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+    }
+  );
+}
+
 // Educational context building functions
 async function buildEducationalContext(params: {
   userId: string;

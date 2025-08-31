@@ -7,6 +7,30 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Input sanitization function
+function sanitizeInput(input: string): string {
+  if (typeof input !== 'string') return '';
+  return input
+    .replace(/[<>]/g, '') // Remove potential HTML tags
+    .trim()
+    .slice(0, 1000); // Limit input length for migration params
+}
+
+// Error handler that doesn't expose sensitive information
+function createSafeErrorResponse(error: any, message: string = 'Migration failed') {
+  console.error('System-migration error:', error);
+  return new Response(
+    JSON.stringify({ 
+      error: message,
+      timestamp: new Date().toISOString()
+    }),
+    { 
+      status: 500, 
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+    }
+  );
+}
+
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
