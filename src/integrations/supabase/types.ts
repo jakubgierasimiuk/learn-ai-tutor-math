@@ -3225,6 +3225,42 @@ export type Database = {
           total_tokens_used: number | null
           user_id: string | null
         }
+        Insert: {
+          accuracy_rate?: never
+          completed_at?: string | null
+          correct_answers?: number | null
+          department?: string | null
+          difficulty_level?: number | null
+          difficulty_multiplier?: number | null
+          engagement_score?: number | null
+          learning_momentum?: number | null
+          learning_velocity?: never
+          preferred_explanation_style?: string | null
+          session_duration_minutes?: never
+          session_type?: string | null
+          started_at?: string | null
+          tasks_completed?: number | null
+          total_tokens_used?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          accuracy_rate?: never
+          completed_at?: string | null
+          correct_answers?: number | null
+          department?: string | null
+          difficulty_level?: number | null
+          difficulty_multiplier?: number | null
+          engagement_score?: number | null
+          learning_momentum?: number | null
+          learning_velocity?: never
+          preferred_explanation_style?: string | null
+          session_duration_minutes?: never
+          session_type?: string | null
+          started_at?: string | null
+          tasks_completed?: number | null
+          total_tokens_used?: number | null
+          user_id?: string | null
+        }
         Relationships: []
       }
     }
@@ -3253,6 +3289,10 @@ export type Database = {
       check_and_award_achievements: {
         Args: { p_user_id: string }
         Returns: undefined
+      }
+      check_security_settings: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       check_social_achievements: {
         Args: { p_user_id: string }
