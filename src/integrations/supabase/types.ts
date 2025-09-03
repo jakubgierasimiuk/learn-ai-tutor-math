@@ -3206,63 +3206,7 @@ export type Database = {
       }
     }
     Views: {
-      learning_analytics: {
-        Row: {
-          accuracy_rate: number | null
-          completed_at: string | null
-          correct_answers: number | null
-          department: string | null
-          difficulty_level: number | null
-          difficulty_multiplier: number | null
-          engagement_score: number | null
-          learning_momentum: number | null
-          learning_velocity: number | null
-          preferred_explanation_style: string | null
-          session_duration_minutes: number | null
-          session_type: string | null
-          started_at: string | null
-          tasks_completed: number | null
-          total_tokens_used: number | null
-          user_id: string | null
-        }
-        Insert: {
-          accuracy_rate?: never
-          completed_at?: string | null
-          correct_answers?: number | null
-          department?: string | null
-          difficulty_level?: number | null
-          difficulty_multiplier?: number | null
-          engagement_score?: number | null
-          learning_momentum?: number | null
-          learning_velocity?: number | null
-          preferred_explanation_style?: string | null
-          session_duration_minutes?: never
-          session_type?: string | null
-          started_at?: string | null
-          tasks_completed?: number | null
-          total_tokens_used?: number | null
-          user_id?: string | null
-        }
-        Update: {
-          accuracy_rate?: never
-          completed_at?: string | null
-          correct_answers?: number | null
-          department?: string | null
-          difficulty_level?: number | null
-          difficulty_multiplier?: number | null
-          engagement_score?: number | null
-          learning_momentum?: number | null
-          learning_velocity?: number | null
-          preferred_explanation_style?: string | null
-          session_duration_minutes?: never
-          session_type?: string | null
-          started_at?: string | null
-          tasks_completed?: number | null
-          total_tokens_used?: number | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       calculate_risk_score: {
@@ -3317,6 +3261,27 @@ export type Database = {
           mastery_level: number
           next_review_at: string
           skill_node_id: string
+        }[]
+      }
+      get_learning_analytics: {
+        Args: { target_user_id?: string }
+        Returns: {
+          accuracy_rate: number
+          completed_at: string
+          correct_answers: number
+          department: string
+          difficulty_level: number
+          difficulty_multiplier: number
+          engagement_score: number
+          learning_momentum: number
+          learning_velocity: number
+          preferred_explanation_style: string
+          session_duration_minutes: number
+          session_type: string
+          started_at: string
+          tasks_completed: number
+          total_tokens_used: number
+          user_id: string
         }[]
       }
       get_user_learning_profile: {
