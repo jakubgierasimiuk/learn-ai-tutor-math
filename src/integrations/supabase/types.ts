@@ -3234,7 +3234,7 @@ export type Database = {
           difficulty_multiplier?: number | null
           engagement_score?: number | null
           learning_momentum?: number | null
-          learning_velocity?: never
+          learning_velocity?: number | null
           preferred_explanation_style?: string | null
           session_duration_minutes?: never
           session_type?: string | null
@@ -3252,7 +3252,7 @@ export type Database = {
           difficulty_multiplier?: number | null
           engagement_score?: number | null
           learning_momentum?: number | null
-          learning_velocity?: never
+          learning_velocity?: number | null
           preferred_explanation_style?: string | null
           session_duration_minutes?: never
           session_type?: string | null
