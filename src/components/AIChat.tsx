@@ -44,6 +44,7 @@ export const AIChat = () => {
   
   const { toast } = useToast();
   const { user } = useAuth();
+  const { shouldShowSoftPaywall } = useTokenUsage();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when messages change
@@ -198,7 +199,6 @@ export const AIChat = () => {
     if (!input.trim() || isLoading || !sessionId || !user?.id) return;
 
     // Check token limits before sending
-    const { shouldShowSoftPaywall } = useTokenUsage();
     if (shouldShowSoftPaywall()) {
       toast({
         title: "Brak tokenów",
