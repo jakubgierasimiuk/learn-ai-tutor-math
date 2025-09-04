@@ -485,16 +485,16 @@ export const AIChat = () => {
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto h-[600px] flex flex-col">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 justify-between">
+    <Card className="w-full max-w-4xl mx-auto h-[700px] sm:h-[600px] flex flex-col">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center gap-2 justify-between">
           <div className="flex items-center gap-2">
             <MessageCircle className="w-5 h-5" />
             mentavo.ai
           </div>
           <div className="flex items-center gap-2 text-sm font-normal">
             <Brain className="h-4 w-4" />
-            <Label htmlFor="enriched-context" className="text-sm">
+            <Label htmlFor="enriched-context" className="text-sm hidden sm:inline">
               Bogaty kontekst
             </Label>
             <Switch
@@ -505,40 +505,40 @@ export const AIChat = () => {
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col flex-1 gap-4">
+      <CardContent className="flex flex-col flex-1 gap-3 px-3 sm:px-6">
         {/* Token Usage & Upgrade Prompts */}
         <UpgradePrompts context="chat" compact />
         <TokenUsageProgress />
         
-        <ScrollArea ref={scrollAreaRef} className="flex-1 pr-4">
-          <div className="space-y-4">
+        <ScrollArea ref={scrollAreaRef} className="flex-1 pr-2">
+          <div className="space-y-3">
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex gap-3 ${
+                className={`flex gap-2 ${
                   message.role === 'user' ? 'justify-end' : 'justify-start'
                 }`}
               >
                 <div
-                  className={`flex gap-2 max-w-[80%] ${
+                  className={`flex gap-2 max-w-[85%] sm:max-w-[75%] ${
                     message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
                   }`}
                 >
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                     {message.role === 'user' ? (
-                      <User className="w-4 h-4" />
+                      <User className="w-3 h-3 sm:w-4 sm:h-4" />
                     ) : (
-                      <Bot className="w-4 h-4" />
+                      <Bot className="w-3 h-3 sm:w-4 sm:h-4" />
                     )}
                   </div>
                   <div
-                    className={`rounded-lg px-3 py-2 ${
+                    className={`rounded-2xl px-3 py-2 min-w-0 ${
                       message.role === 'user'
                         ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted'
+                        : 'bg-muted text-muted-foreground'
                     }`}
                   >
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
                     <p className="text-xs opacity-70 mt-1">
                       {message.timestamp.toLocaleTimeString('pl-PL', {
                         hour: '2-digit',
