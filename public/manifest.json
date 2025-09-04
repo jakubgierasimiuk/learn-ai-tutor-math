@@ -1,7 +1,7 @@
 {
-  "name": "AI Tutor Math",
-  "short_name": "AI Tutor",
-  "description": "Inteligentny tutor matematyczny napędzany sztuczną inteligencją",
+  "name": "mentavo.ai",
+  "short_name": "mentavo.ai",
+  "description": "mentavo.ai - inteligentny tutor matematyczny napędzany sztuczną inteligencją",
   "theme_color": "#6366f1",
   "background_color": "#ffffff",
   "display": "standalone",
@@ -42,7 +42,7 @@
     {
       "name": "AI Chat",
       "short_name": "Chat",
-      "description": "Porozmawiaj z AI tutorem",
+      "description": "Porozmawiaj z mentavo.ai",
       "url": "/chat",
       "icons": [
         {

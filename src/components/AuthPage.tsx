@@ -59,7 +59,7 @@ export const AuthPage = () => {
           </div>
           <div>
             <CardTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              AI Tutor
+              mentavo.ai
             </CardTitle>
             <CardDescription className="text-base">
               Zaloguj się do swojego konta, aby kontynuować naukę

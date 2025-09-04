@@ -363,7 +363,7 @@ export const Dashboard = () => {
                 <Button variant="outline" className="w-full h-auto p-4 flex-col gap-2">
                   <Brain className="w-6 h-6" />
                   <div className="text-center">
-                    <div className="font-medium">AI Korepetytor</div>
+                    <div className="font-medium">mentavo.ai</div>
                     <div className="text-xs opacity-80">Zadaj pytanie AI</div>
                   </div>
                 </Button>

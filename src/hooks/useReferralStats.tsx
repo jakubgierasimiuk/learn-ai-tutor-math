@@ -144,7 +144,7 @@ export const useReferralStats = (): UseReferralStatsReturn => {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: "Dołącz do AI Tutora!",
+          title: "Dołącz do mentavo.ai!",
           text: "Ucz się matematyki z AI! Otrzymaj 7 dni darmowo.",
           url: referralUrl,
         });

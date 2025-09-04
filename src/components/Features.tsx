@@ -14,7 +14,7 @@ import {
 const features = [
   {
     icon: Brain,
-    title: "AI Tutor",
+    title: "mentavo.ai",
     description: "Inteligentny nauczyciel dostosowuje się do Twojego stylu uczenia się.",
     color: "primary",
     benefits: ["Personalizowane wyjaśnienia", "Dostępny 24/7", "Nieskończona cierpliwość"]
@@ -57,7 +57,7 @@ export const Features = () => {
         <div className="text-center mb-16 animate-fadeIn">
           <h2 className="text-3xl md:text-5xl font-bold mb-6">
             Dlaczego wybierać{" "}
-            <span className="gradient-hero bg-clip-text text-transparent">AI Tutor</span>?
+            <span className="gradient-hero bg-clip-text text-transparent">mentavo.ai</span>?
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
             Rewolucyjny sposób nauki matematyki, który łączy najnowsze technologie AI 
@@ -108,7 +108,7 @@ export const Features = () => {
         <div className="bg-card rounded-3xl p-8 md:p-12 shadow-card">
           <div className="text-center mb-12">
             <h3 className="text-2xl md:text-3xl font-bold mb-4">
-              AI Tutor w liczbach
+              mentavo.ai w liczbach
             </h3>
             <p className="text-muted-foreground">
               Dołącz do tysięcy zadowolonych uczniów

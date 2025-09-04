@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* AI Tutor Design System - Professional & Elegant */
+/* mentavo.ai Design System - Professional & Elegant */
 
 @layer base {
   :root {
@@ -248,7 +248,7 @@
 }
 
 @layer components {
-  /* AI Tutor specific components */
+  /* mentavo.ai specific components */
   .gradient-hero {
     background: var(--gradient-hero);
   }

@@ -90,16 +90,16 @@ function RouteSeo() {
   const canonical = typeof window !== 'undefined' ? `${window.location.origin}${path}` : undefined;
   const map: Record<string, { title: string; description: string }> = {
     
-    '/dashboard': { title: 'Panel ucznia – AI Tutor', description: 'Twoje postępy, aktywność i szybkie skróty.' },
-    '/chat': { title: 'AI Korepetytor – Chat', description: 'Rozmawiaj z AI Tutorem i rozwiązuj zadania krok po kroku.' },
+    '/dashboard': { title: 'Panel ucznia – mentavo.ai', description: 'Twoje postępy, aktywność i szybkie skróty.' },
+    '/chat': { title: 'mentavo.ai – Chat', description: 'Rozmawiaj z mentavo.ai i rozwiązuj zadania krok po kroku.' },
     
-    '/materials': { title: 'Materiały ucznia – AI Tutor', description: 'Dodawaj i analizuj własne materiały do nauki.' },
-    '/social': { title: 'Społeczność – AI Tutor', description: 'Rankingi, aktywność i interakcje społeczne.' },
-    '/gamification': { title: 'Gamifikacja – AI Tutor', description: 'Zdobywaj punkty, odznaki i nagrody.' },
-    '/referral': { title: 'Program poleceń – AI Tutor', description: 'Polecaj znajomym i odbieraj nagrody.' },
+    '/materials': { title: 'Materiały ucznia – mentavo.ai', description: 'Dodawaj i analizuj własne materiały do nauki.' },
+    '/social': { title: 'Społeczność – mentavo.ai', description: 'Rankingi, aktywność i interakcje społeczne.' },
+    '/gamification': { title: 'Gamifikacja – mentavo.ai', description: 'Zdobywaj punkty, odznaki i nagrody.' },
+    '/referral': { title: 'Program poleceń – mentavo.ai', description: 'Polecaj znajomym i odbieraj nagrody.' },
     '/ux-test': { title: 'UX Testy – Panel', description: 'Zestaw testów użyteczności i jakości UI.' },
     '/ux-audit': { title: 'UX Audyt – Raport', description: 'Wyniki audytu UX i priorytety działań.' },
-    '/study': { title: 'Panel nauki – AI Tutor', description: 'Twoje umiejętności i ścieżka nauki.' },
+    '/study': { title: 'Panel nauki – mentavo.ai', description: 'Twoje umiejętności i ścieżka nauki.' },
     '/ai-logs': { title: 'Logi AI – Rejestr konwersacji', description: 'Szczegółowe logi wszystkich interakcji z AI.' },
   };
   if (path === '/' || path.startsWith('/postepy')) return null;

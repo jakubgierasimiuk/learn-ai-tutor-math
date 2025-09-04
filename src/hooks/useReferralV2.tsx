@@ -259,7 +259,7 @@ export const useReferralV2 = () => {
       try {
         await navigator.share({
           title: 'Dołącz do nauki ze mną!',
-          text: 'Rozpocznij naukę matematyki z AI tutorem i otrzymaj 7 dni za darmo!',
+          text: 'Rozpocznij naukę matematyki z mentavo.ai i otrzymaj 7 dni za darmo!',
           url: url,
         });
         return true;

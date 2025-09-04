@@ -20,7 +20,7 @@ export const Hero = () => {
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-balance">
                 Ucz się matematyki z{" "}
                 <span className="gradient-hero bg-clip-text text-transparent animate-glow">
-                  AI Tutorem
+                  mentavo.ai
                 </span>
               </h1>
               <p className="text-lg md:text-xl lg:text-xl text-muted-foreground leading-relaxed max-w-lg">
@@ -32,7 +32,7 @@ export const Hero = () => {
             {/* Główne opcje nauki */}
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Chat z AI Tutorem */}
+                {/* Chat z mentavo.ai */}
                 <div className="group relative p-6 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 hover:border-primary/40 transition-all duration-300 hover:scale-105 flex flex-col h-full">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   <div className="relative flex flex-col flex-1">
@@ -40,7 +40,7 @@ export const Hero = () => {
                       <div className="p-2 rounded-lg bg-primary/20">
                         <span className="text-2xl">🤖</span>
                       </div>
-                      <h3 className="text-lg font-semibold">Chat z AI Tutorem</h3>
+                      <h3 className="text-lg font-semibold">Chat z mentavo.ai</h3>
                     </div>
                     <p className="text-sm text-muted-foreground mb-4 leading-relaxed flex-1">
                       Zadaj pytanie, wyślij zdjęcie zadania lub po prostu powiedz czego nie rozumiesz. 

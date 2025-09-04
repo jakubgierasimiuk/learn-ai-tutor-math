@@ -24,7 +24,7 @@ export const AIChat = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: 'Cześć! Jestem Twoim AI korepetytorem. Mogę pomóc Ci z matematyką, wytłumaczyć pojęcia i rozwiązać zadania. W czym mogę Ci dzisiaj pomóc?',
+      content: 'Cześć! Jestem mentavo.ai. Mogę pomóc Ci z matematyką, wytłumaczyć pojęcia i rozwiązać zadania. W czym mogę Ci dzisiaj pomóc?',
       role: 'assistant',
       timestamp: new Date()
     }
@@ -449,7 +449,7 @@ export const AIChat = () => {
       // Reset chat state for new session
       setMessages([{
         id: '1',
-        content: 'Cześć! Jestem Twoim AI korepetytorem. Mogę pomóc Ci z matematyką, wytłumaczyć pojęcia i rozwiązać zadania. W czym mogę Ci dzisiaj pomóc?',
+        content: 'Cześć! Jestem mentavo.ai. Mogę pomóc Ci z matematyką, wytłumaczyć pojęcia i rozwiązać zadania. W czym mogę Ci dzisiaj pomóc?',
         role: 'assistant',
         timestamp: new Date()
       }]);
@@ -490,7 +490,7 @@ export const AIChat = () => {
         <CardTitle className="flex items-center gap-2 justify-between">
           <div className="flex items-center gap-2">
             <MessageCircle className="w-5 h-5" />
-            AI Korepetytor
+            mentavo.ai
           </div>
           <div className="flex items-center gap-2 text-sm font-normal">
             <Brain className="h-4 w-4" />

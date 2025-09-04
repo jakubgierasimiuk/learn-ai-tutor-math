@@ -104,7 +104,7 @@ export const UpgradePrompts = ({ context = 'chat', compact = false }: UpgradePro
                   </Badge>
                 </div>
                 <p className="text-muted-foreground mb-4">
-                  Odblokuj nieograniczone możliwości nauki z AI korepetytorem
+                  Odblokuj nieograniczone możliwości nauki z mentavo.ai
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div className="flex items-center gap-2">

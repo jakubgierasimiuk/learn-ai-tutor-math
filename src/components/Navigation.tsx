@@ -28,7 +28,7 @@ export const Navigation = () => {
             <div className="w-10 h-10 gradient-hero rounded-xl flex items-center justify-center">
               <Brain className="w-6 h-6 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold">AI Tutor</span>
+            <span className="text-xl font-bold">mentavo.ai</span>
           </Link>
 
           {user ? (
@@ -73,7 +73,7 @@ export const Navigation = () => {
                 </Link>
                 <Button asChild size="sm" className="shadow-primary" onClick={() => logEvent('cta_click', { source: 'nav' })}>
                   <Link to="/chat">
-                    <span className="inline-flex items-center"><MessageCircle className="w-4 h-4 mr-2" />AI Korepetytor</span>
+                    <span className="inline-flex items-center"><MessageCircle className="w-4 h-4 mr-2" />mentavo.ai</span>
                   </Link>
                 </Button>
               </div>
@@ -162,7 +162,7 @@ export const Navigation = () => {
                     onClick={() => setIsOpen(false)}
                   >
                     <MessageCircle className="w-4 h-4" />
-                    AI Korepetytor
+                    mentavo.ai
                   </Link>
                   <Link 
                     to="/ai-logs" 

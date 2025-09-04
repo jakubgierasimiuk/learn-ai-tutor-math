@@ -182,7 +182,7 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
       setChatHistory([
         {
           role: 'assistant',
-          content: 'Witaj! Jestem Twoim AI tutorem. Napisz "Rozpocznij lekcję" aby zacząć naukę tej umiejętności.',
+          content: 'Witaj! Jestem mentavo.ai. Napisz "Rozpocznij lekcję" aby zacząć naukę tej umiejętności.',
           timestamp: new Date().toISOString()
         }
       ]);

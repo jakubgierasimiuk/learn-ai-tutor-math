@@ -48,13 +48,13 @@ export function LandingPage() {
           animationDelay: '0.6s'
         }}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Chat z AI Tutorem */}
+              {/* Chat z mentavo.ai */}
               <div className="group relative p-8 rounded-2xl bg-card border border-border hover-lift shadow-card">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-xl flex items-center justify-center">
                     <span className="text-2xl">🤖</span>
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground">Chat z AI Tutorem</h3>
+                  <h3 className="text-xl font-semibold text-foreground">Chat z mentavo.ai</h3>
                 </div>
                 <p className="text-muted-foreground mb-6 leading-relaxed">
                   Zadaj pytanie, wyślij zdjęcie zadania lub po prostu powiedz czego nie rozumiesz. 
@@ -111,7 +111,7 @@ export function LandingPage() {
       {/* Content Import Section */}
       
 
-      {/* AI Tutor Section */}
+      {/* mentavo.ai Section */}
       <section className="py-24 px-6 bg-muted/30">
         <div className="max-w-6xl mx-auto text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary to-primary-glow rounded-2xl mb-8 shadow-primary animate-float">
@@ -123,7 +123,7 @@ export function LandingPage() {
           </h2>
           
           <p className="text-xl mb-16 max-w-3xl mx-auto text-muted-foreground leading-relaxed">
-            AI Tutor dostosowuje się do Ciebie i Twojego stylu nauki
+            mentavo.ai dostosowuje się do Ciebie i Twojego stylu nauki
           </p>
           
           <div className="grid md:grid-cols-3 gap-8 mb-12">
@@ -154,7 +154,7 @@ export function LandingPage() {
           
           <Button asChild className="shadow-primary hover-lift text-lg px-8 py-4" size="lg" onClick={() => handleCtaClick('see_ai_tutor_demo')}>
             <Link to="/auth">
-              Zobacz, jak działa AI Tutor
+              Zobacz, jak działa mentavo.ai
             </Link>
           </Button>
         </div>
@@ -215,7 +215,7 @@ export function LandingPage() {
       <section className="py-24 px-6 bg-muted/30">
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-16 text-foreground">
-            Dlaczego uczniowie wybierają AI Tutor?
+            Dlaczego uczniowie wybierają mentavo.ai?
           </h2>
           
           <div className="grid md:grid-cols-3 gap-8">
@@ -328,10 +328,10 @@ export function LandingPage() {
               <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center">
                 <GraduationCap className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="text-2xl font-bold text-foreground">AI Tutor</span>
+              <span className="text-2xl font-bold text-foreground">mentavo.ai</span>
             </div>
           </div>
-          <p className="text-muted-foreground mb-8">© 2025 AI Tutor. Wszelkie prawa zastrzeżone.</p>
+          <p className="text-muted-foreground mb-8">© 2025 mentavo.ai. Wszelkie prawa zastrzeżone.</p>
           <div className="flex justify-center gap-8 text-muted-foreground">
             <a href="#" className="hover:text-primary transition-colors hover:underline">O nas</a>
             <a href="#" className="hover:text-primary transition-colors hover:underline">Kontakt</a>
