@@ -69,6 +69,30 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
     setStartTime(Date.now());
   }, [userInput]);
 
+  // Auto-close session on page unload
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (session?.id && user?.id) {
+        // Auto-close session in background
+        supabase.functions.invoke('auto-close-session', {
+          body: {
+            sessionId: session.id,
+            sessionType: 'lesson',
+            userId: user.id
+          }
+        }).catch(error => {
+          console.error('Error auto-closing lesson session:', error);
+        });
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [session?.id, user?.id]);
+
   const loadSkillData = async () => {
     try {
       // Load skill data

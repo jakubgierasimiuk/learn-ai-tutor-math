@@ -75,6 +75,30 @@ export const AIChat = () => {
     return () => clearTimeout(timeoutId);
   }, [messages, isLoading]);
 
+  // Auto-close session on page unload
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (sessionId && user?.id) {
+        // Auto-close session in background
+        supabase.functions.invoke('auto-close-session', {
+          body: {
+            sessionId: sessionId,
+            sessionType: 'chat',
+            userId: user.id
+          }
+        }).catch(error => {
+          console.error('Error auto-closing session:', error);
+        });
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [sessionId, user?.id]);
+
   // Initialize or load session on component mount
   useEffect(() => {
     if (user?.id) {

@@ -1,4 +1,13 @@
 project_id = "rfcjhdxsczcwbpknudyy"
 
 [functions.assign-admin-role]
-verify_jwt = true  # Ensure JWT verification is enabled for security
+verify_jwt = true
+
+[functions.auto-close-session]
+verify_jwt = true
+
+[functions.cleanup-sessions]
+verify_jwt = false
+
+[functions.session-summary]
+verify_jwt = true
