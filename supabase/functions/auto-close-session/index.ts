@@ -8,12 +8,16 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log('[AUTO-CLOSE-SESSION] Function started, method:', req.method);
+  
   if (req.method === 'OPTIONS') {
+    console.log('[AUTO-CLOSE-SESSION] CORS preflight request handled');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { sessionId, sessionType, userId } = await req.json();
+    console.log('[AUTO-CLOSE-SESSION] Request data:', { sessionId, sessionType, userId });
 
     if (!sessionId || !sessionType || !userId) {
       return new Response(
@@ -25,7 +29,18 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     
+    console.log('[AUTO-CLOSE-SESSION] Environment variables loaded:', {
+      hasUrl: !!supabaseUrl,
+      hasServiceKey: !!supabaseServiceKey
+    });
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('[AUTO-CLOSE-SESSION] Missing environment variables');
+      throw new Error('Missing required environment variables');
+    }
+    
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    console.log('[AUTO-CLOSE-SESSION] Supabase client initialized');
 
     console.log(`Auto-closing session ${sessionId} (type: ${sessionType}) for user ${userId}`);
 
@@ -74,7 +89,11 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error in auto-close-session:', error);
+    console.error('[AUTO-CLOSE-SESSION] Error in auto-close-session:', { 
+      message: error.message,
+      stack: error.stack
+    });
+    
     return new Response(
       JSON.stringify({ error: error.message }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -83,10 +102,17 @@ serve(async (req) => {
 });
 
 async function generateSessionSummary(sessionId: string, sessionType: string, userId: string, supabase: any) {
+  console.log('[AUTO-CLOSE-SESSION] Background: Starting summary generation for session:', sessionId, 'type:', sessionType);
   try {
-    console.log(`Background: Generating summary for session ${sessionId}`);
+    console.log(`[AUTO-CLOSE-SESSION] Background: Generating summary for session ${sessionId}`);
     
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY')!;
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openAIApiKey) {
+      console.error('[AUTO-CLOSE-SESSION] Background: OpenAI API key not found');
+      throw new Error('OpenAI API key not found');
+    }
+    
+    console.log('[AUTO-CLOSE-SESSION] Background: OpenAI API key found, proceeding...');
 
     // Get session data
     let sessionData;

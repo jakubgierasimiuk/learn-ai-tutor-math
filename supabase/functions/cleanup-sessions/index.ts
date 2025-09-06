@@ -8,20 +8,36 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log('[CLEANUP-SESSIONS] Function started, method:', req.method);
+  
   if (req.method === 'OPTIONS') {
+    console.log('[CLEANUP-SESSIONS] CORS preflight request handled');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    console.log('[CLEANUP-SESSIONS] Starting session cleanup...');
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     
+    console.log('[CLEANUP-SESSIONS] Environment variables loaded:', {
+      hasUrl: !!supabaseUrl,
+      hasServiceKey: !!supabaseServiceKey
+    });
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('[CLEANUP-SESSIONS] Missing environment variables');
+      throw new Error('Missing required environment variables');
+    }
+    
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    console.log('[CLEANUP-SESSIONS] Supabase client initialized');
 
-    console.log('Starting automated session cleanup...');
+    console.log('[CLEANUP-SESSIONS] Starting automated session cleanup...');
 
     // Find sessions that have been inactive for more than 2 hours
     const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    console.log('[CLEANUP-SESSIONS] Looking for sessions older than:', twoHoursAgo);
 
     // Get stale study_sessions (chat and lesson)
     const { data: staleSessions, error: staleSessionsError } = await supabase
@@ -30,8 +46,10 @@ serve(async (req) => {
       .eq('status', 'in_progress')
       .lt('started_at', twoHoursAgo);
 
+    console.log('[CLEANUP-SESSIONS] Found stale study_sessions:', staleSessions?.length || 0);
+
     if (staleSessionsError) {
-      console.error('Error finding stale study_sessions:', staleSessionsError);
+      console.error('[CLEANUP-SESSIONS] Error finding stale study_sessions:', staleSessionsError);
     }
 
     // Get stale unified_learning_sessions
@@ -41,8 +59,10 @@ serve(async (req) => {
       .is('completed_at', null)
       .lt('started_at', twoHoursAgo);
 
+    console.log('[CLEANUP-SESSIONS] Found stale unified_learning_sessions:', staleUnifiedSessions?.length || 0);
+
     if (staleUnifiedError) {
-      console.error('Error finding stale unified sessions:', staleUnifiedError);
+      console.error('[CLEANUP-SESSIONS] Error finding stale unified sessions:', staleUnifiedError);
     }
 
     const allStaleSessions = [
@@ -50,7 +70,7 @@ serve(async (req) => {
       ...(staleUnifiedSessions || []).map(s => ({ ...s, sessionType: 'unified' }))
     ];
 
-    console.log(`Found ${allStaleSessions.length} stale sessions to process`);
+    console.log(`[CLEANUP-SESSIONS] Found ${allStaleSessions.length} stale sessions to process`);
 
     let processedCount = 0;
     let summaryGeneratedCount = 0;
@@ -59,7 +79,7 @@ serve(async (req) => {
     // Process each stale session
     for (const session of allStaleSessions) {
       try {
-        console.log(`Processing stale session ${session.id} (type: ${session.sessionType})`);
+        console.log(`[CLEANUP-SESSIONS] Processing stale session ${session.id} (type: ${session.sessionType})`);
 
         // Check interaction count to determine if summary should be generated
         const { data: interactions, error: interactionsError } = await supabase
@@ -69,21 +89,21 @@ serve(async (req) => {
           .eq('user_id', session.user_id);
 
         if (interactionsError) {
-          console.error(`Error counting interactions for session ${session.id}:`, interactionsError);
+          console.error(`[CLEANUP-SESSIONS] Error counting interactions for session ${session.id}:`, interactionsError);
           continue;
         }
 
         const interactionCount = interactions?.length || 0;
-        console.log(`Session ${session.id} has ${interactionCount} interactions`);
+        console.log(`[CLEANUP-SESSIONS] Session ${session.id} has ${interactionCount} interactions`);
 
         if (interactionCount >= 3) {
           // Generate summary for sessions with meaningful content
-          console.log(`Generating summary for session ${session.id}`);
+          console.log(`[CLEANUP-SESSIONS] Generating summary for session ${session.id}`);
           await generateSessionSummary(session.id, session.sessionType, session.user_id, supabase);
           summaryGeneratedCount++;
         } else {
           // Close directly for sessions with minimal content
-          console.log(`Closing session ${session.id} without summary`);
+          console.log(`[CLEANUP-SESSIONS] Closing session ${session.id} without summary`);
           await closeSessionDirectly(session.id, session.sessionType, session.user_id, supabase);
           directlyClosedCount++;
         }
@@ -91,31 +111,37 @@ serve(async (req) => {
         processedCount++;
 
         // Add small delay to avoid overwhelming the system
-        await new Deno.Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 100));
 
       } catch (error) {
-        console.error(`Error processing session ${session.id}:`, error);
+        console.error(`[CLEANUP-SESSIONS] Error processing session ${session.id}:`, error);
       }
     }
 
-    console.log(`Cleanup completed: ${processedCount} sessions processed, ${summaryGeneratedCount} with summaries, ${directlyClosedCount} closed directly`);
+    const result = {
+      success: true,
+      message: 'Session cleanup completed',
+      stats: {
+        totalFound: allStaleSessions.length,
+        totalProcessed: processedCount,
+        summariesGenerated: summaryGeneratedCount,
+        directlyClosed: directlyClosedCount
+      }
+    };
+
+    console.log(`[CLEANUP-SESSIONS] Cleanup completed:`, result.stats);
 
     return new Response(
-      JSON.stringify({ 
-        success: true,
-        message: 'Session cleanup completed',
-        stats: {
-          totalFound: allStaleSessions.length,
-          totalProcessed: processedCount,
-          summariesGenerated: summaryGeneratedCount,
-          directlyClosed: directlyClosedCount
-        }
-      }), 
+      JSON.stringify(result), 
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
-    console.error('Error in cleanup-sessions:', error);
+    console.error('[CLEANUP-SESSIONS] Error in cleanup-sessions:', { 
+      message: error.message,
+      stack: error.stack
+    });
+    
     return new Response(
       JSON.stringify({ error: error.message }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -124,8 +150,15 @@ serve(async (req) => {
 });
 
 async function generateSessionSummary(sessionId: string, sessionType: string, userId: string, supabase: any) {
+  console.log('[CLEANUP-SESSIONS] Starting summary generation for session:', sessionId, 'type:', sessionType);
   try {
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY')!;
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openAIApiKey) {
+      console.error('[CLEANUP-SESSIONS] OpenAI API key not found');
+      throw new Error('OpenAI API key not found');
+    }
+    
+    console.log('[CLEANUP-SESSIONS] OpenAI API key found, proceeding...');
 
     // Get session data
     let sessionData;
@@ -137,7 +170,10 @@ async function generateSessionSummary(sessionId: string, sessionType: string, us
         .eq('user_id', userId)
         .single();
 
-      if (sessionError) throw sessionError;
+      if (sessionError) {
+        console.error('[CLEANUP-SESSIONS] Error getting session data:', sessionError);
+        throw sessionError;
+      }
       sessionData = session;
     } else if (sessionType === 'unified') {
       const { data: session, error: sessionError } = await supabase
@@ -147,9 +183,14 @@ async function generateSessionSummary(sessionId: string, sessionType: string, us
         .eq('user_id', userId)
         .single();
 
-      if (sessionError) throw sessionError;
+      if (sessionError) {
+        console.error('[CLEANUP-SESSIONS] Error getting unified session data:', sessionError);
+        throw sessionError;
+      }
       sessionData = session;
     }
+
+    console.log('[CLEANUP-SESSIONS] Session data fetched successfully');
 
     // Get interactions
     const { data: interactions, error: interactionsError } = await supabase
@@ -159,9 +200,13 @@ async function generateSessionSummary(sessionId: string, sessionType: string, us
       .eq('user_id', userId)
       .order('sequence_number', { ascending: true });
 
-    if (interactionsError) throw interactionsError;
+    if (interactionsError) {
+      console.error('[CLEANUP-SESSIONS] Error getting interactions:', interactionsError);
+      throw interactionsError;
+    }
 
     const interactionsData = interactions || [];
+    console.log('[CLEANUP-SESSIONS] Interactions fetched:', interactionsData.length);
 
     // Prepare summary data
     const interactionSummary = interactionsData.map((interaction, index) => ({
@@ -205,6 +250,8 @@ Provide a concise summary focusing on:
 Keep it brief since this was an auto-cleanup.
 `;
 
+    console.log('[CLEANUP-SESSIONS] Calling OpenAI API...');
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -225,12 +272,17 @@ Keep it brief since this was an auto-cleanup.
       }),
     });
 
+    console.log('[CLEANUP-SESSIONS] OpenAI response status:', response.status);
+
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
+      const errorText = await response.text();
+      console.error('[CLEANUP-SESSIONS] OpenAI API error:', response.status, response.statusText, errorText);
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
     }
 
     const aiResponse = await response.json();
     const summary = aiResponse.choices[0].message.content;
+    console.log('[CLEANUP-SESSIONS] OpenAI summary generated, length:', summary?.length || 0);
 
     // Create compact summary
     const compactSummary = summary.length > 200 
@@ -247,8 +299,10 @@ Keep it brief since this was an auto-cleanup.
       cleanup_reason: 'stale_session_cleanup'
     };
 
+    console.log('[CLEANUP-SESSIONS] Updating session with summary...');
+
     if (sessionType === 'chat' || sessionType === 'lesson') {
-      await supabase
+      const { error: updateError } = await supabase
         .from('study_sessions')
         .update({
           summary_state: summaryData,
@@ -258,8 +312,13 @@ Keep it brief since this was an auto-cleanup.
         })
         .eq('id', sessionId)
         .eq('user_id', userId);
+        
+      if (updateError) {
+        console.error('[CLEANUP-SESSIONS] Failed to update study_sessions:', updateError.message);
+        throw new Error(`Failed to update session: ${updateError.message}`);
+      }
     } else if (sessionType === 'unified') {
-      await supabase
+      const { error: updateError } = await supabase
         .from('unified_learning_sessions')
         .update({
           next_session_recommendations: summaryData,
@@ -267,20 +326,28 @@ Keep it brief since this was an auto-cleanup.
         })
         .eq('id', sessionId)
         .eq('user_id', userId);
+        
+      if (updateError) {
+        console.error('[CLEANUP-SESSIONS] Failed to update unified_learning_sessions:', updateError.message);
+        throw new Error(`Failed to update session: ${updateError.message}`);
+      }
     }
 
-    console.log(`Successfully generated cleanup summary for session ${sessionId}`);
+    console.log(`[CLEANUP-SESSIONS] Successfully generated cleanup summary for session ${sessionId}`);
 
   } catch (error) {
-    console.error(`Error generating cleanup summary for session ${sessionId}:`, error);
-    throw error;
+    console.error(`[CLEANUP-SESSIONS] Error generating cleanup summary for session ${sessionId}:`, error.message, error.stack);
+    // Fall back to closing session without summary
+    console.log(`[CLEANUP-SESSIONS] Falling back to direct session close for: ${sessionId}`);
+    await closeSessionDirectly(sessionId, sessionType, userId, supabase);
   }
 }
 
 async function closeSessionDirectly(sessionId: string, sessionType: string, userId: string, supabase: any) {
+  console.log('[CLEANUP-SESSIONS] Closing session directly:', sessionId, 'type:', sessionType);
   try {
     if (sessionType === 'chat' || sessionType === 'lesson') {
-      await supabase
+      const { error } = await supabase
         .from('study_sessions')
         .update({
           completed_at: new Date().toISOString(),
@@ -288,20 +355,33 @@ async function closeSessionDirectly(sessionId: string, sessionType: string, user
         })
         .eq('id', sessionId)
         .eq('user_id', userId);
+        
+      console.log('[CLEANUP-SESSIONS] Direct close result for study_sessions:', !error ? 'success' : error.message);
+      
+      if (error) {
+        console.error('[CLEANUP-SESSIONS] Failed to close study_sessions:', error.message);
+        throw new Error(`Failed to close session: ${error.message}`);
+      }
     } else if (sessionType === 'unified') {
-      await supabase
+      const { error } = await supabase
         .from('unified_learning_sessions')
         .update({
           completed_at: new Date().toISOString()
         })
         .eq('id', sessionId)
         .eq('user_id', userId);
+        
+      console.log('[CLEANUP-SESSIONS] Direct close result for unified_learning_sessions:', !error ? 'success' : error.message);
+      
+      if (error) {
+        console.error('[CLEANUP-SESSIONS] Failed to close unified_learning_sessions:', error.message);
+        throw new Error(`Failed to close session: ${error.message}`);
+      }
     }
 
-    console.log(`Successfully closed session ${sessionId} without summary`);
+    console.log(`[CLEANUP-SESSIONS] Successfully closed session ${sessionId} without summary`);
 
   } catch (error) {
-    console.error(`Error closing session ${sessionId}:`, error);
-    throw error;
+    console.error(`[CLEANUP-SESSIONS] Error closing session ${sessionId}:`, error.message, error.stack);
   }
 }
