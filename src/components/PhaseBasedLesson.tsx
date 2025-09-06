@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Textarea } from "@/components/ui/textarea";
-import { AlertCircle, CheckCircle, Clock, HelpCircle, Lightbulb } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { AlertCircle, CheckCircle, Clock, HelpCircle, Lightbulb, Send, Bot, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { PhaseProgress } from "./PhaseProgress";
@@ -439,118 +439,208 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
   const currentPhaseData = getCurrentPhaseData();
 
   return (
-    <div className={`min-h-screen bg-background ${className}`}>
-      {/* Centered Chat Container - OpenAI Style */}
-      <div className="max-w-4xl mx-auto px-4 py-6">
-        {/* Minimal Header */}
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold mb-2">{skill.name}</h1>
-          <p className="text-muted-foreground">
-            {skill.description}
-          </p>
-        </div>
-
-        {/* Full Width Chat Area */}
-        <Card className="min-h-[70vh]">
-          <CardContent className="p-6 flex flex-col h-full">
-            {/* Chat History */}
-            <div ref={chatScrollRef} className="flex-1 space-y-4 max-h-[60vh] overflow-y-auto scroll-smooth mb-6">
-              {chatHistory.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Lightbulb className="h-12 w-12 mx-auto mb-3" />
-                  <p>Napisz "Rozpocznij lekcję" aby zacząć</p>
-                </div>
-              )}
-              
-              {chatHistory.map((message, index) => (
-                <div 
-                  key={index}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div 
-                    className={`max-w-[80%] p-3 rounded-lg ${
-                      message.role === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : message.isHint
-                        ? 'bg-warning/10 border border-warning'
-                        : 'bg-muted'
-                    }`}
-                  >
-                    <div className="flex items-start gap-2">
-                      {message.role === 'assistant' && message.isHint && (
-                        <HelpCircle className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
-                      )}
-                      {message.role === 'user' && message.isCorrect !== undefined && (
-                        message.isCorrect 
-                          ? <CheckCircle className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
-                          : <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
-                      )}
-                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+    <div className={`min-h-screen bg-background flex flex-col ${className}`}>
+      {/* Fixed Header */}
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border/50">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <Lightbulb className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <h1 className="font-semibold text-lg">{skill.name}</h1>
+                <p className="text-xs text-muted-foreground">
+                  Faza {currentPhase} z {phases.length}
+                </p>
+              </div>
             </div>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={askForHint}
+                disabled={isLoading}
+                variant="ghost"
+                size="sm"
+                className="text-xs"
+              >
+                <HelpCircle className="w-4 h-4 mr-1" />
+                Podpowiedź
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-            {/* Input Area */}
-            <div className="space-y-3 border-t pt-4">
-              <Textarea
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                placeholder={chatHistory.length === 0 ? "Napisz 'Rozpocznij lekcję' aby zacząć..." : "Wpisz swoją odpowiedź..."}
-                className="min-h-[80px]"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                  }
-                }}
-              />
-              
-              <div className="flex items-center gap-2">
-                {chatHistory.length === 0 ? (
-                  <Button 
-                    onClick={() => {
-                      setUserInput('Rozpocznij lekcję');
-                      setTimeout(() => sendMessage(), 100);
-                    }}
-                    disabled={isLoading}
-                    className="flex-1"
-                  >
-                    {isLoading ? 'Rozpoczynam...' : 'Rozpocznij lekcję'}
-                  </Button>
-                ) : (
-                  <>
-                    <Button 
-                      onClick={sendMessage}
-                      disabled={!userInput.trim() || isLoading}
-                      className="flex-1"
-                    >
-                      {isLoading ? 'Wysyłam...' : 'Wyślij odpowiedź'}
-                    </Button>
-                    
-                    <Button 
-                      variant="outline"
-                      onClick={askForHint}
-                      disabled={isLoading}
-                    >
-                      <HelpCircle className="h-4 w-4 mr-2" />
-                      Podpowiedź
-                    </Button>
-                    
-                    <Button 
-                      variant="outline"
-                      onClick={endSession}
-                      disabled={isLoading}
-                    >
-                      Zakończ sesję
-                    </Button>
-                  </>
+      {/* Main Chat Area */}
+      <div className="flex-1 max-w-4xl mx-auto w-full px-4 py-6 flex flex-col">
+        {/* Phase Progress */}
+        <div className="mb-6">
+          <PhaseProgress 
+            phases={getPhaseProgressData()} 
+            currentPhase={currentPhase}
+          />
+        </div>
+        
+        {/* Messages Container */}
+        <div ref={chatScrollRef} className="flex-1 overflow-y-auto scroll-smooth pb-4">
+          {chatHistory.length === 0 ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <Lightbulb className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">Gotowy na naukę?</h3>
+                <p className="text-muted-foreground mb-4">
+                  Napisz "Rozpocznij lekcję" aby zacząć
+                </p>
+                {currentPhaseData && (
+                  <div className="max-w-md mx-auto p-4 bg-muted/30 border border-border/50 rounded-xl">
+                    <h4 className="font-medium text-sm mb-2">{currentPhaseData.phase_name}</h4>
+                    <p className="text-xs text-muted-foreground">
+                      {currentPhaseData.phase_description}
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
-          </CardContent>
-        </Card>
+          ) : (
+            <div className="space-y-6">
+              {chatHistory.map((message, index) => {
+                const prevMessage = chatHistory[index - 1];
+                const showTimestamp = !prevMessage || 
+                  new Date(message.timestamp).getTime() - new Date(prevMessage.timestamp).getTime() > 300000; // 5 minutes
+                
+                return (
+                  <div key={index}>
+                    {showTimestamp && (
+                      <div className="text-center mb-4">
+                        <span className="text-xs text-muted-foreground bg-background px-3 py-1 rounded-full border">
+                          {new Date(message.timestamp).toLocaleDateString('pl-PL', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                      </div>
+                    )}
+                    
+                    <div className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        {message.role === 'user' ? (
+                          <User className="w-4 h-4 text-primary" />
+                        ) : (
+                          <Bot className="w-4 h-4 text-primary" />
+                        )}
+                      </div>
+                      
+                      <div className={`flex-1 max-w-[80%] ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
+                        <div
+                          className={`inline-block px-4 py-3 rounded-2xl ${
+                            message.role === 'user'
+                              ? 'bg-primary text-primary-foreground ml-auto'
+                              : message.isHint
+                              ? 'bg-accent/30 border border-accent/50'
+                              : 'bg-muted/50 border border-border/50'
+                          }`}
+                        >
+                          <div className="flex items-start gap-2">
+                            {message.role === 'assistant' && message.isHint && (
+                              <HelpCircle className="h-4 w-4 text-accent-foreground mt-0.5 flex-shrink-0" />
+                            )}
+                            {message.role === 'user' && message.isCorrect !== undefined && (
+                              message.isCorrect 
+                                ? <CheckCircle className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
+                                : <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+                            )}
+                            <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                              {message.content}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              
+              {isLoading && (
+                <div className="flex gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Bot className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="inline-block bg-muted/50 border border-border/50 px-4 py-3 rounded-2xl">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-pulse"></div>
+                        <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-pulse delay-75"></div>
+                        <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-pulse delay-150"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Fixed Input Area */}
+        <div className="sticky bottom-0 bg-background/80 backdrop-blur-sm pt-4">
+          <div className="flex items-end gap-3 p-4 bg-muted/30 border border-border/50 rounded-2xl">
+            <Input
+              type="text"
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              placeholder={chatHistory.length === 0 ? "Napisz 'Rozpocznij lekcję' aby zacząć..." : "Wpisz swoją odpowiedź..."}
+              className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  sendMessage();
+                }
+              }}
+            />
+            
+            {chatHistory.length === 0 ? (
+              <Button 
+                onClick={() => {
+                  setUserInput('Rozpocznij lekcję');
+                  setTimeout(() => sendMessage(), 100);
+                }}
+                disabled={isLoading}
+                size="sm"
+                className="h-10 px-4 rounded-xl"
+              >
+                {isLoading ? 'Rozpoczynam...' : 'Rozpocznij'}
+              </Button>
+            ) : (
+              <Button 
+                onClick={sendMessage}
+                disabled={!userInput.trim() || isLoading}
+                size="sm"
+                className="h-10 w-10 p-0 rounded-xl"
+              >
+                {isLoading ? (
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+              </Button>
+            )}
+          </div>
+          
+          <div className="flex items-center justify-between pt-3 px-1">
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              <button 
+                onClick={endSession} 
+                className="hover:text-foreground transition-colors duration-200 font-medium"
+              >
+                Zakończ sesję
+              </button>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Faza {currentPhase} z {phases.length}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

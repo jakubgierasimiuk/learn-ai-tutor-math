@@ -44,17 +44,14 @@ export const AIChat = () => {
   
   const { toast } = useToast();
   const { user } = useAuth();
-  const { shouldShowSoftPaywall } = useTokenUsage();
+  const { shouldShowSoftPaywall, getRemainingTokens, getUsagePercentage } = useTokenUsage();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     const scrollToBottom = () => {
       if (scrollAreaRef.current) {
-        const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
-        if (scrollContainer) {
-          scrollContainer.scrollTop = scrollContainer.scrollHeight;
-        }
+        scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
       }
     };
 
@@ -484,129 +481,184 @@ export const AIChat = () => {
     }
   };
 
+  const handleSkillSelection = (skillId: string) => {
+    // This would be called when user selects a skill from clarification options
+    console.log('Skill selected:', skillId);
+  };
+
   return (
-    <Card className="w-full max-w-4xl mx-auto h-[700px] sm:h-[600px] flex flex-col">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center gap-2 justify-between">
-          <div className="flex items-center gap-2">
-            <MessageCircle className="w-5 h-5" />
-            mentavo.ai
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Fixed Header */}
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border/50">
+        <div className="max-w-4xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <MessageCircle className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <h1 className="font-semibold text-lg">mentavo.ai</h1>
+                <p className="text-xs text-muted-foreground">Asystent AI do nauki</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex items-center gap-2 text-sm">
+                <Brain className="h-4 w-4 text-muted-foreground" />
+                <Label htmlFor="enriched-context" className="text-sm text-muted-foreground cursor-pointer">
+                  Bogaty kontekst
+                </Label>
+                <Switch
+                  id="enriched-context"
+                  checked={enrichedContext}
+                  onCheckedChange={setEnrichedContext}
+                />
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-sm font-normal">
-            <Brain className="h-4 w-4" />
-            <Label htmlFor="enriched-context" className="text-sm hidden sm:inline">
-              Bogaty kontekst
-            </Label>
-            <Switch
-              id="enriched-context"
-              checked={enrichedContext}
-              onCheckedChange={setEnrichedContext}
-            />
-          </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col flex-1 gap-3 px-3 sm:px-6">
+        </div>
+      </div>
+
+      {/* Main Chat Area */}
+      <div className="flex-1 max-w-4xl mx-auto w-full px-4 py-6 flex flex-col">
         {/* Token Usage & Upgrade Prompts */}
-        <UpgradePrompts context="chat" compact />
-        <TokenUsageProgress />
+        <div className="mb-4 space-y-2">
+          <UpgradePrompts context="chat" compact />
+          <TokenUsageProgress />
+        </div>
         
-        <ScrollArea ref={scrollAreaRef} className="flex-1 pr-2">
-          <div className="space-y-3">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex gap-2 ${
-                  message.role === 'user' ? 'justify-end' : 'justify-start'
-                }`}
-              >
-                <div
-                  className={`flex gap-2 max-w-[85%] sm:max-w-[75%] ${
-                    message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
-                  }`}
-                >
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    {message.role === 'user' ? (
-                      <User className="w-3 h-3 sm:w-4 sm:h-4" />
-                    ) : (
-                      <Bot className="w-3 h-3 sm:w-4 sm:h-4" />
-                    )}
-                  </div>
-                  <div
-                    className={`rounded-2xl px-3 py-2 min-w-0 ${
-                      message.role === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground'
-                    }`}
-                  >
-                    <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
-                    <p className="text-xs opacity-70 mt-1">
-                      {message.timestamp.toLocaleTimeString('pl-PL', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </p>
+        {/* Messages Container */}
+        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto scroll-smooth pb-4">
+          <div className="space-y-6">
+            {messages.map((message, index) => {
+              const prevMessage = messages[index - 1];
+              const showTimestamp = !prevMessage || 
+                new Date(message.timestamp).getTime() - new Date(prevMessage.timestamp).getTime() > 300000; // 5 minutes
+              
+              return (
+                <div key={message.id}>
+                  {showTimestamp && (
+                    <div className="text-center mb-4">
+                      <span className="text-xs text-muted-foreground bg-background px-3 py-1 rounded-full border">
+                        {message.timestamp.toLocaleDateString('pl-PL', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      {message.role === 'user' ? (
+                        <User className="w-4 h-4 text-primary" />
+                      ) : (
+                        <Bot className="w-4 h-4 text-primary" />
+                      )}
+                    </div>
+                    
+                    <div className={`flex-1 max-w-[80%] ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
+                      <div
+                        className={`inline-block px-4 py-3 rounded-2xl ${
+                          message.role === 'user'
+                            ? 'bg-primary text-primary-foreground ml-auto'
+                            : 'bg-muted/50 border border-border/50'
+                        }`}
+                      >
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                          {message.content}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
+            
             {isLoading && (
               <div className="flex gap-3">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Bot className="w-4 h-4" />
+                  <Bot className="w-4 h-4 text-primary" />
                 </div>
-                <div className="bg-muted rounded-lg px-3 py-2">
-                  <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-current rounded-full animate-bounce" />
-                    <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                    <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                <div className="flex-1">
+                  <div className="inline-block bg-muted/50 border border-border/50 px-4 py-3 rounded-2xl">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-pulse"></div>
+                      <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-pulse delay-75"></div>
+                      <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-pulse delay-150"></div>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
           </div>
-        </ScrollArea>
-        
-        <div className="space-y-3">
-          <div className="flex gap-2">
+        </div>
+
+        {/* Clarification Options */}
+        {clarificationContext && clarificationContext.candidates && (
+          <div className="mb-4 bg-accent/30 border border-accent/50 rounded-xl p-4">
+            <p className="text-sm font-medium mb-3 text-accent-foreground">
+              Sprecyzuj, o której umiejętności chodzi:
+            </p>
+            <div className="grid gap-2">
+              {clarificationContext.candidates.map((skill: any, index: number) => (
+                <button
+                  key={index}
+                  onClick={() => handleSkillSelection(skill.id)}
+                  className="text-left p-3 bg-background hover:bg-accent/50 rounded-lg border border-border/50 transition-all duration-200 hover:border-accent/50"
+                >
+                  <span className="font-medium text-sm">{skill.name}</span>
+                  {skill.description && (
+                    <span className="block text-muted-foreground text-xs mt-1">
+                      {skill.description}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Fixed Input Area */}
+        <div className="sticky bottom-0 bg-background/80 backdrop-blur-sm pt-4">
+          <div className="flex items-end gap-3 p-4 bg-muted/30 border border-border/50 rounded-2xl">
             <Input
+              type="text"
+              placeholder="Zadaj pytanie mentavo.ai..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder={
-                clarificationContext?.isWaitingForResponse 
-                  ? "Wybierz jedną z opcji powyżej..." 
-                  : "Zadaj pytanie o matematykę..."
-              }
               disabled={isLoading}
-              className="flex-1"
+              className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60"
             />
             <Button 
               onClick={sendMessage} 
-              disabled={!input.trim() || isLoading}
-              size="icon"
+              disabled={isLoading || !input.trim()}
+              size="sm"
+              className="h-10 w-10 p-0 rounded-xl"
             >
-              <Send className="w-4 h-4" />
+              {isLoading ? (
+                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
             </Button>
           </div>
           
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              onClick={endSession}
-              disabled={isLoading}
-              className="flex-1"
-            >
-              Zakończ sesję
-            </Button>
+          <div className="flex items-center justify-between pt-3 px-1">
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              <button 
+                onClick={endSession} 
+                className="hover:text-foreground transition-colors duration-200 font-medium"
+              >
+                Zakończ sesję
+              </button>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Tokens: {100 - getRemainingTokens()}% używane
+            </div>
           </div>
         </div>
-        
-        {clarificationContext?.isWaitingForResponse && (
-          <div className="text-xs text-muted-foreground text-center mt-2">
-            💡 Wybierz jedną z opcji powyżej lub opisz konkretnie, czego potrzebujesz
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
