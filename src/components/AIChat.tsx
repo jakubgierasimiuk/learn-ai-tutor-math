@@ -513,22 +513,7 @@ export const AIChat = () => {
   };
   return <div className="min-h-screen bg-background flex flex-col">
       {/* Fixed Header */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border/50">
-        <div className="max-w-4xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            
-            <div className="flex items-center gap-3">
-              <div className="hidden sm:flex items-center gap-2 text-sm">
-                <Brain className="h-4 w-4 text-muted-foreground" />
-                <Label htmlFor="enriched-context" className="text-sm text-muted-foreground cursor-pointer">
-                  Bogaty kontekst
-                </Label>
-                <Switch id="enriched-context" checked={enrichedContext} onCheckedChange={setEnrichedContext} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      
 
       {/* Main Chat Area */}
       <div className="flex-1 max-w-4xl mx-auto w-full px-4 py-6 flex flex-col">
