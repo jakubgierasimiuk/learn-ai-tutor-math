@@ -47,7 +47,7 @@ export const AIChat = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { shouldShowSoftPaywall, getRemainingTokens, getUsagePercentage } = useTokenUsage();
-  const { quickSymbols, getSymbolsForText } = useMathSymbols();
+  const { quickSymbols, getSymbolsForText, detectUIHelpRequest } = useMathSymbols();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [contextualSymbols, setContextualSymbols] = useState<string[]>([]);
 
@@ -200,7 +200,7 @@ export const AIChat = () => {
     if (!input.trim() || isLoading || !sessionId || !user?.id) return;
 
     // Check if user needs help with UI/symbols before processing
-    const helpRequest = mathSymbols.detectUIHelpRequest(input.trim());
+    const helpRequest = detectUIHelpRequest(input.trim());
     if (helpRequest.needsHelp) {
       let helpMessage = "Symbole matematyczne znajdziesz w panelu 'Symbole' poniżej ⬇️";
       
