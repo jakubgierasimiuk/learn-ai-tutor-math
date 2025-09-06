@@ -5,6 +5,7 @@ interface MathSymbolsHook {
   quickSymbols: string[];
   loading: boolean;
   getSymbolsForText: (text: string) => string[];
+  detectUIHelpRequest: (text: string) => { needsHelp: boolean; symbolRequested?: string };
 }
 
 export const useMathSymbols = (skillId?: string): MathSymbolsHook => {
@@ -91,9 +92,37 @@ export const useMathSymbols = (skillId?: string): MathSymbolsHook => {
     return suggestedSymbols;
   };
 
+  // Detect if user needs help with UI/symbols
+  const detectUIHelpRequest = (text: string): { needsHelp: boolean; symbolRequested?: string } => {
+    if (!text) return { needsHelp: false };
+    
+    const textLower = text.toLowerCase();
+    const helpPatterns = [
+      'jak wstawić', 'gdzie znajdę', 'nie wiem jak', 'jak napisać', 'jak dodać',
+      'nie mogę znaleźć', 'gdzie jest symbol', 'jak napisać symbol'
+    ];
+    
+    const needsHelp = helpPatterns.some(pattern => textLower.includes(pattern));
+    
+    if (needsHelp) {
+      // Try to detect which symbol they need
+      let symbolRequested;
+      if (textLower.includes('pierwiastek')) symbolRequested = 'pierwiastek';
+      else if (textLower.includes('delta')) symbolRequested = 'delta';
+      else if (textLower.includes('sinus') || textLower.includes('sin')) symbolRequested = 'sinus';
+      else if (textLower.includes('potęg')) symbolRequested = 'potęga';
+      else if (textLower.includes('ułamek')) symbolRequested = 'ułamek';
+      
+      return { needsHelp: true, symbolRequested };
+    }
+    
+    return { needsHelp: false };
+  };
+
   return {
     quickSymbols,
     loading,
-    getSymbolsForText
+    getSymbolsForText,
+    detectUIHelpRequest
   };
 };

@@ -199,6 +199,30 @@ export const AIChat = () => {
   const sendMessage = async () => {
     if (!input.trim() || isLoading || !sessionId || !user?.id) return;
 
+    // Check if user needs help with UI/symbols before processing
+    const helpRequest = mathSymbols.detectUIHelpRequest(input.trim());
+    if (helpRequest.needsHelp) {
+      let helpMessage = "Symbole matematyczne znajdziesz w panelu 'Symbole' poniżej ⬇️";
+      
+      if (helpRequest.symbolRequested === 'pierwiastek') {
+        helpMessage = "Symbol pierwiastka √ znajdziesz w panelu 'Symbole' → zakładka 'Potęgi' ⬇️";
+      } else if (helpRequest.symbolRequested === 'delta') {
+        helpMessage = "Symbol delta Δ znajdziesz w panelu 'Symbole' → zakładka 'Greckie' ⬇️";
+      } else if (helpRequest.symbolRequested === 'sinus') {
+        helpMessage = "Symbol sinus sin znajdziesz w panelu 'Symbole' → zakładka 'Funkcje' ⬇️";
+      } else if (helpRequest.symbolRequested === 'potęga') {
+        helpMessage = "Symbole potęg (², ³, ⁿ) znajdziesz w panelu 'Symbole' → zakładka 'Potęgi' ⬇️";
+      }
+      
+      toast({
+        title: "Pomoc z symbolami",
+        description: helpMessage,
+        duration: 4000
+      });
+      setInput('');
+      return;
+    }
+
     // Check token limits before sending
     if (shouldShowSoftPaywall()) {
       toast({
