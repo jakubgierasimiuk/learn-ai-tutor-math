@@ -14,40 +14,51 @@ import { UpgradePrompts } from '@/components/UpgradePrompts';
 import { useTokenUsage } from '@/hooks/useTokenUsage';
 import { useMathSymbols } from '@/hooks/useMathSymbols';
 import MathSymbolPanel from '@/components/MathSymbolPanel';
-
 interface Message {
   id: string;
   content: string;
   role: 'user' | 'assistant';
   timestamp: Date;
 }
-
 export const AIChat = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      content: 'Cześć! Jestem mentavo.ai. Mogę pomóc Ci z matematyką, wytłumaczyć pojęcia i rozwiązać zadania. W czym mogę Ci dzisiaj pomóc?',
-      role: 'assistant',
-      timestamp: new Date()
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([{
+    id: '1',
+    content: 'Cześć! Jestem mentavo.ai. Mogę pomóc Ci z matematyką, wytłumaczyć pojęcia i rozwiązać zadania. W czym mogę Ci dzisiaj pomóc?',
+    role: 'assistant',
+    timestamp: new Date()
+  }]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [sequenceNumber, setSequenceNumber] = useState(0);
   const [enrichedContext, setEnrichedContext] = useState(false);
-  
+
   // CLARIFICATION CONTEXT STATE
   const [clarificationContext, setClarificationContext] = useState<{
     isWaitingForResponse: boolean;
-    candidates: Array<{ id: string; name: string; department: string }>;
+    candidates: Array<{
+      id: string;
+      name: string;
+      department: string;
+    }>;
     originalMessage: string;
   } | null>(null);
-  
-  const { toast } = useToast();
-  const { user } = useAuth();
-  const { shouldShowSoftPaywall, getRemainingTokens, getUsagePercentage } = useTokenUsage();
-  const { quickSymbols, getSymbolsForText, detectUIHelpRequest } = useMathSymbols();
+  const {
+    toast
+  } = useToast();
+  const {
+    user
+  } = useAuth();
+  const {
+    shouldShowSoftPaywall,
+    getRemainingTokens,
+    getUsagePercentage
+  } = useTokenUsage();
+  const {
+    quickSymbols,
+    getSymbolsForText,
+    detectUIHelpRequest
+  } = useMathSymbols();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [contextualSymbols, setContextualSymbols] = useState<string[]>([]);
 
@@ -70,23 +81,17 @@ export const AIChat = () => {
       initializeSession();
     }
   }, [user]);
-
   const initializeSession = async () => {
     if (!user?.id) return;
-
     try {
       // Check for existing active session or create new one
-      const { data: existingSessions, error: sessionError } = await supabase
-        .from('study_sessions')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('session_type', 'chat')
-        .eq('status', 'in_progress')
-        .order('started_at', { ascending: false })
-        .limit(1);
-
+      const {
+        data: existingSessions,
+        error: sessionError
+      } = await supabase.from('study_sessions').select('*').eq('user_id', user.id).eq('session_type', 'chat').eq('status', 'in_progress').order('started_at', {
+        ascending: false
+      }).limit(1);
       if (sessionError) throw sessionError;
-
       let currentSession;
       if (existingSessions && existingSessions.length > 0) {
         currentSession = existingSessions[0];
@@ -94,40 +99,36 @@ export const AIChat = () => {
         await loadChatHistory(currentSession.id);
       } else {
         // Create new session
-        const { data: newSession, error: createError } = await supabase
-          .from('study_sessions')
-          .insert({
-            user_id: user.id,
-            skill_id: null, // No skill required for general chat
-            session_type: 'chat',
-            status: 'in_progress'
-          })
-          .select()
-          .single();
-
+        const {
+          data: newSession,
+          error: createError
+        } = await supabase.from('study_sessions').insert({
+          user_id: user.id,
+          skill_id: null,
+          // No skill required for general chat
+          session_type: 'chat',
+          status: 'in_progress'
+        }).select().single();
         if (createError) throw createError;
         currentSession = newSession;
       }
-
       setSessionId(currentSession.id);
     } catch (error) {
       console.error('Error initializing session:', error);
     }
   };
-
   const loadChatHistory = async (sessionId: string) => {
     try {
-      const { data: interactions, error } = await supabase
-        .from('learning_interactions')
-        .select('*')
-        .eq('session_id', sessionId)
-        .order('sequence_number', { ascending: true });
-
+      const {
+        data: interactions,
+        error
+      } = await supabase.from('learning_interactions').select('*').eq('session_id', sessionId).order('sequence_number', {
+        ascending: true
+      });
       if (error) throw error;
-
       if (interactions && interactions.length > 0) {
         // Convert interactions to messages format
-        const historyMessages = interactions.flatMap((interaction) => {
+        const historyMessages = interactions.flatMap(interaction => {
           const msgs = [];
           if (interaction.user_input) {
             msgs.push({
@@ -157,45 +158,37 @@ export const AIChat = () => {
       console.error('Error loading chat history:', error);
     }
   };
-
   const saveInteraction = async (userInput: string, aiResponse: string, skillId?: string) => {
     if (!sessionId || !user?.id) return;
-
     try {
-      await supabase
-        .from('learning_interactions')
-        .insert({
-          user_id: user.id,
-          session_id: sessionId,
-          sequence_number: sequenceNumber + 1,
-          user_input: userInput,
-          ai_response: aiResponse,
-          interaction_type: 'chat',
-          content_id: skillId || null,
-          response_time_ms: Date.now() - userMessageTime
-        });
-
+      await supabase.from('learning_interactions').insert({
+        user_id: user.id,
+        session_id: sessionId,
+        sequence_number: sequenceNumber + 1,
+        user_input: userInput,
+        ai_response: aiResponse,
+        interaction_type: 'chat',
+        content_id: skillId || null,
+        response_time_ms: Date.now() - userMessageTime
+      });
       setSequenceNumber(prev => prev + 1);
     } catch (error) {
       console.error('Error saving interaction:', error);
     }
   };
-
   const getMessageHistory = () => {
     // Get last 8 messages (excluding initial greeting)
     const conversationMessages = messages.slice(1);
     const last8Messages = conversationMessages.slice(-8);
-    
     return last8Messages.map(msg => ({
       user: msg.role === 'user' ? msg.content : undefined,
       assistant: msg.role === 'assistant' ? msg.content : undefined,
-      sequence: 0, // Will be handled in backend
+      sequence: 0,
+      // Will be handled in backend
       tokens_estimate: Math.ceil(msg.content.length / 4) // Rough estimate
     }));
   };
-
   let userMessageTime = Date.now();
-
   const sendMessage = async () => {
     if (!input.trim() || isLoading || !sessionId || !user?.id) return;
 
@@ -203,7 +196,6 @@ export const AIChat = () => {
     const helpRequest = detectUIHelpRequest(input.trim());
     if (helpRequest.needsHelp) {
       let helpMessage = "Symbole matematyczne znajdziesz w panelu 'Symbole' poniżej ⬇️";
-      
       if (helpRequest.symbolRequested === 'pierwiastek') {
         helpMessage = "Symbol pierwiastka √ znajdziesz w panelu 'Symbole' → zakładka 'Potęgi' ⬇️";
       } else if (helpRequest.symbolRequested === 'delta') {
@@ -213,7 +205,6 @@ export const AIChat = () => {
       } else if (helpRequest.symbolRequested === 'potęga') {
         helpMessage = "Symbole potęg (², ³, ⁿ) znajdziesz w panelu 'Symbole' → zakładka 'Potęgi' ⬇️";
       }
-      
       toast({
         title: "Pomoc z symbolami",
         description: helpMessage,
@@ -232,20 +223,17 @@ export const AIChat = () => {
       });
       return;
     }
-
     const userMessage: Message = {
       id: Date.now().toString(),
       content: input.trim(),
       role: 'user',
       timestamp: new Date()
     };
-
     setMessages(prev => [...prev, userMessage]);
     const userInput = input.trim();
     setInput('');
     setIsLoading(true);
     userMessageTime = Date.now();
-
     try {
       let skill_id: string | null = null;
       let skill_name: string | null = null;
@@ -255,21 +243,25 @@ export const AIChat = () => {
         skill_id = await processClarificationResponse(userInput);
         skill_name = clarificationContext.candidates.find(c => c.id === skill_id)?.name || null;
         setClarificationContext(null); // Clear context
-        console.log('Processed clarification response:', { skill_id, skill_name });
+        console.log('Processed clarification response:', {
+          skill_id,
+          skill_name
+        });
       } else {
         // Step 1: Normal skill recognition
         console.log('Calling skill-recognition for:', userInput);
-        const { data: skillRecognition, error: recognitionError } = await supabase.functions.invoke('skill-recognition', {
-          body: { 
+        const {
+          data: skillRecognition,
+          error: recognitionError
+        } = await supabase.functions.invoke('skill-recognition', {
+          body: {
             message: userInput
           }
         });
-
         if (recognitionError) {
           console.error('Skill recognition error:', recognitionError);
           throw new Error('Nie mogłem rozpoznać umiejętności z Twojego pytania.');
         }
-
         console.log('Skill recognition result:', skillRecognition);
 
         // Handle two-stage recognition system
@@ -282,34 +274,34 @@ export const AIChat = () => {
             timestamp: new Date()
           };
           setMessages(prev => [...prev, clarificationMessage]);
-          
+
           // Save clarification context for next message
           setClarificationContext({
             isWaitingForResponse: true,
             candidates: skillRecognition.candidatesWithIds || [],
             originalMessage: userInput
           });
-          
           setIsLoading(false);
           return; // Wait for user's clarification response
         }
-
         skill_id = skillRecognition?.skill_id;
         skill_name = skillRecognition?.skill_name;
       }
-
       console.log(`Rozpoznana umiejętność: ${skill_name} (${skill_id})`);
 
       // Step 2: Start chat with recognized skill (using snake_case)
       console.log('Calling study-tutor with endpoint /chat, skill_id:', skill_id);
-      
+
       // Prepare message history and context
       const messageHistory = getMessageHistory();
-      
-      const { data: chatData, error: chatError } = await supabase.functions.invoke('study-tutor', {
-        body: { 
+      const {
+        data: chatData,
+        error: chatError
+      } = await supabase.functions.invoke('study-tutor', {
+        body: {
           message: userInput,
-          skill_id: skill_id, // Use snake_case consistently
+          skill_id: skill_id,
+          // Use snake_case consistently
           sessionId: sessionId,
           messages: messageHistory,
           enrichedContext: enrichedContext,
@@ -325,35 +317,28 @@ export const AIChat = () => {
       console.log('chatData.message:', chatData?.message);
       console.log('chatData keys:', chatData ? Object.keys(chatData) : 'no keys');
       console.log('=== END DEBUG ===');
-
       if (chatError) {
         console.error('Chat error details:', JSON.stringify(chatError, null, 2));
         throw new Error('Wystąpił problem podczas rozmowy z AI.');
       }
-
       if (!chatData) {
         console.error('No chatData received');
         throw new Error('Brak odpowiedzi z AI.');
       }
-
       const aiResponseContent = chatData.message || chatData || 'Rozpocznijmy naukę tej umiejętności!';
-      
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         content: aiResponseContent,
         role: 'assistant',
         timestamp: new Date()
       };
-
       setMessages(prev => [...prev, assistantMessage]);
-      
+
       // Save interaction to database
       await saveInteraction(userInput, aiResponseContent, skill_id);
-
     } catch (error) {
       console.error('Chat error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Nie mogę się połączyć z AI. Spróbuj ponownie.';
-      
       toast({
         title: "Błąd",
         description: errorMessage,
@@ -370,25 +355,25 @@ export const AIChat = () => {
   // Enhanced clarification response processing with advanced fuzzy matching
   const processClarificationResponse = async (userResponse: string): Promise<string | null> => {
     if (!clarificationContext?.candidates) return null;
-    
     const normalizedResponse = userResponse.toLowerCase().trim();
-    const { candidates } = clarificationContext;
-    
+    const {
+      candidates
+    } = clarificationContext;
     console.log('Processing clarification response:', userResponse);
     console.log('Available candidates:', candidates.map(c => c.name));
-    
+
     // Scoring system for candidate matching
     const candidateScores = candidates.map(candidate => {
       let score = 0;
       const candidateName = candidate.name.toLowerCase();
       const candidateWords = candidateName.split(' ').filter(word => word.length > 2);
       const responseWords = normalizedResponse.split(' ').filter(word => word.length > 2);
-      
+
       // 1. Exact name match (highest priority)
       if (normalizedResponse.includes(candidateName) || candidateName.includes(normalizedResponse)) {
         score += 100;
       }
-      
+
       // 2. Word-by-word matching (simplified without fuzzy tolerance)
       candidateWords.forEach(candidateWord => {
         responseWords.forEach(responseWord => {
@@ -399,12 +384,12 @@ export const AIChat = () => {
           }
         });
       });
-      
+
       // 3. Department matching
       if (normalizedResponse.includes(candidate.department.toLowerCase())) {
         score += 20;
       }
-      
+
       // 4. Synonym and concept matching
       const synonyms = {
         'pochodne': ['derivative', 'różniczkowanie', 'tangent'],
@@ -413,7 +398,6 @@ export const AIChat = () => {
         'funkcje': ['function', 'wykres', 'f(x)'],
         'geometria': ['triangle', 'circle', 'area', 'volume']
       };
-      
       Object.entries(synonyms).forEach(([concept, conceptSynonyms]) => {
         if (candidateName.includes(concept)) {
           conceptSynonyms.forEach(synonym => {
@@ -423,14 +407,19 @@ export const AIChat = () => {
           });
         }
       });
-      
-      return { candidate, score };
+      return {
+        candidate,
+        score
+      };
     });
-    
+
     // Sort by score and log results
     candidateScores.sort((a, b) => b.score - a.score);
-    console.log('Candidate scores:', candidateScores.map(cs => ({ name: cs.candidate.name, score: cs.score })));
-    
+    console.log('Candidate scores:', candidateScores.map(cs => ({
+      name: cs.candidate.name,
+      score: cs.score
+    })));
+
     // Try to match by number if user selected option by number
     const numberMatch = normalizedResponse.match(/^(\d+)[\s\.\)]*$/);
     if (numberMatch) {
@@ -440,33 +429,33 @@ export const AIChat = () => {
         return candidates[selectedIndex].id;
       }
     }
-    
+
     // Return highest scoring candidate if score is above threshold
     if (candidateScores[0].score > 15) {
       console.log(`Matched candidate: ${candidateScores[0].candidate.name} (score: ${candidateScores[0].score})`);
       return candidateScores[0].candidate.id;
     }
-    
+
     // Fallback: return first candidate if no good matches
     console.log('No good matches found, using first candidate as fallback');
     return candidates.length > 0 ? candidates[0].id : null;
   };
-
   const endSession = async () => {
     if (!sessionId || !user?.id) return;
-
     try {
       setIsLoading(true);
-      
+
       // Generate session summary
-      const { data, error } = await supabase.functions.invoke('session-summary', {
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('session-summary', {
         body: {
           sessionId: sessionId,
           sessionType: 'chat',
           userId: user.id
         }
       });
-
       if (error) {
         console.error('Error generating session summary:', error);
       }
@@ -484,12 +473,10 @@ export const AIChat = () => {
 
       // Initialize new session
       await initializeSession();
-
       toast({
         title: "Sesja zakończona",
-        description: "Rozpoczęto nową sesję. Poprzednia sesja została zapisana.",
+        description: "Rozpoczęto nową sesję. Poprzednia sesja została zapisana."
       });
-
     } catch (error) {
       console.error('Error ending session:', error);
       toast({
@@ -501,14 +488,12 @@ export const AIChat = () => {
       setIsLoading(false);
     }
   };
-
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
   };
-
   const handleSymbolSelect = (symbol: string) => {
     setInput(prev => prev + symbol);
   };
@@ -522,38 +507,23 @@ export const AIChat = () => {
       setContextualSymbols([]);
     }
   }, [input, getSymbolsForText]);
-
   const handleSkillSelection = (skillId: string) => {
     // This would be called when user selects a skill from clarification options
     console.log('Skill selected:', skillId);
   };
-
-  return (
-    <div className="min-h-screen bg-background flex flex-col">
+  return <div className="min-h-screen bg-background flex flex-col">
       {/* Fixed Header */}
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border/50">
         <div className="max-w-4xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <MessageCircle className="w-4 h-4 text-primary" />
-              </div>
-              <div>
-                <h1 className="font-semibold text-lg">mentavo.ai</h1>
-                <p className="text-xs text-muted-foreground">Asystent AI do nauki</p>
-              </div>
-            </div>
+            
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex items-center gap-2 text-sm">
                 <Brain className="h-4 w-4 text-muted-foreground" />
                 <Label htmlFor="enriched-context" className="text-sm text-muted-foreground cursor-pointer">
                   Bogaty kontekst
                 </Label>
-                <Switch
-                  id="enriched-context"
-                  checked={enrichedContext}
-                  onCheckedChange={setEnrichedContext}
-                />
+                <Switch id="enriched-context" checked={enrichedContext} onCheckedChange={setEnrichedContext} />
               </div>
             </div>
           </div>
@@ -572,52 +542,36 @@ export const AIChat = () => {
         <div ref={scrollAreaRef} className="flex-1 overflow-y-auto scroll-smooth pb-4">
           <div className="space-y-6">
             {messages.map((message, index) => {
-              const prevMessage = messages[index - 1];
-              const showTimestamp = !prevMessage || 
-                new Date(message.timestamp).getTime() - new Date(prevMessage.timestamp).getTime() > 300000; // 5 minutes
-              
-              return (
-                <div key={message.id}>
-                  {showTimestamp && (
-                    <div className="text-center mb-4">
+            const prevMessage = messages[index - 1];
+            const showTimestamp = !prevMessage || new Date(message.timestamp).getTime() - new Date(prevMessage.timestamp).getTime() > 300000; // 5 minutes
+
+            return <div key={message.id}>
+                  {showTimestamp && <div className="text-center mb-4">
                       <span className="text-xs text-muted-foreground bg-background px-3 py-1 rounded-full border">
                         {message.timestamp.toLocaleDateString('pl-PL', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
                       </span>
-                    </div>
-                  )}
+                    </div>}
                   
                   <div className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
                     <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      {message.role === 'user' ? (
-                        <User className="w-4 h-4 text-primary" />
-                      ) : (
-                        <Bot className="w-4 h-4 text-primary" />
-                      )}
+                      {message.role === 'user' ? <User className="w-4 h-4 text-primary" /> : <Bot className="w-4 h-4 text-primary" />}
                     </div>
                     
                     <div className={`flex-1 max-w-[80%] ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
-                      <div
-                        className={`inline-block px-4 py-3 rounded-2xl ${
-                          message.role === 'user'
-                            ? 'bg-primary text-primary-foreground ml-auto'
-                            : 'bg-muted/50 border border-border/50'
-                        }`}
-                      >
+                      <div className={`inline-block px-4 py-3 rounded-2xl ${message.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-muted/50 border border-border/50'}`}>
                         <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
                           {message.content}
                         </p>
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                </div>;
+          })}
             
-            {isLoading && (
-              <div className="flex gap-3">
+            {isLoading && <div className="flex gap-3">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <Bot className="w-4 h-4 text-primary" />
                 </div>
@@ -630,74 +584,40 @@ export const AIChat = () => {
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              </div>}
           </div>
         </div>
 
         {/* Clarification Options */}
-        {clarificationContext && clarificationContext.candidates && (
-          <div className="mb-4 bg-accent/30 border border-accent/50 rounded-xl p-4">
+        {clarificationContext && clarificationContext.candidates && <div className="mb-4 bg-accent/30 border border-accent/50 rounded-xl p-4">
             <p className="text-sm font-medium mb-3 text-accent-foreground">
               Sprecyzuj, o której umiejętności chodzi:
             </p>
             <div className="grid gap-2">
-              {clarificationContext.candidates.map((skill: any, index: number) => (
-                <button
-                  key={index}
-                  onClick={() => handleSkillSelection(skill.id)}
-                  className="text-left p-3 bg-background hover:bg-accent/50 rounded-lg border border-border/50 transition-all duration-200 hover:border-accent/50"
-                >
+              {clarificationContext.candidates.map((skill: any, index: number) => <button key={index} onClick={() => handleSkillSelection(skill.id)} className="text-left p-3 bg-background hover:bg-accent/50 rounded-lg border border-border/50 transition-all duration-200 hover:border-accent/50">
                   <span className="font-medium text-sm">{skill.name}</span>
-                  {skill.description && (
-                    <span className="block text-muted-foreground text-xs mt-1">
+                  {skill.description && <span className="block text-muted-foreground text-xs mt-1">
                       {skill.description}
-                    </span>
-                  )}
-                </button>
-              ))}
+                    </span>}
+                </button>)}
             </div>
-          </div>
-        )}
+          </div>}
 
         {/* Fixed Input Area */}
         <div className="sticky bottom-0 bg-background/80 backdrop-blur-sm pt-4">
           <div className="mb-3">
-            <MathSymbolPanel
-              quickSymbols={contextualSymbols.length > 0 ? contextualSymbols : quickSymbols}
-              onSymbolSelect={handleSymbolSelect}
-            />
+            <MathSymbolPanel quickSymbols={contextualSymbols.length > 0 ? contextualSymbols : quickSymbols} onSymbolSelect={handleSymbolSelect} />
           </div>
           <div className="flex items-end gap-3 p-4 bg-muted/30 border border-border/50 rounded-2xl">
-            <Input
-              type="text"
-              placeholder="Zadaj pytanie mentavo.ai..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              disabled={isLoading}
-              className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60"
-            />
-            <Button 
-              onClick={sendMessage} 
-              disabled={isLoading || !input.trim()}
-              size="sm"
-              className="h-10 w-10 p-0 rounded-xl"
-            >
-              {isLoading ? (
-                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Send className="w-4 h-4" />
-              )}
+            <Input type="text" placeholder="Zadaj pytanie mentavo.ai..." value={input} onChange={e => setInput(e.target.value)} onKeyPress={handleKeyPress} disabled={isLoading} className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60" />
+            <Button onClick={sendMessage} disabled={isLoading || !input.trim()} size="sm" className="h-10 w-10 p-0 rounded-xl">
+              {isLoading ? <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <Send className="w-4 h-4" />}
             </Button>
           </div>
           
           <div className="flex items-center justify-between pt-3 px-1">
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <button 
-                onClick={endSession} 
-                className="hover:text-foreground transition-colors duration-200 font-medium"
-              >
+              <button onClick={endSession} className="hover:text-foreground transition-colors duration-200 font-medium">
                 Zakończ sesję
               </button>
             </div>
@@ -707,6 +627,5 @@ export const AIChat = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
