@@ -12,6 +12,8 @@ import { Label } from '@/components/ui/label';
 import { TokenUsageProgress } from '@/components/TokenUsageProgress';
 import { UpgradePrompts } from '@/components/UpgradePrompts';
 import { useTokenUsage } from '@/hooks/useTokenUsage';
+import { useMathSymbols } from '@/hooks/useMathSymbols';
+import MathSymbolPanel from '@/components/MathSymbolPanel';
 
 interface Message {
   id: string;
@@ -45,7 +47,9 @@ export const AIChat = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { shouldShowSoftPaywall, getRemainingTokens, getUsagePercentage } = useTokenUsage();
+  const { quickSymbols, getSymbolsForText } = useMathSymbols();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const [contextualSymbols, setContextualSymbols] = useState<string[]>([]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -481,6 +485,20 @@ export const AIChat = () => {
     }
   };
 
+  const handleSymbolSelect = (symbol: string) => {
+    setInput(prev => prev + symbol);
+  };
+
+  // Update contextual symbols when input changes
+  useEffect(() => {
+    if (input.trim()) {
+      const suggestedSymbols = getSymbolsForText(input);
+      setContextualSymbols(suggestedSymbols);
+    } else {
+      setContextualSymbols([]);
+    }
+  }, [input, getSymbolsForText]);
+
   const handleSkillSelection = (skillId: string) => {
     // This would be called when user selects a skill from clarification options
     console.log('Skill selected:', skillId);
@@ -620,6 +638,12 @@ export const AIChat = () => {
 
         {/* Fixed Input Area */}
         <div className="sticky bottom-0 bg-background/80 backdrop-blur-sm pt-4">
+          <div className="mb-3">
+            <MathSymbolPanel
+              quickSymbols={contextualSymbols.length > 0 ? contextualSymbols : quickSymbols}
+              onSymbolSelect={handleSymbolSelect}
+            />
+          </div>
           <div className="flex items-end gap-3 p-4 bg-muted/30 border border-border/50 rounded-2xl">
             <Input
               type="text"

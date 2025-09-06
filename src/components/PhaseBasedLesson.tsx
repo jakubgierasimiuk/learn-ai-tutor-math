@@ -9,6 +9,8 @@ import { AlertCircle, CheckCircle, Clock, HelpCircle, Lightbulb, Send, Bot, User
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { PhaseProgress } from "./PhaseProgress";
+import { useMathSymbols } from "@/hooks/useMathSymbols";
+import MathSymbolPanel from "@/components/MathSymbolPanel";
 interface PhaseData {
   id: string;
   phase_number: number;
@@ -53,8 +55,10 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
   const [isLoading, setIsLoading] = useState(false);
   const [responseTime, setResponseTime] = useState<number>(0);
   const [startTime, setStartTime] = useState<number>(Date.now());
+  const [contextualSymbols, setContextualSymbols] = useState<string[]>([]);
   const { toast } = useToast();
   const { user } = useAuth();
+  const { quickSymbols, getSymbolsForText } = useMathSymbols(skillId);
   const chatScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -310,6 +314,20 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
       console.error('Error updating phase progress:', error);
     }
   };
+
+  const handleSymbolSelect = (symbol: string) => {
+    setUserInput(prev => prev + symbol);
+  };
+
+  // Update contextual symbols when input changes
+  useEffect(() => {
+    if (userInput.trim()) {
+      const suggestedSymbols = getSymbolsForText(userInput);
+      setContextualSymbols(suggestedSymbols);
+    } else {
+      setContextualSymbols([]);
+    }
+  }, [userInput, getSymbolsForText]);
 
   const askForHint = async () => {
     if (!session || isLoading) return;
@@ -584,6 +602,12 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
 
         {/* Fixed Input Area */}
         <div className="sticky bottom-0 bg-background/80 backdrop-blur-sm pt-4">
+          <div className="mb-3">
+            <MathSymbolPanel
+              quickSymbols={contextualSymbols.length > 0 ? contextualSymbols : quickSymbols}
+              onSymbolSelect={handleSymbolSelect}
+            />
+          </div>
           <div className="flex items-end gap-3 p-4 bg-muted/30 border border-border/50 rounded-2xl">
             <Input
               type="text"

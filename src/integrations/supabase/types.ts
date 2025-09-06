@@ -1359,6 +1359,30 @@ export type Database = {
         }
         Relationships: []
       }
+      math_symbol_patterns: {
+        Row: {
+          confidence: number
+          created_at: string
+          id: string
+          keywords: string[]
+          symbols: Json
+        }
+        Insert: {
+          confidence?: number
+          created_at?: string
+          id?: string
+          keywords: string[]
+          symbols?: Json
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          id?: string
+          keywords?: string[]
+          symbols?: Json
+        }
+        Relationships: []
+      }
       math_validation_cache: {
         Row: {
           cached_at: string
@@ -2111,6 +2135,33 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      skill_math_symbols: {
+        Row: {
+          created_at: string
+          id: string
+          panel_symbols: Json
+          quick_symbols: Json
+          skill_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          panel_symbols?: Json
+          quick_symbols?: Json
+          skill_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          panel_symbols?: Json
+          quick_symbols?: Json
+          skill_id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       skill_misconception_patterns: {
         Row: {
