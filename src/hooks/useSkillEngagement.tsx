@@ -22,6 +22,10 @@ export interface EngagementLevelInfo {
   progressPercentage: number;
 }
 
+export interface SkillEngagementData {
+  [skillId: string]: EngagementLevelInfo;
+}
+
 const calculateEngagementLevel = (data: EngagementData): EngagementLevelInfo => {
   const { interactionCount, totalTimeMinutes } = data;
 
@@ -69,7 +73,133 @@ const calculateEngagementLevel = (data: EngagementData): EngagementLevelInfo => 
   }
 };
 
+// OPTIMIZED: Bulk fetch all engagement data for all skills at once
+export const useAllSkillsEngagement = () => {
+  const { user } = useAuth();
+  const [engagementData, setEngagementData] = useState<SkillEngagementData>({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user?.id) {
+      setEngagementData({});
+      return;
+    }
+
+    const fetchAllEngagementData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        console.log('Fetching engagement data for user:', user.id);
+
+        // Single optimized query to get all user sessions with their interactions
+        const { data: sessionsWithInteractions, error: queryError } = await supabase
+          .from('study_sessions')
+          .select(`
+            id,
+            skill_id,
+            started_at,
+            completed_at,
+            learning_interactions (
+              id,
+              interaction_timestamp,
+              total_tokens,
+              engagement_score
+            )
+          `)
+          .eq('user_id', user.id);
+
+        if (queryError) throw queryError;
+
+        console.log('Fetched sessions with interactions:', sessionsWithInteractions?.length || 0);
+
+        // Group by skill_id and calculate engagement metrics
+        const skillEngagementMap: SkillEngagementData = {};
+
+        if (sessionsWithInteractions && sessionsWithInteractions.length > 0) {
+          const skillGroups = sessionsWithInteractions.reduce((acc, session) => {
+            if (!acc[session.skill_id]) {
+              acc[session.skill_id] = [];
+            }
+            acc[session.skill_id].push(session);
+            return acc;
+          }, {} as Record<string, any[]>);
+
+          // Calculate engagement for each skill
+          Object.entries(skillGroups).forEach(([skillId, sessions]) => {
+            const allInteractions = sessions.flatMap(s => s.learning_interactions || []);
+            const interactionCount = allInteractions.length;
+            
+            const totalTimeMinutes = sessions.reduce((total, session) => {
+              if (session.completed_at && session.started_at) {
+                const duration = new Date(session.completed_at).getTime() - new Date(session.started_at).getTime();
+                return total + (duration / (1000 * 60));
+              }
+              // For ongoing sessions, calculate time from start to now
+              if (session.started_at && !session.completed_at) {
+                const duration = new Date().getTime() - new Date(session.started_at).getTime();
+                const minutes = duration / (1000 * 60);
+                // Cap ongoing sessions at reasonable time to avoid inflated numbers
+                return total + Math.min(minutes, 180); // Max 3 hours for ongoing session
+              }
+              return total;
+            }, 0);
+
+            const averageTokensPerInteraction = interactionCount > 0 
+              ? (allInteractions.reduce((sum, i) => sum + (i.total_tokens || 0), 0)) / interactionCount
+              : 0;
+
+            const averageEngagementScore = interactionCount > 0
+              ? (allInteractions.reduce((sum, i) => sum + (i.engagement_score || 0), 0)) / interactionCount
+              : 0;
+
+            const lastActivityAt = allInteractions.length > 0
+              ? allInteractions.sort((a, b) => new Date(b.interaction_timestamp).getTime() - new Date(a.interaction_timestamp).getTime())[0].interaction_timestamp
+              : null;
+
+            const engagementData: EngagementData = {
+              interactionCount,
+              totalTimeMinutes,
+              sessionCount: sessions.length,
+              averageTokensPerInteraction,
+              averageEngagementScore,
+              lastActivityAt
+            };
+
+            skillEngagementMap[skillId] = calculateEngagementLevel(engagementData);
+          });
+        }
+
+        console.log('Calculated engagement for skills:', Object.keys(skillEngagementMap).length);
+        setEngagementData(skillEngagementMap);
+
+      } catch (err) {
+        console.error('Error fetching engagement data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch engagement data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllEngagementData();
+  }, [user?.id]);
+
+  return {
+    engagementData,
+    loading,
+    error,
+    getEngagementForSkill: (skillId: string): EngagementLevelInfo | null => {
+      return engagementData[skillId] || null;
+    }
+  };
+};
+
+// Keep the individual hook for backwards compatibility but mark as deprecated
+/** @deprecated Use useAllSkillsEngagement instead for better performance */
 export const useSkillEngagement = (skillId: string) => {
+  console.warn('useSkillEngagement is deprecated. Use useAllSkillsEngagement for better performance.');
+  
   const { user } = useAuth();
   const [engagementData, setEngagementData] = useState<EngagementData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -121,7 +251,14 @@ export const useSkillEngagement = (skillId: string) => {
         const totalTimeMinutes = sessions.reduce((total, session) => {
           if (session.completed_at && session.started_at) {
             const duration = new Date(session.completed_at).getTime() - new Date(session.started_at).getTime();
-            return total + (duration / (1000 * 60)); // Convert to minutes
+            return total + (duration / (1000 * 60));
+          }
+          // For ongoing sessions, calculate time from start to now
+          if (session.started_at && !session.completed_at) {
+            const duration = new Date().getTime() - new Date(session.started_at).getTime();
+            const minutes = duration / (1000 * 60);
+            // Cap ongoing sessions at reasonable time to avoid inflated numbers
+            return total + Math.min(minutes, 180); // Max 3 hours for ongoing session
           }
           return total;
         }, 0);

@@ -14,7 +14,7 @@ import { StudentMaterialsWizard } from '@/components/StudentMaterialsWizard';
 import { LessonResumeModal } from '@/components/LessonResumeModal';
 import { Upload } from 'lucide-react';
 import { Seo } from '@/components/Seo';
-import { useSkillEngagement } from '@/hooks/useSkillEngagement';
+import { useAllSkillsEngagement } from '@/hooks/useSkillEngagement';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function StudyDashboard() {
@@ -26,6 +26,9 @@ export default function StudyDashboard() {
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [resumeModalOpen, setResumeModalOpen] = useState(false);
   const [selectedSkillForResume, setSelectedSkillForResume] = useState<{ id: string; name: string } | null>(null);
+  
+  // OPTIMIZED: Fetch all engagement data at once
+  const { engagementData: allEngagementData, loading: engagementLoading, getEngagementForSkill } = useAllSkillsEngagement();
 
   // Fetch skills with progress
   const { data: skillsWithProgress, isLoading } = useQuery({
@@ -303,7 +306,16 @@ export default function StudyDashboard() {
 
       {/* Skills Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredSkills?.map(skill => <SkillCard key={skill.id} skill={skill} onStartLesson={startLesson} onResumeLesson={handleResumeLesson} />)}
+        {filteredSkills?.map(skill => (
+          <SkillCard 
+            key={skill.id} 
+            skill={skill} 
+            engagementLevel={getEngagementForSkill(skill.id)}
+            engagementLoading={engagementLoading}
+            onStartLesson={startLesson} 
+            onResumeLesson={handleResumeLesson} 
+          />
+        ))}
       </div>
 
       {filteredSkills?.length === 0 && (
@@ -343,17 +355,21 @@ export default function StudyDashboard() {
   );
 }
 
-// Skill Card Component with Engagement Levels
+// Optimized Skill Card Component
 function SkillCard({ 
   skill, 
+  engagementLevel,
+  engagementLoading,
   onStartLesson, 
   onResumeLesson 
 }: { 
   skill: any; 
+  engagementLevel: any;
+  engagementLoading: boolean;
   onStartLesson: (id: string) => void;
   onResumeLesson: (id: string, name: string) => void;
 }) {
-  const { engagementLevel, loading } = useSkillEngagement(skill.id);
+  // Use passed engagement level instead of individual hook call
   const progress = skill.progress;
   const masteryPercentage = progress ? (progress.mastery_level / 5) * 100 : 0;
 
@@ -453,7 +469,7 @@ function SkillCard({
 
       <CardContent className="space-y-4">
         {/* Engagement Level Display */}
-        {loading ? (
+        {engagementLoading ? (
           <div className="space-y-2">
             <div className="h-4 bg-muted rounded animate-pulse" />
             <div className="h-2 bg-muted rounded animate-pulse" />
