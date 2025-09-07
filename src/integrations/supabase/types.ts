@@ -2607,6 +2607,7 @@ export type Database = {
           completed_steps: number | null
           created_at: string
           current_equation: string | null
+          duration_minutes: number | null
           early_reveals: number | null
           hints_used: number | null
           id: string
@@ -2632,6 +2633,7 @@ export type Database = {
           completed_steps?: number | null
           created_at?: string
           current_equation?: string | null
+          duration_minutes?: number | null
           early_reveals?: number | null
           hints_used?: number | null
           id?: string
@@ -2657,6 +2659,7 @@ export type Database = {
           completed_steps?: number | null
           created_at?: string
           current_equation?: string | null
+          duration_minutes?: number | null
           early_reveals?: number | null
           hints_used?: number | null
           id?: string

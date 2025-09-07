@@ -108,7 +108,9 @@ Odpowiedz w języku polskim, w ciepłym, motywującym tonie, maksymalnie 150 sł
     });
 
     if (!openAIResponse.ok) {
-      throw new Error(`OpenAI API error: ${openAIResponse.status}`);
+      const errorText = await openAIResponse.text();
+      console.error('[RESUME-SUMMARY] OpenAI API error:', openAIResponse.status, errorText);
+      throw new Error(`OpenAI API error: ${openAIResponse.status} - ${errorText}`);
     }
 
     const openAIData = await openAIResponse.json();
