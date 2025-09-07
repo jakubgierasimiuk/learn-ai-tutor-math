@@ -39,6 +39,7 @@ interface SessionGroup {
   functions: string[];
   activeChatMinutes: number;
   totalTokens: number;
+  totalCost: number;
   userId: string;
 }
 
@@ -134,6 +135,12 @@ const AILogsPage = () => {
         // Sum total tokens for the session
         const totalTokens = sortedLogs.reduce((sum, log) => sum + (log.tokens_used || 0), 0);
         
+        // Calculate cost based on pricing: $1.25/1M input tokens, $10/1M output tokens
+        // Assuming ~70% input, 30% output tokens (typical for educational conversations)
+        const inputTokens = totalTokens * 0.7;
+        const outputTokens = totalTokens * 0.3;
+        const totalCost = (inputTokens * 1.25 / 1000000) + (outputTokens * 10.0 / 1000000);
+        
         // Get user ID from any log in the session
         const userId = sortedLogs[0]?.user_input ? sortedLogs.find(log => log.user_input)?.session_id?.substring(0, 8) || 'unknown' : 'system';
         
@@ -145,6 +152,7 @@ const AILogsPage = () => {
           functions: [...new Set(sortedLogs.map(log => log.function_name))],
           activeChatMinutes: Math.round(activeChatMinutes * 10) / 10, // Round to 1 decimal
           totalTokens,
+          totalCost: Math.round(totalCost * 10000) / 10000, // Round to 4 decimal places
           userId: sessionId.substring(0, 8) + '...'
         };
       }).sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
@@ -366,6 +374,10 @@ const AILogsPage = () => {
                           <div className="flex items-center gap-1">
                             <span className="text-xs">🪙</span>
                             {session.totalTokens} tokenów
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs">💰</span>
+                            ${session.totalCost.toFixed(4)}
                           </div>
                           <div className="flex items-center gap-1">
                             <User className="h-4 w-4" />
