@@ -37,6 +37,9 @@ interface SessionGroup {
   startTime: string;
   totalLogs: number;
   functions: string[];
+  activeChatMinutes: number;
+  totalTokens: number;
+  userId: string;
 }
 
 const AILogsPage = () => {
@@ -112,12 +115,37 @@ const AILogsPage = () => {
 
       const grouped: SessionGroup[] = Array.from(sessions.entries()).map(([sessionId, sessionLogs]) => {
         const sortedLogs = sessionLogs.sort((a, b) => a.sequence_number - b.sequence_number);
+        
+        // Calculate active chat time (excluding gaps > 10 minutes)
+        let activeChatMinutes = 0;
+        if (sortedLogs.length > 1) {
+          for (let i = 0; i < sortedLogs.length - 1; i++) {
+            const current = new Date(sortedLogs[i].timestamp);
+            const next = new Date(sortedLogs[i + 1].timestamp);
+            const gapMinutes = (next.getTime() - current.getTime()) / (1000 * 60);
+            
+            // Only add time if gap is less than 10 minutes
+            if (gapMinutes <= 10) {
+              activeChatMinutes += gapMinutes;
+            }
+          }
+        }
+        
+        // Sum total tokens for the session
+        const totalTokens = sortedLogs.reduce((sum, log) => sum + (log.tokens_used || 0), 0);
+        
+        // Get user ID from any log in the session
+        const userId = sortedLogs[0]?.user_input ? sortedLogs.find(log => log.user_input)?.session_id?.substring(0, 8) || 'unknown' : 'system';
+        
         return {
           sessionId,
           logs: sortedLogs,
           startTime: sortedLogs[0]?.timestamp || '',
           totalLogs: sortedLogs.length,
-          functions: [...new Set(sortedLogs.map(log => log.function_name))]
+          functions: [...new Set(sortedLogs.map(log => log.function_name))],
+          activeChatMinutes: Math.round(activeChatMinutes * 10) / 10, // Round to 1 decimal
+          totalTokens,
+          userId: sessionId.substring(0, 8) + '...'
         };
       }).sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
 
@@ -330,6 +358,18 @@ const AILogsPage = () => {
                           <div className="flex items-center gap-1">
                             <Brain className="h-4 w-4" />
                             {session.functions.join(', ')}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            {session.activeChatMinutes} min aktywnego czatu
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs">🪙</span>
+                            {session.totalTokens} tokenów
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <User className="h-4 w-4" />
+                            {session.userId}
                           </div>
                         </div>
                       </div>
