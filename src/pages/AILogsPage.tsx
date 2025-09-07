@@ -41,6 +41,7 @@ interface SessionGroup {
   totalTokens: number;
   totalCost: number;
   userId: string;
+  hasFormalSession: boolean;
 }
 
 const AILogsPage = () => {
@@ -104,6 +105,27 @@ const AILogsPage = () => {
 
       setLogs(filteredLogs);
 
+      // Check which session IDs correspond to formal sessions
+      const sessionIds = [...new Set(filteredLogs.map(log => log.session_id).filter(id => id))];
+      let formalSessionIds = new Set<string>();
+      
+      if (sessionIds.length > 0) {
+        // Check study_sessions
+        const { data: studySessions } = await supabase
+          .from('study_sessions')
+          .select('id')
+          .in('id', sessionIds);
+        
+        // Check unified_learning_sessions  
+        const { data: unifiedSessions } = await supabase
+          .from('unified_learning_sessions')
+          .select('id')
+          .in('id', sessionIds);
+          
+        if (studySessions) studySessions.forEach(s => formalSessionIds.add(s.id));
+        if (unifiedSessions) unifiedSessions.forEach(s => formalSessionIds.add(s.id));
+      }
+
       // Group by session
       const sessions = new Map<string, AILog[]>();
       filteredLogs.forEach(log => {
@@ -152,8 +174,9 @@ const AILogsPage = () => {
           functions: [...new Set(sortedLogs.map(log => log.function_name))],
           activeChatMinutes: Math.round(activeChatMinutes * 10) / 10, // Round to 1 decimal
           totalTokens,
-          totalCost: Math.round(totalCost * 10000) / 10000, // Round to 4 decimal places
-          userId: sessionId.substring(0, 8) + '...'
+          totalCost: Math.round(totalCost * 100) / 100, // Round to 2 decimal places
+          userId: sessionId.substring(0, 8) + '...',
+          hasFormalSession: formalSessionIds.has(sessionId)
         };
       }).sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
 
@@ -353,6 +376,15 @@ const AILogsPage = () => {
                       <div>
                         <CardTitle className="text-lg">
                           Sesja: {session.sessionId === 'no-session' ? 'Brak sesji' : session.sessionId.slice(0, 8)}...
+                          {session.hasFormalSession ? (
+                            <Badge variant="secondary" className="ml-2 text-xs bg-blue-100 text-blue-800">
+                              Formalna sesja
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="ml-2 text-xs text-orange-600 border-orange-300">
+                              Tylko AI
+                            </Badge>
+                          )}
                         </CardTitle>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
                           <div className="flex items-center gap-1">

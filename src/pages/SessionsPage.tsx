@@ -44,6 +44,7 @@ interface SessionData {
   active_chat_minutes?: number;
   total_tokens?: number;
   session_cost?: number;
+  has_ai_logs?: boolean;
 }
 
 interface Message {
@@ -194,7 +195,8 @@ const SessionsPage = () => {
             aiLogsMap[sessionId] = {
               activeChatMinutes: Math.round(activeChatMinutes * 10) / 10,
               totalTokens,
-              sessionCost: Math.round(sessionCost * 100) / 100
+              sessionCost: Math.round(sessionCost * 100) / 100,
+              hasAiLogs: true
             };
           });
         }
@@ -233,6 +235,7 @@ const SessionsPage = () => {
           active_chat_minutes: aiLogsMap[session.id]?.activeChatMinutes || 0,
           total_tokens: aiLogsMap[session.id]?.totalTokens || session.total_tokens_used || 0,
           session_cost: aiLogsMap[session.id]?.sessionCost || 0,
+          has_ai_logs: aiLogsMap[session.id]?.hasAiLogs || false,
           user_id: session.user_id.substring(0, 8) + '...'
         })),
         ...(unifiedSessions || []).map(session => ({
@@ -249,6 +252,7 @@ const SessionsPage = () => {
           active_chat_minutes: aiLogsMap[session.id]?.activeChatMinutes || 0,
           total_tokens: aiLogsMap[session.id]?.totalTokens || session.total_tokens_used || 0,
           session_cost: aiLogsMap[session.id]?.sessionCost || 0,
+          has_ai_logs: aiLogsMap[session.id]?.hasAiLogs || false,
           user_id: session.user_id.substring(0, 8) + '...'
         }))
       ];
@@ -522,6 +526,15 @@ const SessionsPage = () => {
                                 <Badge variant="outline" className="text-xs">
                                   {getSessionTypeLabel(session.session_type)}
                                 </Badge>
+                                {session.has_ai_logs ? (
+                                  <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">
+                                    AI
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="text-xs text-orange-600 border-orange-300">
+                                    Bez AI
+                                  </Badge>
+                                )}
                               </div>
                               <Badge variant={session.status === 'completed' ? 'default' : 'secondary'}>
                                 {session.status === 'completed' ? (
