@@ -377,7 +377,7 @@ const AILogsPage = () => {
                           </div>
                           <div className="flex items-center gap-1">
                             <span className="text-xs">💰</span>
-                            ${session.totalCost.toFixed(4)}
+                            ${session.totalCost.toFixed(2)}
                           </div>
                           <div className="flex items-center gap-1">
                             <User className="h-4 w-4" />
