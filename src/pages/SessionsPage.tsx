@@ -16,11 +16,13 @@ import {
   User,
   Bot,
   Filter,
-  Search
+  Search,
+  Shield
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useRoles } from '@/hooks/useRoles';
 import { useNavigate } from 'react-router-dom';
 import { Seo } from '@/components/Seo';
 
@@ -38,6 +40,10 @@ interface SessionData {
   duration_minutes?: number;
   skill_name?: string;
   department?: string;
+  user_id?: string;
+  active_chat_minutes?: number;
+  total_tokens?: number;
+  session_cost?: number;
 }
 
 interface Message {
@@ -55,9 +61,11 @@ const SessionsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [userFilter, setUserFilter] = useState<string>('all');
   
   const { toast } = useToast();
   const { user } = useAuth();
+  const { isAdmin } = useRoles();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -68,7 +76,7 @@ const SessionsPage = () => {
 
   useEffect(() => {
     applyFilters();
-  }, [sessions, searchTerm, statusFilter, typeFilter]);
+  }, [sessions, searchTerm, statusFilter, typeFilter, userFilter]);
 
   const loadSessions = async () => {
     if (!user?.id) return;
@@ -76,10 +84,11 @@ const SessionsPage = () => {
     setIsLoading(true);
     try {
       // Load chat sessions
-      const { data: chatSessions, error: chatError } = await supabase
+      let chatQuery = supabase
         .from('study_sessions')
         .select(`
           id,
+          user_id,
           session_type,
           status,
           started_at,
@@ -88,18 +97,27 @@ const SessionsPage = () => {
           summary_compact,
           summary_state,
           total_steps,
-          completed_steps
+          completed_steps,
+          total_tokens_used
         `)
-        .eq('user_id', user.id)
         .order('started_at', { ascending: false });
+
+      // Only filter by user_id if not admin or if admin has selected specific user
+      if (!isAdmin || userFilter !== "all") {
+        const targetUserId = isAdmin && userFilter !== "all" ? userFilter : user.id;
+        chatQuery = chatQuery.eq('user_id', targetUserId);
+      }
+
+      const { data: chatSessions, error: chatError } = await chatQuery;
 
       if (chatError) throw chatError;
 
       // Load unified learning sessions
-      const { data: unifiedSessions, error: unifiedError } = await supabase
+      let unifiedQuery = supabase
         .from('unified_learning_sessions')
         .select(`
           id,
+          user_id,
           session_type,
           started_at,
           completed_at,
@@ -107,12 +125,80 @@ const SessionsPage = () => {
           next_session_recommendations,
           tasks_completed,
           correct_answers,
-          department
+          department,
+          total_tokens_used
         `)
-        .eq('user_id', user.id)
         .order('started_at', { ascending: false });
 
+      // Only filter by user_id if not admin or if admin has selected specific user
+      if (!isAdmin || userFilter !== "all") {
+        const targetUserId = isAdmin && userFilter !== "all" ? userFilter : user.id;
+        unifiedQuery = unifiedQuery.eq('user_id', targetUserId);
+      }
+
+      const { data: unifiedSessions, error: unifiedError } = await unifiedQuery;
+
       if (unifiedError) throw unifiedError;
+
+      // Get session IDs to fetch AI logs for time calculation
+      const sessionIds = [
+        ...(chatSessions || []).map(s => s.id),
+        ...(unifiedSessions || []).map(s => s.id)
+      ];
+
+      // Fetch AI logs for active chat time calculation
+      let aiLogsMap = {};
+      if (sessionIds.length > 0) {
+        const { data: aiLogs } = await supabase
+          .from('ai_conversation_log')
+          .select('session_id, timestamp, tokens_used')
+          .in('session_id', sessionIds)
+          .order('timestamp', { ascending: true });
+
+        if (aiLogs) {
+          // Group logs by session and calculate active chat time
+          const sessionLogsMap = aiLogs.reduce((acc, log) => {
+            if (!acc[log.session_id]) {
+              acc[log.session_id] = [];
+            }
+            acc[log.session_id].push(log);
+            return acc;
+          }, {});
+
+          Object.keys(sessionLogsMap).forEach(sessionId => {
+            const logs = sessionLogsMap[sessionId];
+            let activeChatMinutes = 0;
+            let totalTokens = 0;
+
+            // Calculate active chat time (excluding gaps > 10 minutes)
+            if (logs.length > 1) {
+              for (let i = 0; i < logs.length - 1; i++) {
+                const current = new Date(logs[i].timestamp);
+                const next = new Date(logs[i + 1].timestamp);
+                const gapMinutes = (next.getTime() - current.getTime()) / (1000 * 60);
+                
+                if (gapMinutes <= 10) {
+                  activeChatMinutes += gapMinutes;
+                }
+              }
+            }
+
+            // Sum total tokens
+            totalTokens = logs.reduce((sum, log) => sum + (log.tokens_used || 0), 0);
+
+            // Calculate cost (70% input tokens at $1.25/1M, 30% output tokens at $10/1M)
+            const inputTokens = totalTokens * 0.7;
+            const outputTokens = totalTokens * 0.3;
+            const sessionCost = (inputTokens * 1.25 / 1000000) + (outputTokens * 10.0 / 1000000);
+
+            aiLogsMap[sessionId] = {
+              activeChatMinutes: Math.round(activeChatMinutes * 10) / 10,
+              totalTokens,
+              sessionCost: Math.round(sessionCost * 100) / 100
+            };
+          });
+        }
+      }
 
       // Get skill names for sessions that have skill IDs
       const skillIds = [
@@ -143,9 +229,11 @@ const SessionsPage = () => {
           skill_name: session.skill_id ? skillsMap[session.skill_id]?.name : null,
           department: session.skill_id ? skillsMap[session.skill_id]?.department : null,
           total_interactions: session.total_steps,
-          duration_minutes: session.completed_at 
-            ? Math.round((new Date(session.completed_at).getTime() - new Date(session.started_at).getTime()) / 60000)
-            : null
+          duration_minutes: aiLogsMap[session.id]?.activeChatMinutes || 0,
+          active_chat_minutes: aiLogsMap[session.id]?.activeChatMinutes || 0,
+          total_tokens: aiLogsMap[session.id]?.totalTokens || session.total_tokens_used || 0,
+          session_cost: aiLogsMap[session.id]?.sessionCost || 0,
+          user_id: session.user_id.substring(0, 8) + '...'
         })),
         ...(unifiedSessions || []).map(session => ({
           ...session,
@@ -157,9 +245,11 @@ const SessionsPage = () => {
           summary_compact: (session.next_session_recommendations as any)?.ai_summary?.substring(0, 200) + '...' || null,
           summary_state: session.next_session_recommendations,
           total_interactions: session.tasks_completed,
-          duration_minutes: session.completed_at 
-            ? Math.round((new Date(session.completed_at).getTime() - new Date(session.started_at).getTime()) / 60000)
-            : null
+          duration_minutes: aiLogsMap[session.id]?.activeChatMinutes || 0,
+          active_chat_minutes: aiLogsMap[session.id]?.activeChatMinutes || 0,
+          total_tokens: aiLogsMap[session.id]?.totalTokens || session.total_tokens_used || 0,
+          session_cost: aiLogsMap[session.id]?.sessionCost || 0,
+          user_id: session.user_id.substring(0, 8) + '...'
         }))
       ];
 
@@ -184,7 +274,8 @@ const SessionsPage = () => {
       filtered = filtered.filter(session => 
         session.skill_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         session.department?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        session.session_type.toLowerCase().includes(searchTerm.toLowerCase())
+        session.session_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        session.user_id?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -196,6 +287,11 @@ const SessionsPage = () => {
     // Type filter
     if (typeFilter !== 'all') {
       filtered = filtered.filter(session => session.session_type === typeFilter);
+    }
+
+    // User filter (admin only)
+    if (isAdmin && userFilter !== 'all') {
+      filtered = filtered.filter(session => session.user_id === userFilter);
     }
 
     setFilteredSessions(filtered);
@@ -310,9 +406,20 @@ const SessionsPage = () => {
       <div className="min-h-screen bg-background p-4">
         <div className="container mx-auto py-8">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-4">Historia Sesji</h1>
+            <div className="flex items-center justify-center gap-2 mb-4">
+              {isAdmin ? <Shield className="h-8 w-8" /> : <MessageCircle className="h-8 w-8" />}
+              <h1 className="text-4xl font-bold">Historia Sesji</h1>
+              {isAdmin && (
+                <Badge variant="secondary" className="ml-2">
+                  Administrator
+                </Badge>
+              )}
+            </div>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Przeglądaj i wznawiaj swoje sesje nauki z AI korepetytorem
+              {isAdmin 
+                ? "Przeglądaj i wznawiaj sesje nauki ze wszystkich kont użytkowników"
+                : "Przeglądaj i wznawiaj swoje sesje nauki z AI korepetytorem"
+              }
             </p>
           </div>
 
@@ -360,6 +467,18 @@ const SessionsPage = () => {
                       <SelectItem value="study_learn">Study & Learn</SelectItem>
                     </SelectContent>
                   </Select>
+
+                  {isAdmin && (
+                    <Select value={userFilter} onValueChange={setUserFilter}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Użytkownik" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Wszyscy użytkownicy</SelectItem>
+                        <SelectItem value={user?.id || ""}>Tylko moje sesje</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                 </CardContent>
               </Card>
 
@@ -427,13 +546,27 @@ const SessionsPage = () => {
                                 <Calendar className="w-3 h-3" />
                                 {formatDate(session.started_at)}
                               </span>
-                              {session.duration_minutes && (
-                                <span className="flex items-center gap-1">
-                                  <Clock className="w-3 h-3" />
-                                  {session.duration_minutes} min
-                                </span>
-                              )}
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {session.active_chat_minutes} min
+                              </span>
                             </div>
+                            <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
+                              <span className="flex items-center gap-1">
+                                <span className="text-xs">🪙</span>
+                                {session.total_tokens} tokenów
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <span className="text-xs">💰</span>
+                                ${session.session_cost?.toFixed(2)}
+                              </span>
+                            </div>
+                            {isAdmin && (
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                                <User className="w-3 h-3" />
+                                {session.user_id}
+                              </div>
+                            )}
                           </div>
                         ))
                       )}
@@ -473,7 +606,7 @@ const SessionsPage = () => {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                         <div className="text-center">
                           <div className="text-2xl font-bold text-primary">
                             {selectedSession.total_interactions || 0}
@@ -482,15 +615,21 @@ const SessionsPage = () => {
                         </div>
                         <div className="text-center">
                           <div className="text-2xl font-bold text-primary">
-                            {selectedSession.duration_minutes || 0}
+                            {selectedSession.active_chat_minutes || 0}
                           </div>
-                          <div className="text-xs text-muted-foreground">Minuty</div>
+                          <div className="text-xs text-muted-foreground">Min aktywnego czatu</div>
                         </div>
                         <div className="text-center">
                           <div className="text-2xl font-bold text-primary">
-                            {selectedSession.department || 'N/A'}
+                            {selectedSession.total_tokens || 0}
                           </div>
-                          <div className="text-xs text-muted-foreground">Dział</div>
+                          <div className="text-xs text-muted-foreground">Tokeny</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-primary">
+                            ${selectedSession.session_cost?.toFixed(2) || '0.00'}
+                          </div>
+                          <div className="text-xs text-muted-foreground">Koszt</div>
                         </div>
                         <div className="text-center">
                           <Badge variant={selectedSession.status === 'completed' ? 'default' : 'secondary'}>
