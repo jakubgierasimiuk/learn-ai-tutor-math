@@ -42,9 +42,13 @@ interface PhaseBasedLessonProps {
   skillId: string;
   onComplete?: () => void;
   className?: string;
+  resumeContext?: {
+    previousInteractions?: any[];
+    summary?: string;
+  };
 }
 
-export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseBasedLessonProps) {
+export function PhaseBasedLesson({ skillId, onComplete, className = "", resumeContext }: PhaseBasedLessonProps) {
   const [skill, setSkill] = useState<SkillData | null>(null);
   const [phases, setPhases] = useState<PhaseData[]>([]);
   const [session, setSession] = useState<SessionData | null>(null);
@@ -204,13 +208,15 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
 
   const loadChatHistory = async (sessionId: string) => {
     try {
-      // For now, start with empty chat history since lesson_steps table was removed
-      // In a real implementation, you might want to store chat history in a different way
-      // or use the learning_interactions table for this purpose
+      // Initialize chat with resume context if available
+      const initialMessage = resumeContext?.summary 
+        ? `Witaj ponownie! Kontynuujemy naukę. Oto krótkie podsumowanie Twojego postępu:\n\n${resumeContext.summary}\n\nMożesz kontynuować naukę, zadać pytanie o wcześniejszy materiał, lub poprosić o powtórzenie trudniejszych fragmentów.`
+        : 'Witaj! Jestem mentavo.ai. Napisz "Rozpocznij lekcję" aby zacząć naukę tej umiejętności.';
+
       setChatHistory([
         {
           role: 'assistant',
-          content: 'Witaj! Jestem mentavo.ai. Napisz "Rozpocznij lekcję" aby zacząć naukę tej umiejętności.',
+          content: initialMessage,
           timestamp: new Date().toISOString()
         }
       ]);
@@ -237,7 +243,8 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "" }: PhaseB
           stepType: 'regular',
           currentPhase,
           sessionType: 'phase_based_lesson',
-          department: 'mathematics'
+          department: 'mathematics',
+          resumeContext: resumeContext
         }
       });
 

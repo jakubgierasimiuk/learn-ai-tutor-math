@@ -3366,6 +3366,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      resume_lesson_summary: {
+        Args: { p_skill_id: string; p_user_id: string }
+        Returns: Json
+      }
       update_leaderboard: {
         Args: { p_points: number; p_user_id: string }
         Returns: undefined

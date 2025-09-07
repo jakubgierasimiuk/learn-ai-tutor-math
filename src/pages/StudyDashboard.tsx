@@ -5,14 +5,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Brain, Clock, TrendingUp, Play, Trophy, Target, ChevronDown, ChevronUp } from 'lucide-react';
+import { BookOpen, Brain, Clock, TrendingUp, Play, Trophy, Target, ChevronDown, ChevronUp, RefreshCw, MoreVertical } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import type { Skill, SkillProgress, DepartmentProgress } from '@/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { StudentMaterialsWizard } from '@/components/StudentMaterialsWizard';
+import { LessonResumeModal } from '@/components/LessonResumeModal';
 import { Upload } from 'lucide-react';
 import { Seo } from '@/components/Seo';
+import { useSkillEngagement } from '@/hooks/useSkillEngagement';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export default function StudyDashboard() {
   const { user } = useAuth();
@@ -21,6 +24,8 @@ export default function StudyDashboard() {
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [materialsOpen, setMaterialsOpen] = useState(false);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+  const [resumeModalOpen, setResumeModalOpen] = useState(false);
+  const [selectedSkillForResume, setSelectedSkillForResume] = useState<{ id: string; name: string } | null>(null);
 
   // Fetch skills with progress
   const { data: skillsWithProgress, isLoading } = useQuery({
@@ -121,6 +126,16 @@ export default function StudyDashboard() {
   }, [skillsWithProgress, selectedClass, selectedDepartment]);
 
   const startLesson = (skillId: string) => {
+    navigate(`/study/lesson/${skillId}`);
+  };
+
+  const handleResumeLesson = (skillId: string, skillName: string) => {
+    setSelectedSkillForResume({ id: skillId, name: skillName });
+    setResumeModalOpen(true);
+  };
+
+  const handleStartOver = (skillId: string) => {
+    // The modal handles the data clearing
     navigate(`/study/lesson/${skillId}`);
   };
 
@@ -288,72 +303,7 @@ export default function StudyDashboard() {
 
       {/* Skills Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredSkills?.map(skill => {
-          const progress = skill.progress;
-          const masteryPercentage = progress ? (progress.mastery_level / 5) * 100 : 0;
-          
-          return (
-            <Card key={skill.id} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1 flex-1">
-                    <CardTitle className="text-base leading-tight">{skill.name}</CardTitle>
-                  </div>
-                  {getDepartmentIcon(skill.department)}
-                </div>
-                
-                <div className="flex flex-wrap gap-2 mt-2">
-                  <Badge variant="outline" className="text-xs">
-                    {skill.class_level_text || `Klasa ${skill.class_level}`}
-                  </Badge>
-                  <Badge variant={skill.level === 'extended' ? 'default' : 'secondary'} className="text-xs">
-                    {skill.level === 'extended' ? 'Rozszerzony' : getLevelLabel(skill.level)}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    ~{skill.estimated_time_minutes} min
-                  </Badge>
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                {progress ? (
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Postęp</span>
-                      <span className="font-medium">{masteryPercentage.toFixed(0)}%</span>
-                    </div>
-                    <Progress value={masteryPercentage} className="h-2" />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>{progress.correct_attempts}/{progress.total_attempts} poprawnych</span>
-                      {progress.is_mastered && (
-                        <Badge variant="default" className="text-xs">
-                          <Trophy className="w-3 h-3 mr-1" />
-                          Opanowane
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-2">
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Nie rozpoczęto jeszcze nauki
-                    </p>
-                    <Badge variant="outline">Nowa umiejętność</Badge>
-                  </div>
-                )}
-
-                <Button 
-                  onClick={() => startLesson(skill.id)} 
-                  className="w-full"
-                  size="sm"
-                >
-                  <Play className="w-4 h-4 mr-2" />
-                  {progress ? 'Kontynuuj naukę' : 'Rozpocznij lekcję'}
-                </Button>
-              </CardContent>
-            </Card>
-          );
-        })}
+        {filteredSkills?.map(skill => <SkillCard key={skill.id} skill={skill} onStartLesson={startLesson} onResumeLesson={handleResumeLesson} />)}
       </div>
 
       {filteredSkills?.length === 0 && (
@@ -378,6 +328,189 @@ export default function StudyDashboard() {
           />
         </DialogContent>
       </Dialog>
+
+      {selectedSkillForResume && (
+        <LessonResumeModal
+          open={resumeModalOpen}
+          onOpenChange={setResumeModalOpen}
+          skillId={selectedSkillForResume.id}
+          skillName={selectedSkillForResume.name}
+          onContinue={() => startLesson(selectedSkillForResume.id)}
+          onStartOver={() => handleStartOver(selectedSkillForResume.id)}
+        />
+      )}
     </div>
+  );
+}
+
+// Skill Card Component with Engagement Levels
+function SkillCard({ 
+  skill, 
+  onStartLesson, 
+  onResumeLesson 
+}: { 
+  skill: any; 
+  onStartLesson: (id: string) => void;
+  onResumeLesson: (id: string, name: string) => void;
+}) {
+  const { engagementLevel, loading } = useSkillEngagement(skill.id);
+  const progress = skill.progress;
+  const masteryPercentage = progress ? (progress.mastery_level / 5) * 100 : 0;
+
+  const getIcon = () => {
+    if (!engagementLevel) return <Play className="w-4 h-4" />;
+    
+    switch (engagementLevel.icon) {
+      case 'BookOpen': return <BookOpen className="w-4 h-4" />;
+      case 'Target': return <Target className="w-4 h-4" />;
+      case 'Trophy': return <Trophy className="w-4 h-4" />;
+      default: return <Play className="w-4 h-4" />;
+    }
+  };
+
+  const handleAction = () => {
+    if (!engagementLevel || engagementLevel.level === 'nierozpoczeta') {
+      onStartLesson(skill.id);
+    } else {
+      onResumeLesson(skill.id, skill.name);
+    }
+  };
+
+  const getActionText = () => {
+    if (!engagementLevel || engagementLevel.level === 'nierozpoczeta') {
+      return 'Rozpocznij lekcję';
+    }
+    return 'Wznów lekcję';
+  };
+
+  const getDepartmentIcon = (department: string) => {
+    const icons: Record<string, React.ReactNode> = {
+      algebra: <Brain className="h-5 w-5" />,
+      geometry: <Target className="h-5 w-5" />,
+      trigonometry: <TrendingUp className="h-5 w-5" />,
+      calculus: <BookOpen className="h-5 w-5" />,
+      statistics: <Trophy className="h-5 w-5" />,
+      sequences: <Play className="h-5 w-5" />,
+      funkcje: <TrendingUp className="h-5 w-5" />
+    };
+    return icons[department] || <BookOpen className="h-5 w-5" />;
+  };
+
+  const getLevelLabel = (level: string) => {
+    switch (level) {
+      case 'basic': return 'Podstawowy';
+      case 'intermediate': return 'Średniozaawansowany';
+      case 'advanced': return 'Zaawansowany';
+      case 'extended': return 'Rozszerzony';
+      case 'expert': return 'Ekspercki';
+      default: return 'Podstawowy';
+    }
+  };
+
+  return (
+    <Card className="hover:shadow-md transition-shadow">
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <div className="space-y-1 flex-1">
+            <CardTitle className="text-base leading-tight">{skill.name}</CardTitle>
+          </div>
+          <div className="flex items-center gap-2">
+            {getDepartmentIcon(skill.department)}
+            {engagementLevel && engagementLevel.level !== 'nierozpoczeta' && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => onResumeLesson(skill.id, skill.name)}>
+                    <Play className="h-4 w-4 mr-2" />
+                    Wznów lekcję
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onResumeLesson(skill.id, skill.name)}>
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Zacznij od nowa
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+        </div>
+        
+        <div className="flex flex-wrap gap-2 mt-2">
+          <Badge variant="outline" className="text-xs">
+            {skill.class_level_text || `Klasa ${skill.class_level}`}
+          </Badge>
+          <Badge variant={skill.level === 'extended' ? 'default' : 'secondary'} className="text-xs">
+            {skill.level === 'extended' ? 'Rozszerzony' : getLevelLabel(skill.level)}
+          </Badge>
+          <Badge variant="outline" className="text-xs">
+            ~{skill.estimated_time_minutes} min
+          </Badge>
+        </div>
+      </CardHeader>
+
+      <CardContent className="space-y-4">
+        {/* Engagement Level Display */}
+        {loading ? (
+          <div className="space-y-2">
+            <div className="h-4 bg-muted rounded animate-pulse" />
+            <div className="h-2 bg-muted rounded animate-pulse" />
+          </div>
+        ) : engagementLevel ? (
+          <div className="space-y-2">
+            <div className="flex justify-between items-center text-sm">
+              <span className={engagementLevel.color}>{engagementLevel.label}</span>
+              <span className="text-xs text-muted-foreground">
+                {engagementLevel.level !== 'nierozpoczeta' && engagementLevel.description}
+              </span>
+            </div>
+            
+            {engagementLevel.level !== 'nierozpoczeta' && (
+              <Progress 
+                value={engagementLevel.progressPercentage} 
+                className="h-2"
+              />
+            )}
+
+            {engagementLevel.level === 'nierozpoczeta' && (
+              <div className="text-center py-2">
+                <Badge variant="outline">Nowa umiejętność</Badge>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="text-center py-2">
+            <p className="text-sm text-muted-foreground mb-2">
+              Nie rozpoczęto jeszcze nauki
+            </p>
+            <Badge variant="outline">Nowa umiejętność</Badge>
+          </div>
+        )}
+
+        {/* Traditional Progress (for mastered skills) */}
+        {progress?.is_mastered && (
+          <div className="pt-2 border-t">
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>{progress.correct_attempts}/{progress.total_attempts} poprawnych</span>
+              <Badge variant="default" className="text-xs">
+                <Trophy className="w-3 h-3 mr-1" />
+                Opanowane
+              </Badge>
+            </div>
+          </div>
+        )}
+
+        <Button 
+          onClick={handleAction}
+          className="w-full"
+          size="sm"
+        >
+          {getIcon()}
+          <span className="ml-2">{getActionText()}</span>
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
