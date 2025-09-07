@@ -756,8 +756,9 @@ async function handlePhaseBasedLesson(req: Request): Promise<Response> {
     // Get skill information with authenticated client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     
-    if (!supabaseUrl || !supabaseKey) {
+    if (!supabaseUrl || !supabaseKey || !serviceRoleKey) {
       console.error('Supabase configuration missing')
       return new Response(JSON.stringify({ error: 'Supabase configuration missing' }), {
         status: 500,
@@ -775,6 +776,9 @@ async function handlePhaseBasedLesson(req: Request): Promise<Response> {
       },
     })
 
+    // Service role client for bypassing RLS
+    const serviceClient = createClient(supabaseUrl, serviceRoleKey)
+
     // Verify user authentication
     const { data: user, error: userError } = await supabaseClient.auth.getUser(jwt)
     if (userError || !user) {
@@ -785,7 +789,8 @@ async function handlePhaseBasedLesson(req: Request): Promise<Response> {
       })
     }
 
-    console.log('Authenticated user:', user.user?.id)
+    const userId = user.user?.id
+    console.log('Authenticated user:', userId)
 
     // Fetch skill content
     const { data: skillData, error: skillError } = await supabaseClient
@@ -802,15 +807,32 @@ async function handlePhaseBasedLesson(req: Request): Promise<Response> {
       })
     }
 
-    // Create AI prompt for phase-based learning with Socratic method
-    const prompt = `Jesteś korepetytorem matematyki dla licealistów używającym METODY SOKRATEJSKIEJ na temat: "${skillData.name}".
+    // Load conversation history for session if it exists
+    let conversationHistory = []
+    if (sessionId) {
+      const { data: interactions, error: historyError } = await supabaseClient
+        .from('learning_interactions')
+        .select('user_input, ai_response, sequence_number')
+        .eq('session_id', sessionId)
+        .order('sequence_number', { ascending: true })
 
-Uczeń napisał: "${message}"
+      if (!historyError && interactions) {
+        conversationHistory = interactions
+        console.log(`Loaded ${interactions.length} previous interactions for session ${sessionId}`)
+      }
+    }
+
+    // Build conversation messages for AI context
+    let conversationMessages = []
+    
+    // Add system prompt with conversation history context
+    let systemPrompt = `Jesteś korepetytorem matematyki dla licealistów używającym METODY SOKRATEJSKIEJ na temat: "${skillData.name}".
 
 KLUCZOWE ZASADY ODPOWIEDZI:
 1. KRÓTKO: Maksymalnie 100 słów + 1 pytanie na końcu
 2. PYTAJ, NIE WYKŁADAJ: Prowadź ucznia pytaniami do odkrycia
 3. JĘZYK LICEALNY: Dostosuj słownictwo do poziomu liceum
+4. KONTYNUUJ ROZMOWĘ: Wykorzystuj wcześniejszą historię rozmowy
 
 SYMBOLE MATEMATYCZNE - ZAWSZE WYJAŚNIAJ:
 - Gdy użyjesz skomplikowanych symboli, od razu je wytłumacz
@@ -822,7 +844,26 @@ Jeśli uczeń chce rozpocząć lekcję:
 
 Odpowiadaj po polsku i bądź zachęcający!`
 
-    // Call OpenAI
+    if (conversationHistory.length > 0) {
+      systemPrompt += `\n\nHISTORIA ROZMOWY: Kontynuujesz rozmowę z uczniem. Wcześniej rozmawialiście o tej umiejętności. Pamiętaj o tym co już omawialiście i kontynuuj od tego miejsca.`
+    }
+
+    conversationMessages.push({ role: 'system', content: systemPrompt })
+
+    // Add conversation history
+    conversationHistory.forEach(interaction => {
+      if (interaction.user_input) {
+        conversationMessages.push({ role: 'user', content: interaction.user_input })
+      }
+      if (interaction.ai_response) {
+        conversationMessages.push({ role: 'assistant', content: interaction.ai_response })
+      }
+    })
+
+    // Add current user message
+    conversationMessages.push({ role: 'user', content: message })
+
+    // Call OpenAI with full conversation context
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -831,10 +872,7 @@ Odpowiadaj po polsku i bądź zachęcający!`
       },
       body: JSON.stringify({
         model: 'gpt-5-2025-08-07',
-        messages: [
-          { role: 'system', content: 'Jesteś pomocnym nauczycielem matematyki. Odpowiadaj zawsze po polsku.' },
-          { role: 'user', content: prompt }
-        ],
+        messages: conversationMessages,
         max_completion_tokens: 10000,
       }),
     })
@@ -861,6 +899,119 @@ Odpowiadaj po polsku i bądź zachęcający!`
     }
     
     const aiMessage = aiData.choices[0]?.message?.content?.trim() || 'Przepraszam, nie mogę teraz odpowiedzieć. Spróbuj ponownie.'
+
+    // **CRITICAL FIX 1: Save interaction to learning_interactions table**
+    if (sessionId && userId) {
+      try {
+        const nextSequence = conversationHistory.length + 1
+        
+        const { error: saveError } = await serviceClient
+          .from('learning_interactions')
+          .insert({
+            user_id: userId,
+            session_id: sessionId,
+            interaction_type: stepType || 'regular',
+            user_input: message,
+            ai_response: aiMessage,
+            sequence_number: nextSequence,
+            response_time_ms: responseTime || 0,
+            total_tokens: aiData.usage?.total_tokens || 0,
+            prompt_tokens: aiData.usage?.prompt_tokens || 0,
+            completion_tokens: aiData.usage?.completion_tokens || 0,
+            interaction_timestamp: new Date().toISOString()
+          })
+
+        if (saveError) {
+          console.error('Error saving interaction:', saveError)
+        } else {
+          console.log('✅ Interaction saved successfully')
+        }
+      } catch (error) {
+        console.error('Failed to save interaction:', error)
+      }
+    }
+
+    // **CRITICAL FIX 2: Update study_sessions table**
+    if (sessionId) {
+      try {
+        const updateData: any = {
+          completed_steps: (conversationHistory.length + 1),
+          total_tokens_used: (await supabaseClient
+            .from('learning_interactions')
+            .select('total_tokens')
+            .eq('session_id', sessionId)
+            .then(({ data }) => 
+              data ? data.reduce((sum, interaction) => sum + (interaction.total_tokens || 0), 0) : 0
+            )) + (aiData.usage?.total_tokens || 0)
+        }
+
+        // Only set completed_at if this is an ending interaction
+        if (message.toLowerCase().includes('koniec') || message.toLowerCase().includes('zakończ')) {
+          updateData.completed_at = new Date().toISOString()
+          updateData.status = 'completed'
+        }
+
+        const { error: sessionError } = await supabaseClient
+          .from('study_sessions')
+          .update(updateData)
+          .eq('id', sessionId)
+
+        if (sessionError) {
+          console.error('Error updating session:', sessionError)
+        } else {
+          console.log('✅ Session updated successfully')
+        }
+      } catch (error) {
+        console.error('Failed to update session:', error)
+      }
+    }
+
+    // **CRITICAL FIX 3: Update skill_progress table**
+    if (skillId && userId) {
+      try {
+        // Determine if this interaction shows improvement
+        const isPositiveInteraction = !message.toLowerCase().includes('nie wiem') && 
+                                     !message.toLowerCase().includes('nie rozumiem') &&
+                                     message.length > 5 // Basic engagement check
+
+        // Get current progress
+        const { data: currentProgress } = await supabaseClient
+          .from('skill_progress')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('skill_id', skillId)
+          .maybeSingle()
+
+        const newTotalAttempts = (currentProgress?.total_attempts || 0) + 1
+        const newCorrectAttempts = (currentProgress?.correct_attempts || 0) + (isPositiveInteraction ? 1 : 0)
+        const newMasteryLevel = Math.min(5, Math.floor((newCorrectAttempts / newTotalAttempts) * 5))
+
+        const progressData = {
+          user_id: userId,
+          skill_id: skillId,
+          total_attempts: newTotalAttempts,
+          correct_attempts: newCorrectAttempts,
+          mastery_level: newMasteryLevel,
+          last_reviewed_at: new Date().toISOString(),
+          is_mastered: newMasteryLevel >= 4,
+          updated_at: new Date().toISOString()
+        }
+
+        const { error: progressError } = await supabaseClient
+          .from('skill_progress')
+          .upsert(progressData, {
+            onConflict: 'user_id,skill_id'
+          })
+
+        if (progressError) {
+          console.error('Error updating skill progress:', progressError)
+        } else {
+          console.log('✅ Skill progress updated successfully')
+        }
+      } catch (error) {
+        console.error('Failed to update skill progress:', error)
+      }
+    }
 
     return new Response(JSON.stringify({ 
       message: aiMessage,
