@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useRoles } from '@/hooks/useRoles';
 import { Seo } from '@/components/Seo';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, ChevronUp, Clock, MessageSquare, Brain, Search, Filter } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clock, MessageSquare, Brain, Search, Filter, Shield, User } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { format } from 'date-fns';
 
 interface AILog {
@@ -39,12 +41,14 @@ interface SessionGroup {
 
 const AILogsPage = () => {
   const { user } = useAuth();
+  const { isAdmin } = useRoles();
   const [logs, setLogs] = useState<AILog[]>([]);
   const [groupedSessions, setGroupedSessions] = useState<SessionGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [functionFilter, setFunctionFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
+  const [userFilter, setUserFilter] = useState('all');
   const [expandedSessions, setExpandedSessions] = useState<Set<string>>(new Set());
 
   const loadLogs = async () => {
@@ -55,8 +59,13 @@ const AILogsPage = () => {
       let query = supabase
         .from('ai_conversation_log')
         .select('*')
-        .eq('user_id', user.id)
         .order('timestamp', { ascending: false });
+
+      // Only filter by user_id if not admin or if admin has selected specific user
+      if (!isAdmin || userFilter !== "all") {
+        const targetUserId = isAdmin && userFilter !== "all" ? userFilter : user.id;
+        query = query.eq('user_id', targetUserId);
+      }
 
       // Apply date filter
       if (dateFilter === 'today') {
@@ -122,7 +131,7 @@ const AILogsPage = () => {
 
   useEffect(() => {
     loadLogs();
-  }, [user, searchTerm, functionFilter, dateFilter]);
+  }, [user, searchTerm, functionFilter, dateFilter, userFilter, isAdmin]);
 
   const toggleSession = (sessionId: string) => {
     const newExpanded = new Set(expandedSessions);
@@ -180,10 +189,31 @@ const AILogsPage = () => {
       
       <div className="container mx-auto py-8 space-y-6">
         <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4">Rejestr konwersacji AI</h1>
+          <div className="flex items-center justify-center gap-2 mb-4">
+            {isAdmin ? <Shield className="h-8 w-8" /> : <User className="h-8 w-8" />}
+            <h1 className="text-4xl font-bold">Rejestr konwersacji AI</h1>
+            {isAdmin && (
+              <Badge variant="secondary" className="ml-2">
+                Administrator
+              </Badge>
+            )}
+          </div>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Przeglądaj szczegółowe logi wszystkich interakcji z AI - prompty, odpowiedzi i parametry wywołań
+            {isAdmin 
+              ? "Przeglądaj szczegółowe logi wszystkich interakcji z AI ze wszystkich kont - prompty, odpowiedzi i parametry wywołań"
+              : "Przeglądaj szczegółowe logi wszystkich interakcji z AI - prompty, odpowiedzi i parametry wywołań"
+            }
           </p>
+          
+          {isAdmin && (
+            <Alert className="mt-4 max-w-2xl mx-auto">
+              <Shield className="h-4 w-4" />
+              <AlertDescription>
+                Jako administrator masz dostęp do wszystkich logów AI ze wszystkich kont użytkowników.
+                {userFilter === "all" ? " Obecnie wyświetlasz logi ze wszystkich kont." : ` Obecnie wyświetlasz logi dla wybranego użytkownika.`}
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
 
         {/* Filters */}
@@ -229,6 +259,18 @@ const AILogsPage = () => {
                   <SelectItem value="week">Ostatni tydzień</SelectItem>
                 </SelectContent>
               </Select>
+
+              {isAdmin && (
+                <Select value={userFilter} onValueChange={setUserFilter}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Użytkownik" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Wszyscy użytkownicy</SelectItem>
+                    <SelectItem value={user?.id || ""}>Tylko moje logi</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
 
               <Button onClick={loadLogs} variant="outline">
                 Odśwież
@@ -305,7 +347,7 @@ const AILogsPage = () => {
                     <div className="space-y-6">
                       {session.logs.map((log) => (
                         <div key={log.id} className="border rounded-lg p-4 space-y-4">
-                          <div className="flex items-center justify-between">
+                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <Badge variant="outline">
                                 {log.function_name}
@@ -313,6 +355,11 @@ const AILogsPage = () => {
                               {log.endpoint && (
                                 <Badge variant="secondary">
                                   {log.endpoint}
+                                </Badge>
+                              )}
+                              {isAdmin && (
+                                <Badge variant="outline" className="text-xs">
+                                  User: {session.sessionId.substring(0, 8)}...
                                 </Badge>
                               )}
                               <span className="text-sm text-muted-foreground">
