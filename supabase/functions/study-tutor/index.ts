@@ -915,7 +915,6 @@ Odpowiadaj po polsku i bądź zachęcający!`
             ai_response: aiMessage,
             sequence_number: nextSequence,
             response_time_ms: responseTime || 0,
-            total_tokens: aiData.usage?.total_tokens || 0,
             prompt_tokens: aiData.usage?.prompt_tokens || 0,
             completion_tokens: aiData.usage?.completion_tokens || 0,
             interaction_timestamp: new Date().toISOString()
