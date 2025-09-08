@@ -23,7 +23,7 @@ interface Message {
 export const AIChat = () => {
   const [messages, setMessages] = useState<Message[]>([{
     id: '1',
-    content: 'Cześć! Jestem mentavo.ai. Mogę pomóc Ci z matematyką, wytłumaczyć pojęcia i rozwiązać zadania. W czym mogę Ci dzisiaj pomóc?',
+    content: 'Cześć! Jestem Mentavo AI. Mogę pomóc Ci z matematyką, wytłumaczyć pojęcia i rozwiązać zadania. W czym mogę Ci dzisiaj pomóc?',
     role: 'assistant',
     timestamp: new Date()
   }]);
@@ -618,7 +618,7 @@ export const AIChat = () => {
             <MathSymbolPanel quickSymbols={contextualSymbols.length > 0 ? contextualSymbols : quickSymbols} onSymbolSelect={handleSymbolSelect} />
           </div>
           <div className="flex items-end gap-3 p-4 bg-muted/30 border border-border/50 rounded-2xl">
-            <Input type="text" placeholder="Zadaj pytanie mentavo.ai..." value={input} onChange={e => setInput(e.target.value)} onKeyPress={handleKeyPress} disabled={isLoading} className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60" />
+            <Input type="text" placeholder="Zadaj pytanie Mentavo AI..." value={input} onChange={e => setInput(e.target.value)} onKeyPress={handleKeyPress} disabled={isLoading} className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60" />
             <Button onClick={sendMessage} disabled={isLoading || !input.trim()} size="sm" className="h-10 w-10 p-0 rounded-xl">
               {isLoading ? <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <Send className="w-4 h-4" />}
             </Button>

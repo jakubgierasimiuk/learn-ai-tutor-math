@@ -1,67 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* mentavo.ai Design System - Professional & Elegant */
+/* Mentavo AI Design System - Professional & Elegant */
 
 @layer base {
   :root {
     /* Core background and text */
     --background: 0 0% 98%;
-    --foreground: 225 15% 15%;
+    --foreground: 215 25% 27%; /* #1E293B - Neutral Dark Navy */
 
     /* Cards and surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 225 15% 15%;
+    --card-foreground: 215 25% 27%;
 
     /* Popover elements */
     --popover: 0 0% 100%;
-    --popover-foreground: 225 15% 15%;
+    --popover-foreground: 215 25% 27%;
 
-    /* Primary brand color - Professional Navy */
-    --primary: 225 40% 25%;
+    /* Primary brand color - Mentavo Turquoise */
+    --primary: 174 61% 50%; /* #2DD4BF - Primary Turquoise */
     --primary-foreground: 0 0% 98%;
-    --primary-glow: 225 35% 35%;
+    --primary-glow: 174 61% 60%;
 
-    /* Secondary - Warm neutral */
-    --secondary: 225 8% 92%;
-    --secondary-foreground: 225 15% 30%;
+    /* Secondary - Mentavo Purple */
+    --secondary: 258 80% 57%; /* #7C3AED - Secondary Purple */
+    --secondary-foreground: 0 0% 98%;
 
     /* Muted elements */
-    --muted: 225 8% 94%;
-    --muted-foreground: 225 8% 50%;
+    --muted: 210 20% 95%; /* #F1F5F9 - Support Light */
+    --muted-foreground: 215 14% 42%; /* #64748B - Support Gray */
 
-    /* Accent - Sophisticated Teal */
-    --accent: 195 40% 45%;
+    /* Accent - Mentavo Purple */
+    --accent: 258 80% 57%; /* #7C3AED - Secondary Purple */
     --accent-foreground: 0 0% 98%;
 
-    /* Success - Muted Green */
-    --success: 155 35% 45%;
+    /* Success - Brand Success Green */
+    --success: 134 61% 41%; /* #28A745 - Success Green */
     --success-foreground: 0 0% 98%;
 
-    /* Warning - Elegant Amber */
-    --warning: 45 85% 55%;
-    --warning-foreground: 225 15% 15%;
+    /* Warning - Brand Warning Orange */
+    --warning: 45 100% 51%; /* #FFC107 - Warning Orange */
+    --warning-foreground: 215 25% 27%;
 
-    /* Destructive */
-    --destructive: 0 65% 50%;
+    /* Destructive - Brand Error Red */
+    --destructive: 355 78% 56%; /* #DC3545 - Error Red */
     --destructive-foreground: 0 0% 98%;
 
     /* UI elements */
-    --border: 225 12% 88%;
-    --input: 225 8% 92%;
-    --ring: 225 40% 25%;
+    --border: 220 13% 91%;
+    --input: 210 20% 95%; /* #F1F5F9 - Support Light */
+    --ring: 174 61% 50%;
 
-    /* Elegant gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(225 40% 25%), hsl(195 40% 45%));
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(225 8% 96%));
-    --gradient-success: linear-gradient(135deg, hsl(155 35% 45%), hsl(155 35% 55%));
-    --gradient-elegant: linear-gradient(135deg, hsl(225 8% 96%), hsl(195 20% 92%));
+    /* Mentavo gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(174 61% 50%), hsl(258 80% 57%)); /* Turquoise to Purple */
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 20% 95%));
+    --gradient-success: linear-gradient(135deg, hsl(134 61% 41%), hsl(134 61% 51%));
+    --gradient-elegant: linear-gradient(135deg, hsl(210 20% 95%), hsl(220 13% 91%));
     
-    /* Elegant shadows */
-    --shadow-primary: 0 8px 32px -8px hsl(225 40% 25% / 0.15);
-    --shadow-accent: 0 8px 32px -8px hsl(195 40% 45% / 0.15);
-    --shadow-card: 0 2px 16px -4px hsl(225 15% 15% / 0.08);
+    /* Mentavo shadows */
+    --shadow-primary: 0 8px 32px -8px hsl(174 61% 50% / 0.15);
+    --shadow-accent: 0 8px 32px -8px hsl(258 80% 57% / 0.15);
+    --shadow-card: 0 2px 16px -4px hsl(215 25% 27% / 0.08);
 
     /* Animation variables */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -70,13 +72,13 @@
     --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-foreground: 215 25% 27%;
+    --sidebar-primary: 174 61% 50%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-accent: 210 20% 95%;
+    --sidebar-accent-foreground: 215 25% 27%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 174 61% 50%;
 
     /* Overlay (semantic black) */
     --overlay: 0 0% 0%;
@@ -178,58 +180,58 @@
   }
 
   .dark {
-    --background: 225 25% 6%;
-    --foreground: 225 8% 90%;
+    --background: 215 25% 27%; /* #1E293B - Dark Navy background */
+    --foreground: 210 40% 98%;
 
-    --card: 225 25% 8%;
-    --card-foreground: 225 8% 90%;
+    --card: 215 25% 32%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 225 25% 8%;
-    --popover-foreground: 225 8% 90%;
+    --popover: 215 25% 32%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 225 40% 70%;
-    --primary-foreground: 225 25% 6%;
-    --primary-glow: 225 35% 75%;
+    --primary: 174 61% 50%; /* #2DD4BF - Primary Turquoise */
+    --primary-foreground: 215 25% 27%;
+    --primary-glow: 174 61% 60%;
 
-    --secondary: 225 15% 12%;
-    --secondary-foreground: 225 8% 80%;
+    --secondary: 258 80% 57%; /* #7C3AED - Secondary Purple */
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 225 15% 10%;
-    --muted-foreground: 225 8% 60%;
+    --muted: 215 25% 32%;
+    --muted-foreground: 215 14% 60%; /* Lighter Support Gray for dark mode */
 
-    --accent: 195 40% 65%;
-    --accent-foreground: 225 25% 6%;
+    --accent: 258 80% 57%; /* #7C3AED - Secondary Purple */
+    --accent-foreground: 210 40% 98%;
 
-    --success: 155 35% 60%;
-    --success-foreground: 225 25% 6%;
+    --success: 134 61% 41%; /* #28A745 - Success Green */
+    --success-foreground: 210 40% 98%;
 
-    --warning: 45 85% 65%;
-    --warning-foreground: 225 25% 6%;
+    --warning: 45 100% 51%; /* #FFC107 - Warning Orange */
+    --warning-foreground: 215 25% 27%;
 
-    --destructive: 0 65% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 355 78% 56%; /* #DC3545 - Error Red */
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 225 15% 15%;
-    --input: 225 15% 12%;
-    --ring: 225 40% 70%;
+    --border: 215 25% 32%;
+    --input: 215 25% 32%;
+    --ring: 174 61% 50%;
 
-    --gradient-hero: linear-gradient(135deg, hsl(225 40% 70%), hsl(195 40% 65%));
-    --gradient-card: linear-gradient(145deg, hsl(225 25% 8%), hsl(225 15% 10%));
-    --gradient-success: linear-gradient(135deg, hsl(155 35% 60%), hsl(155 35% 70%));
-    --gradient-elegant: linear-gradient(135deg, hsl(225 15% 10%), hsl(195 20% 12%));
+    --gradient-hero: linear-gradient(135deg, hsl(174 61% 50%), hsl(258 80% 57%)); /* Turquoise to Purple */  
+    --gradient-card: linear-gradient(145deg, hsl(215 25% 32%), hsl(215 25% 27%));
+    --gradient-success: linear-gradient(135deg, hsl(134 61% 41%), hsl(134 61% 51%));
+    --gradient-elegant: linear-gradient(135deg, hsl(215 25% 32%), hsl(215 25% 27%));
     
-    --shadow-primary: 0 8px 32px -8px hsl(225 40% 70% / 0.2);
-    --shadow-accent: 0 8px 32px -8px hsl(195 40% 65% / 0.2);
+    --shadow-primary: 0 8px 32px -8px hsl(174 61% 50% / 0.2);
+    --shadow-accent: 0 8px 32px -8px hsl(258 80% 57% / 0.2);
     --shadow-card: 0 2px 16px -4px hsl(0 0% 0% / 0.4);
 
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 215 25% 27%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 174 61% 50%;
+    --sidebar-primary-foreground: 215 25% 27%;
+    --sidebar-accent: 215 25% 32%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 215 25% 32%;
+    --sidebar-ring: 174 61% 50%;
 
     /* Overlay (semantic black) */
     --overlay: 0 0% 0%;
@@ -248,7 +250,7 @@
 }
 
 @layer components {
-  /* mentavo.ai specific components */
+  /* Mentavo AI specific components */
   .gradient-hero {
     background: var(--gradient-hero);
   }

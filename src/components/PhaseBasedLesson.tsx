@@ -209,7 +209,7 @@ export function PhaseBasedLesson({
   const loadChatHistory = async (sessionId: string) => {
     try {
       // Initialize chat with resume context if available
-      const initialMessage = resumeContext?.summary ? `Witaj ponownie! Kontynuujemy naukę. Oto krótkie podsumowanie Twojego postępu:\n\n${resumeContext.summary}\n\nMożesz kontynuować naukę, zadać pytanie o wcześniejszy materiał, lub poprosić o powtórzenie trudniejszych fragmentów.` : 'Witaj! Jestem mentavo.ai. Napisz "Rozpocznij lekcję" aby zacząć naukę tej umiejętności.';
+      const initialMessage = resumeContext?.summary ? `Witaj ponownie! Kontynuujemy naukę. Oto krótkie podsumowanie Twojego postępu:\n\n${resumeContext.summary}\n\nMożesz kontynuować naukę, zadać pytanie o wcześniejszy materiał, lub poprosić o powtórzenie trudniejszych fragmentów.` : 'Witaj! Jestem Mentavo AI. Napisz "Rozpocznij lekcję" aby zacząć naukę tej umiejętności.';
       setChatHistory([{
         role: 'assistant',
         content: initialMessage,

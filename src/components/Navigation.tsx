@@ -6,6 +6,8 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { logEvent } from "@/lib/logger";
 import { useTokenUsage } from "@/hooks/useTokenUsage";
+import mentavoLogoFull from "@/assets/mentavo-logo-full.png";
+import mentavoLogoIcon from "@/assets/mentavo-logo-icon.png";
 export const Navigation = () => {
   const {
     user,
@@ -29,10 +31,12 @@ export const Navigation = () => {
         <div className="flex items-center justify-between h-12 md:h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 gradient-hero rounded-xl flex items-center justify-center">
-              <Brain className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold">mentavo.ai</span>
+            <img 
+              src={mentavoLogoIcon} 
+              alt="Mentavo AI Logo" 
+              className="w-10 h-10"
+            />
+            <span className="text-xl font-bold font-['Poppins'] hidden sm:block">Mentavo AI</span>
           </Link>
 
           {user ? <>
@@ -58,7 +62,7 @@ export const Navigation = () => {
               source: 'nav'
             })}>
                   <Link to="/chat">
-                    <span className="inline-flex items-center"><MessageCircle className="w-4 h-4 mr-2" />mentavo.ai</span>
+                    <span className="inline-flex items-center"><MessageCircle className="w-4 h-4 mr-2" />Mentavo AI</span>
                   </Link>
                 </Button>
               </div>
@@ -121,7 +125,7 @@ export const Navigation = () => {
                   </Link>
                   <Link to="/chat" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/chat') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
                     <MessageCircle className="w-4 h-4" />
-                    mentavo.ai
+                    Mentavo AI
                   </Link>
                   <Link to="/ai-logs" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/ai-logs') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
                     <Database className="w-4 h-4" />
