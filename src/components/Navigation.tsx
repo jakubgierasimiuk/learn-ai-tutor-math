@@ -62,7 +62,7 @@ export const Navigation = () => {
               source: 'nav'
             })}>
                   <Link to="/chat">
-                    <span className="inline-flex items-center"><MessageCircle className="w-4 h-4 mr-2" />Mentavo AI</span>
+                    <span className="inline-flex items-center"><MessageCircle className="w-4 h-4 mr-2" />Korepetycje z AI</span>
                   </Link>
                 </Button>
               </div>
