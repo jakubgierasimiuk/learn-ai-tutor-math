@@ -61,6 +61,9 @@ export function PhaseBasedLesson({
   const [responseTime, setResponseTime] = useState<number>(0);
   const [startTime, setStartTime] = useState<number>(Date.now());
   const [contextualSymbols, setContextualSymbols] = useState<string[]>([]);
+  const [isFirstInteraction, setIsFirstInteraction] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState("");
+  const [loadingStep, setLoadingStep] = useState(0);
   const {
     toast
   } = useToast();
@@ -218,9 +221,17 @@ export function PhaseBasedLesson({
   };
   const sendMessage = async () => {
     if (!userInput.trim() || !session || isLoading) return;
+    
     setIsLoading(true);
     const currentResponseTime = Date.now() - startTime;
     setResponseTime(currentResponseTime);
+    
+    // Set first interaction flag before processing
+    const wasFirstInteraction = isFirstInteraction;
+    if (isFirstInteraction) {
+      setIsFirstInteraction(false);
+    }
+    
     try {
       // Process through enhanced study-tutor with cognitive analysis
       const {
@@ -333,6 +344,38 @@ export function PhaseBasedLesson({
       setContextualSymbols([]);
     }
   }, [userInput, getSymbolsForText]);
+
+  // Handle loading messages for first interaction
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    
+    if (isLoading && isFirstInteraction) {
+      const messages = [
+        "Przygotowuję materiały do lekcji",
+        "Tworzę spersonalizowany plan lekcji...",
+        "Finalizuję przygotowania...",
+        "⚡ Pracuję nad najlepszym planem dla Ciebie...\nSystemy AI potrzebują czasem więcej czasu na stworzenie idealnej lekcji.\nDziękuję za cierpliwość!"
+      ];
+      
+      setLoadingStep(0);
+      setLoadingMessage(messages[0]);
+      
+      timer = setInterval(() => {
+        setLoadingStep(prev => {
+          const nextStep = prev + 1;
+          if (nextStep < messages.length) {
+            setLoadingMessage(messages[nextStep]);
+            return nextStep;
+          }
+          return prev;
+        });
+      }, 7000); // Change message every 7 seconds
+    }
+    
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isLoading, isFirstInteraction]);
   const askForHint = async () => {
     if (!session || isLoading) return;
     setIsLoading(true);
@@ -532,15 +575,31 @@ export function PhaseBasedLesson({
               
               {isLoading && <div className="flex gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Bot className="w-4 h-4 text-primary" />
+                    <Bot className="w-4 h-4 text-primary animate-pulse" />
                   </div>
                   <div className="flex-1">
                     <div className="inline-block bg-muted/50 border border-border/50 px-4 py-3 rounded-2xl">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-pulse"></div>
-                        <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-pulse delay-75"></div>
-                        <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-pulse delay-150"></div>
-                      </div>
+                      {isFirstInteraction ? (
+                        <div className="flex flex-col space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                            <span className="text-sm font-medium text-foreground">{loadingMessage}</span>
+                          </div>
+                          {loadingStep >= 3 && (
+                            <div className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                              Systemy AI potrzebują czasem więcej czasu na stworzenie idealnej lekcji.
+                              <br />
+                              Dziękuję za cierpliwość!
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-pulse"></div>
+                          <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-pulse delay-75"></div>
+                          <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-pulse delay-150"></div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>}
