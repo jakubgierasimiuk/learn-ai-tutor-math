@@ -20,7 +20,6 @@ interface PhaseData {
   success_criteria: any;
   estimated_duration_minutes: number;
 }
-
 interface SkillData {
   id: string;
   name: string;
@@ -28,7 +27,6 @@ interface SkillData {
   department: string;
   phases: any;
 }
-
 interface SessionData {
   id: string;
   user_id: string;
@@ -37,7 +35,6 @@ interface SessionData {
   status: string;
   started_at: string;
 }
-
 interface PhaseBasedLessonProps {
   skillId: string;
   onComplete?: () => void;
@@ -47,8 +44,12 @@ interface PhaseBasedLessonProps {
     summary?: string;
   };
 }
-
-export function PhaseBasedLesson({ skillId, onComplete, className = "", resumeContext }: PhaseBasedLessonProps) {
+export function PhaseBasedLesson({
+  skillId,
+  onComplete,
+  className = "",
+  resumeContext
+}: PhaseBasedLessonProps) {
   const [skill, setSkill] = useState<SkillData | null>(null);
   const [phases, setPhases] = useState<PhaseData[]>([]);
   const [session, setSession] = useState<SessionData | null>(null);
@@ -60,15 +61,20 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "", resumeCo
   const [responseTime, setResponseTime] = useState<number>(0);
   const [startTime, setStartTime] = useState<number>(Date.now());
   const [contextualSymbols, setContextualSymbols] = useState<string[]>([]);
-  const { toast } = useToast();
-  const { user } = useAuth();
-  const { quickSymbols, getSymbolsForText } = useMathSymbols(skillId);
+  const {
+    toast
+  } = useToast();
+  const {
+    user
+  } = useAuth();
+  const {
+    quickSymbols,
+    getSymbolsForText
+  } = useMathSymbols(skillId);
   const chatScrollRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     loadSkillData();
   }, [skillId]);
-
   useEffect(() => {
     setStartTime(Date.now());
   }, [userInput]);
@@ -89,98 +95,83 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "", resumeCo
         });
       }
     };
-
     window.addEventListener('beforeunload', handleBeforeUnload);
-    
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [session?.id, user?.id]);
-
   const loadSkillData = async () => {
     try {
       // Load skill data
-      const { data: skillData, error: skillError } = await supabase
-        .from('skills')
-        .select('*')
-        .eq('id', skillId)
-        .single();
-
+      const {
+        data: skillData,
+        error: skillError
+      } = await supabase.from('skills').select('*').eq('id', skillId).single();
       if (skillError) throw skillError;
       setSkill(skillData);
 
       // Load skill phases from unified content
-      const { data: unifiedContent, error: unifiedError } = await supabase
-        .from('unified_skill_content')
-        .select('content_data')
-        .eq('skill_id', skillId)
-        .maybeSingle();
-
+      const {
+        data: unifiedContent,
+        error: unifiedError
+      } = await supabase.from('unified_skill_content').select('content_data').eq('skill_id', skillId).maybeSingle();
       if (unifiedError) throw unifiedError;
-      
       const contentData = unifiedContent?.content_data as any;
       const phases = contentData?.phases || [];
       setPhases(phases);
 
       // Check for existing session or create new one
       await initializeSession();
-
     } catch (error) {
       console.error('Error loading skill data:', error);
       toast({
         title: "Błąd",
         description: "Nie udało się załadować danych umiejętności",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const initializeSession = async () => {
     try {
       // Check for existing active session
-      const { data: existingSessions, error: sessionError } = await supabase
-        .from('study_sessions')
-        .select('*')
-        .eq('skill_id', skillId)
-        .eq('status', 'in_progress')
-        .order('started_at', { ascending: false })
-        .limit(1);
-
+      const {
+        data: existingSessions,
+        error: sessionError
+      } = await supabase.from('study_sessions').select('*').eq('skill_id', skillId).eq('status', 'in_progress').order('started_at', {
+        ascending: false
+      }).limit(1);
       if (sessionError) throw sessionError;
-
       let sessionData;
       if (existingSessions && existingSessions.length > 0) {
         sessionData = existingSessions[0];
         setCurrentPhase(sessionData.current_phase || 1);
       } else {
         // Create new session - get current user first
-        const { data: userData, error: userError } = await supabase.auth.getUser();
+        const {
+          data: userData,
+          error: userError
+        } = await supabase.auth.getUser();
         if (userError || !userData.user) throw new Error('User not authenticated');
-
-        const { data: newSession, error: createError } = await supabase
-          .from('study_sessions')
-          .insert({
-            user_id: userData.user.id,
-            skill_id: skillId,
-            session_type: 'lesson',
-            status: 'in_progress'
-          })
-          .select()
-          .single();
-
+        const {
+          data: newSession,
+          error: createError
+        } = await supabase.from('study_sessions').insert({
+          user_id: userData.user.id,
+          skill_id: skillId,
+          session_type: 'lesson',
+          status: 'in_progress'
+        }).select().single();
         if (createError) throw createError;
         sessionData = newSession;
         setCurrentPhase(1);
       }
-
       setSession(sessionData);
 
       // Load phase progress
-      const { data: progressData, error: progressError } = await supabase
-        .from('learning_phase_progress')
-        .select('*')
-        .eq('skill_id', skillId);
-
+      const {
+        data: progressData,
+        error: progressError
+      } = await supabase.from('learning_phase_progress').select('*').eq('skill_id', skillId);
       if (progressError) {
         console.error('Error loading phase progress:', progressError);
       } else {
@@ -195,46 +186,39 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "", resumeCo
       if (sessionData) {
         loadChatHistory(sessionData.id);
       }
-
     } catch (error) {
       console.error('Error initializing session:', error);
       toast({
         title: "Błąd",
         description: "Nie udało się zainicjować sesji",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const loadChatHistory = async (sessionId: string) => {
     try {
       // Initialize chat with resume context if available
-      const initialMessage = resumeContext?.summary 
-        ? `Witaj ponownie! Kontynuujemy naukę. Oto krótkie podsumowanie Twojego postępu:\n\n${resumeContext.summary}\n\nMożesz kontynuować naukę, zadać pytanie o wcześniejszy materiał, lub poprosić o powtórzenie trudniejszych fragmentów.`
-        : 'Witaj! Jestem mentavo.ai. Napisz "Rozpocznij lekcję" aby zacząć naukę tej umiejętności.';
-
-      setChatHistory([
-        {
-          role: 'assistant',
-          content: initialMessage,
-          timestamp: new Date().toISOString()
-        }
-      ]);
+      const initialMessage = resumeContext?.summary ? `Witaj ponownie! Kontynuujemy naukę. Oto krótkie podsumowanie Twojego postępu:\n\n${resumeContext.summary}\n\nMożesz kontynuować naukę, zadać pytanie o wcześniejszy materiał, lub poprosić o powtórzenie trudniejszych fragmentów.` : 'Witaj! Jestem mentavo.ai. Napisz "Rozpocznij lekcję" aby zacząć naukę tej umiejętności.';
+      setChatHistory([{
+        role: 'assistant',
+        content: initialMessage,
+        timestamp: new Date().toISOString()
+      }]);
     } catch (error) {
       console.error('Error loading chat history:', error);
     }
   };
-
   const sendMessage = async () => {
     if (!userInput.trim() || !session || isLoading) return;
-
     setIsLoading(true);
     const currentResponseTime = Date.now() - startTime;
     setResponseTime(currentResponseTime);
-
     try {
       // Process through enhanced study-tutor with cognitive analysis
-      const { data, error } = await supabase.functions.invoke('study-tutor', {
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('study-tutor', {
         body: {
           message: userInput,
           sessionId: session.id,
@@ -247,9 +231,7 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "", resumeCo
           resumeContext: resumeContext
         }
       });
-
       if (error) throw error;
-
       const aiResponse = data.message || 'Przepraszam, wystąpił problem z odpowiedzią.';
       const isCorrect = data.isCorrect || data.correctAnswer || aiResponse.includes('Poprawnie');
 
@@ -277,31 +259,26 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "", resumeCo
 
       // Update phase progress
       await updatePhaseProgress(isCorrect);
-
       setUserInput("");
       setStartTime(Date.now());
-
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
         title: "Błąd",
         description: "Nie udało się wysłać wiadomości",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
     }
   };
-
   const updatePhaseProgress = async (isCorrect: boolean) => {
     if (!session) return;
-
     try {
       const currentProgress = phaseProgress[currentPhase];
       const newCorrectAttempts = currentProgress?.correct_attempts || 0;
       const newAttemptsCount = (currentProgress?.attempts_count || 0) + 1;
       const newProgressPercentage = Math.min(100, Math.round((newCorrectAttempts + (isCorrect ? 1 : 0)) / newAttemptsCount * 100));
-
       const updateData = {
         user_id: session.user_id,
         skill_id: skillId,
@@ -312,13 +289,11 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "", resumeCo
         last_attempt_at: new Date().toISOString(),
         status: newProgressPercentage >= 80 ? 'completed' : 'in_progress'
       };
-
-      const { error } = await supabase
-        .from('learning_phase_progress')
-        .upsert(updateData, {
-          onConflict: 'user_id,skill_id,phase_number'
-        });
-
+      const {
+        error
+      } = await supabase.from('learning_phase_progress').upsert(updateData, {
+        onConflict: 'user_id,skill_id,phase_number'
+      });
       if (error) throw error;
 
       // Update local state
@@ -336,16 +311,14 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "", resumeCo
           setCurrentPhase(prev => prev + 1);
           toast({
             title: "Faza ukończona!",
-            description: `Przechodzisz do fazy ${currentPhase + 1}`,
+            description: `Przechodzisz do fazy ${currentPhase + 1}`
           });
         }, 1000);
       }
-
     } catch (error) {
       console.error('Error updating phase progress:', error);
     }
   };
-
   const handleSymbolSelect = (symbol: string) => {
     setUserInput(prev => prev + symbol);
   };
@@ -359,14 +332,15 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "", resumeCo
       setContextualSymbols([]);
     }
   }, [userInput, getSymbolsForText]);
-
   const askForHint = async () => {
     if (!session || isLoading) return;
-
     setIsLoading(true);
     try {
       // Use supabase client instead of direct fetch to ensure proper auth
-      const { data, error } = await supabase.functions.invoke('study-tutor', {
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('study-tutor', {
         body: {
           message: "Poproś o podpowiedź",
           sessionId: session.id,
@@ -376,9 +350,7 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "", resumeCo
           currentPhase: currentPhase
         }
       });
-
       if (error) throw error;
-
       setChatHistory(prev => [...prev, {
         role: 'assistant',
         content: data.message || 'Przepraszam, nie mogę teraz udzielić podpowiedzi.',
@@ -392,47 +364,44 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "", resumeCo
           chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
         }
       }, 100);
-
     } catch (error) {
       console.error('Error getting hint:', error);
       toast({
         title: "Błąd",
         description: "Nie udało się pobrać podpowiedzi",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
     }
   };
-
   const endSession = async () => {
     if (!session || !user?.id) return;
-
     try {
       setIsLoading(true);
-      
+
       // Generate session summary
-      const { data, error } = await supabase.functions.invoke('session-summary', {
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('session-summary', {
         body: {
           sessionId: session.id,
           sessionType: 'lesson',
           userId: user.id
         }
       });
-
       if (error) {
         console.error('Error generating session summary:', error);
       }
 
       // Mark first lesson as completed for onboarding
-      await supabase
-        .from('profiles')
-        .update({ first_lesson_completed: true })
-        .eq('user_id', user.id);
-
+      await supabase.from('profiles').update({
+        first_lesson_completed: true
+      }).eq('user_id', user.id);
       toast({
         title: "Sesja zakończona",
-        description: "Sesja została pomyślnie zakończona i zapisana.",
+        description: "Sesja została pomyślnie zakończona i zapisana."
       });
 
       // Navigate back or to sessions page
@@ -441,7 +410,6 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "", resumeCo
       } else {
         window.history.back();
       }
-
     } catch (error) {
       console.error('Error ending session:', error);
       toast({
@@ -453,11 +421,9 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "", resumeCo
       setIsLoading(false);
     }
   };
-
   const getCurrentPhaseData = () => {
     return phases.find(p => p.phase_number === currentPhase);
   };
-
   const getPhaseProgressData = () => {
     return phases.map(phase => ({
       ...phase,
@@ -465,10 +431,8 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "", resumeCo
       progress_percentage: phaseProgress[phase.phase_number]?.progress_percentage || 0
     }));
   };
-
   if (!skill) {
-    return (
-      <div className={`animate-pulse space-y-4 ${className}`}>
+    return <div className={`animate-pulse space-y-4 ${className}`}>
         <Card>
           <CardHeader>
             <div className="h-6 bg-muted rounded w-1/2" />
@@ -481,14 +445,10 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "", resumeCo
             </div>
           </CardContent>
         </Card>
-      </div>
-    );
+      </div>;
   }
-
   const currentPhaseData = getCurrentPhaseData();
-
-  return (
-    <div className={`min-h-screen bg-background flex flex-col ${className}`}>
+  return <div className={`min-h-screen bg-background flex flex-col ${className}`}>
       {/* Fixed Header */}
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border/50">
         <div className="max-w-4xl mx-auto px-4 py-4">
@@ -499,19 +459,11 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "", resumeCo
               </div>
               <div>
                 <h1 className="font-semibold text-lg">{skill.name}</h1>
-                <p className="text-xs text-muted-foreground">
-                  Faza {currentPhase} z {phases.length}
-                </p>
+                
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button
-                onClick={askForHint}
-                disabled={isLoading}
-                variant="ghost"
-                size="sm"
-                className="text-xs"
-              >
+              <Button onClick={askForHint} disabled={isLoading} variant="ghost" size="sm" className="text-xs">
                 <HelpCircle className="w-4 h-4 mr-1" />
                 Podpowiedź
               </Button>
@@ -523,17 +475,11 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "", resumeCo
       {/* Main Chat Area */}
       <div className="flex-1 max-w-4xl mx-auto w-full px-4 py-6 flex flex-col">
         {/* Phase Progress */}
-        <div className="mb-6">
-          <PhaseProgress 
-            phases={getPhaseProgressData()} 
-            currentPhase={currentPhase}
-          />
-        </div>
+        
         
         {/* Messages Container */}
         <div ref={chatScrollRef} className="flex-1 overflow-y-auto scroll-smooth pb-4">
-          {chatHistory.length === 0 ? (
-            <div className="flex items-center justify-center h-64">
+          {chatHistory.length === 0 ? <div className="flex items-center justify-center h-64">
               <div className="text-center">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                   <Lightbulb className="h-8 w-8 text-primary" />
@@ -542,64 +488,38 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "", resumeCo
                 <p className="text-muted-foreground mb-4">
                   Napisz "Rozpocznij lekcję" aby zacząć
                 </p>
-                {currentPhaseData && (
-                  <div className="max-w-md mx-auto p-4 bg-muted/30 border border-border/50 rounded-xl">
+                {currentPhaseData && <div className="max-w-md mx-auto p-4 bg-muted/30 border border-border/50 rounded-xl">
                     <h4 className="font-medium text-sm mb-2">{currentPhaseData.phase_name}</h4>
                     <p className="text-xs text-muted-foreground">
                       {currentPhaseData.phase_description}
                     </p>
-                  </div>
-                )}
+                  </div>}
               </div>
-            </div>
-          ) : (
-            <div className="space-y-6">
+            </div> : <div className="space-y-6">
               {chatHistory.map((message, index) => {
-                const prevMessage = chatHistory[index - 1];
-                const showTimestamp = !prevMessage || 
-                  new Date(message.timestamp).getTime() - new Date(prevMessage.timestamp).getTime() > 300000; // 5 minutes
-                
-                return (
-                  <div key={index}>
-                    {showTimestamp && (
-                      <div className="text-center mb-4">
+            const prevMessage = chatHistory[index - 1];
+            const showTimestamp = !prevMessage || new Date(message.timestamp).getTime() - new Date(prevMessage.timestamp).getTime() > 300000; // 5 minutes
+
+            return <div key={index}>
+                    {showTimestamp && <div className="text-center mb-4">
                         <span className="text-xs text-muted-foreground bg-background px-3 py-1 rounded-full border">
                           {new Date(message.timestamp).toLocaleDateString('pl-PL', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
                         </span>
-                      </div>
-                    )}
+                      </div>}
                     
                     <div className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        {message.role === 'user' ? (
-                          <User className="w-4 h-4 text-primary" />
-                        ) : (
-                          <Bot className="w-4 h-4 text-primary" />
-                        )}
+                        {message.role === 'user' ? <User className="w-4 h-4 text-primary" /> : <Bot className="w-4 h-4 text-primary" />}
                       </div>
                       
                       <div className={`flex-1 max-w-[80%] ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
-                        <div
-                          className={`inline-block px-4 py-3 rounded-2xl ${
-                            message.role === 'user'
-                              ? 'bg-primary text-primary-foreground ml-auto'
-                              : message.isHint
-                              ? 'bg-accent/30 border border-accent/50'
-                              : 'bg-muted/50 border border-border/50'
-                          }`}
-                        >
+                        <div className={`inline-block px-4 py-3 rounded-2xl ${message.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : message.isHint ? 'bg-accent/30 border border-accent/50' : 'bg-muted/50 border border-border/50'}`}>
                           <div className="flex items-start gap-2">
-                            {message.role === 'assistant' && message.isHint && (
-                              <HelpCircle className="h-4 w-4 text-accent-foreground mt-0.5 flex-shrink-0" />
-                            )}
-                            {message.role === 'user' && message.isCorrect !== undefined && (
-                              message.isCorrect 
-                                ? <CheckCircle className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
-                                : <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
-                            )}
+                            {message.role === 'assistant' && message.isHint && <HelpCircle className="h-4 w-4 text-accent-foreground mt-0.5 flex-shrink-0" />}
+                            {message.role === 'user' && message.isCorrect !== undefined && (message.isCorrect ? <CheckCircle className="h-4 w-4 text-success mt-0.5 flex-shrink-0" /> : <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />)}
                             <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
                               {message.content}
                             </p>
@@ -607,12 +527,10 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "", resumeCo
                         </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  </div>;
+          })}
               
-              {isLoading && (
-                <div className="flex gap-3">
+              {isLoading && <div className="flex gap-3">
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                     <Bot className="w-4 h-4 text-primary" />
                   </div>
@@ -625,78 +543,42 @@ export function PhaseBasedLesson({ skillId, onComplete, className = "", resumeCo
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
-          )}
+                </div>}
+            </div>}
         </div>
 
         {/* Fixed Input Area */}
         <div className="sticky bottom-0 bg-background/80 backdrop-blur-sm pt-4">
           <div className="mb-3">
-            <MathSymbolPanel
-              quickSymbols={contextualSymbols.length > 0 ? contextualSymbols : quickSymbols}
-              onSymbolSelect={handleSymbolSelect}
-            />
+            <MathSymbolPanel quickSymbols={contextualSymbols.length > 0 ? contextualSymbols : quickSymbols} onSymbolSelect={handleSymbolSelect} />
           </div>
           <div className="flex items-end gap-3 p-4 bg-muted/30 border border-border/50 rounded-2xl">
-            <Input
-              type="text"
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              placeholder={chatHistory.length === 0 ? "Napisz 'Rozpocznij lekcję' aby zacząć..." : "Wpisz swoją odpowiedź..."}
-              className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  sendMessage();
-                }
-              }}
-            />
+            <Input type="text" value={userInput} onChange={e => setUserInput(e.target.value)} placeholder={chatHistory.length === 0 ? "Napisz 'Rozpocznij lekcję' aby zacząć..." : "Wpisz swoją odpowiedź..."} className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60" onKeyDown={e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              sendMessage();
+            }
+          }} />
             
-            {chatHistory.length === 0 ? (
-              <Button 
-                onClick={() => {
-                  setUserInput('Rozpocznij lekcję');
-                  setTimeout(() => sendMessage(), 100);
-                }}
-                disabled={isLoading}
-                size="sm"
-                className="h-10 px-4 rounded-xl"
-              >
+            {chatHistory.length === 0 ? <Button onClick={() => {
+            setUserInput('Rozpocznij lekcję');
+            setTimeout(() => sendMessage(), 100);
+          }} disabled={isLoading} size="sm" className="h-10 px-4 rounded-xl">
                 {isLoading ? 'Rozpoczynam...' : 'Rozpocznij'}
-              </Button>
-            ) : (
-              <Button 
-                onClick={sendMessage}
-                disabled={!userInput.trim() || isLoading}
-                size="sm"
-                className="h-10 w-10 p-0 rounded-xl"
-              >
-                {isLoading ? (
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4" />
-                )}
-              </Button>
-            )}
+              </Button> : <Button onClick={sendMessage} disabled={!userInput.trim() || isLoading} size="sm" className="h-10 w-10 p-0 rounded-xl">
+                {isLoading ? <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <Send className="w-4 h-4" />}
+              </Button>}
           </div>
           
           <div className="flex items-center justify-between pt-3 px-1">
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <button 
-                onClick={endSession} 
-                className="hover:text-foreground transition-colors duration-200 font-medium"
-              >
+              <button onClick={endSession} className="hover:text-foreground transition-colors duration-200 font-medium">
                 Zakończ sesję
               </button>
             </div>
-            <div className="text-xs text-muted-foreground">
-              Faza {currentPhase} z {phases.length}
-            </div>
+            
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 }

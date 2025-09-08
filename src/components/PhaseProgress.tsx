@@ -1,7 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, Circle, Clock, AlertCircle } from "lucide-react";
-
 interface PhaseData {
   phase_number: number;
   phase_name: string;
@@ -10,14 +9,16 @@ interface PhaseData {
   status: 'not_started' | 'in_progress' | 'completed' | 'failed';
   progress_percentage: number;
 }
-
 interface PhaseProgressProps {
   phases: PhaseData[];
   currentPhase: number;
   className?: string;
 }
-
-export function PhaseProgress({ phases, currentPhase, className = "" }: PhaseProgressProps) {
+export function PhaseProgress({
+  phases,
+  currentPhase,
+  className = ""
+}: PhaseProgressProps) {
   const getPhaseIcon = (phase: PhaseData) => {
     switch (phase.status) {
       case 'completed':
@@ -30,7 +31,6 @@ export function PhaseProgress({ phases, currentPhase, className = "" }: PhasePro
         return <Circle className="h-5 w-5 text-muted-foreground" />;
     }
   };
-
   const getPhaseVariant = (phase: PhaseData) => {
     switch (phase.status) {
       case 'completed':
@@ -43,28 +43,11 @@ export function PhaseProgress({ phases, currentPhase, className = "" }: PhasePro
         return 'secondary' as const;
     }
   };
-
-  return (
-    <div className={`space-y-4 ${className}`}>
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-foreground">
-          Postęp w umiejętności
-        </h3>
-        <Badge variant="outline">
-          Faza {currentPhase} z {phases.length}
-        </Badge>
-      </div>
+  return <div className={`space-y-4 ${className}`}>
+      
 
       <div className="space-y-3">
-        {phases.map((phase) => (
-          <div 
-            key={phase.phase_number}
-            className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
-              phase.phase_number === currentPhase 
-                ? 'border-primary bg-primary/5' 
-                : 'border-border bg-card'
-            }`}
-          >
+        {phases.map(phase => <div key={phase.phase_number} className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${phase.phase_number === currentPhase ? 'border-primary bg-primary/5' : 'border-border bg-card'}`}>
             {getPhaseIcon(phase)}
             
             <div className="flex-1 min-w-0">
@@ -84,12 +67,8 @@ export function PhaseProgress({ phases, currentPhase, className = "" }: PhasePro
                 {phase.phase_description}
               </p>
               
-              {(phase.status === 'in_progress' || phase.status === 'completed') && (
-                <div className="space-y-1">
-                  <Progress 
-                    value={phase.progress_percentage} 
-                    className="h-2"
-                  />
+              {(phase.status === 'in_progress' || phase.status === 'completed') && <div className="space-y-1">
+                  <Progress value={phase.progress_percentage} className="h-2" />
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span>{phase.progress_percentage}% ukończone</span>
                     <span className="flex items-center gap-1">
@@ -97,12 +76,9 @@ export function PhaseProgress({ phases, currentPhase, className = "" }: PhasePro
                       {phase.estimated_duration_minutes}min
                     </span>
                   </div>
-                </div>
-              )}
+                </div>}
             </div>
-          </div>
-        ))}
+          </div>)}
       </div>
-    </div>
-  );
+    </div>;
 }
