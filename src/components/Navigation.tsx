@@ -6,21 +6,25 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { logEvent } from "@/lib/logger";
 import { useTokenUsage } from "@/hooks/useTokenUsage";
-
 export const Navigation = () => {
-  const { user, signOut } = useAuth();
+  const {
+    user,
+    signOut
+  } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const { subscription, getRemainingTokens, getTokenStatus } = useTokenUsage();
-
+  const {
+    subscription,
+    getRemainingTokens,
+    getTokenStatus
+  } = useTokenUsage();
   const isActive = (path: string) => location.pathname === path;
-
   const handleCtaClick = (action: string) => {
-    logEvent('landing_cta_click', { action });
+    logEvent('landing_cta_click', {
+      action
+    });
   };
-
-  return (
-    <nav className="z-50 bg-background/80 backdrop-blur-md border-b border-border md:sticky md:top-0">
+  return <nav className="z-50 bg-background/80 backdrop-blur-md border-b border-border md:sticky md:top-0">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-12 md:h-16">
           {/* Logo */}
@@ -31,47 +35,28 @@ export const Navigation = () => {
             <span className="text-xl font-bold">mentavo.ai</span>
           </Link>
 
-          {user ? (
-            <>
+          {user ? <>
               {/* Desktop Navigation - Logged In */}
               <div className="hidden md:flex items-center gap-8">
-                <Link 
-                  to="/study" 
-                  className={`flex items-center gap-2 transition-smooth ${
-                    isActive('/study') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
-                  }`}
-                >
+                <Link to="/study" className={`flex items-center gap-2 transition-smooth ${isActive('/study') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
                   <Brain className="w-4 h-4" />
                   Study & Learn
                 </Link>
-                <Link 
-                  to="/postepy" 
-                  className={`flex items-center gap-2 transition-smooth ${
-                    isActive('/postepy') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
-                  }`}
-                >
+                <Link to="/postepy" className={`flex items-center gap-2 transition-smooth ${isActive('/postepy') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
                   <TrendingUp className="w-4 h-4" />
                   Postępy
                 </Link>
-                <Link 
-                  to="/ai-logs" 
-                  className={`flex items-center gap-2 transition-smooth ${
-                    isActive('/ai-logs') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
-                  }`}
-                >
+                <Link to="/ai-logs" className={`flex items-center gap-2 transition-smooth ${isActive('/ai-logs') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
                   <Database className="w-4 h-4" />
                   AI Logs
                 </Link>
-                <Link 
-                  to="/sessions" 
-                  className={`flex items-center gap-2 transition-smooth ${
-                    isActive('/sessions') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'
-                  }`}
-                >
+                <Link to="/sessions" className={`flex items-center gap-2 transition-smooth ${isActive('/sessions') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
                   <Clock className="w-4 h-4" />
                   Sesje
                 </Link>
-                <Button asChild size="sm" className="shadow-primary" onClick={() => logEvent('cta_click', { source: 'nav' })}>
+                <Button asChild size="sm" className="shadow-primary" onClick={() => logEvent('cta_click', {
+              source: 'nav'
+            })}>
                   <Link to="/chat">
                     <span className="inline-flex items-center"><MessageCircle className="w-4 h-4 mr-2" />mentavo.ai</span>
                   </Link>
@@ -80,18 +65,12 @@ export const Navigation = () => {
 
               {/* User Info & Logout */}
               <div className="hidden md:flex items-center gap-4">
-                {subscription?.subscription_type === 'free' && (
-                  <div className="flex items-center gap-2 text-xs">
-                    <span className="text-muted-foreground">
-                      {getRemainingTokens()} tokenów
-                    </span>
-                    {getTokenStatus() === 'critical' && (
-                      <Badge variant="destructive" className="text-xs">
+                {subscription?.subscription_type === 'free' && <div className="flex items-center gap-2 text-xs">
+                    
+                    {getTokenStatus() === 'critical' && <Badge variant="destructive" className="text-xs">
                         Niski poziom!
-                      </Badge>
-                    )}
-                  </div>
-                )}
+                      </Badge>}
+                  </div>}
                 <span className="text-sm text-muted-foreground">
                   {user?.email}
                 </span>
@@ -106,9 +85,7 @@ export const Navigation = () => {
                   Wyloguj
                 </Button>
               </div>
-            </>
-          ) : (
-            <>
+            </> : <>
               {/* Desktop Navigation - Not Logged In */}
               <div className="hidden md:flex items-center gap-4">
                 <Link to="/auth">
@@ -122,14 +99,10 @@ export const Navigation = () => {
                   </Button>
                 </Link>
               </div>
-            </>
-          )}
+            </>}
 
           {/* Mobile menu button */}
-          <button 
-            className="md:hidden"
-            onClick={() => setIsOpen(!isOpen)}
-          >
+          <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
             <div className="w-6 h-6 flex flex-col justify-center items-center">
               <span className={`w-5 h-0.5 bg-foreground transition-all ${isOpen ? 'rotate-45 translate-y-1' : ''}`}></span>
               <span className={`w-5 h-0.5 bg-foreground transition-all mt-1 ${isOpen ? 'opacity-0' : ''}`}></span>
@@ -139,48 +112,22 @@ export const Navigation = () => {
         </div>
 
           {/* Mobile Navigation */}
-        {isOpen && (
-          <div className="md:hidden py-4 border-t border-border animate-fadeIn">
-            {user ? (
-              <>
+        {isOpen && <div className="md:hidden py-4 border-t border-border animate-fadeIn">
+            {user ? <>
                 <div className="flex flex-col gap-4">
-                  <Link 
-                    to="/study" 
-                    className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                      isActive('/study') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
+                  <Link to="/study" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/study') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
                     <Brain className="w-4 h-4" />
                     Study & Learn
                   </Link>
-                  <Link 
-                    to="/chat" 
-                    className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                      isActive('/chat') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
+                  <Link to="/chat" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/chat') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
                     <MessageCircle className="w-4 h-4" />
                     mentavo.ai
                   </Link>
-                  <Link 
-                    to="/ai-logs" 
-                    className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                      isActive('/ai-logs') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
+                  <Link to="/ai-logs" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/ai-logs') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
                     <Database className="w-4 h-4" />
                     AI Logs
                   </Link>
-                  <Link 
-                    to="/sessions" 
-                    className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${
-                      isActive('/sessions') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'
-                    }`}
-                    onClick={() => setIsOpen(false)}
-                  >
+                  <Link to="/sessions" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/sessions') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
                     <Clock className="w-4 h-4" />
                     Sesje
                   </Link>
@@ -200,24 +147,22 @@ export const Navigation = () => {
                     Wyloguj
                   </Button>
                 </div>
-              </>
-            ) : (
-              <div className="flex flex-col gap-4">
+              </> : <div className="flex flex-col gap-4">
                 <Button asChild variant="outline" className="w-full" onClick={() => setIsOpen(false)}>
                   <Link to="/auth">
                     Zaloguj się
                   </Link>
                 </Button>
-                <Button asChild className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90" onClick={() => { setIsOpen(false); handleCtaClick('mobile_signup'); }}>
+                <Button asChild className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90" onClick={() => {
+            setIsOpen(false);
+            handleCtaClick('mobile_signup');
+          }}>
                   <Link to="/auth">
                     Odblokuj nieograniczoną naukę
                   </Link>
                 </Button>
-              </div>
-            )}
-            </div>
-        )}
+              </div>}
+            </div>}
       </div>
-    </nav>
-  );
+    </nav>;
 };
