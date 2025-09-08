@@ -79,6 +79,14 @@ export function PhaseBasedLesson({
     setStartTime(Date.now());
   }, [userInput]);
 
+  // Auto-scroll to bottom when new messages are added
+  useEffect(() => {
+    if (chatScrollRef.current && chatHistory.length > 0) {
+      const scrollElement = chatScrollRef.current;
+      scrollElement.scrollTop = scrollElement.scrollHeight;
+    }
+  }, [chatHistory]);
+
   // Auto-close session on page unload
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -235,27 +243,20 @@ export function PhaseBasedLesson({
       const aiResponse = data.message || 'Przepraszam, wystąpił problem z odpowiedzią.';
       const isCorrect = data.isCorrect || data.correctAnswer || aiResponse.includes('Poprawnie');
 
-      // Add user message to chat
-      setChatHistory(prev => [...prev, {
-        role: 'user',
-        content: userInput,
-        timestamp: new Date().toISOString(),
-        isCorrect: isCorrect
-      }]);
-
-      // Add AI response to chat
-      setChatHistory(prev => [...prev, {
-        role: 'assistant',
-        content: aiResponse,
-        timestamp: new Date().toISOString()
-      }]);
-
-      // Scroll to bottom after adding messages
-      setTimeout(() => {
-        if (chatScrollRef.current) {
-          chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+      // Add both user message and AI response at once to prevent double renders
+      setChatHistory(prev => [...prev, 
+        {
+          role: 'user',
+          content: userInput,
+          timestamp: new Date().toISOString(),
+          isCorrect: isCorrect
+        },
+        {
+          role: 'assistant',
+          content: aiResponse,
+          timestamp: new Date().toISOString()
         }
-      }, 100);
+      ]);
 
       // Update phase progress
       await updatePhaseProgress(isCorrect);
