@@ -2688,6 +2688,42 @@ export type Database = {
           },
         ]
       }
+      subscription_plans: {
+        Row: {
+          created_at: string
+          features: Json
+          id: string
+          is_active: boolean
+          monthly_price_cents: number
+          plan_type: string
+          token_limit_hard: number
+          token_limit_soft: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          features?: Json
+          id?: string
+          is_active?: boolean
+          monthly_price_cents?: number
+          plan_type: string
+          token_limit_hard: number
+          token_limit_soft: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          features?: Json
+          id?: string
+          is_active?: boolean
+          monthly_price_cents?: number
+          plan_type?: string
+          token_limit_hard?: number
+          token_limit_soft?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       task_definitions: {
         Row: {
           created_at: string
@@ -2743,50 +2779,50 @@ export type Database = {
       }
       token_limit_exceeded_logs: {
         Row: {
+          account_limit: number | null
           attempted_tokens: number | null
           context_size: number | null
           conversation_length: number | null
           created_at: string
           enriched_context_enabled: boolean | null
           id: string
-          monthly_limit: number | null
           session_id: string | null
           skill_id: string | null
           subscription_type: string | null
           timestamp: string
-          tokens_used_this_month: number | null
+          tokens_used_total: number | null
           user_id: string | null
           user_message: string | null
         }
         Insert: {
+          account_limit?: number | null
           attempted_tokens?: number | null
           context_size?: number | null
           conversation_length?: number | null
           created_at?: string
           enriched_context_enabled?: boolean | null
           id?: string
-          monthly_limit?: number | null
           session_id?: string | null
           skill_id?: string | null
           subscription_type?: string | null
           timestamp?: string
-          tokens_used_this_month?: number | null
+          tokens_used_total?: number | null
           user_id?: string | null
           user_message?: string | null
         }
         Update: {
+          account_limit?: number | null
           attempted_tokens?: number | null
           context_size?: number | null
           conversation_length?: number | null
           created_at?: string
           enriched_context_enabled?: boolean | null
           id?: string
-          monthly_limit?: number | null
           session_id?: string | null
           skill_id?: string | null
           subscription_type?: string | null
           timestamp?: string
-          tokens_used_this_month?: number | null
+          tokens_used_total?: number | null
           user_id?: string | null
           user_message?: string | null
         }
@@ -3045,39 +3081,6 @@ export type Database = {
           },
         ]
       }
-      user_daily_limits: {
-        Row: {
-          created_at: string
-          date: string
-          hard_limit: number | null
-          id: string
-          sessions_count: number | null
-          soft_limit: number | null
-          tokens_used: number | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          date?: string
-          hard_limit?: number | null
-          id?: string
-          sessions_count?: number | null
-          soft_limit?: number | null
-          tokens_used?: number | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          date?: string
-          hard_limit?: number | null
-          id?: string
-          sessions_count?: number | null
-          soft_limit?: number | null
-          tokens_used?: number | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       user_referral_stats: {
         Row: {
           available_points: number
@@ -3175,36 +3178,39 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          monthly_token_limit: number
           status: string
           stripe_customer_id: string | null
           subscription_end_date: string | null
           subscription_type: string
-          tokens_used_this_month: number
+          token_limit_hard: number
+          token_limit_soft: number
+          tokens_used_total: number
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
-          monthly_token_limit?: number
           status?: string
           stripe_customer_id?: string | null
           subscription_end_date?: string | null
           subscription_type?: string
-          tokens_used_this_month?: number
+          token_limit_hard?: number
+          token_limit_soft?: number
+          tokens_used_total?: number
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
-          monthly_token_limit?: number
           status?: string
           stripe_customer_id?: string | null
           subscription_end_date?: string | null
           subscription_type?: string
-          tokens_used_this_month?: number
+          token_limit_hard?: number
+          token_limit_soft?: number
+          tokens_used_total?: number
           updated_at?: string
           user_id?: string
         }
@@ -3392,6 +3398,16 @@ export type Database = {
       get_user_roles: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"][]
+      }
+      get_user_subscription_limits: {
+        Args: { target_user_id: string }
+        Returns: {
+          status: string
+          subscription_type: string
+          token_limit_hard: number
+          token_limit_soft: number
+          tokens_used_total: number
+        }[]
       }
       get_user_total_token_usage: {
         Args: { target_user_id: string }
