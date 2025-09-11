@@ -66,17 +66,17 @@ export const useSubscription = () => {
   }, [user]);
 
   const hasTokens = () => {
-    if (!subscription) return false;
+    if (!subscription || subscription.subscription_type !== 'free') return true; // Paid users have unlimited
     return subscription.tokens_used_this_month < subscription.monthly_token_limit;
   };
 
   const getRemainingTokens = () => {
-    if (!subscription) return 0;
+    if (!subscription || subscription.subscription_type !== 'free') return 999999999; // Paid users have unlimited
     return Math.max(0, subscription.monthly_token_limit - subscription.tokens_used_this_month);
   };
 
   const getUsagePercentage = () => {
-    if (!subscription) return 0;
+    if (!subscription || subscription.subscription_type !== 'free') return 0; // Paid users always show 0%
     return (subscription.tokens_used_this_month / subscription.monthly_token_limit) * 100;
   };
 

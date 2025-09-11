@@ -1,6 +1,6 @@
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle, Zap } from 'lucide-react';
 import { useTokenUsage } from '@/hooks/useTokenUsage';
 export const TokenUsageProgress = () => {
@@ -12,7 +12,10 @@ export const TokenUsageProgress = () => {
     getTokenStatus,
     getStatusMessage
   } = useTokenUsage();
-  if (loading || !subscription) return null;
+
+  // Only show for free accounts
+  if (loading || !subscription || subscription.subscription_type !== 'free') return null;
+
   const percentage = getUsagePercentage();
   const remaining = getRemainingTokens();
   const status = getTokenStatus();
@@ -40,6 +43,32 @@ export const TokenUsageProgress = () => {
         return 'bg-green-100 text-green-800 border-green-200';
     }
   };
-  if (subscription.subscription_type !== 'free') return null;
-  return;
+
+  return (
+    <Card className="mb-4">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Zap className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium">Zużycie tokenów</span>
+          </div>
+          <Badge className={getStatusBadgeColor()}>
+            {percentage.toFixed(0)}%
+          </Badge>
+        </div>
+        
+        <Progress 
+          value={percentage} 
+          className="mb-2 h-2"
+        />
+        
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span>{getStatusMessage()}</span>
+          {status === 'critical' && (
+            <AlertTriangle className="w-4 h-4 text-red-500" />
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
 };

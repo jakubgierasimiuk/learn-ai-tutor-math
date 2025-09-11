@@ -3171,6 +3171,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_subscriptions: {
+        Row: {
+          created_at: string
+          id: string
+          monthly_token_limit: number
+          status: string
+          stripe_customer_id: string | null
+          subscription_end_date: string | null
+          subscription_type: string
+          tokens_used_this_month: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          monthly_token_limit?: number
+          status?: string
+          stripe_customer_id?: string | null
+          subscription_end_date?: string | null
+          subscription_type?: string
+          tokens_used_this_month?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          monthly_token_limit?: number
+          status?: string
+          stripe_customer_id?: string | null
+          subscription_end_date?: string | null
+          subscription_type?: string
+          tokens_used_this_month?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       validation_logs: {
         Row: {
           confidence: number
@@ -3353,6 +3392,10 @@ export type Database = {
       get_user_roles: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"][]
+      }
+      get_user_total_token_usage: {
+        Args: { target_user_id: string }
+        Returns: number
       }
       get_weekly_benchmarks: {
         Args: Record<PropertyKey, never>

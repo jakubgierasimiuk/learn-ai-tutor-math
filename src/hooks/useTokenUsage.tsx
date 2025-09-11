@@ -35,7 +35,8 @@ export const useTokenUsage = () => {
   };
 
   const shouldShowSoftPaywall = () => {
-    return !hasTokens() && subscription?.subscription_type === 'free';
+    if (!subscription || subscription.subscription_type !== 'free') return false;
+    return !hasTokens();
   };
 
   return {

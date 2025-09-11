@@ -47,7 +47,7 @@ serve(async (req) => {
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     
     let subscriptionType: 'free' | 'paid' | 'super' = 'free';
-    let monthlyTokenLimit = 10000; // Free tier
+    let monthlyTokenLimit = 500; // Default free tier limit
     let subscriptionEnd = null;
     let stripeCustomerId = null;
     
@@ -88,6 +88,14 @@ serve(async (req) => {
       logStep("No Stripe customer found");
     }
 
+    // Calculate total token usage from registration (not monthly)
+    const { data: tokenUsageData, error: tokenError } = await supabaseClient.rpc('get_user_total_token_usage', {
+      target_user_id: user.id
+    });
+    
+    const tokensUsedTotal = tokenUsageData || 0;
+    logStep("Token usage calculated", { tokensUsedTotal });
+
     // Update user subscription in database
     const { error: upsertError } = await supabaseClient
       .from("user_subscriptions")
@@ -118,8 +126,9 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       subscription_type: subscriptionType,
       monthly_token_limit: monthlyTokenLimit,
+      tokens_used_this_month: tokensUsedTotal, // Return total usage from registration
       subscription_end: subscriptionEnd,
-      is_active: true
+      status: 'active'
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

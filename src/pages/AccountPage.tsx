@@ -93,17 +93,9 @@ const AccountPage = () => {
     });
   };
 
-  const getTokenLimitDisplay = (type: string) => {
-    switch (type) {
-      case 'free':
-        return '10,000';
-      case 'paid':
-        return '5,000,000';
-      case 'super':
-        return '15,000,000';
-      default:
-        return 'Nieznany';
-    }
+  const getTokenLimitDisplay = () => {
+    if (!subscription) return 'Ładowanie...';
+    return subscription.monthly_token_limit.toLocaleString();
   };
 
   return (
@@ -175,14 +167,14 @@ const AccountPage = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium">Limit tokenów miesięcznie</Label>
+                    <Label className="text-sm font-medium">Limit tokenów na konto</Label>
                     <span className="text-base font-semibold">
-                      {getTokenLimitDisplay(subscription.subscription_type)} tokenów
+                      {getTokenLimitDisplay()} tokenów
                     </span>
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium">Wykorzystane tokeny w tym miesiącu</Label>
+                    <Label className="text-sm font-medium">Wykorzystane tokeny od rejestracji</Label>
                     <div className="space-y-1">
                       <span className="text-base">
                         {subscription.tokens_used_this_month?.toLocaleString() || 0} tokenów
@@ -195,6 +187,12 @@ const AccountPage = () => {
                           }}
                         ></div>
                       </div>
+                      <p className="text-xs text-muted-foreground">
+                        {subscription.subscription_type === 'free' 
+                          ? `Pozostało: ${(subscription.monthly_token_limit - (subscription.tokens_used_this_month || 0)).toLocaleString()} tokenów`
+                          : 'Nieograniczone wykorzystanie'
+                        }
+                      </p>
                     </div>
                   </div>
 

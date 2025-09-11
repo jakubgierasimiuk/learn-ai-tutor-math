@@ -1072,11 +1072,11 @@ async function handleChat(req: Request): Promise<Response> {
 
     // Initialize Supabase client for data access
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
-    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     let supabaseClient = null;
     
-    if (supabaseUrl && supabaseKey) {
-      supabaseClient = createClient(supabaseUrl, supabaseKey, {
+    if (supabaseUrl && supabaseServiceKey) {
+      supabaseClient = createClient(supabaseUrl, supabaseServiceKey, {
         auth: { persistSession: false },
       })
     }
@@ -1107,51 +1107,53 @@ async function handleChat(req: Request): Promise<Response> {
       }
     }
 
-    // Check token usage limit for authenticated users
-    if (userId) {
-      const { data: subscription } = await supabaseClient
-        .from('user_subscriptions')
-        .select('tokens_used_this_month, monthly_token_limit, subscription_type')
-        .eq('user_id', userId)
-        .single();
-
-      if (subscription && subscription.tokens_used_this_month >= subscription.monthly_token_limit) {
-        console.log('🚫 Token limit exceeded:', subscription);
-        
-        // Log detailed information about token limit exceeded
-        const conversationLength = messageHistory?.length || 0;
-        const contextSize = 0; // Will be calculated if enriched context was requested
-        
-        try {
-          await supabaseClient
-            .from('token_limit_exceeded_logs')
-            .insert({
-              user_id: userId,
-              session_id: sessionId,
-              attempted_tokens: 2000, // Our current token limit
-              monthly_limit: subscription.monthly_token_limit,
-              tokens_used_this_month: subscription.tokens_used_this_month,
-              subscription_type: subscription.subscription_type,
-              conversation_length: conversationLength,
-              skill_id: skillId,
-              user_message: message.substring(0, 500), // Truncate for storage
-              enriched_context_enabled: enrichedContext,
-              context_size: contextSize
-            });
-          
-          console.log(`🔍 Detailed token limit exceeded log created for user ${userId}: ${subscription.tokens_used_this_month}/${subscription.monthly_token_limit} tokens used this month`);
-        } catch (logError) {
-          console.error('Failed to log token limit exceeded event:', logError);
-        }
-        
-        return new Response(JSON.stringify({
-          error: 'Token limit exceeded',
-          message: `Osiągnięto limit ${subscription.monthly_token_limit} tokenów na miesiąc. Rozważ upgrade planu.`,
-          subscription_type: subscription.subscription_type
-        }), {
-          status: 429,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    // Check token usage limit for authenticated users (free accounts only)
+    if (userId && supabaseClient) {
+      try {
+        // Get total token usage from registration
+        const { data: totalUsage, error: usageError } = await supabaseClient.rpc('get_user_total_token_usage', {
+          target_user_id: userId
         });
+
+        if (usageError) {
+          console.log('Error getting token usage:', usageError);
+        } else {
+          const tokensUsed = totalUsage || 0;
+          
+          // Check if user has a paid subscription
+          const { data: subscription } = await supabaseClient.functions.invoke('check-subscription', {
+            headers: { Authorization: authHeader }
+          });
+
+          const isFreeTier = subscription?.subscription_type === 'free';
+          const tokenLimit = subscription?.monthly_token_limit || 500;
+
+          console.log(`Token check for user ${userId}:`, {
+            tokensUsed,
+            tokenLimit,
+            subscriptionType: subscription?.subscription_type,
+            isFreeTier,
+            wouldExceed: isFreeTier && tokensUsed >= tokenLimit
+          });
+
+          if (isFreeTier && tokensUsed >= tokenLimit) {
+            console.log('🚫 Token limit exceeded for free user:', { tokensUsed, tokenLimit });
+            
+            return new Response(JSON.stringify({
+              error: 'Token limit exceeded',
+              message: `Osiągnięto limit ${tokenLimit} tokenów na konto darmowe. Ulepsz plan, aby kontynuować naukę.`,
+              subscription_type: subscription?.subscription_type,
+              tokens_used: tokensUsed,
+              token_limit: tokenLimit
+            }), {
+              status: 429,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          }
+        }
+      } catch (error) {
+        console.log('Error checking subscription/tokens:', error);
+        // Continue without blocking - don't fail on subscription check errors
       }
     }
 
