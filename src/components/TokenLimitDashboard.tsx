@@ -24,8 +24,8 @@ interface TokenLimitLog {
   session_id: string;
   timestamp: string;
   attempted_tokens: number;
-  monthly_limit: number;
-  tokens_used_this_month: number;
+  account_limit: number;
+  tokens_used_total: number;
   subscription_type: string;
   conversation_length: number;
   skill_id: string;
@@ -297,15 +297,15 @@ export const TokenLimitDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                  <div>
-                    <p className="text-sm font-medium">Użyte tokeny</p>
-                    <p className="text-lg font-bold text-destructive">
-                      {log.tokens_used_this_month.toLocaleString()} / {log.monthly_limit.toLocaleString()}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {Math.round((log.tokens_used_this_month / log.monthly_limit) * 100)}% limitu
-                    </p>
-                  </div>
+                   <div>
+                     <p className="text-sm font-medium">Użyte tokeny</p>
+                     <p className="text-lg font-bold text-destructive">
+                       {log.tokens_used_total.toLocaleString()} / {log.account_limit.toLocaleString()}
+                     </p>
+                     <p className="text-xs text-muted-foreground">
+                       {Math.round((log.tokens_used_total / log.account_limit) * 100)}% limitu
+                     </p>
+                   </div>
                   <div>
                     <p className="text-sm font-medium">Długość rozmowy</p>
                     <p className="text-lg font-bold">{log.conversation_length}</p>

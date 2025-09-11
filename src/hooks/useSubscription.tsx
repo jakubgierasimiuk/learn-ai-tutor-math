@@ -4,8 +4,9 @@ import { useAuth } from './useAuth';
 
 interface SubscriptionData {
   subscription_type: 'free' | 'paid' | 'super' | 'test';
-  monthly_token_limit: number;
-  tokens_used_this_month: number;
+  token_limit_soft: number;
+  token_limit_hard: number;
+  tokens_used_total: number;
   subscription_end?: string;
   status: string;
 }
@@ -28,24 +29,26 @@ export const useSubscription = () => {
       if (error) {
         console.error('Error checking subscription:', error);
         // Set default free subscription on error
-        setSubscription({
-          subscription_type: 'free',
-          monthly_token_limit: 500,
-          tokens_used_this_month: 0,
-          status: 'active'
-        });
+      setSubscription({
+        subscription_type: 'free',
+        token_limit_soft: 20000,
+        token_limit_hard: 25000,
+        tokens_used_total: 0,
+        status: 'active'
+      });
       } else {
         setSubscription({
           ...data,
-          tokens_used_this_month: data.tokens_used_this_month || 0
+          tokens_used_total: data.tokens_used_total || 0
         });
       }
     } catch (error) {
       console.error('Error in refreshSubscription:', error);
       setSubscription({
         subscription_type: 'free',
-        monthly_token_limit: 500,
-        tokens_used_this_month: 0,
+        token_limit_soft: 20000,
+        token_limit_hard: 25000,
+        tokens_used_total: 0,
         status: 'active'
       });
     } finally {
@@ -67,17 +70,17 @@ export const useSubscription = () => {
 
   const hasTokens = () => {
     if (!subscription || subscription.subscription_type !== 'free') return true; // Paid users have unlimited
-    return subscription.tokens_used_this_month < subscription.monthly_token_limit;
+    return subscription.tokens_used_total < subscription.token_limit_hard;
   };
 
   const getRemainingTokens = () => {
     if (!subscription || subscription.subscription_type !== 'free') return 999999999; // Paid users have unlimited
-    return Math.max(0, subscription.monthly_token_limit - subscription.tokens_used_this_month);
+    return Math.max(0, subscription.token_limit_hard - subscription.tokens_used_total);
   };
 
   const getUsagePercentage = () => {
     if (!subscription || subscription.subscription_type !== 'free') return 0; // Paid users always show 0%
-    return (subscription.tokens_used_this_month / subscription.monthly_token_limit) * 100;
+    return (subscription.tokens_used_total / subscription.token_limit_hard) * 100;
   };
 
   return {

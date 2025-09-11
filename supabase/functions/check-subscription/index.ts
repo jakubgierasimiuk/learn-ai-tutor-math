@@ -47,7 +47,8 @@ serve(async (req) => {
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     
     let subscriptionType: 'free' | 'paid' | 'super' = 'free';
-    let monthlyTokenLimit = 500; // Default free tier limit
+    let tokenLimitSoft = 20000; // Default free tier soft limit
+    let tokenLimitHard = 25000; // Default free tier hard limit
     let subscriptionEnd = null;
     let stripeCustomerId = null;
     
@@ -74,13 +75,15 @@ serve(async (req) => {
         
         if (amount >= 9999) { // Super plan
           subscriptionType = 'super';
-          monthlyTokenLimit = 15000000;
+          tokenLimitSoft = 999999999;
+          tokenLimitHard = 999999999;
         } else if (amount >= 2999) { // Paid plan
           subscriptionType = 'paid';
-          monthlyTokenLimit = 5000000;
+          tokenLimitSoft = 999999999;
+          tokenLimitHard = 999999999;
         }
         
-        logStep("Determined subscription details", { subscriptionType, monthlyTokenLimit, amount });
+        logStep("Determined subscription details", { subscriptionType, tokenLimitSoft, tokenLimitHard, amount });
       } else {
         logStep("No active subscription found");
       }
@@ -88,7 +91,21 @@ serve(async (req) => {
       logStep("No Stripe customer found");
     }
 
-    // Calculate total token usage from registration (not monthly)
+    // Get dynamic limits from subscription_plans table
+    const { data: planData, error: planError } = await supabaseClient
+      .from('subscription_plans')
+      .select('token_limit_soft, token_limit_hard')
+      .eq('plan_type', subscriptionType)
+      .eq('is_active', true)
+      .single();
+
+    if (!planError && planData) {
+      tokenLimitSoft = planData.token_limit_soft;
+      tokenLimitHard = planData.token_limit_hard;
+      logStep("Dynamic limits loaded", { tokenLimitSoft, tokenLimitHard });
+    }
+
+    // Calculate total token usage from registration (lifetime, not monthly)
     const { data: tokenUsageData, error: tokenError } = await supabaseClient.rpc('get_user_total_token_usage', {
       target_user_id: user.id
     });
@@ -102,8 +119,10 @@ serve(async (req) => {
       .upsert({
         user_id: user.id,
         subscription_type: subscriptionType,
-        status: subscriptionType === 'free' ? 'active' : 'active',
-        monthly_token_limit: monthlyTokenLimit,
+        status: 'active',
+        token_limit_soft: tokenLimitSoft,
+        token_limit_hard: tokenLimitHard,
+        tokens_used_total: tokensUsedTotal,
         stripe_customer_id: stripeCustomerId,
         subscription_end_date: subscriptionEnd,
         updated_at: new Date().toISOString(),
@@ -119,14 +138,17 @@ serve(async (req) => {
 
     logStep("Updated database with subscription info", { 
       subscriptionType, 
-      monthlyTokenLimit, 
+      tokenLimitSoft,
+      tokenLimitHard, 
+      tokensUsedTotal,
       subscriptionEnd 
     });
 
     return new Response(JSON.stringify({
       subscription_type: subscriptionType,
-      monthly_token_limit: monthlyTokenLimit,
-      tokens_used_this_month: tokensUsedTotal, // Return total usage from registration
+      token_limit_soft: tokenLimitSoft,
+      token_limit_hard: tokenLimitHard,
+      tokens_used_total: tokensUsedTotal,
       subscription_end: subscriptionEnd,
       status: 'active'
     }), {

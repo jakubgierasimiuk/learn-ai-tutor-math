@@ -95,7 +95,10 @@ const AccountPage = () => {
 
   const getTokenLimitDisplay = () => {
     if (!subscription) return 'Ładowanie...';
-    return subscription.monthly_token_limit.toLocaleString();
+    if (subscription.subscription_type === 'free') {
+      return subscription.token_limit_hard?.toLocaleString() || '25 000';
+    }
+    return 'Nieograniczone';
   };
 
   return (
@@ -177,19 +180,19 @@ const AccountPage = () => {
                     <Label className="text-sm font-medium">Wykorzystane tokeny od rejestracji</Label>
                     <div className="space-y-1">
                       <span className="text-base">
-                        {subscription.tokens_used_this_month?.toLocaleString() || 0} tokenów
+                        {subscription.tokens_used_total?.toLocaleString() || 0} tokenów
                       </span>
                       <div className="w-full bg-muted rounded-full h-2">
                         <div 
                           className="bg-primary h-2 rounded-full transition-all duration-300"
                           style={{ 
-                            width: `${Math.min(100, (subscription.tokens_used_this_month / subscription.monthly_token_limit) * 100)}%` 
+                            width: `${Math.min(100, (subscription.tokens_used_total / subscription.token_limit_hard) * 100)}%` 
                           }}
                         ></div>
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {subscription.subscription_type === 'free' 
-                          ? `Pozostało ${(subscription.monthly_token_limit - (subscription.tokens_used_this_month || 0)).toLocaleString()} z ${subscription.monthly_token_limit.toLocaleString()} tokenów`
+                          ? `Wykorzystano ${(subscription.tokens_used_total || 0).toLocaleString()} z ${subscription.token_limit_hard.toLocaleString()} tokenów`
                           : 'Nieograniczone wykorzystanie'
                         }
                       </p>

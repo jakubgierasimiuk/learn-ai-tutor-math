@@ -16,8 +16,9 @@ export const TokenUsageProgress = () => {
   // Only show for free accounts
   if (loading || !subscription || subscription.subscription_type !== 'free') return null;
 
-  const percentage = getUsagePercentage();
-  const remaining = getRemainingTokens();
+  const tokensUsed = subscription?.tokens_used_total || 0;
+  const hardLimit = subscription?.token_limit_hard || 25000;
+  const percentage = (tokensUsed / hardLimit) * 100;
   const status = getTokenStatus();
   const getProgressColor = () => {
     switch (status) {
@@ -50,10 +51,10 @@ export const TokenUsageProgress = () => {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Zap className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium">Zużycie tokenów</span>
+            <span className="text-sm font-medium">Wykorzystanie tokenów</span>
           </div>
           <Badge className={getStatusBadgeColor()}>
-            {percentage.toFixed(0)}%
+            {tokensUsed.toLocaleString()} / {hardLimit.toLocaleString()}
           </Badge>
         </div>
         
@@ -63,9 +64,9 @@ export const TokenUsageProgress = () => {
         />
         
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>{getStatusMessage()}</span>
-          {status === 'critical' && (
-            <AlertTriangle className="w-4 h-4 text-red-500" />
+          <span className="flex-1">{getStatusMessage()}</span>
+          {(status === 'critical' || status === 'warning') && (
+            <AlertTriangle className={`w-4 h-4 ml-2 ${status === 'critical' ? 'text-red-500' : 'text-orange-500'}`} />
           )}
         </div>
       </CardContent>
