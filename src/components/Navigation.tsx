@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
+import { useRoles } from "@/hooks/useRoles";
 import { Brain, BookOpen, MessageCircle, LogOut, Upload, TrendingUp, Database, Clock, Settings, Crown } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -13,6 +14,7 @@ export const Navigation = () => {
     user,
     signOut
   } = useAuth();
+  const { isAdmin } = useRoles();
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const {
@@ -50,10 +52,12 @@ export const Navigation = () => {
                   <TrendingUp className="w-4 h-4" />
                   Postępy
                 </Link>
-                <Link to="/ai-logs" className={`flex items-center gap-2 transition-smooth ${isActive('/ai-logs') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
-                  <Database className="w-4 h-4" />
-                  AI Logs
-                </Link>
+                {isAdmin && (
+                  <Link to="/ai-logs" className={`flex items-center gap-2 transition-smooth ${isActive('/ai-logs') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
+                    <Database className="w-4 h-4" />
+                    AI Logs
+                  </Link>
+                )}
                 <Link to="/sessions" className={`flex items-center gap-2 transition-smooth ${isActive('/sessions') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
                   <Clock className="w-4 h-4" />
                   Sesje
@@ -127,10 +131,12 @@ export const Navigation = () => {
                     <MessageCircle className="w-4 h-4" />
                     Mentavo AI
                   </Link>
-                  <Link to="/ai-logs" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/ai-logs') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
-                    <Database className="w-4 h-4" />
-                    AI Logs
-                  </Link>
+                  {isAdmin && (
+                    <Link to="/ai-logs" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/ai-logs') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
+                      <Database className="w-4 h-4" />
+                      AI Logs
+                    </Link>
+                  )}
                   <Link to="/sessions" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/sessions') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
                     <Clock className="w-4 h-4" />
                     Sesje

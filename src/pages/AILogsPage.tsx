@@ -14,6 +14,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChevronDown, ChevronUp, Clock, MessageSquare, Brain, Search, Filter, Shield, User } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { format } from 'date-fns';
+import { Navigate } from 'react-router-dom';
 
 interface AILog {
   id: string;
@@ -230,6 +231,11 @@ const AILogsPage = () => {
       );
     });
   };
+
+  // Redirect non-admin users
+  if (!loading && !isAdmin) {
+    return <Navigate to="/study" replace />;
+  }
 
   if (loading) {
     return (
