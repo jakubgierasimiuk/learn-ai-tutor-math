@@ -48,10 +48,6 @@ export const Navigation = () => {
                   <Brain className="w-4 h-4" />
                   Study & Learn
                 </Link>
-                <Link to="/postepy" className={`flex items-center gap-2 transition-smooth ${isActive('/postepy') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
-                  <TrendingUp className="w-4 h-4" />
-                  Postępy
-                </Link>
                 {isAdmin && (
                   <Link to="/ai-logs" className={`flex items-center gap-2 transition-smooth ${isActive('/ai-logs') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
                     <Database className="w-4 h-4" />
