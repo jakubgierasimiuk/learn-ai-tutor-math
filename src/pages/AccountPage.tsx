@@ -189,7 +189,7 @@ const AccountPage = () => {
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {subscription.subscription_type === 'free' 
-                          ? `Pozostało: ${(subscription.monthly_token_limit - (subscription.tokens_used_this_month || 0)).toLocaleString()} tokenów`
+                          ? `Pozostało ${(subscription.monthly_token_limit - (subscription.tokens_used_this_month || 0)).toLocaleString()} z ${subscription.monthly_token_limit.toLocaleString()} tokenów`
                           : 'Nieograniczone wykorzystanie'
                         }
                       </p>
