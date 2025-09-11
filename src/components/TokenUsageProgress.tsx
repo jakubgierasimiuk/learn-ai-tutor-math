@@ -13,12 +13,12 @@ export const TokenUsageProgress = () => {
     getStatusMessage
   } = useTokenUsage();
 
-  // Only show for free accounts
-  if (loading || !subscription || subscription.subscription_type !== 'free') return null;
+  // Show for free and expired tier users, hide for paid
+  if (loading || !subscription || subscription.subscription_type === 'paid') return null;
 
-  const tokensUsed = subscription?.tokens_used_total || 0;
-  const hardLimit = subscription?.token_limit_hard || 25000;
-  const percentage = (tokensUsed / hardLimit) * 100;
+  const tokensUsed = subscription.tokens_used_total;
+  const hardLimit = subscription.token_limit_hard;
+  const percentage = getUsagePercentage();
   const status = getTokenStatus();
   const getProgressColor = () => {
     switch (status) {

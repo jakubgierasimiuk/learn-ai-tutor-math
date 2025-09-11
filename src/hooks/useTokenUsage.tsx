@@ -4,53 +4,61 @@ export const useTokenUsage = () => {
   const { subscription, loading, refreshSubscription, hasTokens, getRemainingTokens, getUsagePercentage } = useSubscription();
 
   const getTokenStatus = () => {
-    if (!subscription || subscription.subscription_type !== 'free') return 'good';
+    if (!subscription) return 'good';
     
-    const tokensUsed = subscription.tokens_used_total;
-    const softLimit = subscription.token_limit_soft;
-    const hardLimit = subscription.token_limit_hard;
-    
-    if (tokensUsed >= hardLimit) return 'critical'; // Hard limit reached
-    if (tokensUsed >= softLimit) return 'warning';  // Soft limit reached  
-    if (tokensUsed >= softLimit * 0.8) return 'moderate'; // 80% of soft limit
+    const percentage = getUsagePercentage();
+    if (percentage >= 90) return 'critical';
+    if (percentage >= 75) return 'warning';
+    if (percentage >= 50) return 'moderate';
     return 'good';
   };
 
   const getStatusMessage = () => {
-    if (!subscription || subscription.subscription_type !== 'free') {
-      return 'Nieograniczone tokeny';
-    }
+    if (!subscription) return 'Ładowanie...';
     
-    const tokensUsed = subscription.tokens_used_total;
-    const softLimit = subscription.token_limit_soft; 
-    const hardLimit = subscription.token_limit_hard;
-    const remaining = hardLimit - tokensUsed;
+    if (subscription.subscription_type === 'paid') {
+      const remaining = getRemainingTokens();
+      return `${remaining.toLocaleString()} tokenów pozostało w tym miesiącu`;
+    }
+
+    if (subscription.subscription_type === 'expired') {
+      const remaining = getRemainingTokens();
+      return `Plan wygasł - ${remaining.toLocaleString()} tokenów dostępnych`;
+    }
+
+    const remaining = getRemainingTokens();
     const status = getTokenStatus();
     
     switch (status) {
       case 'critical':
-        return 'Osiągnięto limit 25 000 tokenów. Ulepsz plan, aby kontynuować.';
+        return `Zostało tylko ${remaining.toLocaleString()} tokenów!`;
       case 'warning':
-        return `Osiągnięto próg ${softLimit.toLocaleString()} tokenów. Zostało ${remaining.toLocaleString()} tokenów.`;
+        return `Zostało ${remaining.toLocaleString()} tokenów`;
       case 'moderate':
-        return `Wykorzystano ${tokensUsed.toLocaleString()} z ${hardLimit.toLocaleString()} tokenów.`;
+        return `Pozostało ${remaining.toLocaleString()} tokenów`;
       default:
-        return `Wykorzystano ${tokensUsed.toLocaleString()} z ${hardLimit.toLocaleString()} tokenów.`;
+        return `${remaining.toLocaleString()} tokenów dostępnych`;
     }
   };
 
   const shouldShowUpgradePrompt = () => {
-    if (!subscription || subscription.subscription_type !== 'free') return false;
-    const tokensUsed = subscription.tokens_used_total;
-    const softLimit = subscription.token_limit_soft;
-    return tokensUsed >= softLimit;
+    if (!subscription || subscription.subscription_type === 'paid') return false;
+    
+    if (subscription.subscription_type === 'expired') {
+      return subscription.tokens_used_total >= subscription.token_limit_soft;
+    }
+    
+    return subscription.tokens_used_total >= subscription.token_limit_soft;
   };
 
   const shouldShowSoftPaywall = () => {
-    if (!subscription || subscription.subscription_type !== 'free') return false;
-    const tokensUsed = subscription.tokens_used_total;
-    const hardLimit = subscription.token_limit_hard;
-    return tokensUsed >= hardLimit;
+    if (!subscription) return false;
+    
+    if (subscription.subscription_type === 'paid') {
+      return (subscription.monthly_tokens_used || 0) >= subscription.token_limit_hard;
+    }
+    
+    return subscription.tokens_used_total >= subscription.token_limit_hard;
   };
 
   return {

@@ -43,69 +43,18 @@ serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
     
-    // Check if customer exists
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    
-    let subscriptionType: 'free' | 'paid' | 'super' = 'free';
-    let tokenLimitSoft = 20000; // Default free tier soft limit
-    let tokenLimitHard = 25000; // Default free tier hard limit
-    let subscriptionEnd = null;
-    let stripeCustomerId = null;
-    
-    if (customers.data.length > 0) {
-      const customerId = customers.data[0].id;
-      stripeCustomerId = customerId;
-      logStep("Found Stripe customer", { customerId });
-
-      const subscriptions = await stripe.subscriptions.list({
-        customer: customerId,
-        status: "active",
-        limit: 1,
-      });
-
-      if (subscriptions.data.length > 0) {
-        const subscription = subscriptions.data[0];
-        subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
-        logStep("Active subscription found", { subscriptionId: subscription.id, endDate: subscriptionEnd });
-        
-        // Determine subscription type from price
-        const priceId = subscription.items.data[0].price.id;
-        const price = await stripe.prices.retrieve(priceId);
-        const amount = price.unit_amount || 0;
-        
-        if (amount >= 9999) { // Super plan
-          subscriptionType = 'super';
-          tokenLimitSoft = 999999999;
-          tokenLimitHard = 999999999;
-        } else if (amount >= 2999) { // Paid plan
-          subscriptionType = 'paid';
-          tokenLimitSoft = 999999999;
-          tokenLimitHard = 999999999;
-        }
-        
-        logStep("Determined subscription details", { subscriptionType, tokenLimitSoft, tokenLimitHard, amount });
-      } else {
-        logStep("No active subscription found");
-      }
-    } else {
-      logStep("No Stripe customer found");
-    }
-
-    // Get dynamic limits from subscription_plans table
-    const { data: planData, error: planError } = await supabaseClient
+    // Get subscription plans
+    const { data: plans } = await supabaseClient
       .from('subscription_plans')
-      .select('token_limit_soft, token_limit_hard')
-      .eq('plan_type', subscriptionType)
-      .eq('is_active', true)
-      .single();
+      .select('*')
+      .eq('is_active', true);
 
-    if (!planError && planData) {
-      tokenLimitSoft = planData.token_limit_soft;
-      tokenLimitHard = planData.token_limit_hard;
-      logStep("Dynamic limits loaded", { tokenLimitSoft, tokenLimitHard });
-    }
+    const freeLimit = plans?.find(p => p.plan_type === 'free');
+    const paidLimit = plans?.find(p => p.plan_type === 'paid');
+    const expiredLimit = plans?.find(p => p.plan_type === 'expired');
+    logStep("Plans loaded", { free: freeLimit?.token_limit_hard, paid: paidLimit?.token_limit_hard, expired: expiredLimit?.token_limit_hard });
 
-    // Calculate total token usage from registration (lifetime, not monthly)
+    // Calculate current token usage
     const { data: tokenUsageData, error: tokenError } = await supabaseClient.rpc('get_user_total_token_usage', {
       target_user_id: user.id
     });
@@ -113,18 +62,120 @@ serve(async (req) => {
     const tokensUsedTotal = tokenUsageData || 0;
     logStep("Token usage calculated", { tokensUsedTotal });
 
+    let subscriptionType: 'free' | 'paid' | 'super' | 'expired' = 'free';
+    let subscriptionStatus = 'active';
+    let subscriptionEnd: string | null = null;
+    let stripeCustomerId: string | null = null;
+    let monthlyTokensUsed = 0;
+    let billingCycleStart: string | null = null;
+
+    // Check for Stripe customer and ALL subscription statuses
+    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    
+    if (customers.data.length > 0) {
+      const customer = customers.data[0];
+      stripeCustomerId = customer.id;
+
+      // Get ALL subscriptions (not just active ones)
+      const subscriptions = await stripe.subscriptions.list({
+        customer: customer.id,
+        expand: ['data.items.data.price']
+      });
+
+      logStep("Stripe subscriptions found", { count: subscriptions.data.length });
+
+      if (subscriptions.data.length > 0) {
+        // Get the most recent subscription
+        const subscription = subscriptions.data[0];
+        const price = subscription.items.data[0]?.price;
+        
+        logStep("Subscription status", {
+          status: subscription.status,
+          priceAmount: price?.unit_amount
+        });
+
+        // Map Stripe status to our application logic
+        if (subscription.status === 'active') {
+          if (price && price.unit_amount === 4999) { // 49.99 PLN - now 10M tokens
+            subscriptionType = 'paid';
+            subscriptionStatus = 'active';
+            subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+            billingCycleStart = new Date(subscription.current_period_start * 1000).toISOString();
+          }
+        } else if (subscription.status === 'past_due') {
+          // Past due = immediate downgrade to free
+          subscriptionType = 'free';
+          subscriptionStatus = 'active';
+          logStep("Past due subscription - downgraded to free");
+        } else if (['canceled', 'incomplete', 'incomplete_expired', 'unpaid'].includes(subscription.status)) {
+          // Canceled = expired with 5k tokens
+          subscriptionType = 'expired';
+          subscriptionStatus = 'active';
+          subscriptionEnd = subscription.canceled_at ? 
+            new Date(subscription.canceled_at * 1000).toISOString() : 
+            new Date(subscription.current_period_end * 1000).toISOString();
+          logStep("Canceled subscription - moved to expired plan");
+        }
+      }
+    } else {
+      logStep("No Stripe customer found");
+    }
+
+    // Get current subscription from database to check for transitions
+    const { data: currentSub } = await supabaseClient
+      .from('user_subscriptions')
+      .select('subscription_type, monthly_tokens_used')
+      .eq('user_id', user.id)
+      .single();
+
+    if (currentSub) {
+      monthlyTokensUsed = currentSub.monthly_tokens_used || 0;
+      
+      // Handle subscription type transitions
+      if (currentSub.subscription_type === 'paid' && subscriptionType === 'expired') {
+        // Transition from paid to expired - reset monthly tokens and set to expired plan
+        monthlyTokensUsed = 0;
+        logStep("Transition: Paid -> Expired (5k tokens granted)");
+      } else if (currentSub.subscription_type === 'free' && subscriptionType === 'paid') {
+        // Transition from free to paid - reset monthly tokens for new billing cycle
+        monthlyTokensUsed = 0;
+        logStep("Transition: Free -> Paid (10M tokens granted)");
+      }
+    }
+
+    // Get the appropriate limits based on subscription type
+    let finalLimits;
+    if (subscriptionType === 'paid') {
+      finalLimits = {
+        tokenLimitSoft: paidLimit?.token_limit_soft || 10000000,
+        tokenLimitHard: paidLimit?.token_limit_hard || 10000000
+      };
+    } else if (subscriptionType === 'expired') {
+      finalLimits = {
+        tokenLimitSoft: expiredLimit?.token_limit_soft || 5000,
+        tokenLimitHard: expiredLimit?.token_limit_hard || 5000
+      };
+    } else {
+      finalLimits = {
+        tokenLimitSoft: freeLimit?.token_limit_soft || 20000,
+        tokenLimitHard: freeLimit?.token_limit_hard || 25000
+      };
+    }
+
     // Update user subscription in database
     const { error: upsertError } = await supabaseClient
       .from("user_subscriptions")
       .upsert({
         user_id: user.id,
         subscription_type: subscriptionType,
-        status: 'active',
-        token_limit_soft: tokenLimitSoft,
-        token_limit_hard: tokenLimitHard,
+        status: subscriptionStatus,
+        token_limit_soft: finalLimits.tokenLimitSoft,
+        token_limit_hard: finalLimits.tokenLimitHard,
         tokens_used_total: tokensUsedTotal,
+        monthly_tokens_used: monthlyTokensUsed,
         stripe_customer_id: stripeCustomerId,
         subscription_end_date: subscriptionEnd,
+        billing_cycle_start: billingCycleStart || new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }, { 
         onConflict: 'user_id',
@@ -137,20 +188,23 @@ serve(async (req) => {
     }
 
     logStep("Updated database with subscription info", { 
-      subscriptionType, 
-      tokenLimitSoft,
-      tokenLimitHard, 
+      subscriptionType,
+      subscriptionStatus,
+      tokenLimitSoft: finalLimits.tokenLimitSoft,
+      tokenLimitHard: finalLimits.tokenLimitHard,
       tokensUsedTotal,
+      monthlyTokensUsed,
       subscriptionEnd 
     });
 
     return new Response(JSON.stringify({
       subscription_type: subscriptionType,
-      token_limit_soft: tokenLimitSoft,
-      token_limit_hard: tokenLimitHard,
+      token_limit_soft: finalLimits.tokenLimitSoft,
+      token_limit_hard: finalLimits.tokenLimitHard,
       tokens_used_total: tokensUsedTotal,
+      monthly_tokens_used: monthlyTokensUsed,
       subscription_end: subscriptionEnd,
-      status: 'active'
+      status: subscriptionStatus
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

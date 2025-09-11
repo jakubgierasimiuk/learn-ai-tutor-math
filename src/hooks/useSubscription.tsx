@@ -3,10 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
 interface SubscriptionData {
-  subscription_type: 'free' | 'paid' | 'super' | 'test';
+  subscription_type: 'free' | 'paid' | 'super' | 'test' | 'expired';
   token_limit_soft: number;
   token_limit_hard: number;
   tokens_used_total: number;
+  monthly_tokens_used?: number;
   subscription_end?: string;
   status: string;
 }
@@ -69,18 +70,39 @@ export const useSubscription = () => {
   }, [user]);
 
   const hasTokens = () => {
-    if (!subscription || subscription.subscription_type !== 'free') return true; // Paid users have unlimited
-    return subscription.tokens_used_total < subscription.token_limit_hard;
+    if (!subscription) return false;
+    
+    if (subscription.subscription_type === 'paid') {
+      // Paid users: check monthly limit
+      return (subscription.monthly_tokens_used || 0) < subscription.token_limit_hard;
+    } else {
+      // Free/expired users: check lifetime limit
+      return subscription.tokens_used_total < subscription.token_limit_hard;
+    }
   };
 
   const getRemainingTokens = () => {
-    if (!subscription || subscription.subscription_type !== 'free') return 999999999; // Paid users have unlimited
-    return Math.max(0, subscription.token_limit_hard - subscription.tokens_used_total);
+    if (!subscription) return 0;
+    
+    if (subscription.subscription_type === 'paid') {
+      // Paid users: remaining from monthly limit
+      return Math.max(0, subscription.token_limit_hard - (subscription.monthly_tokens_used || 0));
+    } else {
+      // Free/expired users: remaining from lifetime limit
+      return Math.max(0, subscription.token_limit_hard - subscription.tokens_used_total);
+    }
   };
 
   const getUsagePercentage = () => {
-    if (!subscription || subscription.subscription_type !== 'free') return 0; // Paid users always show 0%
-    return (subscription.tokens_used_total / subscription.token_limit_hard) * 100;
+    if (!subscription) return 0;
+    
+    if (subscription.subscription_type === 'paid') {
+      // Paid users: percentage of monthly usage
+      return ((subscription.monthly_tokens_used || 0) / subscription.token_limit_hard) * 100;
+    } else {
+      // Free/expired users: percentage of lifetime usage
+      return (subscription.tokens_used_total / subscription.token_limit_hard) * 100;
+    }
   };
 
   return {

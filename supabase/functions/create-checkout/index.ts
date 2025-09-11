@@ -62,7 +62,7 @@ serve(async (req) => {
 
     // Define plan pricing - only paid plan available for purchase
     const planPricing = {
-      paid: { amount: 4999, name: "Plan Płatny", tokens: 10000 }, // 49.99 PLN
+      paid: { amount: 4999, name: "Plan Płatny", tokens: 10000000 }, // 49.99 PLN
     };
 
     const selectedPlan = planPricing[plan as keyof typeof planPricing];
