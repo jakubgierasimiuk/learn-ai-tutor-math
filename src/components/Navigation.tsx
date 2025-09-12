@@ -49,10 +49,16 @@ export const Navigation = () => {
                   Study & Learn
                 </Link>
                 {isAdmin && (
-                  <Link to="/ai-logs" className={`flex items-center gap-2 transition-smooth ${isActive('/ai-logs') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
-                    <Database className="w-4 h-4" />
-                    AI Logs
-                  </Link>
+                  <>
+                    <Link to="/dashboard" className={`flex items-center gap-2 transition-smooth ${isActive('/dashboard') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
+                      <Crown className="w-4 h-4" />
+                      Dashboard Zarządczy
+                    </Link>
+                    <Link to="/ai-logs" className={`flex items-center gap-2 transition-smooth ${isActive('/ai-logs') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
+                      <Database className="w-4 h-4" />
+                      AI Logs
+                    </Link>
+                  </>
                 )}
                 <Link to="/sessions" className={`flex items-center gap-2 transition-smooth ${isActive('/sessions') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
                   <Clock className="w-4 h-4" />
@@ -128,10 +134,16 @@ export const Navigation = () => {
                     Mentavo AI
                   </Link>
                   {isAdmin && (
-                    <Link to="/ai-logs" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/ai-logs') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
-                      <Database className="w-4 h-4" />
-                      AI Logs
-                    </Link>
+                    <>
+                      <Link to="/dashboard" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/dashboard') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
+                        <Crown className="w-4 h-4" />
+                        Dashboard Zarządczy
+                      </Link>
+                      <Link to="/ai-logs" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/ai-logs') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
+                        <Database className="w-4 h-4" />
+                        AI Logs
+                      </Link>
+                    </>
                   )}
                   <Link to="/sessions" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/sessions') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
                     <Clock className="w-4 h-4" />
