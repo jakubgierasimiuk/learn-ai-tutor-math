@@ -123,7 +123,7 @@ serve(async (req) => {
         }
       });
 
-      // Give invitee bonus (7 days + 1000 tokens)
+      // Give invitee bonus (7 days + 4000 tokens)
       await supabaseService.from('rewards').insert([
         {
           user_id: user.id,
@@ -137,7 +137,7 @@ serve(async (req) => {
         {
           user_id: user.id,
           kind: 'tokens',
-          amount: 1000,
+          amount: 4000,
           status: 'released', 
           source: 'activation',
           meta: { reason: 'invited_user_bonus' },
@@ -261,7 +261,7 @@ serve(async (req) => {
         rewardStatus = 'pending'; // Manual review needed
       }
 
-      // Give convertible reward to referrer (3 days or 1000 tokens)
+      // Give convertible reward to referrer (3 days or 4000 tokens)
       await supabaseService.from('rewards').insert({
         user_id: referral.referrer_id,
         kind: 'convertible',
@@ -271,7 +271,7 @@ serve(async (req) => {
         meta: { 
           convertible_to: ['days', 'tokens'],
           days_amount: 3,
-          tokens_amount: 1000,
+          tokens_amount: 4000,
           referral_id: referral.id 
         },
         released_at: releasedAt,

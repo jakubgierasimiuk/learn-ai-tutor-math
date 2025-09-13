@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ReferralDemo } from "@/components/ReferralDemo";
+import { RealTimeCounters } from "@/components/viral/RealTimeCounters";
 import { TierType } from "@/types";
 import { 
   Copy, 
@@ -82,42 +83,8 @@ export default function ReferralPage() {
         </p>
       </div>
 
-      {/* Current Tier and Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border-primary/20">
-          <CardContent className="p-4 text-center">
-            <div className={`w-12 h-12 rounded-full ${tierInfo[currentTier as keyof typeof tierInfo]?.color} flex items-center justify-center mx-auto mb-2`}>
-              <TierIcon className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground">Twój status</p>
-            <p className="font-semibold">{tierInfo[currentTier as keyof typeof tierInfo]?.label}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4 text-center">
-            <Users className="w-8 h-8 mx-auto mb-2 text-primary" />
-            <p className="text-sm text-muted-foreground">Skuteczne polecenia</p>
-            <p className="text-2xl font-bold">{stats?.successful_referrals || 0}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4 text-center">
-            <Gift className="w-8 h-8 mx-auto mb-2 text-primary" />
-            <p className="text-sm text-muted-foreground">Dostępne punkty</p>
-            <p className="text-2xl font-bold">{stats?.available_points || 0}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4 text-center">
-            <Trophy className="w-8 h-8 mx-auto mb-2 text-primary" />
-            <p className="text-sm text-muted-foreground">Darmowe miesiące</p>
-            <p className="text-2xl font-bold">{stats?.free_months_earned || 0}</p>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Real-time Counters with Viral Loop */}
+      <RealTimeCounters variant="full" showProgress={true} />
 
       {/* Referral Link Section */}
       <Card>
@@ -143,7 +110,7 @@ export default function ReferralPage() {
             </Button>
           </div>
           <div className="text-sm text-muted-foreground">
-            Udostępnij ten link znajomym. Otrzymują 7 dni darmowo, a Ty nagrody za każde skuteczne polecenie!
+            Udostępnij ten link znajomym. Otrzymują 7 dni darmowo + 4000 tokenów, a Ty nagrody za każde skuteczne polecenie!
           </div>
         </CardContent>
       </Card>
@@ -197,7 +164,7 @@ export default function ReferralPage() {
                     <div className="text-center">
                       <h3 className="font-semibold">Nagroda convertible</h3>
                       <p className="text-sm text-muted-foreground">
-                        {reward.meta?.days_amount || 3} dni lub {reward.meta?.tokens_amount || 1000} tokenów
+                        {reward.meta?.days_amount || 3} dni lub {reward.meta?.tokens_amount || 4000} tokenów
                       </p>
                     </div>
                     <Button size="sm" className="w-full">

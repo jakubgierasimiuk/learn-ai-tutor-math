@@ -70,7 +70,7 @@ serve(async (req) => {
     // Get the amount based on conversion type
     const amount = convertTo === 'days' 
       ? (reward.meta?.days_amount || reward.amount)
-      : (reward.meta?.tokens_amount || 1000);
+      : (reward.meta?.tokens_amount || 4000);
 
     const consumed_at = new Date().toISOString();
 

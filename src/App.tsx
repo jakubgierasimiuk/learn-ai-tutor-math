@@ -39,6 +39,8 @@ import { GoalSelection } from "@/components/onboarding/GoalSelection";
 import { setupGlobalLogging, setupGlobalInteractionLogging, logEvent } from "@/lib/logger";
 import { Seo } from "@/components/Seo";
 import { supabase } from "@/integrations/supabase/client";
+import { ViralLoopProvider } from "@/components/viral/ViralLoopProvider";
+import { ViralPopups } from "@/components/viral/ViralPopups";
 
 const queryClient = new QueryClient();
 
@@ -59,13 +61,16 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      <CurriculumSeeder />
-      <main>
-        {children}
-      </main>
-    </div>
+    <ViralLoopProvider>
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <CurriculumSeeder />
+        <ViralPopups />
+        <main>
+          {children}
+        </main>
+      </div>
+    </ViralLoopProvider>
   );
 };
 
