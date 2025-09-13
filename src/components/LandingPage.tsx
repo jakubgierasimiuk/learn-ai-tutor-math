@@ -333,9 +333,9 @@ export function LandingPage() {
           </div>
           <p className="text-muted-foreground mb-8">© 2025 mentavo.ai. Wszelkie prawa zastrzeżone.</p>
           <div className="flex justify-center gap-8 text-muted-foreground">
-            <a href="#" className="hover:text-primary transition-colors hover:underline">O nas</a>
-            <a href="#" className="hover:text-primary transition-colors hover:underline">Kontakt</a>
-            <a href="#" className="hover:text-primary transition-colors hover:underline">Polityka prywatności</a>
+            <a href="/terms-of-service" className="hover:text-primary transition-colors hover:underline">Regulamin</a>
+            <a href="/privacy-policy" className="hover:text-primary transition-colors hover:underline">Polityka prywatności</a>
+            <a href="mailto:kontakt@mentavo.ai" className="hover:text-primary transition-colors hover:underline">Kontakt</a>
           </div>
         </div>
       </footer>

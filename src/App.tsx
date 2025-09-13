@@ -30,6 +30,8 @@ import BatchImportPage from "./pages/BatchImportPage";
 import AILogsPage from "./pages/AILogsPage";
 import SessionsPage from "./pages/SessionsPage";
 import AccountPage from "./pages/AccountPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import TermsOfServicePage from "./pages/TermsOfServicePage";
 import { OnboardingWelcome } from "@/components/onboarding/OnboardingWelcome";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 import { AITutorial } from "@/components/onboarding/AITutorial";
@@ -92,6 +94,8 @@ function RouteSeo() {
     
     '/dashboard': { title: 'Panel ucznia – mentavo.ai', description: 'Twoje postępy, aktywność i szybkie skróty.' },
     '/chat': { title: 'mentavo.ai – Chat', description: 'Rozmawiaj z mentavo.ai i rozwiązuj zadania krok po kroku.' },
+    '/privacy-policy': { title: 'Polityka Prywatności – mentavo.ai', description: 'Polityka prywatności i plików cookies Mentavo AI.' },
+    '/terms-of-service': { title: 'Regulamin – mentavo.ai', description: 'Regulamin aplikacji Mentavo AI.' },
     
     '/materials': { title: 'Materiały ucznia – mentavo.ai', description: 'Dodawaj i analizuj własne materiały do nauki.' },
     '/social': { title: 'Społeczność – mentavo.ai', description: 'Rankingi, aktywność i interakcje społeczne.' },
@@ -252,6 +256,11 @@ const App = () => (
                 <StudyLesson />
               </AuthenticatedLayout>
             } />
+            
+            {/* Legal pages - accessible to everyone */}
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+            
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
