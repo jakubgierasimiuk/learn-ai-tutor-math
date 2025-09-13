@@ -41,6 +41,7 @@ import { Seo } from "@/components/Seo";
 import { supabase } from "@/integrations/supabase/client";
 import { ViralLoopProvider } from "@/components/viral/ViralLoopProvider";
 import { ViralPopups } from "@/components/viral/ViralPopups";
+import { SMSTriggerManager } from "@/components/SMSTriggerManager";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +67,7 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
         <Navigation />
         <CurriculumSeeder />
         <ViralPopups />
+        <SMSTriggerManager />
         <main>
           {children}
         </main>

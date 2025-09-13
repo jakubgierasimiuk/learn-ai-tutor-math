@@ -20,6 +20,7 @@ import {
   Brain
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTokenUsage } from "@/hooks/useTokenUsage";
 
 interface UserStats {
   total_points: number;
@@ -50,6 +51,7 @@ interface RecentActivity {
 
 export const Dashboard = () => {
   const { user } = useAuth();
+  const { getTokenStatus, shouldShowUpgradePrompt } = useTokenUsage();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +59,22 @@ export const Dashboard = () => {
   useEffect(() => {
     fetchDashboardData();
     checkDiagnosticStatus();
+    checkSMSTriggerConditions();
   }, []);
+
+  const checkSMSTriggerConditions = () => {
+    // Trigger SMS prompt if conditions are met
+    const tokenStatus = getTokenStatus();
+    const shouldUpgrade = shouldShowUpgradePrompt();
+    
+    if ((tokenStatus === 'warning' || shouldUpgrade) && user) {
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('trigger-sms-prompt', {
+          detail: { triggerType: 'dashboard_token_warning' }
+        }));
+      }, 5000); // 5 second delay for better UX
+    }
+  };
 
   const checkDiagnosticStatus = async () => {
     // Skip diagnostic check for now to allow access to admin dashboards

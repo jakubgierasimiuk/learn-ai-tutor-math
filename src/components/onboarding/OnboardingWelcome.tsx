@@ -40,6 +40,16 @@ export function OnboardingWelcome() {
   
   const handleNext = () => {
     if (isLast) {
+      // Check if user has referral code and trigger SMS prompt
+      const hasReferralCode = new URLSearchParams(window.location.search).get('ref');
+      if (hasReferralCode) {
+        // Trigger SMS prompt after a short delay
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('trigger-sms-prompt', {
+            detail: { triggerType: 'onboarding_with_referral' }
+          }));
+        }, 1000);
+      }
       navigate('/onboarding/checklist');
     } else {
       setCurrentScreen(prev => prev + 1);

@@ -4,7 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Phone, Shield, Clock } from 'lucide-react';
+import { useViralTriggers } from '@/hooks/useViralTriggers';
+import { Phone, Shield, Clock, Share2, Users } from 'lucide-react';
 
 interface SMSVerificationProps {
   onVerificationComplete: (phoneNumber: string) => void;
@@ -23,7 +24,9 @@ export const SMSVerification: React.FC<SMSVerificationProps> = ({
   const [loading, setLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [canResend, setCanResend] = useState(true);
+  const [showViralPrompt, setShowViralPrompt] = useState(false);
   const { toast } = useToast();
+  const { showSocialProof, triggerMilestone } = useViralTriggers();
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -80,6 +83,15 @@ export const SMSVerification: React.FC<SMSVerificationProps> = ({
       setStep('code');
       setTimeLeft(300); // 5 minutes
       setCanResend(false);
+      setShowViralPrompt(true);
+      
+      // Show social proof during waiting
+      setTimeout(() => {
+        showSocialProof('local_stats', {
+          city: 'Twojej okolicy',
+          count: Math.floor(Math.random() * 500) + 800
+        });
+      }, 3000);
       
     } catch (error) {
       console.error('Error sending SMS:', error);
@@ -123,6 +135,12 @@ export const SMSVerification: React.FC<SMSVerificationProps> = ({
         description: "Numer telefonu został pomyślnie zweryfikowany",
       });
 
+      // Trigger viral milestone
+      triggerMilestone('phone_verified', {
+        phoneNumber: formattedPhone,
+        bonusTokens: 4000
+      });
+
       onVerificationComplete(formattedPhone);
       
     } catch (error) {
@@ -148,6 +166,50 @@ export const SMSVerification: React.FC<SMSVerificationProps> = ({
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
+  // Viral sharing prompt during SMS waiting
+  const renderViralSharingPrompt = () => (
+    <Card className="w-full max-w-md mx-auto mb-4 border-primary/20 bg-primary/5">
+      <CardContent className="p-4">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+            <Share2 className="w-5 h-5 text-primary" />
+          </div>
+          <div className="flex-1">
+            <p className="font-medium text-sm">Poczekaj 2-3 minuty na SMS</p>
+            <p className="text-xs text-muted-foreground">W międzyczasie poleć znajomemu i zarobij dodatkowe dni!</p>
+          </div>
+        </div>
+        <div className="mt-3 flex space-x-2">
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="flex-1 text-xs"
+            onClick={() => {
+              // Copy referral link
+              const referralUrl = `${window.location.origin}?ref=YOUR_CODE`;
+              navigator.clipboard.writeText(referralUrl);
+              toast({
+                title: "Link skopiowany!",
+                description: "Wyślij go znajomemu, aby zarobić więcej dni premium"
+              });
+            }}
+          >
+            <Users className="w-3 h-3 mr-1" />
+            Skopiuj link
+          </Button>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="flex-1 text-xs"
+            onClick={() => setShowViralPrompt(false)}
+          >
+            Później
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   if (step === 'phone') {
     return (
@@ -198,60 +260,64 @@ export const SMSVerification: React.FC<SMSVerificationProps> = ({
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader className="text-center">
-        <div className="mx-auto mb-4 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-          <Shield className="w-6 h-6 text-primary" />
-        </div>
-        <CardTitle>Wprowadź kod weryfikacyjny</CardTitle>
-        <CardDescription>
-          Kod został wysłany na numer {formatPhoneNumber(phoneNumber)}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Kod weryfikacyjny</label>
-          <Input
-            type="text"
-            placeholder="123456"
-            value={verificationCode}
-            onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            onKeyPress={(e) => e.key === 'Enter' && verifySMS()}
-            className="text-center text-lg tracking-widest"
-            maxLength={6}
-          />
-        </div>
-
-        {timeLeft > 0 && (
-          <div className="flex items-center justify-center space-x-2 text-sm text-muted-foreground">
-            <Clock className="w-4 h-4" />
-            <span>Kod ważny przez {formatTime(timeLeft)}</span>
+    <div className="space-y-4">
+      {showViralPrompt && renderViralSharingPrompt()}
+      
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-4 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+            <Shield className="w-6 h-6 text-primary" />
           </div>
-        )}
+          <CardTitle>Wprowadź kod weryfikacyjny</CardTitle>
+          <CardDescription>
+            Kod został wysłany na numer {formatPhoneNumber(phoneNumber)}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Kod weryfikacyjny</label>
+            <Input
+              type="text"
+              placeholder="123456"
+              value={verificationCode}
+              onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              onKeyPress={(e) => e.key === 'Enter' && verifySMS()}
+              className="text-center text-lg tracking-widest"
+              maxLength={6}
+            />
+          </div>
 
-        <div className="flex flex-col space-y-2">
-          <Button onClick={verifySMS} disabled={loading} className="w-full">
-            {loading ? "Weryfikowanie..." : "Zweryfikuj"}
-          </Button>
-          
-          <Button 
-            variant="ghost" 
-            onClick={handleResend} 
-            disabled={!canResend || loading}
-            className="w-full"
-          >
-            {canResend ? "Wyślij ponownie" : `Wyślij ponownie za ${formatTime(timeLeft)}`}
-          </Button>
-          
-          <Button 
-            variant="ghost" 
-            onClick={() => setStep('phone')} 
-            className="w-full text-sm"
-          >
-            Zmień numer telefonu
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          {timeLeft > 0 && (
+            <div className="flex items-center justify-center space-x-2 text-sm text-muted-foreground">
+              <Clock className="w-4 h-4" />
+              <span>Kod ważny przez {formatTime(timeLeft)}</span>
+            </div>
+          )}
+
+          <div className="flex flex-col space-y-2">
+            <Button onClick={verifySMS} disabled={loading} className="w-full">
+              {loading ? "Weryfikowanie..." : "Zweryfikuj"}
+            </Button>
+            
+            <Button 
+              variant="ghost" 
+              onClick={handleResend} 
+              disabled={!canResend || loading}
+              className="w-full"
+            >
+              {canResend ? "Wyślij ponownie" : `Wyślij ponownie za ${formatTime(timeLeft)}`}
+            </Button>
+            
+            <Button 
+              variant="ghost" 
+              onClick={() => setStep('phone')} 
+              className="w-full text-sm"
+            >
+              Zmień numer telefonu
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };

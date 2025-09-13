@@ -140,5 +140,6 @@ export const useViralTriggers = (options: ViralTriggerOptions = {}) => {
     triggerTestimonial,
     triggerLocalStats,
     triggerFomo,
+    showSocialProof,
   };
 };

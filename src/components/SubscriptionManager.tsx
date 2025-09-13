@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Crown, CreditCard, RefreshCw } from 'lucide-react';
+import { useReferralV2 } from '@/hooks/useReferralV2';
 
 interface SubscriptionData {
   subscription_type: 'free' | 'paid' | 'super';
@@ -21,6 +22,7 @@ export const SubscriptionManager = () => {
   const [checking, setChecking] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { completeConversion } = useReferralV2();
 
   const checkSubscription = async () => {
     if (!user) return;
@@ -61,6 +63,16 @@ export const SubscriptionManager = () => {
         title: "Przekierowanie do płatności",
         description: "Otwarto nową kartę z formularzem płatności"
       });
+
+      // Listen for successful payment completion
+      const handlePaymentSuccess = () => {
+        // Auto-trigger conversion completion
+        completeConversion();
+        window.removeEventListener('focus', handlePaymentSuccess);
+      };
+      
+      // Simple way to detect user returning from payment
+      window.addEventListener('focus', handlePaymentSuccess);
     } catch (error) {
       console.error('Error creating checkout:', error);
       toast({
