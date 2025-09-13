@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.session-summary]
 verify_jwt = true
+
+[functions.trial-expiry-check]
+verify_jwt = false

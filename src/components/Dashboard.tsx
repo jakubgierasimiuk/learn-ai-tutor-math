@@ -336,6 +336,7 @@ export const Dashboard = () => {
         </div>
 
         {/* Upgrade Promotion for Free Users */}
+        
         <UpgradePrompts context="dashboard" />
 
         {/* Quick Actions */}

@@ -3176,8 +3176,10 @@ export type Database = {
       }
       user_subscriptions: {
         Row: {
+          billing_cycle_start: string | null
           created_at: string
           id: string
+          monthly_tokens_used: number | null
           status: string
           stripe_customer_id: string | null
           subscription_end_date: string | null
@@ -3185,12 +3187,15 @@ export type Database = {
           token_limit_hard: number
           token_limit_soft: number
           tokens_used_total: number
+          trial_end_date: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          billing_cycle_start?: string | null
           created_at?: string
           id?: string
+          monthly_tokens_used?: number | null
           status?: string
           stripe_customer_id?: string | null
           subscription_end_date?: string | null
@@ -3198,12 +3203,15 @@ export type Database = {
           token_limit_hard?: number
           token_limit_soft?: number
           tokens_used_total?: number
+          trial_end_date?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          billing_cycle_start?: string | null
           created_at?: string
           id?: string
+          monthly_tokens_used?: number | null
           status?: string
           stripe_customer_id?: string | null
           subscription_end_date?: string | null
@@ -3211,6 +3219,7 @@ export type Database = {
           token_limit_hard?: number
           token_limit_soft?: number
           tokens_used_total?: number
+          trial_end_date?: string | null
           updated_at?: string
           user_id?: string
         }

@@ -121,15 +121,29 @@ serve(async (req) => {
       logStep("No Stripe customer found");
     }
 
-    // Get current subscription from database to check for transitions
+    // Get current subscription from database to check for transitions and trial status
     const { data: currentSub } = await supabaseClient
       .from('user_subscriptions')
-      .select('subscription_type, monthly_tokens_used')
+      .select('subscription_type, monthly_tokens_used, trial_end_date, billing_cycle_start')
       .eq('user_id', user.id)
       .single();
 
+    // Check for trial expiry and handle transitions
+    let isTrialExpired = false;
     if (currentSub) {
       monthlyTokensUsed = currentSub.monthly_tokens_used || 0;
+      billingCycleStart = currentSub.billing_cycle_start || billingCycleStart;
+      
+      // Check if free trial has expired
+      if (currentSub.subscription_type === 'free' && currentSub.trial_end_date) {
+        const trialEndDate = new Date(currentSub.trial_end_date);
+        if (new Date() > trialEndDate) {
+          isTrialExpired = true;
+          subscriptionType = 'limited_free';
+          monthlyTokensUsed = 0; // Reset for new limited_free plan
+          logStep("Trial expired - downgraded to limited_free");
+        }
+      }
       
       // Handle subscription type transitions
       if (currentSub.subscription_type === 'paid' && subscriptionType === 'expired') {
@@ -141,9 +155,16 @@ serve(async (req) => {
         monthlyTokensUsed = 0;
         logStep("Transition: Free -> Paid (10M tokens granted)");
       }
+    } else {
+      // New user - set trial end date for 7 days from now
+      const trialEndDate = new Date();
+      trialEndDate.setDate(trialEndDate.getDate() + 7);
+      billingCycleStart = new Date().toISOString();
+      logStep("New user - setting 7-day trial", { trialEndDate: trialEndDate.toISOString() });
     }
 
     // Get the appropriate limits based on subscription type
+    const limitedFreeLimit = plans?.find(p => p.plan_type === 'limited_free');
     let finalLimits;
     if (subscriptionType === 'paid') {
       finalLimits = {
@@ -155,11 +176,29 @@ serve(async (req) => {
         tokenLimitSoft: expiredLimit?.token_limit_soft || 5000,
         tokenLimitHard: expiredLimit?.token_limit_hard || 5000
       };
+    } else if (subscriptionType === 'limited_free') {
+      finalLimits = {
+        tokenLimitSoft: limitedFreeLimit?.token_limit_soft || 1000,
+        tokenLimitHard: limitedFreeLimit?.token_limit_hard || 1200
+      };
     } else {
+      // Free trial (7 days with 25k tokens)
       finalLimits = {
         tokenLimitSoft: freeLimit?.token_limit_soft || 20000,
         tokenLimitHard: freeLimit?.token_limit_hard || 25000
       };
+    }
+
+    // Prepare trial end date for new users or trial expiry handling
+    let trialEndDate = currentSub?.trial_end_date;
+    if (!currentSub && subscriptionType === 'free') {
+      // New user - set trial for 7 days
+      const newTrialEnd = new Date();
+      newTrialEnd.setDate(newTrialEnd.getDate() + 7);
+      trialEndDate = newTrialEnd.toISOString();
+    } else if (isTrialExpired) {
+      // Clear trial end date for expired trials
+      trialEndDate = null;
     }
 
     // Update user subscription in database
@@ -176,6 +215,7 @@ serve(async (req) => {
         stripe_customer_id: stripeCustomerId,
         subscription_end_date: subscriptionEnd,
         billing_cycle_start: billingCycleStart || new Date().toISOString(),
+        trial_end_date: trialEndDate,
         updated_at: new Date().toISOString(),
       }, { 
         onConflict: 'user_id',
@@ -204,7 +244,9 @@ serve(async (req) => {
       tokens_used_total: tokensUsedTotal,
       monthly_tokens_used: monthlyTokensUsed,
       subscription_end: subscriptionEnd,
-      status: subscriptionStatus
+      status: subscriptionStatus,
+      trial_end_date: trialEndDate,
+      is_trial_expired: isTrialExpired
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
