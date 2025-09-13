@@ -208,7 +208,7 @@ export const UpgradePrompts = ({ context = 'chat', compact = false }: UpgradePro
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground mb-4">
-                  Dołącz do 1000+ uczniów, którzy już ulepszyli swój plan!
+                  Dołącz do 500+ uczniów, którzy już wybrali Premium! W tym tygodniu 23 uczniów wybrało Premium.
                 </p>
               </div>
               <div className="text-center ml-4">
@@ -262,13 +262,25 @@ export const UpgradePrompts = ({ context = 'chat', compact = false }: UpgradePro
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <Crown className="w-8 h-8 text-primary" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Kontynuuj naukę bez ograniczeń!</h3>
-            <p className="text-muted-foreground mb-6">
-              {subscription?.subscription_type === 'limited_free'
-                ? 'Wykorzystałeś swój miesięczny limit. Przywróć pełny dostęp!'
-                : 'Ulepsz plan, aby otrzymać nieograniczone tokeny AI i ekskluzywne funkcje'
-              }
+            <h3 className="text-lg font-semibold mb-2">Wykorzystałeś darmowe tokeny!</h3>
+            <p className="text-muted-foreground mb-4">
+              ✨ Z Premium otrzymasz:
             </p>
+            <div className="text-left space-y-2 mb-4">
+              <p className="text-sm">• Pełny dostęp do wszystkich funkcji aplikacji</p>
+              <p className="text-sm">• Zaawansowane wyjaśnienia krok-po-kroku</p>
+              <p className="text-sm">• Personalizowane ścieżki nauki</p>
+              <p className="text-sm">• Wsparcie 24/7</p>
+            </div>
+            <p className="text-sm font-medium text-green-600 mb-4">
+              💰 Oszczędzasz 510 PLN/mies vs tradycyjne korepetycje
+            </p>
+            <div className="bg-blue-50 p-3 rounded-lg mb-4">
+              <p className="text-xs text-blue-700">📊 Porównanie kosztów:</p>
+              <p className="text-xs text-blue-700">Korepetycje prywatne: 560 PLN/mies</p>
+              <p className="text-xs text-blue-700">Mentavo AI: 49,99 PLN/mies</p>
+              <p className="text-xs font-bold text-blue-800">Twoje oszczędności: 510 PLN/mies</p>
+            </div>
             <div className="space-y-3">
               <Button 
                 onClick={handleUpgrade} 

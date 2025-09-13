@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { TokenUsageProgress } from '@/components/TokenUsageProgress';
 import { UpgradePrompts } from '@/components/UpgradePrompts';
+import { ConversionPrompts } from '@/components/ConversionPrompts';
 import { useTokenUsage } from '@/hooks/useTokenUsage';
 import { useMathSymbols } from '@/hooks/useMathSymbols';
 import MathSymbolPanel from '@/components/MathSymbolPanel';
@@ -61,6 +62,7 @@ export const AIChat = () => {
   } = useMathSymbols();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [contextualSymbols, setContextualSymbols] = useState<string[]>([]);
+  const [showSuccessPrompt, setShowSuccessPrompt] = useState(false);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -358,6 +360,19 @@ export const AIChat = () => {
       };
       setMessages(prev => [...prev, assistantMessage]);
 
+      // Check for success moments and trigger conversion prompts
+      const isPositiveResponse = aiResponseContent.includes('Świetnie!') || 
+                                aiResponseContent.includes('Brawo!') || 
+                                aiResponseContent.includes('Doskonale!') ||
+                                aiResponseContent.includes('Bardzo dobrze!') ||
+                                aiResponseContent.includes('Poprawnie!') ||
+                                aiResponseContent.includes('Excellent!') ||
+                                aiResponseContent.includes('Great job!');
+      
+      if (isPositiveResponse) {
+        setTimeout(() => setShowSuccessPrompt(true), 2000); // Show after 2 seconds
+      }
+
       // Save interaction to database
       await saveInteraction(userInput, aiResponseContent, skill_id);
     } catch (error) {
@@ -545,6 +560,14 @@ export const AIChat = () => {
         <div className="mb-4 space-y-2">
           <UpgradePrompts context="chat" compact />
           <TokenUsageProgress />
+          
+          {/* Success Moment Conversion Prompts */}
+          {showSuccessPrompt && (
+            <ConversionPrompts 
+              context="success_moment" 
+              onClose={() => setShowSuccessPrompt(false)} 
+            />
+          )}
         </div>
         
         {/* Messages Container */}
