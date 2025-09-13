@@ -267,56 +267,25 @@ export default function AuthPage() {
         {/* Left side - Marketing content */}
         <div className="hidden lg:flex lg:w-1/2 bg-gradient-primary p-12 text-white flex-col justify-center relative overflow-hidden">
           <div className="relative z-10 max-w-lg">
-            <div className="mb-8">
-              <div className="inline-flex items-center bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-                <Gift className="w-4 h-4 mr-2" />
-                <span className="text-sm font-medium">7 dni FREE TRIAL</span>
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center bg-white/30 backdrop-blur-sm rounded-full px-6 py-3 mb-8 text-lg font-bold">
+                <Gift className="w-5 h-5 mr-3" />
+                <span>7 DNI PREMIUM GRATIS</span>
               </div>
-              <h1 className="text-4xl font-bold mb-4">
-                Dołącz do <span className="text-accent">15,000+</span> uczniów
+              <h1 className="text-4xl font-bold mb-6">
+                Ucz się matematyki<br />z AI tutorem
               </h1>
-              <p className="text-xl opacity-90 mb-8">
-                Ucz się matematyki z AI, które naprawdę Cię rozumie. Bez stresu, za to z sukcesem.
+              <p className="text-xl opacity-90">
+                Spersonalizowane wyjaśnienia 24/7.<br />
+                Bez stresu, za to z sukcesem.
               </p>
             </div>
 
-            <div className="space-y-6">
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                  <CheckCircle className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Spersonalizowane wyjaśnienia</h3>
-                  <p className="text-sm opacity-80">AI dostosowuje się do Twojego tempa i stylu uczenia</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                  <Zap className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Natychmiastowa pomoc 24/7</h3>
-                  <p className="text-sm opacity-80">Zadaj pytanie o dowolnej porze - AI zawsze odpowie</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                  <Users className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Sprawdzone przez tysiące</h3>
-                  <p className="text-sm opacity-80">98% satysfakcji wśród uczniów i rodziców</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-12 p-6 bg-white/10 backdrop-blur-sm rounded-xl">
-              <div className="text-center">
-                <div className="text-3xl font-bold mb-2">⭐️ 4.9/5</div>
-                <div className="text-sm opacity-80">Średnia ocena w App Store</div>
-              </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center">
+              <div className="text-2xl font-bold mb-2">🎯 Zacznij już dziś</div>
+              <p className="text-sm opacity-90">
+                Darmowe konto • Bez zobowiązań • Anuluj w dowolnym momencie
+              </p>
             </div>
           </div>
           
