@@ -60,9 +60,9 @@ export function LandingPage() {
                   Zadaj pytanie, wyślij zdjęcie zadania lub po prostu powiedz czego nie rozumiesz. 
                   AI pomoże Ci krok po kroku.
                 </p>
-                <Button asChild className="w-full shadow-primary" onClick={() => handleCtaClick('start_ai_tutor')}>
+                <Button asChild className="w-full shadow-primary" onClick={() => handleCtaClick('signup')}>
                   <Link to="/auth">
-                    Rozpocznij rozmowę
+                    Załóż darmowe konto
                   </Link>
                 </Button>
               </div>
@@ -79,7 +79,7 @@ export function LandingPage() {
                   Systematyczna nauka z AI. Wybierz temat, rozwiązuj zadania dopasowane do Twojego poziomu
                   i śledź postępy.
                 </p>
-                <Button asChild variant="outline" className="w-full hover-lift" onClick={() => handleCtaClick('discover_study_learn')}>
+                <Button asChild variant="outline" className="w-full hover-lift" onClick={() => handleCtaClick('study')}>
                   <Link to="/auth">
                     Zacznij naukę
                   </Link>

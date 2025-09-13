@@ -54,16 +54,36 @@
     --input: 210 20% 95%; /* #F1F5F9 - Support Light */
     --ring: 174 61% 50%;
 
-    /* Mentavo gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(174 61% 50%), hsl(258 80% 57%)); /* Turquoise to Purple */
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 20% 95%));
-    --gradient-success: linear-gradient(135deg, hsl(134 61% 41%), hsl(134 61% 51%));
-    --gradient-elegant: linear-gradient(135deg, hsl(210 20% 95%), hsl(220 13% 91%));
-    
-    /* Mentavo shadows */
-    --shadow-primary: 0 8px 32px -8px hsl(174 61% 50% / 0.15);
-    --shadow-accent: 0 8px 32px -8px hsl(258 80% 57% / 0.15);
-    --shadow-card: 0 2px 16px -4px hsl(215 25% 27% / 0.08);
+  /* Mentavo gradients */
+  --gradient-hero: linear-gradient(135deg, hsl(174 61% 50%), hsl(258 80% 57%)); /* Turquoise to Purple */
+  --gradient-primary: linear-gradient(135deg, hsl(174 61% 50%), hsl(258 80% 57%));
+  --gradient-secondary: linear-gradient(135deg, hsl(258 80% 57%), hsl(174 61% 50%));
+  --gradient-accent: linear-gradient(135deg, hsl(258 80% 57%), hsl(174 61% 50%));
+  --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 20% 95%));
+  --gradient-success: linear-gradient(135deg, hsl(134 61% 41%), hsl(134 61% 51%));
+  --gradient-elegant: linear-gradient(135deg, hsl(210 20% 95%), hsl(220 13% 91%));
+  
+  /* Mentavo shadows */
+  --shadow-primary: 0 8px 32px -8px hsl(174 61% 50% / 0.15);
+  --shadow-accent: 0 8px 32px -8px hsl(258 80% 57% / 0.15);
+  --shadow-card: 0 2px 16px -4px hsl(215 25% 27% / 0.08);
+  --shadow-elegant: 0 10px 30px -10px hsl(174 61% 50% / 0.3);
+  --shadow-glow: 0 0 40px hsl(174 61% 50% / 0.4);
+
+  /* Grid pattern for backgrounds */
+  --grid-pattern: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    hsl(var(--muted)) 2px,
+    hsl(var(--muted)) 4px
+  ), repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 2px,
+    hsl(var(--muted)) 2px,
+    hsl(var(--muted)) 4px
+  );
 
     /* Animation variables */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -295,6 +315,36 @@
     animation: glow 2s ease-in-out infinite alternate;
   }
 
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+
+  .bg-grid-pattern {
+    background-image: var(--grid-pattern);
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .button-glow:hover {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.5);
+  }
+
+  .input-glow:focus {
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.2);
+  }
+
   .hover-lift {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -326,6 +376,21 @@
   }
   to {
     text-shadow: 0 0 30px hsl(214 88% 52% / 0.8);
+  }
+}
+
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
   }
 }
 

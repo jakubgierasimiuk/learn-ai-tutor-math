@@ -47,8 +47,8 @@ export const Hero = () => {
                       AI pomoże Ci krok po kroku.
                     </p>
                     <Button asChild className="w-full group-hover:shadow-primary transition-all mt-auto">
-                      <Link to="/chat" onClick={() => logEvent('cta_click', { source: 'hero', target: 'chat' })}>
-                        Rozpocznij rozmowę
+                      <Link to="/auth" onClick={() => logEvent('cta_click', { source: 'hero', target: 'signup' })}>
+                        Załóż darmowe konto
                       </Link>
                     </Button>
                   </div>
@@ -69,7 +69,7 @@ export const Hero = () => {
                       i śledź postępy.
                     </p>
                     <Button asChild variant="outline" className="w-full group-hover:shadow-accent transition-all mt-auto">
-                      <Link to="/study" onClick={() => logEvent('cta_click', { source: 'hero', target: 'study' })}>
+                      <Link to="/auth" onClick={() => logEvent('cta_click', { source: 'hero', target: 'study' })}>
                         Zacznij naukę
                       </Link>
                     </Button>
