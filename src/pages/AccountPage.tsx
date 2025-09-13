@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { User, Shield, CreditCard, Calendar, Lock, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { SMSActivationSection } from "@/components/SMSActivationSection";
 
 const AccountPage = () => {
   const { user } = useAuth();
@@ -140,6 +141,9 @@ const AccountPage = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* SMS Verification and Bonuses */}
+          <SMSActivationSection variant="account" />
 
           {/* Subscription Information */}
           <Card>

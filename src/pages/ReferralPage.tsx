@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ReferralDemo } from "@/components/ReferralDemo";
 import { RealTimeCounters } from "@/components/viral/RealTimeCounters";
+import { SMSActivationSection } from "@/components/SMSActivationSection";
 import { TierType } from "@/types";
 import { 
   Copy, 
@@ -85,6 +86,9 @@ export default function ReferralPage() {
 
       {/* Real-time Counters with Viral Loop */}
       <RealTimeCounters variant="full" showProgress={true} />
+
+      {/* SMS Activation Section */}
+      <SMSActivationSection variant="referral" />
 
       {/* Referral Link Section */}
       <Card>

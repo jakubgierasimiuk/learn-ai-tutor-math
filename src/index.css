@@ -443,6 +443,22 @@
     background: var(--gradient-accent);
   }
   
+  .bg-gradient-subtle {
+    background: var(--gradient-elegant);
+  }
+  
+  .bg-gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  .gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  
   .bg-grid-pattern {
     background-image: var(--grid-pattern);
   }
