@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 export const SMSTriggerManager: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [userHasPhone, setUserHasPhone] = useState(false);
+  const [userDeclined, setUserDeclined] = useState(false);
   const { user } = useAuth();
   const { getSMSTriggerConditions } = useSMSGamification();
   const { checkActivation } = useReferralV2();
@@ -34,7 +35,7 @@ export const SMSTriggerManager: React.FC = () => {
 
   // Smart trigger logic - check various conditions
   useEffect(() => {
-    if (!user || userHasPhone) return;
+    if (!user || userHasPhone || userDeclined) return;
 
     const conditions = getSMSTriggerConditions();
     
@@ -46,7 +47,7 @@ export const SMSTriggerManager: React.FC = () => {
         setShowModal(true);
       }, delay);
     }
-  }, [user, userHasPhone, getSMSTriggerConditions]);
+  }, [user, userHasPhone, userDeclined, getSMSTriggerConditions]);
 
   // Handle SMS verification completion
   const handleVerificationComplete = async (phoneNumber: string) => {
@@ -68,7 +69,7 @@ export const SMSTriggerManager: React.FC = () => {
   // Trigger SMS on specific events
   useEffect(() => {
     const handleSMSTriggerEvent = (event: CustomEvent) => {
-      if (!userHasPhone && !showModal) {
+      if (!userHasPhone && !showModal && !userDeclined) {
         const { triggerType } = event.detail;
         
         const conditions = getSMSTriggerConditions();
@@ -82,12 +83,15 @@ export const SMSTriggerManager: React.FC = () => {
     return () => {
       window.removeEventListener('trigger-sms-prompt', handleSMSTriggerEvent as EventListener);
     };
-  }, [userHasPhone, showModal, getSMSTriggerConditions]);
+  }, [userHasPhone, showModal, userDeclined, getSMSTriggerConditions]);
 
   return (
     <SMSActivationModal
       isOpen={showModal}
-      onClose={() => setShowModal(false)}
+      onClose={() => {
+        setShowModal(false);
+        setUserDeclined(true);
+      }}
       onVerificationComplete={handleVerificationComplete}
     />
   );
