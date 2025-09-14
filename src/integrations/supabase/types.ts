@@ -1359,6 +1359,174 @@ export type Database = {
         }
         Relationships: []
       }
+      marketing_consent_rewards: {
+        Row: {
+          bonus_days: number | null
+          bonus_tokens: number | null
+          clawback_eligible_until: string | null
+          created_at: string | null
+          device_fingerprint: string | null
+          id: string
+          marketing_consent_revoked_at: string | null
+          reward_granted: boolean | null
+          reward_granted_at: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          bonus_days?: number | null
+          bonus_tokens?: number | null
+          clawback_eligible_until?: string | null
+          created_at?: string | null
+          device_fingerprint?: string | null
+          id?: string
+          marketing_consent_revoked_at?: string | null
+          reward_granted?: boolean | null
+          reward_granted_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          bonus_days?: number | null
+          bonus_tokens?: number | null
+          clawback_eligible_until?: string | null
+          created_at?: string | null
+          device_fingerprint?: string | null
+          id?: string
+          marketing_consent_revoked_at?: string | null
+          reward_granted?: boolean | null
+          reward_granted_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_consent_rewards_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      marketing_consents: {
+        Row: {
+          consent_type: string
+          consent_version: string | null
+          created_at: string | null
+          device_fingerprint: string | null
+          granted_at: string | null
+          id: string
+          ip_address: unknown | null
+          is_granted: boolean | null
+          metadata: Json | null
+          revoked_at: string | null
+          source: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          consent_type: string
+          consent_version?: string | null
+          created_at?: string | null
+          device_fingerprint?: string | null
+          granted_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          is_granted?: boolean | null
+          metadata?: Json | null
+          revoked_at?: string | null
+          source?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          consent_type?: string
+          consent_version?: string | null
+          created_at?: string | null
+          device_fingerprint?: string | null
+          granted_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          is_granted?: boolean | null
+          metadata?: Json | null
+          revoked_at?: string | null
+          source?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_consents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      marketing_rewards_history: {
+        Row: {
+          amount: number
+          claimed_at: string | null
+          clawback_reason: string | null
+          clawed_back_at: string | null
+          created_at: string | null
+          description: string | null
+          device_fingerprint: string | null
+          id: string
+          ip_address: unknown | null
+          reward_type: string
+          source: string
+          status: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          claimed_at?: string | null
+          clawback_reason?: string | null
+          clawed_back_at?: string | null
+          created_at?: string | null
+          description?: string | null
+          device_fingerprint?: string | null
+          id?: string
+          ip_address?: unknown | null
+          reward_type: string
+          source: string
+          status?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          claimed_at?: string | null
+          clawback_reason?: string | null
+          clawed_back_at?: string | null
+          created_at?: string | null
+          description?: string | null
+          device_fingerprint?: string | null
+          id?: string
+          ip_address?: unknown | null
+          reward_type?: string
+          source?: string
+          status?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_rewards_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       math_symbol_patterns: {
         Row: {
           confidence: number
@@ -3436,6 +3604,10 @@ export type Database = {
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      migrate_existing_marketing_consents: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       resume_lesson_summary: {
         Args: { p_skill_id: string; p_user_id: string }

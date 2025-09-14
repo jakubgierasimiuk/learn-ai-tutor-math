@@ -63,16 +63,16 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <ViralLoopProvider>
-      <div className="min-h-screen bg-background">
-        <Navigation />
-        <CurriculumSeeder />
-        <ViralPopups />
-        <SMSTriggerManager />
-        <main>
-          {children}
-        </main>
-      </div>
-    </ViralLoopProvider>
+        <div className="min-h-screen bg-background">
+          <Navigation />
+          <CurriculumSeeder />
+          <ViralPopups />
+          <SMSTriggerManager />
+          <main>
+            {children}
+          </main>
+        </div>
+      </ViralLoopProvider>
   );
 };
 
