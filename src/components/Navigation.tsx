@@ -75,12 +75,6 @@ export const Navigation = () => {
 
               {/* User Info & Logout */}
               <div className="hidden md:flex items-center gap-4">
-                {subscription?.subscription_type === 'free' && <div className="flex items-center gap-2 text-xs">
-                    
-                    {getTokenStatus() === 'critical' && <Badge variant="destructive" className="text-xs">
-                        Niski poziom!
-                      </Badge>}
-                  </div>}
                 <span className="text-sm text-muted-foreground">
                   {user?.email}
                 </span>
