@@ -106,7 +106,8 @@ export const SMSActivationModal: React.FC<SMSActivationModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md min-h-[600px] flex flex-col justify-between overflow-hidden">
+        <div className="flex-1 space-y-6">
         <DialogHeader className="text-center space-y-4">
           {getUrgencyBadge()}
           
@@ -123,7 +124,7 @@ export const SMSActivationModal: React.FC<SMSActivationModalProps> = ({
           </p>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-6 flex-1">
           {/* Progress Bar */}
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
@@ -183,29 +184,31 @@ export const SMSActivationModal: React.FC<SMSActivationModalProps> = ({
             </div>
           </div>
 
-          {/* Referrer Info */}
-          {context.showReferrerInfo && (
-            <Card className="border-accent/20 bg-accent/5">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-                    <Users className="w-5 h-5 text-accent" />
+          {/* Conditional Content Container with Fixed Height */}
+          <div className="min-h-[120px] transition-all duration-300 ease-in-out">
+            {/* Referrer Info */}
+            {context.showReferrerInfo && (
+              <Card className="border-accent/20 bg-accent/5 mb-4">
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
+                      <Users className="w-5 h-5 text-accent" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Twój znajomy również otrzyma nagrodę!</p>
+                      <p className="text-sm text-muted-foreground">+3 dni Premium za Twoją aktywację</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium">Twój znajomy również otrzyma nagrodę!</p>
-                    <p className="text-sm text-muted-foreground">+3 dni Premium za Twoją aktywację</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                </CardContent>
+              </Card>
+            )}
 
-          {/* Social Proof */}
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground">
-              {context.socialProofMessage}
-            </p>
-          </div>
+            {/* Social Proof */}
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground">
+                {context.socialProofMessage}
+              </p>
+            </div>
 
           {/* Action Buttons */}
           <div className="space-y-3">
@@ -244,6 +247,8 @@ export const SMSActivationModal: React.FC<SMSActivationModalProps> = ({
               <span>Darmowe</span>
             </div>
           </div>
+          </div>
+        </div>
         </div>
       </DialogContent>
     </Dialog>
