@@ -17,10 +17,13 @@ import {
   Award,
   Calendar,
   BarChart3,
-  Brain
+  Brain,
+  Zap,
+  Crown
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTokenUsage } from "@/hooks/useTokenUsage";
+import { useSubscription } from "@/hooks/useSubscription";
 
 interface UserStats {
   total_points: number;
@@ -51,7 +54,8 @@ interface RecentActivity {
 
 export const Dashboard = () => {
   const { user } = useAuth();
-  const { getTokenStatus, shouldShowUpgradePrompt } = useTokenUsage();
+  const { getTokenStatus, shouldShowUpgradePrompt, getRemainingTokens } = useTokenUsage();
+  const { subscription } = useSubscription();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -208,6 +212,23 @@ export const Dashboard = () => {
     }
   };
 
+  const getTokenUsageInfo = () => {
+    if (!subscription) return null;
+    
+    const usedTokens = subscription.tokens_used_total || 0;
+    const totalTokens = subscription.token_limit_hard || 25000;
+    const remainingTokens = Math.max(0, totalTokens - usedTokens);
+    const usagePercentage = totalTokens > 0 ? Math.min(100, (usedTokens / totalTokens) * 100) : 0;
+    
+    return {
+      usedTokens,
+      totalTokens,
+      remainingTokens,
+      usagePercentage,
+      subscriptionType: subscription.subscription_type
+    };
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background p-6 flex items-center justify-center">
@@ -215,6 +236,8 @@ export const Dashboard = () => {
       </div>
     );
   }
+
+  const tokenInfo = getTokenUsageInfo();
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -224,6 +247,67 @@ export const Dashboard = () => {
           <h1 className="text-4xl font-bold gradient-text">Dashboard</h1>
           <p className="text-muted-foreground">Przegląd Twojego postępu w nauce</p>
         </div>
+
+        {/* Token Usage Card */}
+        {tokenInfo && (
+          <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-primary" />
+                  <CardTitle className="text-lg">Wykorzystanie tokenów</CardTitle>
+                  <Badge variant={tokenInfo.subscriptionType === 'free' ? 'secondary' : 'default'}>
+                    {tokenInfo.subscriptionType === 'free' ? 'Plan Darmowy' : 
+                     tokenInfo.subscriptionType === 'paid' ? 'Plan Płatny' : 'Premium'}
+                  </Badge>
+                </div>
+                {tokenInfo.subscriptionType === 'free' && (
+                  <Badge variant="outline" className="text-xs">
+                    {tokenInfo.remainingTokens.toLocaleString()} pozostało
+                  </Badge>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Wykorzystane tokeny</span>
+                  <span className="font-medium">
+                    {tokenInfo.usedTokens.toLocaleString()} / {' '}
+                    {tokenInfo.subscriptionType === 'free' ? 
+                      tokenInfo.totalTokens.toLocaleString() : 'Nieograniczone'}
+                  </span>
+                </div>
+                {tokenInfo.subscriptionType === 'free' && (
+                  <Progress 
+                    value={tokenInfo.usagePercentage} 
+                    className="h-2"
+                  />
+                )}
+              </div>
+              
+              {tokenInfo.subscriptionType === 'free' && tokenInfo.usagePercentage > 70 && (
+                <div className="bg-warning/10 border border-warning/20 rounded-lg p-3">
+                  <div className="flex items-start gap-2">
+                    <Crown className="w-4 h-4 text-warning mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-warning">
+                        Zbliżasz się do limitu tokenów
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Ulepsz do planu płatnego, aby cieszyć się nieograniczoną nauką z AI
+                      </p>
+                    </div>
+                    <Button size="sm" className="ml-2">
+                      <Crown className="w-3 h-3 mr-1" />
+                      Ulepsz
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
