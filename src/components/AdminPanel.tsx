@@ -14,9 +14,11 @@ import {
   AlertTriangle,
   Clock,
   Target,
-  Zap
+  Zap,
+  BarChart3
 } from "lucide-react";
 import { TokenLimitDashboard } from "@/components/TokenLimitDashboard";
+import { AnalyticsSection } from "@/components/AnalyticsSection";
 
 export const AdminPanel = () => {
   const [selectedView, setSelectedView] = useState<"owner" | "admin">("owner");
@@ -266,8 +268,9 @@ export const AdminPanel = () => {
 
       {selectedView === "admin" && (
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList>
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="overview">Przegląd</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="token-limits">Limity Tokenów</TabsTrigger>
           </TabsList>
           
@@ -413,6 +416,10 @@ export const AdminPanel = () => {
               </CardContent>
             </Card>
             </div>
+          </TabsContent>
+          
+          <TabsContent value="analytics" className="space-y-6">
+            <AnalyticsSection />
           </TabsContent>
           
           <TabsContent value="token-limits">

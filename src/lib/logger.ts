@@ -4,11 +4,30 @@ import { supabase } from "@/integrations/supabase/client";
 const CONTEXT_BUFFER_KEY = 'mentavo_context_buffer';
 const MAX_BUFFER_SIZE = 25;
 
+// Analytics tracking
+const SESSION_STORAGE_KEY = 'mentavo_session_analytics';
+const PAGE_VISIT_KEY = 'mentavo_page_visits';
+
 interface ContextAction {
   timestamp: number;
   type: string;
   route: string;
   data?: any;
+}
+
+interface PageVisit {
+  route: string;
+  startTime: number;
+  endTime?: number;
+  duration?: number;
+}
+
+interface SessionAnalytics {
+  sessionId: string;
+  startTime: number;
+  pageVisits: PageVisit[];
+  entryPage: string;
+  currentPage: string;
 }
 
 function getContextBuffer(): ContextAction[] {
@@ -39,6 +58,102 @@ function addToContextBuffer(action: ContextAction) {
 export function getRecentUserJourney(): ContextAction[] {
   return getContextBuffer();
 }
+
+// Analytics Functions
+export const initializeSessionAnalytics = () => {
+  if (typeof window === 'undefined') return;
+
+  let sessionData = getSessionAnalytics();
+  if (!sessionData) {
+    sessionData = {
+      sessionId: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      startTime: Date.now(),
+      pageVisits: [],
+      entryPage: window.location.pathname,
+      currentPage: window.location.pathname
+    };
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(sessionData));
+  }
+
+  // Track page view
+  trackPageView(window.location.pathname);
+};
+
+export const trackPageView = (route: string) => {
+  if (typeof window === 'undefined') return;
+
+  const sessionData = getSessionAnalytics();
+  if (!sessionData) return;
+
+  // End previous page visit
+  if (sessionData.pageVisits.length > 0) {
+    const lastVisit = sessionData.pageVisits[sessionData.pageVisits.length - 1];
+    if (!lastVisit.endTime) {
+      lastVisit.endTime = Date.now();
+      lastVisit.duration = lastVisit.endTime - lastVisit.startTime;
+    }
+  }
+
+  // Start new page visit
+  const newVisit: PageVisit = {
+    route,
+    startTime: Date.now()
+  };
+
+  sessionData.pageVisits.push(newVisit);
+  sessionData.currentPage = route;
+  localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(sessionData));
+
+  // Log page view event
+  logEvent('page_view', { 
+    route, 
+    sessionId: sessionData.sessionId,
+    timestamp: Date.now(),
+    referrer: document.referrer || 'direct'
+  });
+};
+
+export const endSession = () => {
+  if (typeof window === 'undefined') return;
+
+  const sessionData = getSessionAnalytics();
+  if (!sessionData) return;
+
+  // End current page visit
+  if (sessionData.pageVisits.length > 0) {
+    const lastVisit = sessionData.pageVisits[sessionData.pageVisits.length - 1];
+    if (!lastVisit.endTime) {
+      lastVisit.endTime = Date.now();
+      lastVisit.duration = lastVisit.endTime - lastVisit.startTime;
+    }
+  }
+
+  // Calculate session metrics
+  const totalDuration = Date.now() - sessionData.startTime;
+  const pagesVisited = sessionData.pageVisits.length;
+  const isBounce = pagesVisited <= 1 && totalDuration < 30000; // Less than 30 seconds, single page
+
+  // Log session end
+  logEvent('session_end', {
+    sessionId: sessionData.sessionId,
+    duration: totalDuration,
+    pagesVisited,
+    isBounce,
+    entryPage: sessionData.entryPage,
+    exitPage: sessionData.currentPage,
+    pageVisits: sessionData.pageVisits
+  });
+
+  // Clear session data
+  localStorage.removeItem(SESSION_STORAGE_KEY);
+};
+
+const getSessionAnalytics = (): SessionAnalytics | null => {
+  if (typeof window === 'undefined') return null;
+  
+  const stored = localStorage.getItem(SESSION_STORAGE_KEY);
+  return stored ? JSON.parse(stored) : null;
+};
 
 function getDeviceType() {
   const ua = navigator?.userAgent || "";
@@ -161,6 +276,26 @@ export async function logAIMessage(sessionId: number, role: 'user' | 'assistant'
 }
 
 export function setupGlobalLogging() {
+  if (typeof window === 'undefined') return;
+
+  // Initialize session analytics
+  initializeSessionAnalytics();
+
+  // Track page unload
+  window.addEventListener('beforeunload', () => {
+    endSession();
+  });
+
+  // Track route changes (for SPA)
+  let currentRoute = window.location.pathname;
+  const observer = new MutationObserver(() => {
+    if (window.location.pathname !== currentRoute) {
+      currentRoute = window.location.pathname;
+      trackPageView(currentRoute);
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+
   const onError = (event: ErrorEvent) => {
     logError(event.error || event.message, 'global.error', { filename: event.filename, lineno: event.lineno, colno: event.colno });
   };
@@ -176,6 +311,7 @@ export function setupGlobalLogging() {
   return () => {
     window.removeEventListener('error', onError);
     window.removeEventListener('unhandledrejection', onRejection);
+    observer.disconnect();
   };
 }
 

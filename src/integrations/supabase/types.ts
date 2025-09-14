@@ -161,6 +161,30 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_cache: {
+        Row: {
+          cache_data: Json
+          cache_key: string
+          created_at: string
+          expires_at: string
+          id: string
+        }
+        Insert: {
+          cache_data: Json
+          cache_key: string
+          created_at?: string
+          expires_at: string
+          id?: string
+        }
+        Update: {
+          cache_data?: Json
+          cache_key?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       app_error_logs: {
         Row: {
           admin_notes: string | null
@@ -1874,6 +1898,51 @@ export type Database = {
         }
         Relationships: []
       }
+      page_analytics: {
+        Row: {
+          average_session_duration_minutes: number | null
+          bounce_count: number
+          bounce_rate: number | null
+          created_at: string
+          date: string
+          exit_count: number
+          id: string
+          route: string
+          total_page_views: number
+          total_session_duration_minutes: number
+          unique_page_views: number
+          updated_at: string
+        }
+        Insert: {
+          average_session_duration_minutes?: number | null
+          bounce_count?: number
+          bounce_rate?: number | null
+          created_at?: string
+          date: string
+          exit_count?: number
+          id?: string
+          route: string
+          total_page_views?: number
+          total_session_duration_minutes?: number
+          unique_page_views?: number
+          updated_at?: string
+        }
+        Update: {
+          average_session_duration_minutes?: number | null
+          bounce_count?: number
+          bounce_rate?: number | null
+          created_at?: string
+          date?: string
+          exit_count?: number
+          id?: string
+          route?: string
+          total_page_views?: number
+          total_session_duration_minutes?: number
+          unique_page_views?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       points_history: {
         Row: {
           id: number
@@ -3333,6 +3402,60 @@ export type Database = {
         }
         Relationships: []
       }
+      user_session_analytics: {
+        Row: {
+          created_at: string
+          device_type: string | null
+          duration_minutes: number | null
+          ended_at: string | null
+          entry_page: string | null
+          exit_page: string | null
+          id: string
+          is_bounce: boolean | null
+          pages_visited: number
+          referrer: string | null
+          session_id: string
+          started_at: string
+          updated_at: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_type?: string | null
+          duration_minutes?: number | null
+          ended_at?: string | null
+          entry_page?: string | null
+          exit_page?: string | null
+          id?: string
+          is_bounce?: boolean | null
+          pages_visited?: number
+          referrer?: string | null
+          session_id: string
+          started_at: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_type?: string | null
+          duration_minutes?: number | null
+          ended_at?: string | null
+          entry_page?: string | null
+          exit_page?: string | null
+          id?: string
+          is_bounce?: boolean | null
+          pages_visited?: number
+          referrer?: string | null
+          session_id?: string
+          started_at?: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_streaks: {
         Row: {
           created_at: string
@@ -3537,6 +3660,10 @@ export type Database = {
       }
       check_social_achievements: {
         Args: { p_user_id: string }
+        Returns: undefined
+      }
+      cleanup_analytics_cache: {
+        Args: Record<PropertyKey, never>
         Returns: undefined
       }
       generate_join_code: {
