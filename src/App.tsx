@@ -42,6 +42,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ViralLoopProvider } from "@/components/viral/ViralLoopProvider";
 import { ViralPopups } from "@/components/viral/ViralPopups";
 import { SMSTriggerManager } from "@/components/SMSTriggerManager";
+import { SurveyProvider } from "@/components/SurveyProvider";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <ViralLoopProvider>
+      <SurveyProvider>
         <div className="min-h-screen bg-background">
           <Navigation />
           <CurriculumSeeder />
@@ -72,7 +74,8 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
             {children}
           </main>
         </div>
-      </ViralLoopProvider>
+      </SurveyProvider>
+    </ViralLoopProvider>
   );
 };
 

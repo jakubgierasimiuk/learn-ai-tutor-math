@@ -275,14 +275,73 @@ export async function logAIMessage(sessionId: number, role: 'user' | 'assistant'
   }
 }
 
+// Survey Trigger Functions
+let surveyTriggerCallback: ((surveyType: string, context?: any) => void) | null = null;
+
+export const setSurveyTriggerCallback = (callback: (surveyType: string, context?: any) => void) => {
+  surveyTriggerCallback = callback;
+};
+
+const triggerSurvey = (surveyType: string, context: any = {}) => {
+  if (surveyTriggerCallback) {
+    surveyTriggerCallback(surveyType, context);
+  }
+};
+
+// Enhanced event logging with survey triggers
+export const logLessonComplete = (lessonData: any) => {
+  logEvent('lesson_complete', lessonData);
+  
+  // Trigger lesson feedback survey (with probability)
+  if (Math.random() < 0.3) {
+    triggerSurvey('lesson_feedback', {
+      lesson_id: lessonData.lessonId,
+      lesson_name: lessonData.lessonName,
+      score: lessonData.score,
+      time_spent_minutes: Math.round((lessonData.timeSpent || 0) / 60),
+      difficulty_level: lessonData.difficulty || 1,
+      completed_at: new Date().toISOString()
+    });
+  }
+};
+
+export const logUserChurn = (sessionData: any) => {
+  logEvent('user_churn_risk', sessionData);
+  
+  // Trigger exit intent survey for longer sessions
+  if (sessionData.sessionDuration > 120) { // 2+ minutes
+    triggerSurvey('exit_intent', {
+      session_duration: sessionData.sessionDuration,
+      pages_visited: sessionData.pagesVisited,
+      last_activity: new Date().toISOString()
+    });
+  }
+};
+
+export const triggerNPSSurvey = () => {
+  triggerSurvey('nps', {
+    trigger_time: new Date().toISOString(),
+    user_journey: getRecentUserJourney()
+  });
+};
+
 export function setupGlobalLogging() {
   if (typeof window === 'undefined') return;
 
   // Initialize session analytics
   initializeSessionAnalytics();
 
-  // Track page unload
+  // Log session end when user leaves
   window.addEventListener('beforeunload', () => {
+    const sessionAnalytics = getSessionAnalytics();
+    if (sessionAnalytics) {
+      const sessionDuration = Date.now() - sessionAnalytics.startTime;
+      logUserChurn({
+        sessionDuration: Math.round(sessionDuration / 1000),
+        pagesVisited: sessionAnalytics.pageVisits.length,
+        lastPage: sessionAnalytics.currentPage
+      });
+    }
     endSession();
   });
 

@@ -2982,6 +2982,105 @@ export type Database = {
         }
         Relationships: []
       }
+      survey_responses: {
+        Row: {
+          created_at: string
+          id: string
+          question_id: string
+          question_text: string | null
+          response_text: string | null
+          response_value: Json | null
+          sentiment_score: number | null
+          survey_id: string
+          template_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          question_id: string
+          question_text?: string | null
+          response_text?: string | null
+          response_value?: Json | null
+          sentiment_score?: number | null
+          survey_id: string
+          template_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          question_id?: string
+          question_text?: string | null
+          response_text?: string | null
+          response_value?: Json | null
+          sentiment_score?: number | null
+          survey_id?: string
+          template_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_responses_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "user_surveys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "survey_responses_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "survey_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_rules: Json | null
+          id: string
+          is_active: boolean
+          max_frequency_days: number | null
+          name: string
+          priority: number | null
+          questions: Json
+          survey_type: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_rules?: Json | null
+          id?: string
+          is_active?: boolean
+          max_frequency_days?: number | null
+          name: string
+          priority?: number | null
+          questions?: Json
+          survey_type: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_rules?: Json | null
+          id?: string
+          is_active?: boolean
+          max_frequency_days?: number | null
+          name?: string
+          priority?: number | null
+          questions?: Json
+          survey_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       task_definitions: {
         Row: {
           created_at: string
@@ -3537,6 +3636,54 @@ export type Database = {
         }
         Relationships: []
       }
+      user_surveys: {
+        Row: {
+          completed_at: string | null
+          context: Json | null
+          created_at: string
+          dismissed_at: string | null
+          displayed_at: string | null
+          id: string
+          metadata: Json | null
+          scheduled_for: string | null
+          status: string
+          survey_type: string
+          template_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          context?: Json | null
+          created_at?: string
+          dismissed_at?: string | null
+          displayed_at?: string | null
+          id?: string
+          metadata?: Json | null
+          scheduled_for?: string | null
+          status?: string
+          survey_type: string
+          template_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          context?: Json | null
+          created_at?: string
+          dismissed_at?: string | null
+          displayed_at?: string | null
+          id?: string
+          metadata?: Json | null
+          scheduled_for?: string | null
+          status?: string
+          survey_type?: string
+          template_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       validation_logs: {
         Row: {
           confidence: number
@@ -3685,6 +3832,17 @@ export type Database = {
           mastery_level: number
           next_review_at: string
           skill_node_id: string
+        }[]
+      }
+      get_due_surveys_for_user: {
+        Args: { target_user_id: string }
+        Returns: {
+          context: Json
+          description: string
+          questions: Json
+          survey_id: string
+          survey_type: string
+          title: string
         }[]
       }
       get_learning_analytics: {
