@@ -185,7 +185,7 @@ export const SMSActivationModal: React.FC<SMSActivationModalProps> = ({
           </div>
 
           {/* Conditional Content Container with Fixed Height */}
-          <div className="min-h-[120px] transition-all duration-300 ease-in-out">
+          <div className="min-h-[140px] transition-all duration-300 ease-in-out">
             {/* Referrer Info */}
             {context.showReferrerInfo && (
               <Card className="border-accent/20 bg-accent/5 mb-4">
@@ -205,7 +205,7 @@ export const SMSActivationModal: React.FC<SMSActivationModalProps> = ({
 
             {/* Social Proof */}
             <div className="text-center">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground break-words hyphens-auto leading-relaxed px-2">
                 {context.socialProofMessage}
               </p>
             </div>

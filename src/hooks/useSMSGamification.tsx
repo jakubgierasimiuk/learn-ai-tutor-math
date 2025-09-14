@@ -101,7 +101,7 @@ export const useSMSGamification = () => {
     const messages = [
       "Dziś już 247 uczniów odebrało swoje bonusy",
       "89% uczniów weryfikuje telefon w pierwszym dniu",
-      "Średnio uczniowie oszczędzają 3 tygodnie nauki dzięki premium funkcjom"
+      "Premium funkcje oszczędzają średnio 3 tygodnie"
     ];
     return messages[Math.floor(Math.random() * messages.length)];
   };
