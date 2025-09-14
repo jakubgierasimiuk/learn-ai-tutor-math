@@ -30,11 +30,48 @@ interface SocialProofEvent {
 export const ViralPopups: React.FC = () => {
   const [activePopup, setActivePopup] = useState<ViralPopupEvent | null>(null);
   const [socialProof, setSocialProof] = useState<SocialProofEvent | null>(null);
+  const [lastDismissed, setLastDismissed] = useState<number>(0);
   const { getReferralUrl, copyReferralUrl, shareReferralUrl } = useReferralV2();
   const { toast } = useToast();
 
+  // Check user preferences for showing popups
+  const getPopupPreference = (type: string): boolean => {
+    try {
+      const prefs = localStorage.getItem('popup-preferences');
+      if (!prefs) return true;
+      const parsed = JSON.parse(prefs);
+      return parsed[type] !== false;
+    } catch {
+      return true;
+    }
+  };
+
+  const setPopupPreference = (type: string, show: boolean) => {
+    try {
+      const prefs = localStorage.getItem('popup-preferences');
+      const parsed = prefs ? JSON.parse(prefs) : {};
+      parsed[type] = show;
+      localStorage.setItem('popup-preferences', JSON.stringify(parsed));
+    } catch {
+      // Silent fail
+    }
+  };
+
+  const shouldShowPopup = (): boolean => {
+    const now = Date.now();
+    const cooldownPeriod = 10 * 60 * 1000; // 10 minutes
+    return now - lastDismissed > cooldownPeriod;
+  };
+
   useEffect(() => {
     const handleViralPopup = (event: CustomEvent<ViralPopupEvent>) => {
+      const { trigger } = event.detail;
+      
+      // Check cooldown and user preferences
+      if (!shouldShowPopup() || !getPopupPreference('viral-popups') || !getPopupPreference(trigger)) {
+        return;
+      }
+      
       setActivePopup(event.detail);
       
       // Auto-hide after 10 seconds
@@ -44,6 +81,13 @@ export const ViralPopups: React.FC = () => {
     };
 
     const handleSocialProof = (event: CustomEvent<SocialProofEvent>) => {
+      const { type } = event.detail;
+      
+      // Check cooldown and user preferences  
+      if (!shouldShowPopup() || !getPopupPreference('social-proof') || !getPopupPreference(type)) {
+        return;
+      }
+      
       setSocialProof(event.detail);
       
       // Auto-hide after 6 seconds
@@ -118,7 +162,10 @@ export const ViralPopups: React.FC = () => {
                 <p className="text-xs text-muted-foreground">{message}</p>
               </div>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => setActivePopup(null)}>
+            <Button variant="ghost" size="sm" onClick={() => {
+              setLastDismissed(Date.now());
+              setActivePopup(null);
+            }}>
               <X className="w-4 h-4" />
             </Button>
           </div>
@@ -128,8 +175,19 @@ export const ViralPopups: React.FC = () => {
               <Share2 className="w-3 h-3 mr-1" />
               Udostępnij
             </Button>
-            <Button size="sm" variant="outline" onClick={() => setActivePopup(null)}>
+            <Button size="sm" variant="outline" onClick={() => {
+              setLastDismissed(Date.now());
+              setActivePopup(null);
+            }}>
               Później
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => {
+              setPopupPreference('viral-popups', false);
+              setLastDismissed(Date.now());
+              setActivePopup(null);
+              toast({ title: "Popup-y wyłączone", description: "Nie będziemy już pokazywać popup-ów z poleceniami" });
+            }}>
+              Nie pokazuj więcej
             </Button>
           </div>
 
@@ -192,7 +250,10 @@ export const ViralPopups: React.FC = () => {
         <CardContent className="p-3">
           <div className="flex items-center justify-between">
             {content}
-            <Button variant="ghost" size="sm" onClick={() => setSocialProof(null)}>
+            <Button variant="ghost" size="sm" onClick={() => {
+              setLastDismissed(Date.now());
+              setSocialProof(null);
+            }}>
               <X className="w-3 h-3" />
             </Button>
           </div>

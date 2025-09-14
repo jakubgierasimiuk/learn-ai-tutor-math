@@ -85,14 +85,14 @@ export const useViralTriggers = (options: ViralTriggerOptions = {}) => {
     showSocialProof('fomo', { message, timeLeft });
   };
 
-  // Auto-trigger social proof periodically
+  // Auto-trigger social proof periodically (much less aggressive)
   useEffect(() => {
     if (!enableSocialProof || !user) return;
 
     const interval = setInterval(() => {
       const randomTrigger = Math.random();
       
-      if (randomTrigger < 0.1) { // 10% chance every minute
+      if (randomTrigger < 0.02) { // 2% chance every 5 minutes (was 10% every minute)
         const testimonials = [
           { name: 'Ania', subject: 'algebrą', improvement: 40 },
           { name: 'Kuba', subject: 'geometrią', improvement: 35 },
@@ -101,18 +101,18 @@ export const useViralTriggers = (options: ViralTriggerOptions = {}) => {
         ];
         const testimonial = testimonials[Math.floor(Math.random() * testimonials.length)];
         triggerTestimonial(testimonial.name, testimonial.subject, testimonial.improvement);
-      } else if (randomTrigger < 0.15) { // 5% chance
+      } else if (randomTrigger < 0.03) { // 1% chance (was 5%)
         const cities = ['Warszawie', 'Krakowie', 'Gdańsku', 'Wrocławiu', 'Poznaniu'];
         const city = cities[Math.floor(Math.random() * cities.length)];
         const count = 50 + Math.floor(Math.random() * 200);
         triggerLocalStats(city, count);
       }
-    }, 60000); // Every minute
+    }, 300000); // Every 5 minutes (was 1 minute)
 
     return () => clearInterval(interval);
   }, [enableSocialProof, user]);
 
-  // FOMO triggers - show periodically
+  // FOMO triggers - show periodically (much less aggressive)
   useEffect(() => {
     if (!enableSocialProof || !user) return;
 
@@ -123,11 +123,11 @@ export const useViralTriggers = (options: ViralTriggerOptions = {}) => {
     ];
 
     const interval = setInterval(() => {
-      if (Math.random() < 0.05) { // 5% chance every 2 minutes
+      if (Math.random() < 0.01) { // 1% chance every 10 minutes (was 5% every 2 minutes)
         const fomo = fomoMessages[Math.floor(Math.random() * fomoMessages.length)];
         triggerFomo(fomo.message, fomo.timeLeft);
       }
-    }, 120000); // Every 2 minutes
+    }, 600000); // Every 10 minutes (was 2 minutes)
 
     return () => clearInterval(interval);
   }, [enableSocialProof, user]);
