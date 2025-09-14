@@ -23,15 +23,15 @@ export const useSMSGamification = () => {
   const getSMSTriggerConditions = (): SMSTriggerConditions => {
     if (!user) return { showSMSPrompt: false, urgencyLevel: 'none', triggerReason: '', personalizedMessage: '', rewardAmount: 4000 };
 
+    // Check if user came with referral code (from URL params)
+    const hasReferralCode = new URLSearchParams(window.location.search).get('ref') || referralCode;
+    
     const tokenStatus = getTokenStatus();
     const remainingTokens = getRemainingTokens();
     const shouldUpgrade = shouldShowUpgradePrompt();
     
-    // Check if user came with referral code (from URL params)
-    const hasReferralCode = new URLSearchParams(window.location.search).get('ref') || referralCode;
-    
-    // Critical trigger - paywall hit
-    if (remainingTokens <= 0) {
+    // Critical trigger - paywall hit (only for referred users)
+    if (remainingTokens <= 0 && hasReferralCode) {
       return {
         showSMSPrompt: true,
         urgencyLevel: 'critical',
@@ -41,8 +41,8 @@ export const useSMSGamification = () => {
       };
     }
 
-    // High urgency - very low tokens + upgrade prompt
-    if (tokenStatus === 'critical' && shouldUpgrade) {
+    // High urgency - very low tokens + upgrade prompt (only for referred users)
+    if (tokenStatus === 'critical' && shouldUpgrade && hasReferralCode) {
       return {
         showSMSPrompt: true,
         urgencyLevel: 'high',
@@ -63,17 +63,7 @@ export const useSMSGamification = () => {
       };
     }
 
-    // Low urgency - after positive AI interaction
-    if (tokenStatus === 'warning' && !hasShownSMSToday) {
-      return {
-        showSMSPrompt: true,
-        urgencyLevel: 'low',
-        triggerReason: 'engagement_boost',
-        personalizedMessage: 'Świetnie Ci idzie! Odblokuj premium funkcje weryfikując telefon.',
-        rewardAmount: 4000
-      };
-    }
-
+    // No trigger for non-referred users
     return {
       showSMSPrompt: false,
       urgencyLevel: 'none',

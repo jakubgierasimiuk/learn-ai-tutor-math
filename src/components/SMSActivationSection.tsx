@@ -135,6 +135,11 @@ export const SMSActivationSection: React.FC<SMSActivationSectionProps> = ({
     }
   };
 
+  // Only show verification section if user is from referral or has already started verification
+  if (variant === 'account' && !isFromReferral && !phoneVerified) {
+    return null; // Don't show for non-referred users
+  }
+
   if (variant === 'account') {
     return (
       <>
