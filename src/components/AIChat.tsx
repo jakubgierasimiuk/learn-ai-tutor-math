@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MessageCircle, Send, Bot, User, Brain, Settings } from 'lucide-react';
+import { MessageCircle, Send, Bot, User, Brain, Settings, Crown } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,6 +33,7 @@ export const AIChat = () => {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [sequenceNumber, setSequenceNumber] = useState(0);
   const [enrichedContext, setEnrichedContext] = useState(false);
+  const [hasShownTokenExhaustedMessage, setHasShownTokenExhaustedMessage] = useState(false);
 
   // CLARIFICATION CONTEXT STATE
   const [clarificationContext, setClarificationContext] = useState<{
@@ -63,6 +64,21 @@ export const AIChat = () => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [contextualSymbols, setContextualSymbols] = useState<string[]>([]);
   const [showSuccessPrompt, setShowSuccessPrompt] = useState(false);
+
+  // Add one-time message when tokens are exhausted
+  useEffect(() => {
+    if (shouldShowSoftPaywall() && !hasShownTokenExhaustedMessage && messages.length > 1) {
+      const exhaustedMessage: Message = {
+        id: `exhausted-${Date.now()}`,
+        content: 'Twój darmowy okres zakończył się! 🎓 Aby kontynuować naukę z Mentavo AI, ulepsz swój plan. Dzięki Premium będziesz mieć nieograniczony dostęp do wszystkich funkcji i 24/7 wsparcie w nauce matematyki.',
+        role: 'assistant',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, exhaustedMessage]);
+      setHasShownTokenExhaustedMessage(true);
+    }
+  }, [shouldShowSoftPaywall, hasShownTokenExhaustedMessage, messages.length]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -240,13 +256,8 @@ export const AIChat = () => {
       return;
     }
 
-    // Check token limits before sending
+    // Block sending when tokens exhausted - no toast, just silent block
     if (shouldShowSoftPaywall()) {
-      toast({
-        title: "Brak tokenów",
-        description: "Wykorzystałeś wszystkie tokeny w tym miesiącu. Ulepsz plan, aby kontynuować.",
-        variant: "destructive"
-      });
       return;
     }
     const userMessage: Message = {
@@ -635,28 +646,91 @@ export const AIChat = () => {
             </div>
           </div>}
 
-        {/* Fixed Input Area */}
+        {/* Fixed Input Area or Lock Banner */}
         <div className="sticky bottom-0 bg-background/80 backdrop-blur-sm pt-4">
-          <div className="mb-3">
-            <MathSymbolPanel quickSymbols={contextualSymbols.length > 0 ? contextualSymbols : quickSymbols} onSymbolSelect={handleSymbolSelect} />
-          </div>
-          <div className="flex items-end gap-3 p-4 bg-muted/30 border border-border/50 rounded-2xl">
-            <Input type="text" placeholder="Zadaj pytanie Mentavo AI..." value={input} onChange={e => setInput(e.target.value)} onKeyPress={handleKeyPress} disabled={isLoading} className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60" />
-            <Button onClick={sendMessage} disabled={isLoading || !input.trim()} size="sm" className="h-10 w-10 p-0 rounded-xl">
-              {isLoading ? <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <Send className="w-4 h-4" />}
-            </Button>
-          </div>
-          
-          <div className="flex items-center justify-between pt-3 px-1">
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <button onClick={endSession} className="hover:text-foreground transition-colors duration-200 font-medium">
-                Zakończ sesję
-              </button>
-            </div>
-            <div className="text-xs text-muted-foreground">
-              Tokens: {100 - getRemainingTokens()}% używane
-            </div>
-          </div>
+          {shouldShowSoftPaywall() ? (
+            // Show lock banner when tokens exhausted
+            <Card className="border-orange-200 bg-gradient-to-r from-orange-50 to-red-50 mb-4">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                      <Brain className="w-4 h-4 text-orange-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-orange-800">
+                        Okres darmowy zakończony
+                      </p>
+                      <p className="text-sm text-orange-600">
+                        Ulepsz plan, aby kontynuować rozmowę z AI
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={async () => {
+                      try {
+                        const { data, error } = await supabase.functions.invoke('create-checkout', {
+                          body: { plan: 'paid' }
+                        });
+                        if (error) throw error;
+                        if (data?.url) {
+                          window.location.href = data.url;
+                        }
+                      } catch (error) {
+                        console.error('Upgrade error:', error);
+                      }
+                    }}
+                    size="sm" 
+                    className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+                  >
+                    <Crown className="w-4 h-4 mr-2" />
+                    Ulepsz plan
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            // Normal input area when tokens available
+            <>
+              <div className="mb-3">
+                <MathSymbolPanel quickSymbols={contextualSymbols.length > 0 ? contextualSymbols : quickSymbols} onSymbolSelect={handleSymbolSelect} />
+              </div>
+              <div className="flex items-end gap-3 p-4 bg-muted/30 border border-border/50 rounded-2xl">
+                <Input 
+                  type="text" 
+                  placeholder="Zadaj pytanie Mentavo AI..." 
+                  value={input} 
+                  onChange={e => setInput(e.target.value)} 
+                  onKeyPress={handleKeyPress} 
+                  disabled={isLoading} 
+                  className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60" 
+                />
+                <Button 
+                  onClick={sendMessage} 
+                  disabled={isLoading || !input.trim()} 
+                  size="sm" 
+                  className="h-10 w-10 p-0 rounded-xl"
+                >
+                  {isLoading ? (
+                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
+              
+              <div className="flex items-center justify-between pt-3 px-1">
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <button onClick={endSession} className="hover:text-foreground transition-colors duration-200 font-medium">
+                    Zakończ sesję
+                  </button>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  Tokens: {100 - getRemainingTokens()}% używane
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>;

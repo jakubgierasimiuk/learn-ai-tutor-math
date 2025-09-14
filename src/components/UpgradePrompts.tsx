@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Zap, Crown, Sparkles, Users, X, Clock, AlertTriangle } from 'lucide-react';
 import { useTokenUsage } from '@/hooks/useTokenUsage';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,6 +30,24 @@ export const UpgradePrompts = ({ context = 'chat', compact = false }: UpgradePro
   
   const [showSoftPaywall, setShowSoftPaywall] = useState(false);
   const [isUpgrading, setIsUpgrading] = useState(false);
+  const [paywallDismissed, setPaywallDismissed] = useState(false);
+
+  // Check if paywall was dismissed for this month
+  useEffect(() => {
+    if (!user?.id) return;
+    
+    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
+    const dismissKey = `paywall_dismissed_${user.id}_${currentMonth}`;
+    const dismissed = localStorage.getItem(dismissKey) === 'true';
+    setPaywallDismissed(dismissed);
+  }, [user?.id]);
+
+  // Show soft paywall only if tokens exhausted and not dismissed
+  useEffect(() => {
+    if (shouldShowSoftPaywall() && !paywallDismissed && context === 'chat') {
+      setShowSoftPaywall(true);
+    }
+  }, [shouldShowSoftPaywall, paywallDismissed, context]);
 
   const handleUpgrade = async () => {
     if (!user) return;
@@ -57,10 +75,16 @@ export const UpgradePrompts = ({ context = 'chat', compact = false }: UpgradePro
     }
   };
 
-  // Show soft paywall modal when no tokens left
-  if (shouldShowSoftPaywall() && !showSoftPaywall) {
-    setShowSoftPaywall(true);
-  }
+  const handleDismissPaywall = () => {
+    if (!user?.id) return;
+    
+    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
+    const dismissKey = `paywall_dismissed_${user.id}_${currentMonth}`;
+    localStorage.setItem(dismissKey, 'true');
+    setPaywallDismissed(true);
+    setShowSoftPaywall(false);
+  };
+
 
   // Contextual upgrade prompts based on token usage and trial status
   const renderContextualPrompt = () => {
@@ -252,11 +276,14 @@ export const UpgradePrompts = ({ context = 'chat', compact = false }: UpgradePro
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setShowSoftPaywall(false)}
+                onClick={handleDismissPaywall}
               >
                 <X className="w-4 h-4" />
               </Button>
             </div>
+            <DialogDescription>
+              Wykorzystałeś swoje darmowe tokeny. Ulepsz plan, aby kontynuować naukę bez ograniczeń.
+            </DialogDescription>
           </DialogHeader>
           <div className="text-center py-6">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -295,7 +322,7 @@ export const UpgradePrompts = ({ context = 'chat', compact = false }: UpgradePro
               </Button>
               <Button 
                 variant="outline" 
-                onClick={() => setShowSoftPaywall(false)}
+                onClick={handleDismissPaywall}
                 className="w-full"
               >
                 {subscription?.subscription_type === 'limited_free' ? 'Zamknij' : 'Może później'}
