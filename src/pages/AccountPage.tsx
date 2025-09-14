@@ -8,9 +8,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { User, Shield, CreditCard, Calendar, Lock, CheckCircle } from "lucide-react";
+import { User, Shield, CreditCard, Calendar, Lock, CheckCircle, Crown, Zap, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SMSActivationSection } from "@/components/SMSActivationSection";
+import { logEvent } from "@/lib/logger";
 
 const AccountPage = () => {
   const { user } = useAuth();
@@ -71,6 +72,21 @@ const AccountPage = () => {
     } finally {
       setIsChangingPassword(false);
     }
+  };
+
+  const handleUpgradeClick = () => {
+    logEvent('subscription_upgrade_cta_click', { 
+      source: 'account_page',
+      current_subscription: subscription?.subscription_type 
+    });
+    
+    toast({
+      title: "Przekierowanie do płatności",
+      description: "Wkrótce zostaniesz przekierowany do strony płatności...",
+    });
+    
+    // TODO: Implement actual upgrade flow/redirect to payment page
+    console.log('Upgrade subscription clicked');
   };
 
   const getSubscriptionTypeDisplay = (type: string) => {
@@ -221,6 +237,49 @@ const AccountPage = () => {
                       {subscription.status === 'active' ? 'Aktywna' : 'Nieaktywna'}
                     </Badge>
                   </div>
+
+                  {/* Upgrade CTA for free accounts */}
+                  {subscription.subscription_type === 'free' && (
+                    <div className="pt-4 border-t border-border">
+                      <div className="bg-gradient-to-r from-primary/5 to-accent/5 p-4 rounded-lg border border-primary/20">
+                        <div className="flex items-start gap-3">
+                          <Crown className="w-5 h-5 text-primary mt-0.5" />
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-primary mb-1">
+                              Odblokuj pełny potencjał nauki
+                            </h4>
+                            <p className="text-sm text-muted-foreground mb-3">
+                              Przejdź na plan płatny i ciesz się nieograniczonym dostępem do AI tutora, 
+                              zaawansowanych funkcji i priorytetowym wsparciem.
+                            </p>
+                            <ul className="text-xs text-muted-foreground space-y-1 mb-4">
+                              <li className="flex items-center gap-2">
+                                <Zap className="w-3 h-3 text-yellow-500" />
+                                Nieograniczone tokeny AI
+                              </li>
+                              <li className="flex items-center gap-2">
+                                <Crown className="w-3 h-3 text-purple-500" />
+                                Priorytetowe wsparcie
+                              </li>
+                              <li className="flex items-center gap-2">
+                                <CheckCircle className="w-3 h-3 text-green-500" />
+                                Zaawansowane analityki postępów
+                              </li>
+                            </ul>
+                            <Button 
+                              onClick={handleUpgradeClick}
+                              className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-primary"
+                              size="sm"
+                            >
+                              <Crown className="w-4 h-4 mr-2" />
+                              Ulepsz subskrypcję
+                              <ArrowRight className="w-4 h-4 ml-2" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </>
               ) : (
                 <p className="text-muted-foreground">Nie udało się załadować informacji o subskrypcji</p>
