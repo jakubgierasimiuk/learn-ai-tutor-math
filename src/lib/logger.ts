@@ -1,5 +1,45 @@
 import { supabase } from "@/integrations/supabase/client";
 
+// Context buffer for user journey tracking
+const CONTEXT_BUFFER_KEY = 'mentavo_context_buffer';
+const MAX_BUFFER_SIZE = 25;
+
+interface ContextAction {
+  timestamp: number;
+  type: string;
+  route: string;
+  data?: any;
+}
+
+function getContextBuffer(): ContextAction[] {
+  try {
+    const stored = localStorage.getItem(CONTEXT_BUFFER_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+function addToContextBuffer(action: ContextAction) {
+  try {
+    const buffer = getContextBuffer();
+    buffer.push(action);
+    
+    // Keep only last MAX_BUFFER_SIZE actions (FIFO)
+    if (buffer.length > MAX_BUFFER_SIZE) {
+      buffer.splice(0, buffer.length - MAX_BUFFER_SIZE);
+    }
+    
+    localStorage.setItem(CONTEXT_BUFFER_KEY, JSON.stringify(buffer));
+  } catch (e) {
+    console.warn('Failed to add to context buffer:', e);
+  }
+}
+
+export function getRecentUserJourney(): ContextAction[] {
+  return getContextBuffer();
+}
+
 function getDeviceType() {
   const ua = navigator?.userAgent || "";
   const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(ua) || window.innerWidth < 768;
@@ -18,6 +58,15 @@ export async function logEvent(event_type: string, payload?: any) {
   try {
     const meta = getMeta();
     const { data: { user } } = await supabase.auth.getUser();
+    
+    // Add to context buffer for journey tracking
+    addToContextBuffer({
+      timestamp: Date.now(),
+      type: event_type,
+      route: meta.route,
+      data: payload
+    });
+    
     if (!user) return; // RLS requires user_id
     await (supabase as any).from('app_event_logs').insert({
       user_id: user.id,
@@ -37,6 +86,15 @@ export async function logError(error: unknown, location?: string, payload?: any)
   try {
     const meta = getMeta();
     const { data: { user } } = await supabase.auth.getUser();
+    
+    // Add error to context buffer
+    addToContextBuffer({
+      timestamp: Date.now(),
+      type: 'error',
+      route: meta.route,
+      data: { message: (error as any)?.message || String(error) }
+    });
+    
     if (!user) return; // RLS requires user_id
     const err = error as any;
     await (supabase as any).from('app_error_logs').insert({
@@ -48,6 +106,47 @@ export async function logError(error: unknown, location?: string, payload?: any)
     });
   } catch (e) {
     console.warn('logError failed', e);
+  }
+}
+
+export async function logBugReport(
+  description: string,
+  whatHappened: string,
+  reproductionSteps: string,
+  severity: 'blocking' | 'hindering' | 'cosmetic'
+) {
+  try {
+    const meta = getMeta();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+    
+    const userJourney = getRecentUserJourney();
+    const sessionContext = {
+      currentRoute: meta.route,
+      device: meta.device,
+      platform: meta.platform,
+      timestamp: Date.now(),
+      userAgent: navigator?.userAgent || 'unknown'
+    };
+    
+    const { data, error } = await (supabase as any).from('app_error_logs').insert({
+      user_id: user.id,
+      message: `Bug Report: ${description}`,
+      user_description: description,
+      reproduction_steps: reproductionSteps,
+      severity,
+      location: meta.route,
+      source: 'user_report',
+      user_journey: userJourney,
+      session_context: sessionContext,
+      payload: { whatHappened }
+    }).select().single();
+    
+    if (error) throw error;
+    return data;
+  } catch (e) {
+    console.warn('logBugReport failed', e);
+    return null;
   }
 }
 

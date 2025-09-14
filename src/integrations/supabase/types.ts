@@ -163,34 +163,55 @@ export type Database = {
       }
       app_error_logs: {
         Row: {
+          admin_notes: string | null
           created_at: string
           id: string
           location: string | null
           message: string
           payload: Json | null
+          reproduction_steps: string | null
+          session_context: Json | null
+          severity: string | null
           source: string
           stack: string | null
+          status: string | null
+          user_description: string | null
           user_id: string | null
+          user_journey: Json | null
         }
         Insert: {
+          admin_notes?: string | null
           created_at?: string
           id?: string
           location?: string | null
           message: string
           payload?: Json | null
+          reproduction_steps?: string | null
+          session_context?: Json | null
+          severity?: string | null
           source?: string
           stack?: string | null
+          status?: string | null
+          user_description?: string | null
           user_id?: string | null
+          user_journey?: Json | null
         }
         Update: {
+          admin_notes?: string | null
           created_at?: string
           id?: string
           location?: string | null
           message?: string
           payload?: Json | null
+          reproduction_steps?: string | null
+          session_context?: Json | null
+          severity?: string | null
           source?: string
           stack?: string | null
+          status?: string | null
+          user_description?: string | null
           user_id?: string | null
+          user_journey?: Json | null
         }
         Relationships: []
       }

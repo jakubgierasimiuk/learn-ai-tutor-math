@@ -2,11 +2,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useRoles } from "@/hooks/useRoles";
-import { Brain, BookOpen, MessageCircle, LogOut, Upload, TrendingUp, Database, Clock, Settings, Crown } from "lucide-react";
+import { Brain, BookOpen, MessageCircle, LogOut, Upload, TrendingUp, Database, Clock, Settings, Crown, Bug } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { logEvent } from "@/lib/logger";
 import { useTokenUsage } from "@/hooks/useTokenUsage";
+import { BugReportModal } from "@/components/BugReportModal";
 import mentavoLogoFull from "@/assets/mentavo-logo-full.png";
 import mentavoLogoIcon from "@/assets/mentavo-logo-icon.png";
 export const Navigation = () => {
@@ -16,6 +17,7 @@ export const Navigation = () => {
   } = useAuth();
   const { isAdmin } = useRoles();
   const [isOpen, setIsOpen] = useState(false);
+  const [isBugReportOpen, setIsBugReportOpen] = useState(false);
   const location = useLocation();
   const {
     subscription,
@@ -75,6 +77,19 @@ export const Navigation = () => {
 
               {/* User Info & Logout */}
               <div className="hidden md:flex items-center gap-4">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => {
+                    setIsBugReportOpen(true);
+                    logEvent('bug_report_opened', { source: 'desktop_nav' });
+                  }}
+                  className="flex items-center gap-2 text-muted-foreground hover:text-orange-500"
+                  title="Zgłoś problem"
+                >
+                  <Bug className="w-4 h-4" />
+                  Zgłoś problem
+                </Button>
                 <span className="text-sm text-muted-foreground">
                   {user?.email}
                 </span>
@@ -145,6 +160,18 @@ export const Navigation = () => {
                   </Link>
                 </div>
                 <div className="flex flex-col gap-2 pt-4 border-t border-border">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full flex items-center gap-2 text-muted-foreground hover:text-orange-500" 
+                    onClick={() => {
+                      setIsBugReportOpen(true);
+                      setIsOpen(false);
+                      logEvent('bug_report_opened', { source: 'mobile_nav' });
+                    }}
+                  >
+                    <Bug className="w-4 h-4" />
+                    Zgłoś problem
+                  </Button>
                   <span className="text-sm text-muted-foreground px-2">
                     {user?.email}
                   </span>
@@ -176,5 +203,13 @@ export const Navigation = () => {
               </div>}
             </div>}
       </div>
+      
+      {/* Bug Report Modal */}
+      {user && (
+        <BugReportModal 
+          open={isBugReportOpen} 
+          onOpenChange={setIsBugReportOpen} 
+        />
+      )}
     </nav>;
 };
