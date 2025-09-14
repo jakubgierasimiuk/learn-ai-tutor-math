@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
-import { AlertCircle, CheckCircle, Clock, HelpCircle, Lightbulb, Send, Bot, User } from "lucide-react";
+import { AlertCircle, CheckCircle, Clock, HelpCircle, Lightbulb, Send, Bot, User, Crown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { PhaseProgress } from "./PhaseProgress";
 import { useMathSymbols } from "@/hooks/useMathSymbols";
 import MathSymbolPanel from "@/components/MathSymbolPanel";
+import { useTokenUsage } from "@/hooks/useTokenUsage";
 interface PhaseData {
   id: string;
   phase_number: number;
@@ -64,16 +65,10 @@ export function PhaseBasedLesson({
   const [isFirstInteraction, setIsFirstInteraction] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState("");
   const [loadingStep, setLoadingStep] = useState(0);
-  const {
-    toast
-  } = useToast();
-  const {
-    user
-  } = useAuth();
-  const {
-    quickSymbols,
-    getSymbolsForText
-  } = useMathSymbols(skillId);
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const { quickSymbols, getSymbolsForText } = useMathSymbols(skillId);
+  const { shouldShowSoftPaywall } = useTokenUsage();
   const chatScrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     loadSkillData();
@@ -210,11 +205,23 @@ export function PhaseBasedLesson({
     try {
       // Initialize chat with resume context if available
       const initialMessage = resumeContext?.summary ? `Witaj ponownie! Kontynuujemy naukę. Oto krótkie podsumowanie Twojego postępu:\n\n${resumeContext.summary}\n\nMożesz kontynuować naukę, zadać pytanie o wcześniejszy materiał, lub poprosić o powtórzenie trudniejszych fragmentów.` : 'Witaj! Jestem Mentavo AI. Napisz "Rozpocznij lekcję" aby zacząć naukę tej umiejętności.';
-      setChatHistory([{
+      
+      const initialHistory = [{
         role: 'assistant',
         content: initialMessage,
         timestamp: new Date().toISOString()
-      }]);
+      }];
+
+      // Add token exhaustion message if needed
+      if (shouldShowSoftPaywall()) {
+        initialHistory.push({
+          role: 'assistant',
+          content: '⚠️ Twój darmowy okres się skończył. Aby kontynuować naukę, ulepsz swój plan do wersji Premium i odblokuj nieograniczony dostęp do zaawansowanych funkcji nauki.',
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      setChatHistory(initialHistory);
     } catch (error) {
       console.error('Error loading chat history:', error);
     }
@@ -611,23 +618,68 @@ export function PhaseBasedLesson({
           <div className="mb-3">
             <MathSymbolPanel quickSymbols={contextualSymbols.length > 0 ? contextualSymbols : quickSymbols} onSymbolSelect={handleSymbolSelect} />
           </div>
-          <div className="flex items-end gap-3 p-4 bg-muted/30 border border-border/50 rounded-2xl">
-            <Input type="text" value={userInput} onChange={e => setUserInput(e.target.value)} placeholder={chatHistory.length === 0 ? "Napisz 'Rozpocznij lekcję' aby zacząć..." : "Wpisz swoją odpowiedź..."} className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60" onKeyDown={e => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              sendMessage();
-            }
-          }} />
-            
-            {chatHistory.length === 0 ? <Button onClick={() => {
-            setUserInput('Rozpocznij lekcję');
-            setTimeout(() => sendMessage(), 100);
-          }} disabled={isLoading} size="sm" className="h-10 px-4 rounded-xl">
-                {isLoading ? 'Rozpoczynam...' : 'Rozpocznij'}
-              </Button> : <Button onClick={sendMessage} disabled={!userInput.trim() || isLoading} size="sm" className="h-10 w-10 p-0 rounded-xl">
-                {isLoading ? <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <Send className="w-4 h-4" />}
-              </Button>}
-          </div>
+          
+          {shouldShowSoftPaywall() ? (
+            // Token exhausted - show upgrade banner
+            <div className="p-4 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-2xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                    <Crown className="w-4 h-4 text-orange-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-orange-800">
+                      Okres darmowy zakończony
+                    </p>
+                    <p className="text-sm text-orange-600">
+                      Ulepsz plan, aby kontynuować rozmowę w Study & Learn
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={async () => {
+                    try {
+                      const { data, error } = await supabase.functions.invoke('create-checkout', {
+                        body: { plan: 'paid' }
+                      });
+                      if (error) throw error;
+                      if (data?.url) {
+                        window.location.href = data.url;
+                      }
+                    } catch (error) {
+                      toast({
+                        title: "Błąd",
+                        description: "Nie udało się rozpocząć procesu upgrade'u",
+                        variant: "destructive"
+                      });
+                    }
+                  }}
+                  size="sm"
+                >
+                  <Crown className="w-4 h-4 mr-2" />
+                  Ulepsz plan
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-end gap-3 p-4 bg-muted/30 border border-border/50 rounded-2xl">
+              <Input type="text" value={userInput} onChange={e => setUserInput(e.target.value)} placeholder={chatHistory.length === 0 ? "Napisz 'Rozpocznij lekcję' aby zacząć..." : "Wpisz swoją odpowiedź..."} className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60" onKeyDown={e => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }} />
+              
+              {chatHistory.length === 0 ? <Button onClick={() => {
+              setUserInput('Rozpocznij lekcję');
+              setTimeout(() => sendMessage(), 100);
+            }} disabled={isLoading} size="sm" className="h-10 px-4 rounded-xl">
+                  {isLoading ? 'Rozpoczynam...' : 'Rozpocznij'}
+                </Button> : <Button onClick={sendMessage} disabled={!userInput.trim() || isLoading} size="sm" className="h-10 w-10 p-0 rounded-xl">
+                  {isLoading ? <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <Send className="w-4 h-4" />}
+                </Button>}
+            </div>
+          )}
           
           <div className="flex items-center justify-between pt-3 px-1">
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
