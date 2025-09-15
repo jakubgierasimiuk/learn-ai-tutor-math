@@ -824,6 +824,63 @@ export type Database = {
         }
         Relationships: []
       }
+      founding_members: {
+        Row: {
+          bonus_days_earned: number | null
+          created_at: string
+          device_info: Json | null
+          email: string
+          founding_position: number | null
+          id: string
+          name: string | null
+          phone: string | null
+          referral_code: string | null
+          referred_by: string | null
+          registration_ip: unknown | null
+          registration_source: string | null
+          status: string | null
+          updated_at: string
+          user_id: string
+          utm_params: Json | null
+        }
+        Insert: {
+          bonus_days_earned?: number | null
+          created_at?: string
+          device_info?: Json | null
+          email: string
+          founding_position?: number | null
+          id?: string
+          name?: string | null
+          phone?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
+          registration_ip?: unknown | null
+          registration_source?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+          utm_params?: Json | null
+        }
+        Update: {
+          bonus_days_earned?: number | null
+          created_at?: string
+          device_info?: Json | null
+          email?: string
+          founding_position?: number | null
+          id?: string
+          name?: string | null
+          phone?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
+          registration_ip?: unknown | null
+          registration_source?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+          utm_params?: Json | null
+        }
+        Relationships: []
+      }
       fraud_signals: {
         Row: {
           created_at: string
@@ -3844,6 +3901,10 @@ export type Database = {
           survey_type: string
           title: string
         }[]
+      }
+      get_founding_members_count: {
+        Args: Record<PropertyKey, never>
+        Returns: number
       }
       get_learning_analytics: {
         Args: { target_user_id?: string }

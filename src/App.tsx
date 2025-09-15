@@ -43,6 +43,7 @@ import { ViralLoopProvider } from "@/components/viral/ViralLoopProvider";
 import { ViralPopups } from "@/components/viral/ViralPopups";
 import { SMSTriggerManager } from "@/components/SMSTriggerManager";
 import { SurveyProvider } from "@/components/SurveyProvider";
+import { FoundingLandingPage } from "@/components/FoundingLandingPage";
 
 const queryClient = new QueryClient();
 
@@ -115,6 +116,7 @@ function RouteSeo() {
     '/ux-audit': { title: 'UX Audyt – Raport', description: 'Wyniki audytu UX i priorytety działań.' },
     '/study': { title: 'Panel nauki – mentavo.ai', description: 'Twoje umiejętności i ścieżka nauki.' },
     '/ai-logs': { title: 'Logi AI – Rejestr konwersacji', description: 'Szczegółowe logi wszystkich interakcji z AI.' },
+    '/founding': { title: 'Dołącz do Founding 100 – Mentavo AI', description: 'Wyjątkowa grupa uczniów i rodziców, którzy jako pierwsi testują Mentavo AI i tworzą przyszłość nauki matematyki. Darmowy miesiąc Premium!' },
   };
   if (path === '/' || path.startsWith('/postepy')) return null;
   const match = Object.entries(map).find(([k]) => path === k || path.startsWith(k + '/'))?.[1];
@@ -154,6 +156,7 @@ const App = () => (
           <RouteSeo />
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/founding" element={<FoundingLandingPage />} />
             <Route path="/auth" element={<AuthPage />} />
             
             {/* Onboarding routes - accessible to authenticated users */}
