@@ -881,6 +881,36 @@ export type Database = {
         }
         Relationships: []
       }
+      founding_scarcity_state: {
+        Row: {
+          created_at: string
+          hourly_decrease_rate: number
+          id: string
+          last_update: string
+          peak_hours_config: Json
+          updated_at: string
+          virtual_spots_taken: number
+        }
+        Insert: {
+          created_at?: string
+          hourly_decrease_rate?: number
+          id?: string
+          last_update?: string
+          peak_hours_config?: Json
+          updated_at?: string
+          virtual_spots_taken?: number
+        }
+        Update: {
+          created_at?: string
+          hourly_decrease_rate?: number
+          id?: string
+          last_update?: string
+          peak_hours_config?: Json
+          updated_at?: string
+          virtual_spots_taken?: number
+        }
+        Relationships: []
+      }
       fraud_signals: {
         Row: {
           created_at: string
@@ -3955,6 +3985,10 @@ export type Database = {
       }
       get_user_total_token_usage: {
         Args: { target_user_id: string }
+        Returns: number
+      }
+      get_virtual_spots_left: {
+        Args: Record<PropertyKey, never>
         Returns: number
       }
       get_weekly_benchmarks: {

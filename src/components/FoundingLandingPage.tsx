@@ -11,18 +11,36 @@ export function FoundingLandingPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [membersCount, setMembersCount] = useState<number>(0);
+  const [spotsLeft, setSpotsLeft] = useState<number>(100);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Fetch current members count
-    const fetchMembersCount = async () => {
-      const { data, error } = await supabase.rpc('get_founding_members_count');
-      if (data && !error) {
-        setMembersCount(data);
+    const fetchStats = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('founding-registration', {
+          method: 'GET'
+        });
+
+        if (error) {
+          console.error('Error fetching stats:', error);
+          return;
+        }
+
+        if (data) {
+          setMembersCount(data.totalMembers || 0);
+          setSpotsLeft(data.slotsLeft || 0);
+        }
+      } catch (error) {
+        console.error('Error:', error);
       }
     };
+
+    fetchStats();
     
-    fetchMembersCount();
+    // Poll for updates every 30 seconds for real-time scarcity
+    const interval = setInterval(fetchStats, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const handleJoinNow = async () => {
@@ -35,10 +53,10 @@ export function FoundingLandingPage() {
       return;
     }
 
-    if (membersCount >= 100) {
+    if (spotsLeft <= 0) {
       toast({
         title: "Brak miejsc",
-        description: "Niestety, wszystkie 100 miejsc zostało już zajętych",
+        description: "Niestety, wszystkie miejsca zostały już zajęte",
         variant: "destructive"
       });
       return;
@@ -47,34 +65,37 @@ export function FoundingLandingPage() {
     setIsLoading(true);
     
     try {
-      const { error } = await supabase.from('founding_members').insert({
-        user_id: user.id,
-        email: user.email || '',
-        registration_source: 'landing_page',
-        device_info: {
-          userAgent: navigator.userAgent,
-          screenWidth: window.screen.width,
-          screenHeight: window.screen.height
+      const { data, error } = await supabase.functions.invoke('founding-registration', {
+        body: {
+          email: user.email || '',
+          name: user.user_metadata?.name || '',
+          deviceInfo: {
+            userAgent: navigator.userAgent,
+            screenWidth: window.screen.width,
+            screenHeight: window.screen.height
+          }
         }
       });
 
       if (error) {
-        if (error.code === '23505') { // Unique constraint violation
-          toast({
-            title: "Już jesteś w programie!",
-            description: "Jesteś już członkiem Founding 100",
-            variant: "default"
-          });
-        } else {
-          throw error;
-        }
-      } else {
+        throw error;
+      }
+
+      if (data?.success) {
         toast({
           title: "Gratulacje! 🎉",
           description: "Dołączyłeś do Founding 100! Sprawdź swoją skrzynkę mailową.",
         });
-        // Refresh count
-        setMembersCount(prev => prev + 1);
+        setMembersCount(data.totalMembers || 0);
+        setSpotsLeft(data.slotsLeft || 0);
+      } else if (data?.code === 'ALREADY_REGISTERED') {
+        toast({
+          title: "Już jesteś w programie!",
+          description: "Jesteś już członkiem Founding 100",
+          variant: "default"
+        });
+      } else {
+        throw new Error(data?.error || 'Registration failed');
       }
     } catch (error) {
       console.error('Error joining Founding 100:', error);
@@ -88,7 +109,40 @@ export function FoundingLandingPage() {
     }
   };
 
-  const spotsLeft = Math.max(0, 100 - membersCount);
+  // Get dynamic messaging based on spots left
+  const getUrgencyMessage = () => {
+    if (spotsLeft > 3) {
+      return (
+        <div className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-200 rounded-xl p-4">
+          <div className="flex items-center justify-center gap-2 text-orange-600 font-semibold animate-pulse">
+            <Flame className="w-5 h-5" />
+            <span>🔥 Zostało tylko {spotsLeft} miejsc!</span>
+            <Flame className="w-5 h-5" />
+          </div>
+        </div>
+      );
+    } else if (spotsLeft === 3) {
+      return (
+        <div className="relative">
+          <div className="animate-bounce bg-yellow-500/20 border border-yellow-500 rounded-xl p-4">
+            <div className="flex items-center justify-center gap-2 text-lg font-bold text-yellow-600 animate-pulse">
+              <span className="text-2xl">⚠️</span>
+              <span>OSTATNIE 3 MIEJSCA!</span>
+              <span className="text-2xl">⚠️</span>
+            </div>
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="bg-muted/50 border border-border rounded-xl p-4">
+          <p className="text-lg text-muted-foreground text-center">
+            Darmowe miejsca się wyczerpały, ale możesz zapisać się za darmo na Free Trial
+          </p>
+        </div>
+      );
+    }
+  };
 
   return (
     <>
@@ -137,13 +191,8 @@ export function FoundingLandingPage() {
               i tworzą przyszłość nauki matematyki.
             </p>
 
-            {/* Urgency Counter */}
-            <div className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-200 rounded-xl p-4">
-              <div className="flex items-center justify-center gap-2 text-orange-600 font-semibold">
-                <Flame className="w-5 h-5" />
-                <span>Zostało tylko {spotsLeft} miejsc!</span>
-              </div>
-            </div>
+            {/* Dynamic Urgency Message */}
+            {getUrgencyMessage()}
           </div>
         </section>
 
@@ -210,12 +259,22 @@ export function FoundingLandingPage() {
             <Button 
               onClick={handleJoinNow}
               disabled={isLoading || spotsLeft === 0}
-              className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white rounded-xl shadow-lg disabled:opacity-50"
+              className={`w-full h-14 text-lg font-semibold rounded-xl shadow-lg disabled:opacity-50 transition-all duration-300 ${
+                spotsLeft === 3 
+                  ? "h-16 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white animate-pulse" 
+                  : spotsLeft < 3
+                  ? "bg-muted hover:bg-muted/80 text-muted-foreground"
+                  : "bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white"
+              }`}
             >
               {isLoading ? (
                 "Dołączam..."
               ) : spotsLeft === 0 ? (
                 "Brak miejsc"
+              ) : spotsLeft < 3 ? (
+                "Zapisz się na Free Trial"
+              ) : spotsLeft === 3 ? (
+                "DOŁĄCZ TERAZ - OSTATNIE MIEJSCA!"
               ) : (
                 "Dołącz teraz"
               )}

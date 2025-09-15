@@ -54,22 +54,26 @@ Deno.serve(async (req) => {
     if (req.method === 'POST') {
       const body: FoundingRegistrationRequest = await req.json();
       
-      // Check current count
-      const { data: currentCount, error: countError } = await supabase
-        .rpc('get_founding_members_count');
+      // Check virtual spots left using new function
+      const { data: spotsLeft, error: spotsError } = await supabase
+        .rpc('get_virtual_spots_left');
 
-      if (countError) {
-        console.error('Error getting count:', countError);
+      if (spotsError) {
+        console.error('Error getting virtual spots left:', spotsError);
         return new Response(
           JSON.stringify({ error: 'Failed to check availability' }),
           { status: 500, headers: corsHeaders }
         );
       }
 
-      if (currentCount >= 100) {
+      if (spotsLeft <= 0) {
         return new Response(
-          JSON.stringify({ error: 'Program is full', slotsLeft: 0 }),
-          { status: 400, headers: corsHeaders }
+          JSON.stringify({ 
+            error: 'Program is full', 
+            slotsLeft: 0,
+            message: 'All founding member spots have been taken'
+          }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
@@ -135,14 +139,15 @@ Deno.serve(async (req) => {
           .eq('user_id', referredBy);
       }
 
-      // Get updated count
+      // Get updated stats using virtual scarcity
       const { data: newCount } = await supabase.rpc('get_founding_members_count');
+      const { data: newSpotsLeft } = await supabase.rpc('get_virtual_spots_left');
 
       return new Response(
         JSON.stringify({
           success: true,
           foundingPosition: foundingMember.founding_position,
-          slotsLeft: Math.max(0, 100 - (newCount || 0)),
+          slotsLeft: newSpotsLeft || 0,
           totalMembers: newCount || 0
         }),
         { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -150,14 +155,15 @@ Deno.serve(async (req) => {
     }
 
     if (req.method === 'GET') {
-      // Get current stats
+      // Get current stats using virtual scarcity
       const { data: count } = await supabase.rpc('get_founding_members_count');
+      const { data: spotsLeft } = await supabase.rpc('get_virtual_spots_left');
       
       return new Response(
         JSON.stringify({
           totalMembers: count || 0,
-          slotsLeft: Math.max(0, 100 - (count || 0)),
-          isOpen: (count || 0) < 100
+          slotsLeft: spotsLeft || 0,
+          isOpen: (spotsLeft || 0) > 0
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
