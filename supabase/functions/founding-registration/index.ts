@@ -30,7 +30,24 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get auth user
+    // Handle GET request - return current stats (public access)
+    if (req.method === 'GET') {
+      // Get current stats using virtual scarcity
+      const { data: count } = await supabase.rpc('get_founding_members_count');
+      const { data: spotsLeft } = await supabase.rpc('get_virtual_spots_left');
+      
+      return new Response(
+        JSON.stringify({
+          success: true,
+          totalMembers: count || 0,
+          slotsLeft: spotsLeft || 0,
+          isOpen: (spotsLeft || 0) > 0
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // For POST requests, require authentication
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response(
@@ -151,21 +168,6 @@ Deno.serve(async (req) => {
           totalMembers: newCount || 0
         }),
         { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    if (req.method === 'GET') {
-      // Get current stats using virtual scarcity
-      const { data: count } = await supabase.rpc('get_founding_members_count');
-      const { data: spotsLeft } = await supabase.rpc('get_virtual_spots_left');
-      
-      return new Response(
-        JSON.stringify({
-          totalMembers: count || 0,
-          slotsLeft: spotsLeft || 0,
-          isOpen: (spotsLeft || 0) > 0
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
