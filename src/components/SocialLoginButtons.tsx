@@ -2,7 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { FaGoogle, FaFacebook, FaApple } from "react-icons/fa";
+import { FaGoogle, FaFacebook } from "react-icons/fa";
 
 interface SocialLoginButtonsProps {
   loading: boolean;
@@ -12,7 +12,7 @@ interface SocialLoginButtonsProps {
 export const SocialLoginButtons = ({ loading, setLoading }: SocialLoginButtonsProps) => {
   const { toast } = useToast();
 
-  const handleSocialLogin = async (provider: 'google' | 'facebook' | 'apple') => {
+  const handleSocialLogin = async (provider: 'google' | 'facebook') => {
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -60,16 +60,6 @@ export const SocialLoginButtons = ({ loading, setLoading }: SocialLoginButtonsPr
       >
         <FaFacebook className="w-5 h-5 mr-3" />
         {loading ? "Logowanie..." : "Kontynuuj z Facebook"}
-      </Button>
-      
-      <Button
-        onClick={() => handleSocialLogin('apple')}
-        disabled={loading}
-        variant="outline"
-        className="w-full h-12 text-base font-medium bg-black hover:bg-gray-900 border-0 text-white"
-      >
-        <FaApple className="w-5 h-5 mr-3" />
-        {loading ? "Logowanie..." : "Kontynuuj z Apple"}
       </Button>
     </div>
   );
