@@ -116,7 +116,7 @@ function RouteSeo() {
     '/ux-audit': { title: 'UX Audyt – Raport', description: 'Wyniki audytu UX i priorytety działań.' },
     '/study': { title: 'Panel nauki – mentavo.ai', description: 'Twoje umiejętności i ścieżka nauki.' },
     '/ai-logs': { title: 'Logi AI – Rejestr konwersacji', description: 'Szczegółowe logi wszystkich interakcji z AI.' },
-    '/founding': { title: 'Dołącz do Founding 100 – Mentavo AI', description: 'Wyjątkowa grupa uczniów i rodziców, którzy jako pierwsi testują Mentavo AI i tworzą przyszłość nauki matematyki. Darmowy miesiąc Premium!' },
+    '/founding': { title: 'Dołącz do Founding 100 – Mentavo AI', description: 'Dołącz do pierwszych 100 użytkowników Mentavo AI i otrzymaj darmowy miesiąc Premium.' },
   };
   if (path === '/' || path.startsWith('/postepy')) return null;
   const match = Object.entries(map).find(([k]) => path === k || path.startsWith(k + '/'))?.[1];

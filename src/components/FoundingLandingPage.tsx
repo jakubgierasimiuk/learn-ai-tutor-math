@@ -148,7 +148,7 @@ export function FoundingLandingPage() {
     <>
       <Seo 
         title="Dołącz do Founding 100 - Mentavo AI"
-        description="Wyjątkowa grupa uczniów i rodziców, którzy jako pierwsi testują Mentavo AI i tworzą przyszłość nauki matematyki. Darmowy miesiąc Premium!"
+        description="Dołącz do pierwszych 100 użytkowników Mentavo AI i otrzymaj darmowy miesiąc Premium."
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "SpecialOffer",
@@ -187,8 +187,7 @@ export function FoundingLandingPage() {
             </h1>
             
             <p className="text-lg text-muted-foreground max-w-md mx-auto leading-relaxed">
-              Wyjątkowa grupa uczniów i rodziców, którzy jako pierwsi testują Mentavo AI 
-              i tworzą przyszłość nauki matematyki.
+              Dołącz do pierwszych 100 użytkowników Mentavo AI i otrzymaj darmowy miesiąc Premium.
             </p>
 
             {/* Dynamic Urgency Message */}
