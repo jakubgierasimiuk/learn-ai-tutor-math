@@ -119,7 +119,7 @@ export const useReferralV2 = () => {
     mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke('create-referral-code');
       if (error) throw error;
-      return data.referral_code;
+      return data.code; // FIX: Changed from data.referral_code to data.code
     },
     onSuccess: (code) => {
       setReferralCode(code);
