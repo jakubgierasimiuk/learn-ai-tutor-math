@@ -318,7 +318,7 @@ export function PhaseBasedLesson({
       });
       if (error) throw error;
       const aiResponse = data.message || 'Przepraszam, wystąpił problem z odpowiedzią.';
-      const isCorrect = data.isCorrect || data.correctAnswer || aiResponse.includes('Poprawnie');
+      const isCorrect = Boolean(data.isCorrect);
 
       // Add both user message and AI response at once to prevent double renders
       setChatHistory(prev => [...prev, 

@@ -16,7 +16,10 @@ export const TokenUsageProgress = () => {
   // Show for free and expired tier users, hide for paid
   if (loading || !subscription || subscription.subscription_type === 'paid') return null;
 
-  const tokensUsed = subscription.tokens_used_total;
+  // Use monthly tokens for monthly plans, total tokens for lifetime plans
+  const tokensUsed = subscription.subscription_type === 'limited_free' 
+    ? (subscription.monthly_tokens_used || 0)
+    : subscription.tokens_used_total;
   const hardLimit = subscription.token_limit_hard;
   const percentage = getUsagePercentage();
   const status = getTokenStatus();

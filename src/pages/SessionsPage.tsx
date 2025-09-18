@@ -41,6 +41,7 @@ interface SessionData {
   skill_name?: string;
   department?: string;
   user_id?: string;
+  full_user_id?: string;
   active_chat_minutes?: number;
   total_tokens?: number;
   session_cost?: number;
@@ -236,7 +237,8 @@ const SessionsPage = () => {
           total_tokens: aiLogsMap[session.id]?.totalTokens || session.total_tokens_used || 0,
           session_cost: aiLogsMap[session.id]?.sessionCost || 0,
           has_ai_logs: aiLogsMap[session.id]?.hasAiLogs || false,
-          user_id: session.user_id.substring(0, 8) + '...'
+          user_id: session.user_id.substring(0, 8) + '...',
+          full_user_id: session.user_id // Keep full ID for filtering and history
         })),
         ...(unifiedSessions || []).map(session => ({
           ...session,
@@ -253,7 +255,8 @@ const SessionsPage = () => {
           total_tokens: aiLogsMap[session.id]?.totalTokens || session.total_tokens_used || 0,
           session_cost: aiLogsMap[session.id]?.sessionCost || 0,
           has_ai_logs: aiLogsMap[session.id]?.hasAiLogs || false,
-          user_id: session.user_id.substring(0, 8) + '...'
+          user_id: session.user_id.substring(0, 8) + '...',
+          full_user_id: session.user_id // Keep full ID for filtering and history
         }))
       ];
 
@@ -295,7 +298,7 @@ const SessionsPage = () => {
 
     // User filter (admin only)
     if (isAdmin && userFilter !== 'all') {
-      filtered = filtered.filter(session => session.user_id === userFilter);
+      filtered = filtered.filter(session => session.full_user_id === userFilter);
     }
 
     setFilteredSessions(filtered);
@@ -307,7 +310,7 @@ const SessionsPage = () => {
         .from('learning_interactions')
         .select('user_input, ai_response, interaction_timestamp, sequence_number')
         .eq('session_id', session.id)
-        .eq('user_id', session.user_id)
+        .eq('user_id', session.full_user_id || session.user_id)
         .order('sequence_number', { ascending: true });
 
       if (error) throw error;
