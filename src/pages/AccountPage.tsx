@@ -18,6 +18,7 @@ const AccountPage = () => {
   const { subscription, loading: subscriptionLoading } = useSubscription();
   const { toast } = useToast();
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isUpgrading, setIsUpgrading] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -89,7 +90,7 @@ const AccountPage = () => {
       current_subscription: subscription?.subscription_type 
     });
 
-    setIsChangingPassword(true);
+    setIsUpgrading(true);
     
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
@@ -128,7 +129,7 @@ const AccountPage = () => {
         variant: "destructive",
       });
     } finally {
-      setIsChangingPassword(false);
+      setIsUpgrading(false);
     }
   };
 
@@ -311,12 +312,22 @@ const AccountPage = () => {
                             </ul>
                             <Button 
                               onClick={handleUpgradeClick}
+                              disabled={isUpgrading}
                               className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-primary"
                               size="sm"
                             >
-                              <Crown className="w-4 h-4 mr-2" />
-                              Ulepsz subskrypcję
-                              <ArrowRight className="w-4 h-4 ml-2" />
+                              {isUpgrading ? (
+                                <>
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground mr-2"></div>
+                                  Otwieranie płatności...
+                                </>
+                              ) : (
+                                <>
+                                  <Crown className="w-4 h-4 mr-2" />
+                                  Ulepsz subskrypcję
+                                  <ArrowRight className="w-4 h-4 ml-2" />
+                                </>
+                              )}
                             </Button>
                           </div>
                         </div>
