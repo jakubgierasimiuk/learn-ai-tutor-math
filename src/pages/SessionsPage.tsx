@@ -307,7 +307,7 @@ const SessionsPage = () => {
         .from('learning_interactions')
         .select('user_input, ai_response, interaction_timestamp, sequence_number')
         .eq('session_id', session.id)
-        .eq('user_id', user?.id)
+        .eq('user_id', session.user_id)
         .order('sequence_number', { ascending: true });
 
       if (error) throw error;
@@ -368,9 +368,9 @@ const SessionsPage = () => {
       if (session.session_type === 'chat') {
         navigate('/chat');
       } else if (session.skill_id) {
-        navigate(`/study-lesson/${session.skill_id}`);
+        navigate(`/study/lesson/${session.skill_id}`);
       } else {
-        navigate('/real-learning');
+        navigate('/dashboard');
       }
     } catch (error) {
       console.error('Error resuming session:', error);

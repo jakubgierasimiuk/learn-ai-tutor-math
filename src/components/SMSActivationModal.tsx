@@ -37,7 +37,7 @@ export const SMSActivationModal: React.FC<SMSActivationModalProps> = ({
   const context = getPersonalizedSMSContext();
 
   useEffect(() => {
-    if (isOpen && context.urgencyLevel === 'high' || context.urgencyLevel === 'critical') {
+    if (isOpen && (context.urgencyLevel === 'high' || context.urgencyLevel === 'critical')) {
       const timer = setInterval(() => {
         setCountdown(prev => Math.max(0, prev - 1));
       }, 1000);

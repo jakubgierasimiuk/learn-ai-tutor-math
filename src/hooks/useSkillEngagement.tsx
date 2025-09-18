@@ -93,32 +93,32 @@ export const useAllSkillsEngagement = () => {
 
         console.log('Fetching engagement data for user:', user.id);
 
-        // Single optimized query to get all user sessions with their interactions
-        const { data: sessionsWithInteractions, error: queryError } = await supabase
+        // Get all user sessions first
+        const { data: sessions, error: sessionError } = await supabase
           .from('study_sessions')
-          .select(`
-            id,
-            skill_id,
-            started_at,
-            completed_at,
-            learning_interactions (
-              id,
-              interaction_timestamp,
-              total_tokens,
-              engagement_score
-            )
-          `)
+          .select('id, skill_id, started_at, completed_at')
           .eq('user_id', user.id);
 
-        if (queryError) throw queryError;
+        if (sessionError) throw sessionError;
 
-        console.log('Fetched sessions with interactions:', sessionsWithInteractions?.length || 0);
+        // Get all learning interactions for these sessions
+        const sessionIds = sessions?.map(s => s.id) || [];
+        const { data: interactions, error: interactionError } = sessionIds.length > 0 ? await supabase
+          .from('learning_interactions')
+          .select('id, session_id, interaction_timestamp, total_tokens, engagement_score')
+          .in('session_id', sessionIds) : { data: [], error: null };
+
+        if (interactionError) throw interactionError;
+
+        console.log('Fetched sessions:', sessions?.length || 0);
+        console.log('Fetched interactions:', interactions?.length || 0);
 
         // Group by skill_id and calculate engagement metrics
         const skillEngagementMap: SkillEngagementData = {};
 
-        if (sessionsWithInteractions && sessionsWithInteractions.length > 0) {
-          const skillGroups = sessionsWithInteractions.reduce((acc, session) => {
+        if (sessions && sessions.length > 0) {
+          const skillGroups = sessions.reduce((acc, session) => {
+            if (!session.skill_id) return acc;
             if (!acc[session.skill_id]) {
               acc[session.skill_id] = [];
             }
@@ -127,8 +127,9 @@ export const useAllSkillsEngagement = () => {
           }, {} as Record<string, any[]>);
 
           // Calculate engagement for each skill
-          Object.entries(skillGroups).forEach(([skillId, sessions]) => {
-            const allInteractions = sessions.flatMap(s => s.learning_interactions || []);
+          Object.entries(skillGroups).forEach(([skillId, skillSessions]) => {
+            const sessionIds = skillSessions.map(s => s.id);
+            const allInteractions = interactions?.filter(i => sessionIds.includes(i.session_id)) || [];
             const interactionCount = allInteractions.length;
             
             const totalTimeMinutes = sessions.reduce((total, session) => {

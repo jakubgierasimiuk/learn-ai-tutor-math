@@ -221,25 +221,66 @@ export function PhaseBasedLesson({
   };
   const loadChatHistory = async (sessionId: string) => {
     try {
-      // Initialize chat with resume context if available
-      const initialMessage = resumeContext?.summary ? `Witaj ponownie! Kontynuujemy naukę. Oto krótkie podsumowanie Twojego postępu:\n\n${resumeContext.summary}\n\nMożesz kontynuować naukę, zadać pytanie o wcześniejszy materiał, lub poprosić o powtórzenie trudniejszych fragmentów.` : 'Witaj! Jestem Mentavo AI. Napisz "Rozpocznij lekcję" aby zacząć naukę tej umiejętności.';
+      // Load actual chat history from learning_interactions
+      const { data: interactions, error } = await supabase
+        .from('learning_interactions')
+        .select('user_input, ai_response, interaction_timestamp, sequence_number')
+        .eq('session_id', sessionId)
+        .order('sequence_number', { ascending: true });
+
+      if (error) {
+        console.error('Error loading interactions:', error);
+      }
+
+      const history: any[] = [];
       
-      const initialHistory = [{
-        role: 'assistant',
-        content: initialMessage,
-        timestamp: new Date().toISOString()
-      }];
+      // Add resume context message if available
+      if (resumeContext?.summary) {
+        history.push({
+          role: 'assistant',
+          content: `Witaj ponownie! Kontynuujemy naukę. Oto krótkie podsumowanie Twojego postępu:\n\n${resumeContext.summary}\n\nMożesz kontynuować naukę, zadać pytanie o wcześniejszy materiał, lub poprosić o powtórzenie trudniejszych fragmentów.`,
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      // Add historical interactions
+      if (interactions && interactions.length > 0) {
+        interactions.forEach(interaction => {
+          if (interaction.user_input) {
+            history.push({
+              role: 'user',
+              content: interaction.user_input,
+              timestamp: interaction.interaction_timestamp
+            });
+          }
+          if (interaction.ai_response) {
+            history.push({
+              role: 'assistant',
+              content: interaction.ai_response,
+              timestamp: interaction.interaction_timestamp
+            });
+          }
+        });
+      } else {
+        // Add initial welcome message if no history exists
+        const initialMessage = 'Witaj! Jestem Mentavo AI. Napisz "Rozpocznij lekcję" aby zacząć naukę tej umiejętności.';
+        history.push({
+          role: 'assistant',
+          content: initialMessage,
+          timestamp: new Date().toISOString()
+        });
+      }
 
       // Add token exhaustion message if needed
       if (shouldShowSoftPaywall()) {
-        initialHistory.push({
+        history.push({
           role: 'assistant',
           content: '⚠️ Twój darmowy okres się skończył. Aby kontynuować naukę, ulepsz swój plan do wersji Premium i odblokuj nieograniczony dostęp do zaawansowanych funkcji nauki.',
           timestamp: new Date().toISOString()
         });
       }
 
-      setChatHistory(initialHistory);
+      setChatHistory(history);
     } catch (error) {
       console.error('Error loading chat history:', error);
     }

@@ -3,13 +3,44 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle, AlertCircle } from 'lucide-react';
+import { CheckCircle, AlertCircle, Shield } from 'lucide-react';
 import { Seo } from '@/components/Seo';
+import { useAuth } from '@/hooks/useAuth';
+import { useRoles } from '@/hooks/useRoles';
 
 const BatchImportPage = () => {
+  const { user, loading } = useAuth();
+  const { isAdmin, loading: rolesLoading } = useRoles();
   const { toast } = useToast();
   const [importing, setImporting] = useState(false);
   const [results, setResults] = useState<any[]>([]);
+
+  // Security check - only admins can access
+  if (loading || rolesLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!user || !isAdmin) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="max-w-md">
+          <CardHeader className="text-center">
+            <Shield className="w-12 h-12 mx-auto text-destructive mb-4" />
+            <CardTitle>Brak dostępu</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-center text-muted-foreground">
+              Nie masz uprawnień do przeglądania tej strony. Wymagane są uprawnienia administratora.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const importSpecificSkills = async () => {
     setImporting(true);

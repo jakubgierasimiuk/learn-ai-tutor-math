@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useNavigate } from 'react-router-dom';
 import { MessageCircle, Send, Bot, User, Brain, Settings, Crown } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
@@ -22,6 +23,7 @@ interface Message {
   timestamp: Date;
 }
 export const AIChat = () => {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([{
     id: '1',
     content: 'Cześć! Jestem Mentavo AI. Mogę pomóc Ci z matematyką, wytłumaczyć pojęcia i rozwiązać zadania. W czym mogę Ci dzisiaj pomóc?',
@@ -557,8 +559,8 @@ export const AIChat = () => {
     }
   }, [input, getSymbolsForText]);
   const handleSkillSelection = (skillId: string) => {
-    // This would be called when user selects a skill from clarification options
-    console.log('Skill selected:', skillId);
+    // Navigate to the selected skill lesson
+    navigate(`/study/lesson/${skillId}`);
   };
   return <div className="min-h-screen bg-background flex flex-col">
       {/* Fixed Header */}

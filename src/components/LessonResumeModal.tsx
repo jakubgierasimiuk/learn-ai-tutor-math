@@ -83,6 +83,23 @@ export function LessonResumeModal({
       
       // Clear all data for this specific skill
       if (user?.id) {
+        // Get all sessions for this skill to find their IDs
+        const { data: sessions } = await supabase
+          .from('study_sessions')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('skill_id', skillId);
+
+        if (sessions && sessions.length > 0) {
+          const sessionIds = sessions.map(s => s.id);
+          
+          // Delete learning interactions first
+          await supabase
+            .from('learning_interactions')
+            .delete()
+            .in('session_id', sessionIds);
+        }
+
         // Delete study sessions
         await supabase
           .from('study_sessions')
@@ -90,7 +107,6 @@ export function LessonResumeModal({
           .eq('user_id', user.id)
           .eq('skill_id', skillId);
 
-        // Delete learning interactions (will cascade due to foreign keys)
         // Delete skill progress
         await supabase
           .from('skill_progress')

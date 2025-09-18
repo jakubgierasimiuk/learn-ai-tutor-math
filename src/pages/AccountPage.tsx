@@ -137,6 +137,12 @@ const AccountPage = () => {
     switch (type) {
       case 'free':
         return { name: 'Darmowy', color: 'bg-slate-100 text-slate-800' };
+      case 'limited_free':
+        return { name: 'Darmowy (Ograniczony)', color: 'bg-yellow-100 text-yellow-800' };
+      case 'expired':
+        return { name: 'Wygasł', color: 'bg-red-100 text-red-800' };
+      case 'test':
+        return { name: 'Testowy', color: 'bg-orange-100 text-orange-800' };
       case 'paid':
         return { name: 'Płatny', color: 'bg-blue-100 text-blue-800' };
       case 'super':
@@ -156,7 +162,9 @@ const AccountPage = () => {
 
   const getTokenLimitDisplay = () => {
     if (!subscription) return 'Ładowanie...';
-    if (subscription.subscription_type === 'free') {
+    
+    const limitedTypes = ['free', 'limited_free', 'expired', 'test'];
+    if (limitedTypes.includes(subscription.subscription_type)) {
       return subscription.token_limit_hard?.toLocaleString() || '25 000';
     }
     return 'Nieograniczone';
