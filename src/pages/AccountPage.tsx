@@ -74,19 +74,62 @@ const AccountPage = () => {
     }
   };
 
-  const handleUpgradeClick = () => {
+  const handleUpgradeClick = async () => {
+    if (!user) {
+      toast({
+        title: "Błąd",
+        description: "Musisz być zalogowany aby ulepszyć plan",
+        variant: "destructive",
+      });
+      return;
+    }
+
     logEvent('subscription_upgrade_cta_click', { 
       source: 'account_page',
       current_subscription: subscription?.subscription_type 
     });
+
+    setIsChangingPassword(true);
     
-    toast({
-      title: "Przekierowanie do płatności",
-      description: "Wkrótce zostaniesz przekierowany do strony płatności...",
-    });
-    
-    // TODO: Implement actual upgrade flow/redirect to payment page
-    console.log('Upgrade subscription clicked');
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { plan: 'paid' }
+      });
+
+      if (error) {
+        console.error('Checkout error:', error);
+        toast({
+          title: "Błąd",
+          description: "Nie udało się utworzyć sesji płatności",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data?.url) {
+        // Otwórz Stripe Checkout w nowej karcie
+        window.open(data.url, '_blank');
+        toast({
+          title: "Przekierowanie do płatności",
+          description: "Otwarto stronę płatności w nowej karcie",
+        });
+      } else {
+        toast({
+          title: "Błąd",
+          description: "Nie otrzymano URL płatności",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Upgrade error:', error);
+      toast({
+        title: "Błąd",
+        description: "Wystąpił błąd podczas otwierania płatności",
+        variant: "destructive",
+      });
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   const getSubscriptionTypeDisplay = (type: string) => {
