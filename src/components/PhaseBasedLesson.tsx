@@ -73,9 +73,15 @@ export function PhaseBasedLesson({
   useEffect(() => {
     loadSkillData();
   }, [skillId]);
+  // Initialize startTime when chat history changes (new AI message)
   useEffect(() => {
-    setStartTime(Date.now());
-  }, [userInput]);
+    if (chatHistory.length > 0) {
+      const lastMessage = chatHistory[chatHistory.length - 1];
+      if (lastMessage.role === 'assistant') {
+        setStartTime(Date.now());
+      }
+    }
+  }, [chatHistory.length]);
 
   // Auto-scroll to bottom when new messages are added
   useEffect(() => {
@@ -291,7 +297,6 @@ export function PhaseBasedLesson({
       // Update phase progress
       await updatePhaseProgress(isCorrect);
       setUserInput("");
-      setStartTime(Date.now());
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
