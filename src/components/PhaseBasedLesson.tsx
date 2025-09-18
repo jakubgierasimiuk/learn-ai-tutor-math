@@ -139,25 +139,33 @@ export function PhaseBasedLesson({
   };
   const initializeSession = async () => {
     try {
-      // Check for existing active session
+      // Get current user first
+      const {
+        data: userData,
+        error: userError
+      } = await supabase.auth.getUser();
+      if (userError || !userData.user) throw new Error('User not authenticated');
+
+      // Check for existing active session - MUST filter by user_id
       const {
         data: existingSessions,
         error: sessionError
-      } = await supabase.from('study_sessions').select('*').eq('skill_id', skillId).eq('status', 'in_progress').order('started_at', {
-        ascending: false
-      }).limit(1);
+      } = await supabase.from('study_sessions')
+        .select('*')
+        .eq('skill_id', skillId)
+        .eq('user_id', userData.user.id) // SECURITY FIX: Filter by user_id
+        .eq('status', 'in_progress')
+        .order('started_at', { ascending: false })
+        .limit(1);
+        
       if (sessionError) throw sessionError;
+      
       let sessionData;
       if (existingSessions && existingSessions.length > 0) {
         sessionData = existingSessions[0];
         setCurrentPhase(sessionData.current_phase || 1);
       } else {
-        // Create new session - get current user first
-        const {
-          data: userData,
-          error: userError
-        } = await supabase.auth.getUser();
-        if (userError || !userData.user) throw new Error('User not authenticated');
+        // Create new session
         const {
           data: newSession,
           error: createError
@@ -173,11 +181,15 @@ export function PhaseBasedLesson({
       }
       setSession(sessionData);
 
-      // Load phase progress
+      // Load phase progress - MUST filter by user_id
       const {
         data: progressData,
         error: progressError
-      } = await supabase.from('learning_phase_progress').select('*').eq('skill_id', skillId);
+      } = await supabase.from('learning_phase_progress')
+        .select('*')
+        .eq('skill_id', skillId)
+        .eq('user_id', userData.user.id); // SECURITY FIX: Filter by user_id
+        
       if (progressError) {
         console.error('Error loading phase progress:', progressError);
       } else {
@@ -294,12 +306,19 @@ export function PhaseBasedLesson({
   const updatePhaseProgress = async (isCorrect: boolean) => {
     if (!session) return;
     try {
+      // Get current user for security
+      const {
+        data: userData,
+        error: userError
+      } = await supabase.auth.getUser();
+      if (userError || !userData.user) throw new Error('User not authenticated');
+
       const currentProgress = phaseProgress[currentPhase];
       const newCorrectAttempts = currentProgress?.correct_attempts || 0;
       const newAttemptsCount = (currentProgress?.attempts_count || 0) + 1;
       const newProgressPercentage = Math.min(100, Math.round((newCorrectAttempts + (isCorrect ? 1 : 0)) / newAttemptsCount * 100));
       const updateData = {
-        user_id: session.user_id,
+        user_id: userData.user.id, // SECURITY FIX: Use authenticated user ID
         skill_id: skillId,
         phase_number: currentPhase,
         progress_percentage: newProgressPercentage,
