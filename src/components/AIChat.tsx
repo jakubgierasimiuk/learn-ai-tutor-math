@@ -337,8 +337,7 @@ export const AIChat = () => {
       } = await supabase.functions.invoke('study-tutor', {
         body: {
           message: userInput,
-          skill_id: skill_id,
-          // Use snake_case consistently
+          skillId: skill_id,
           sessionId: sessionId,
           messages: messageHistory,
           enrichedContext: enrichedContext,
