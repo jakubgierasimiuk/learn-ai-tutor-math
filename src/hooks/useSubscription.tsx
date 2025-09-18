@@ -106,16 +106,27 @@ export const useSubscription = () => {
   const getUsagePercentage = () => {
     if (!subscription) return 0;
     
+    // Zabezpieczenie przed dzieleniem przez zero
+    if (!subscription.token_limit_hard || subscription.token_limit_hard <= 0) return 0;
+    
+    let percentage = 0;
+    
     if (subscription.subscription_type === 'paid') {
       // Paid users: percentage of monthly usage
-      return ((subscription.monthly_tokens_used || 0) / subscription.token_limit_hard) * 100;
+      const used = subscription.monthly_tokens_used || 0;
+      percentage = (used / subscription.token_limit_hard) * 100;
     } else if (subscription.subscription_type === 'limited_free') {
       // Limited free: percentage of monthly usage
-      return ((subscription.monthly_tokens_used || 0) / subscription.token_limit_hard) * 100;
+      const used = subscription.monthly_tokens_used || 0;
+      percentage = (used / subscription.token_limit_hard) * 100;
     } else {
       // Free/expired users: percentage of lifetime usage
-      return (subscription.tokens_used_total / subscription.token_limit_hard) * 100;
+      const used = subscription.tokens_used_total || 0;
+      percentage = (used / subscription.token_limit_hard) * 100;
     }
+    
+    // Ograniczenie do zakresu 0-100% i zaokrąglenie
+    return Math.min(100, Math.max(0, Math.round(percentage)));
   };
 
   return {
