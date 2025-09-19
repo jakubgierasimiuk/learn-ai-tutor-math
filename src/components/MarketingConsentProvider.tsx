@@ -62,64 +62,84 @@ export const MarketingConsentProvider: React.FC<MarketingConsentProviderProps> =
   useEffect(() => {
     if (!user || hasGeneralConsent || !isEligibleForReward) return;
 
+    let lessonTimeout: NodeJS.Timeout;
+
     const handleLessonCompleted = async () => {
       const { shouldShow, trigger } = await checkShouldShowModal();
       
       if (shouldShow && trigger === 'first_lesson') {
         setCurrentTrigger(trigger);
-        setTimeout(() => {
+        lessonTimeout = setTimeout(() => {
           setIsModalOpen(true);
         }, 2000); // Longer delay after lesson completion
       }
     };
 
-    // Listen for custom events
-    window.addEventListener('lesson-completed', handleLessonCompleted);
-    window.addEventListener('high-token-usage', () => {
+    const handleHighTokenUsage = () => {
       if (!hasGeneralConsent && isEligibleForReward) {
         setCurrentTrigger('token_warning');
         setIsModalOpen(true);
       }
-    });
+    };
+
+    // Listen for custom events
+    if (typeof window !== 'undefined') {
+      window.addEventListener('lesson-completed', handleLessonCompleted);
+      window.addEventListener('high-token-usage', handleHighTokenUsage);
+    }
 
     return () => {
-      window.removeEventListener('lesson-completed', handleLessonCompleted);
-      window.removeEventListener('high-token-usage', () => {});
+      clearTimeout(lessonTimeout);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('lesson-completed', handleLessonCompleted);
+        window.removeEventListener('high-token-usage', handleHighTokenUsage);
+      }
     };
   }, [user, hasGeneralConsent, isEligibleForReward, checkShouldShowModal]);
 
-  // Check for re-engagement (user returns after inactivity)
+  // Check for re-engagement (user returns after inactivity) - SAFE localStorage access
   useEffect(() => {
-    if (!user || hasGeneralConsent || !isEligibleForReward) return;
+    if (!user || hasGeneralConsent || !isEligibleForReward || typeof window === 'undefined') return;
 
-    const lastVisit = localStorage.getItem(`last-visit-${user.id}`);
-    const now = Date.now();
-    
-    if (lastVisit) {
-      const daysSinceLastVisit = (now - parseInt(lastVisit)) / (1000 * 60 * 60 * 24);
+    let reengagementTimeout: NodeJS.Timeout;
+
+    try {
+      const lastVisit = localStorage.getItem(`last-visit-${user.id}`);
+      const now = Date.now();
       
-      if (daysSinceLastVisit >= 3) {
-        // User returned after 3+ days
-        setTimeout(() => {
-          setCurrentTrigger('reengagement');
-          setIsModalOpen(true);
-        }, 3000); // Show after 3 seconds
+      if (lastVisit) {
+        const daysSinceLastVisit = (now - parseInt(lastVisit)) / (1000 * 60 * 60 * 24);
+        
+        if (daysSinceLastVisit >= 3) {
+          // User returned after 3+ days
+          reengagementTimeout = setTimeout(() => {
+            setCurrentTrigger('reengagement');
+            setIsModalOpen(true);
+          }, 3000); // Show after 3 seconds
+        }
       }
-    }
 
-    // Update last visit timestamp
-    localStorage.setItem(`last-visit-${user.id}`, now.toString());
+      // Update last visit timestamp
+      localStorage.setItem(`last-visit-${user.id}`, now.toString());
+    } catch {
+      // Silent fail - localStorage not available
+    }
 
     // Set up visibility change listener for re-engagement
     const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        localStorage.setItem(`last-visit-${user.id}`, Date.now().toString());
+      if (!document.hidden && typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(`last-visit-${user.id}`, Date.now().toString());
+        } catch {
+          // Silent fail - localStorage not available
+        }
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
+      clearTimeout(reengagementTimeout);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [user, hasGeneralConsent, isEligibleForReward]);

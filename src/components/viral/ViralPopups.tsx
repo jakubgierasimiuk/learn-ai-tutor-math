@@ -34,8 +34,9 @@ export const ViralPopups: React.FC = () => {
   const { getReferralUrl, copyReferralUrl, shareReferralUrl } = useReferralV2();
   const { toast } = useToast();
 
-  // Check user preferences for showing popups
+  // Check user preferences for showing popups - SAFE localStorage access
   const getPopupPreference = (type: string): boolean => {
+    if (typeof window === 'undefined') return true;
     try {
       const prefs = localStorage.getItem('popup-preferences');
       if (!prefs) return true;
@@ -47,13 +48,14 @@ export const ViralPopups: React.FC = () => {
   };
 
   const setPopupPreference = (type: string, show: boolean) => {
+    if (typeof window === 'undefined') return;
     try {
       const prefs = localStorage.getItem('popup-preferences');
       const parsed = prefs ? JSON.parse(prefs) : {};
       parsed[type] = show;
       localStorage.setItem('popup-preferences', JSON.stringify(parsed));
     } catch {
-      // Silent fail
+      // Silent fail - localStorage not available
     }
   };
 
@@ -64,6 +66,9 @@ export const ViralPopups: React.FC = () => {
   };
 
   useEffect(() => {
+    let viralTimeout: NodeJS.Timeout;
+    let socialTimeout: NodeJS.Timeout;
+    
     const handleViralPopup = (event: CustomEvent<ViralPopupEvent>) => {
       const { trigger } = event.detail;
       
@@ -74,8 +79,9 @@ export const ViralPopups: React.FC = () => {
       
       setActivePopup(event.detail);
       
-      // Auto-hide after 10 seconds
-      setTimeout(() => {
+      // Clear existing timeout and set new one
+      clearTimeout(viralTimeout);
+      viralTimeout = setTimeout(() => {
         setActivePopup(null);
       }, 10000);
     };
@@ -90,18 +96,25 @@ export const ViralPopups: React.FC = () => {
       
       setSocialProof(event.detail);
       
-      // Auto-hide after 6 seconds
-      setTimeout(() => {
+      // Clear existing timeout and set new one
+      clearTimeout(socialTimeout);
+      socialTimeout = setTimeout(() => {
         setSocialProof(null);
       }, 6000);
     };
 
-    window.addEventListener('show-viral-popup', handleViralPopup as EventListener);
-    window.addEventListener('show-social-proof', handleSocialProof as EventListener);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('show-viral-popup', handleViralPopup as EventListener);
+      window.addEventListener('show-social-proof', handleSocialProof as EventListener);
+    }
 
     return () => {
-      window.removeEventListener('show-viral-popup', handleViralPopup as EventListener);
-      window.removeEventListener('show-social-proof', handleSocialProof as EventListener);
+      clearTimeout(viralTimeout);
+      clearTimeout(socialTimeout);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('show-viral-popup', handleViralPopup as EventListener);
+        window.removeEventListener('show-social-proof', handleSocialProof as EventListener);
+      }
     };
   }, []);
 

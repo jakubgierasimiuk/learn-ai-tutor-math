@@ -20,15 +20,25 @@ export const ConversionPrompts = ({ context = 'chat', onClose }: ConversionPromp
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [showSavingsCalculator, setShowSavingsCalculator] = useState(false);
 
-  // Check how many times savings calculator was shown
+  // Check how many times savings calculator was shown - SAFE localStorage access
   const getSavingsCalculatorCount = () => {
-    const count = localStorage.getItem('mentavo_savings_shown');
-    return count ? parseInt(count) : 0;
+    if (typeof window === 'undefined') return 0;
+    try {
+      const count = localStorage.getItem('mentavo_savings_shown');
+      return count ? parseInt(count) : 0;
+    } catch {
+      return 0;
+    }
   };
 
   const incrementSavingsCalculatorCount = () => {
-    const currentCount = getSavingsCalculatorCount();
-    localStorage.setItem('mentavo_savings_shown', (currentCount + 1).toString());
+    if (typeof window === 'undefined') return;
+    try {
+      const currentCount = getSavingsCalculatorCount();
+      localStorage.setItem('mentavo_savings_shown', (currentCount + 1).toString());
+    } catch {
+      // Silent fail - localStorage not available
+    }
   };
 
   const handleUpgrade = async () => {

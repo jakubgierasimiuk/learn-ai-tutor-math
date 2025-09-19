@@ -91,8 +91,6 @@ export const useAllSkillsEngagement = () => {
         setLoading(true);
         setError(null);
 
-        console.log('Fetching engagement data for user:', user.id);
-
         // Get all user sessions first
         const { data: sessions, error: sessionError } = await supabase
           .from('study_sessions')
@@ -109,9 +107,6 @@ export const useAllSkillsEngagement = () => {
           .in('session_id', sessionIds) : { data: [], error: null };
 
         if (interactionError) throw interactionError;
-
-        console.log('Fetched sessions:', sessions?.length || 0);
-        console.log('Fetched interactions:', interactions?.length || 0);
 
         // Group by skill_id and calculate engagement metrics
         const skillEngagementMap: SkillEngagementData = {};
@@ -172,7 +167,6 @@ export const useAllSkillsEngagement = () => {
           });
         }
 
-        console.log('Calculated engagement for skills:', Object.keys(skillEngagementMap).length);
         setEngagementData(skillEngagementMap);
 
       } catch (err) {
@@ -199,7 +193,6 @@ export const useAllSkillsEngagement = () => {
 // Keep the individual hook for backwards compatibility but mark as deprecated
 /** @deprecated Use useAllSkillsEngagement instead for better performance */
 export const useSkillEngagement = (skillId: string) => {
-  console.warn('useSkillEngagement is deprecated. Use useAllSkillsEngagement for better performance.');
   
   const { user } = useAuth();
   const [engagementData, setEngagementData] = useState<EngagementData | null>(null);

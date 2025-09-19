@@ -17,39 +17,49 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    let profileTimeout: NodeJS.Timeout;
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        if (!isMounted) return;
+
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
 
         // If arriving from password recovery link, force redirect to the reset form
         if (event === "PASSWORD_RECOVERY") {
-          window.location.replace("/auth?type=recovery");
+          if (typeof window !== 'undefined') {
+            window.location.replace("/auth?type=recovery");
+          }
           return;
         }
 
         // Defer Supabase calls to avoid deadlocks in auth callback
-        if (session?.user) {
-          setTimeout(async () => {
+        if (session?.user && isMounted) {
+          profileTimeout = setTimeout(async () => {
+            if (!isMounted) return;
+            
             try {
               // Ensure user profile exists
               const { data: existingProfile, error: profileErr } = await supabase
                 .from('profiles')
                 .select('user_id')
-                .eq('user_id', session.user!.id)
+                .eq('user_id', session.user.id)
                 .maybeSingle();
 
               if (profileErr) {
                 console.error('Profile check error:', profileErr);
+                return;
               }
 
-              if (!existingProfile) {
+              if (!existingProfile && isMounted) {
                 const { error: insertErr } = await supabase.from('profiles').insert({
-                  user_id: session.user!.id,
-                  email: session.user!.email ?? '',
-                  name: (session.user!.user_metadata as any)?.name || '',
+                  user_id: session.user.id,
+                  email: session.user.email ?? '',
+                  name: session.user.user_metadata?.name || '',
                   level: 1,
                   total_points: 0,
                   diagnosis_completed: false,
@@ -61,19 +71,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             } catch (e) {
               console.error('Error ensuring profile exists:', e);
             }
-          }, 0);
+          }, 100);
         }
       }
     );
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!isMounted) return;
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      clearTimeout(profileTimeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {

@@ -65,12 +65,39 @@ export const useSubscription = () => {
     refreshSubscription();
   }, [user]);
 
-  // Auto-refresh every 30 seconds when user is on the page
+  // Auto-refresh with debouncing - only when user is active and tab is visible
   useEffect(() => {
     if (!user) return;
 
-    const interval = setInterval(refreshSubscription, 30000);
-    return () => clearInterval(interval);
+    let isActive = true;
+    let refreshTimeout: NodeJS.Timeout;
+
+    const debouncedRefresh = () => {
+      clearTimeout(refreshTimeout);
+      refreshTimeout = setTimeout(() => {
+        if (isActive && !document.hidden) {
+          refreshSubscription();
+        }
+      }, 30000);
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden && isActive) {
+        debouncedRefresh();
+      }
+    };
+
+    // Start the debounced refresh cycle
+    debouncedRefresh();
+    
+    // Listen for visibility changes to pause/resume refreshing
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      isActive = false;
+      clearTimeout(refreshTimeout);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [user]);
 
   const hasTokens = () => {

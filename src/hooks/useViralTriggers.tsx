@@ -110,7 +110,7 @@ export const useViralTriggers = (options: ViralTriggerOptions = {}) => {
     }, 300000); // Every 5 minutes (was 1 minute)
 
     return () => clearInterval(interval);
-  }, [enableSocialProof, user]);
+  }, [enableSocialProof, user, triggerTestimonial, triggerLocalStats]);
 
   // FOMO triggers - show periodically (much less aggressive)
   useEffect(() => {
@@ -130,7 +130,7 @@ export const useViralTriggers = (options: ViralTriggerOptions = {}) => {
     }, 600000); // Every 10 minutes (was 2 minutes)
 
     return () => clearInterval(interval);
-  }, [enableSocialProof, user]);
+  }, [enableSocialProof, user, triggerFomo]);
 
   return {
     triggerLessonComplete,
