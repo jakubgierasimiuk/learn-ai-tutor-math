@@ -1987,13 +1987,16 @@ export type Database = {
       }
       page_analytics: {
         Row: {
+          average_load_time_ms: number | null
           average_session_duration_minutes: number | null
           bounce_count: number
           bounce_rate: number | null
           created_at: string
           date: string
+          device_stats: Json | null
           exit_count: number
           id: string
+          platform_stats: Json | null
           route: string
           total_page_views: number
           total_session_duration_minutes: number
@@ -2001,13 +2004,16 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          average_load_time_ms?: number | null
           average_session_duration_minutes?: number | null
           bounce_count?: number
           bounce_rate?: number | null
           created_at?: string
           date: string
+          device_stats?: Json | null
           exit_count?: number
           id?: string
+          platform_stats?: Json | null
           route: string
           total_page_views?: number
           total_session_duration_minutes?: number
@@ -2015,13 +2021,16 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          average_load_time_ms?: number | null
           average_session_duration_minutes?: number | null
           bounce_count?: number
           bounce_rate?: number | null
           created_at?: string
           date?: string
+          device_stats?: Json | null
           exit_count?: number
           id?: string
+          platform_stats?: Json | null
           route?: string
           total_page_views?: number
           total_session_duration_minutes?: number
