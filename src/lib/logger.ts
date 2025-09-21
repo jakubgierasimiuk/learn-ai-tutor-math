@@ -104,14 +104,44 @@ export const trackPageView = (route: string) => {
   sessionData.currentPage = route;
   localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(sessionData));
 
-  // Log page view event
+  // Log page view event (client-side)
   logEvent('page_view', { 
     route, 
     sessionId: sessionData.sessionId,
     timestamp: Date.now(),
     referrer: document.referrer || 'direct'
   });
+
+  // Real-time server-side tracking
+  trackPageViewServerSide(route, sessionData.sessionId);
 };
+
+async function trackPageViewServerSide(route: string, sessionId: string) {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    const trackingData = {
+      route,
+      referrer: document.referrer || 'direct',
+      userAgent: navigator.userAgent,
+      device: getDeviceType(),
+      platform: navigator.platform || 'web',
+      sessionId,
+      timestamp: Date.now(),
+      userId: user?.id,
+      loadTime: performance.now(),
+      screenResolution: `${screen.width}x${screen.height}`,
+      language: navigator.language,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    };
+
+    await supabase.functions.invoke('page-tracker', {
+      body: trackingData
+    });
+  } catch (error) {
+    console.warn('Server-side page tracking failed:', error);
+  }
+}
 
 export const endSession = () => {
   if (typeof window === 'undefined') return;
