@@ -4015,6 +4015,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      is_group_admin: {
+        Args: { _group_id: number; _user_id: string }
+        Returns: boolean
+      }
       migrate_existing_marketing_consents: {
         Args: Record<PropertyKey, never>
         Returns: undefined
