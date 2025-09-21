@@ -256,6 +256,14 @@ const App = () => (
                 <AccountPage />
               </AuthenticatedLayout>
             } />
+            
+            {/* Admin-only routes - require authentication AND admin role */}
+            <Route path="/batch-import" element={
+              <AuthenticatedLayout>
+                <BatchImportPage />
+              </AuthenticatedLayout>
+            } />
+            
             {/* Real Learning Engine - UNDER DEVELOPMENT - DO NOT USE */}
             {/* <Route path="/real-learning" element={
               <AuthenticatedLayout>
@@ -263,7 +271,6 @@ const App = () => (
               </AuthenticatedLayout>
             } /> */}
             
-            <Route path="/batch-import" element={<BatchImportPage />} />
             <Route path="/study/lesson/:skillId" element={
               <AuthenticatedLayout>
                 <StudyLesson />
