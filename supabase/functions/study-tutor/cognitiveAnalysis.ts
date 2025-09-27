@@ -1,9 +1,21 @@
 // Cognitive Analysis and Flow State Management for Universal Learning Engine
 // Implements cognitive science principles from ChatGPT's pedagogical research
 
-import { StudentProfile, FlowStateIndicators, StudentResponsePattern } from './adaptivePedagogy.ts';
+import { StudentProfile, StudentResponsePattern } from './adaptivePedagogy.ts';
 
 // Calculate flow state indicators based on cognitive science principles
+// Define FlowStateIndicators type at the top of cognitiveAnalysis.ts
+interface FlowStateIndicators {
+  engagement: number;
+  frustration: number;
+  cognitiveLoad: number;
+  flow: number;
+  responseTimeVariance: number;
+  perceivedChallenge: number;
+  engagementLevel: number;
+  frustrationLevel: number;
+}
+
 export function calculateFlowState(responseTime: number, profile: StudentProfile): FlowStateIndicators {
   // Response time variance calculation (attention regulation)
   const expectedResponseTime = profile.processingSpeed * 1000; // convert to ms

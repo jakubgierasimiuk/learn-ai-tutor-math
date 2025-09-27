@@ -183,8 +183,9 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Marketing consent reward error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(JSON.stringify({ 
-      error: error.message 
+      error: errorMessage 
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

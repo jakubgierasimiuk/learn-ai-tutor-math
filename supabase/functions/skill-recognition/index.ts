@@ -181,8 +181,8 @@ function calculateSkillRelevance(skill: any, message: string, extractedConcepts:
   const nameWords = skillName.split(' ');
   const messageWords = normalizedMessage.split(' ');
   
-  nameWords.forEach(nameWord => {
-    messageWords.forEach(messageWord => {
+  nameWords.forEach((nameWord: string) => {
+    messageWords.forEach((messageWord: string) => {
       if (nameWord.length > 3 && messageWord.length > 3) {
         const similarity = calculateStringSimilarity(nameWord, messageWord);
         if (similarity > 0.7) {
@@ -450,7 +450,7 @@ FALLBACK: Jeśli brak dopasowania: stage="direct", skill_id=null, confidence=0`;
       'gpt-5-2025-08-07'
     );
     
-    let recognitionResult;
+    let recognitionResult: any = null;
     try {
       recognitionResult = JSON.parse(rawResponse);
       console.log('Parsed recognition result:', recognitionResult);

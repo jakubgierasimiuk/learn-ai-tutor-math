@@ -142,8 +142,8 @@ function classifyResponsePattern(
   profile: StudentProfile
 ): StudentResponsePattern {
   
-  const quickThreshold = Math.max(2000, profile.averageResponseTime * 0.6);
-  const slowThreshold = profile.averageResponseTime * 1.8;
+  const quickThreshold = Math.max(2000, (profile.averageResponseTime || 5000) * 0.6);
+  const slowThreshold = (profile.averageResponseTime || 5000) * 1.8;
   
   // Sprawdź oznaki pozornej aktywności
   if (isPseudoActivity(userAnswer, responseTime, quickThreshold)) {
@@ -319,6 +319,14 @@ function generateTeachingMoment(
 }
 
 /**
+ * Określa czy powinien być pokazany checkpoint w nauce
+ */
+function shouldShowCheckpoint(stepsCompleted: number, consecutiveCorrect: number, timeSpent: number): boolean {
+  // Show checkpoint every 10 steps or after 20 minutes
+  return stepsCompleted > 0 && (stepsCompleted % 10 === 0 || timeSpent > 1200000);
+}
+
+/**
  * Określa czy sesja powinna kontynuować
  */
 function shouldContinueSession(
@@ -413,7 +421,7 @@ function calculateMethodUnderstanding(profile: StudentProfile): number {
 }
 
 function determineSpeedVsAccuracy(profile: StudentProfile): 'speed_focused' | 'accuracy_focused' | 'balanced' {
-  const avgTime = profile.averageResponseTime;
+  const avgTime = profile.averageResponseTime || 15000;
   const accuracy = profile.correctnessRate || 0.5;
   
   if (avgTime < 15000 && accuracy > 0.8) return 'balanced';
@@ -451,7 +459,7 @@ function generateEnhancedTeachingMoment(
 ): TeachingMoment {
   // Use EducationalScaffolding for more sophisticated responses
   let message = mathError.pedagogicalResponse;
-  let nextAction = 'continue';
+  let nextAction: 'continue' | 'increase_difficulty' | 'practice_more' | 'review_basics' | 'show_checkpoint' | 'end_session' | 'confidence_building' | 'prerequisite_review' = 'continue';
   let difficultyAdjustment = mathError.difficultyAdjustment;
 
   // Emergency protocols

@@ -135,8 +135,9 @@ Odpowiedz w języku polskim, w ciepłym, motywującym tonie, maksymalnie 150 sł
 
   } catch (error) {
     console.error('[RESUME-SUMMARY] Error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(JSON.stringify({ 
-      error: error.message,
+      error: errorMessage,
       summary: "Wystąpił błąd podczas generowania podsumowania. Spróbuj ponownie.",
       interactionCount: 0,
       recommendations: ["Kontynuuj naukę"]
