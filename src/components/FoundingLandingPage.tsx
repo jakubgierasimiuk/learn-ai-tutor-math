@@ -178,6 +178,13 @@ export function FoundingLandingPage() {
 
             {/* Dynamic Urgency Message */}
             {getUrgencyMessage()}
+            
+            {/* CTA after urgency message */}
+            <div className="mt-6">
+              <Button onClick={handleJoinNow} disabled={isLoading || spotsLeft === 0} className={`w-full h-12 text-lg font-semibold rounded-xl shadow-lg disabled:opacity-50 transition-all duration-300 ${spotsLeft === 3 ? "bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white animate-pulse" : spotsLeft < 3 ? "bg-muted hover:bg-muted/80 text-muted-foreground" : "bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white"}`}>
+                {isLoading ? "Dołączam..." : spotsLeft === 0 ? "Brak miejsc" : spotsLeft < 3 ? "Zapisz się na Free Trial" : spotsLeft === 3 ? "DOŁĄCZ TERAZ!" : "Dołącz teraz"}
+              </Button>
+            </div>
           </div>
         </section>
 
@@ -215,6 +222,13 @@ export function FoundingLandingPage() {
               </div>
             </CardContent>
           </Card>
+        </section>
+
+        {/* CTA before "Jak to działa" */}
+        <section className="px-4 py-4">
+          <Button onClick={handleJoinNow} disabled={isLoading || spotsLeft === 0} className={`w-full h-12 text-lg font-semibold rounded-xl shadow-lg disabled:opacity-50 transition-all duration-300 ${spotsLeft === 3 ? "bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white animate-pulse" : spotsLeft < 3 ? "bg-muted hover:bg-muted/80 text-muted-foreground" : "bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white"}`}>
+            {isLoading ? "Dołączam..." : spotsLeft === 0 ? "Brak miejsc" : spotsLeft < 3 ? "Zapisz się na Free Trial" : spotsLeft === 3 ? "DOŁĄCZ TERAZ!" : "Dołącz teraz"}
+          </Button>
         </section>
 
         {/* Process Section */}
