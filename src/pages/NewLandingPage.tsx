@@ -10,6 +10,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Seo } from '@/components/Seo';
+import { useLanguage } from '@/hooks/useLanguage';
 
 // Language context
 interface Language {
@@ -190,11 +191,9 @@ const translations = {
 };
 
 const NewLandingPage = () => {
-  const [currentLang, setCurrentLang] = useState<'pl' | 'uk'>('pl');
+  const { language, setLanguage, t } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-
-  const t = translations[currentLang];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -207,7 +206,7 @@ const NewLandingPage = () => {
   const handleCTAClick = (source: string) => {
     // Track analytics
     console.log(`CTA clicked from: ${source}`);
-    window.location.href = '/auth?trial=true';
+    window.location.href = `/auth?trial=true&lang=${language}`;
   };
 
   const scrollToSection = (sectionId: string) => {
@@ -251,9 +250,9 @@ const NewLandingPage = () => {
                 {languages.map((lang) => (
                   <button
                     key={lang.code}
-                    onClick={() => setCurrentLang(lang.code)}
-                    className={`flex items-center space-x-1 px-2 py-1 rounded text-sm ${
-                      currentLang === lang.code 
+                     onClick={() => setLanguage(lang.code)}
+                     className={`flex items-center space-x-1 px-2 py-1 rounded text-sm ${
+                       language === lang.code
                         ? 'bg-primary text-primary-foreground' 
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
@@ -269,7 +268,7 @@ const NewLandingPage = () => {
             <div className="hidden md:flex items-center space-x-4">
               <Button 
                 variant="ghost" 
-                onClick={() => window.location.href = '/auth'}
+                onClick={() => window.location.href = `/auth?lang=${language}`}
               >
                 {t.login}
               </Button>
@@ -307,9 +306,9 @@ const NewLandingPage = () => {
                   {languages.map((lang) => (
                     <button
                       key={lang.code}
-                      onClick={() => setCurrentLang(lang.code)}
-                      className={`flex items-center space-x-1 px-3 py-1 rounded ${
-                        currentLang === lang.code 
+                       onClick={() => setLanguage(lang.code)}
+                       className={`flex items-center space-x-1 px-3 py-1 rounded ${
+                         language === lang.code
                           ? 'bg-primary text-primary-foreground' 
                           : 'text-muted-foreground hover:text-foreground'
                       }`}
@@ -322,7 +321,7 @@ const NewLandingPage = () => {
                 <div className="flex space-x-4 pt-4">
                   <Button 
                     variant="ghost" 
-                    onClick={() => window.location.href = '/auth'}
+                    onClick={() => window.location.href = `/auth?lang=${language}`}
                     className="flex-1"
                   >
                     {t.login}

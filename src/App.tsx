@@ -45,6 +45,7 @@ import { ViralPopups } from "@/components/viral/ViralPopups";
 import { SMSTriggerManager } from "@/components/SMSTriggerManager";
 import { SurveyProvider } from "@/components/SurveyProvider";
 import { FoundingLandingPage } from "@/components/FoundingLandingPage";
+import { LanguageProvider } from "@/hooks/useLanguage";
 
 const queryClient = new QueryClient();
 
@@ -149,13 +150,15 @@ function CurriculumSeeder() {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <LoggingBootstrap />
-          <RouteSeo />
-          <Routes>
+      <LanguageProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <LoggingBootstrap />
+            <RouteSeo />
+            <CurriculumSeeder />
+            <Routes>
             <Route path="/" element={<NewLandingPage />} />
             <Route path="/app" element={<HomePage />} />
             <Route path="/founding" element={<FoundingLandingPage />} />
@@ -285,9 +288,10 @@ const App = () => (
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </LanguageProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

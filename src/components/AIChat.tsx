@@ -16,6 +16,7 @@ import { ConversionPrompts } from '@/components/ConversionPrompts';
 import { useTokenUsage } from '@/hooks/useTokenUsage';
 import { useMathSymbols } from '@/hooks/useMathSymbols';
 import MathSymbolPanel from '@/components/MathSymbolPanel';
+import { useLanguage } from '@/hooks/useLanguage';
 interface Message {
   id: string;
   content: string;
@@ -24,9 +25,11 @@ interface Message {
 }
 export const AIChat = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
+  
   const [messages, setMessages] = useState<Message[]>([{
     id: '1',
-    content: 'Cześć! Jestem Mentavo AI. Mogę pomóc Ci z matematyką, wytłumaczyć pojęcia i rozwiązać zadania. W czym mogę Ci dzisiaj pomóc?',
+    content: t.chatWelcome,
     role: 'assistant',
     timestamp: new Date()
   }]);
@@ -699,7 +702,7 @@ export const AIChat = () => {
               <div className="flex items-end gap-3 p-4 bg-muted/30 border border-border/50 rounded-2xl">
                 <Input 
                   type="text" 
-                  placeholder="Zadaj pytanie Mentavo AI..." 
+                  placeholder={t.chatPlaceholder} 
                   value={input} 
                   onChange={e => setInput(e.target.value)} 
                   onKeyPress={handleKeyPress} 
