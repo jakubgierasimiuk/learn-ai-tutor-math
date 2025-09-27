@@ -108,7 +108,7 @@ export function TestimonialsCarousel() {
           </div>
           
           <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground leading-tight animate-fadeIn" style={{animationDelay: '0.2s'}}>
-            Opinie naszych użytkowników<br />
+            Opinie naszych<br />
             <span className="text-primary">licealistów</span>
           </h2>
           
