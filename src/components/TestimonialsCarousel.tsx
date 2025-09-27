@@ -161,12 +161,7 @@ export function TestimonialsCarousel() {
                 <span className="text-foreground font-semibold">500+ zadowolonych uczniów</span>
               </div>
             </div>
-            <div className="bg-card/80 backdrop-blur-sm rounded-xl px-6 py-4 border border-border shadow-card">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-primary rounded-full"></div>
-                <span className="text-foreground font-semibold">Średnio +1.5 oceny</span>
-              </div>
-            </div>
+            
           </div>
         </div>
       </div>
