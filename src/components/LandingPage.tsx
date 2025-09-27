@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-education.jpg";
 import { logEvent } from "@/lib/logger";
+import { TestimonialsCarousel } from "./TestimonialsCarousel";
 export function LandingPage() {
   const handleCtaClick = (action: string) => {
     logEvent('landing_cta_click', {
@@ -230,6 +231,9 @@ export function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Testimonials Carousel */}
+      <TestimonialsCarousel />
 
       {/* mentavo.ai Section */}
       <section className="py-24 px-6 bg-muted/30">
