@@ -196,7 +196,7 @@ export function FoundingLandingPage() {
                 Dlaczego warto?
               </h2>
               
-              <div className="space-y-4">
+              <div className="space-y-4 max-w-sm mx-auto">
                 {[{
                 icon: Gift,
                 text: "Darmowy miesiąc Premium",
@@ -213,8 +213,8 @@ export function FoundingLandingPage() {
                 icon: ChevronRight,
                 text: "+3 dni za polecenie znajomego",
                 color: "text-warning"
-              }].map((benefit, index) => <div key={index} className="flex items-center gap-4 p-3 rounded-lg bg-background/50">
-                    <div className={`${benefit.color} bg-current/10 p-2 rounded-lg`}>
+              }].map((benefit, index) => <div key={index} className="flex items-center justify-center gap-4 p-3 rounded-lg bg-background/50 text-center">
+                    <div className={`${benefit.color} bg-current/10 p-2 rounded-lg flex-shrink-0`}>
                       <benefit.icon className={`w-5 h-5 ${benefit.color}`} />
                     </div>
                     <span className="text-foreground font-medium">{benefit.text}</span>
@@ -237,9 +237,9 @@ export function FoundingLandingPage() {
             Jak to działa?
           </h2>
           
-          <div className="space-y-4">
-            {["Rejestrujesz się → Dostęp do AI", "Testujesz → Dzielisz się opinią", "Zapraszasz znajomych → Bonusy", "Twój feedback → Nowe funkcje"].map((step, index) => <div key={index} className="flex items-center gap-4 p-4 bg-card/30 rounded-xl border border-primary/5">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white font-semibold text-sm">
+          <div className="space-y-4 max-w-sm mx-auto">
+            {["Rejestrujesz się → Dostęp do AI", "Testujesz → Dzielisz się opinią", "Zapraszasz znajomych → Bonusy", "Twój feedback → Nowe funkcje"].map((step, index) => <div key={index} className="flex items-center justify-center gap-4 p-4 bg-card/30 rounded-xl border border-primary/5 text-center">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
                   {index + 1}
                 </div>
                 <span className="text-foreground font-medium">{step}</span>
