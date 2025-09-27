@@ -87,12 +87,7 @@ export function TestimonialsCarousel() {
             <span className="text-muted-foreground font-medium">Co mówią uczniowie</span>
           </div>
           
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground leading-tight animate-fadeIn" style={{
-          animationDelay: '0.2s'
-        }}>
-            Opinie naszych<br />
-            <span className="text-primary">licealistów</span>
-          </h2>
+          
           
           
         </div>
