@@ -6,26 +6,29 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Check, Flame, Users, Star, Gift, ChevronRight } from "lucide-react";
-
 export function FoundingLandingPage() {
-  const { user } = useAuth();
-  const { toast } = useToast();
+  const {
+    user
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
   const [membersCount, setMembersCount] = useState<number>(0);
   const [spotsLeft, setSpotsLeft] = useState<number>(100);
   const [isLoading, setIsLoading] = useState(false);
-
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const { data, error } = await supabase.functions.invoke('founding-registration', {
+        const {
+          data,
+          error
+        } = await supabase.functions.invoke('founding-registration', {
           method: 'GET'
         });
-
         if (error) {
           console.error('Error fetching stats:', error);
           return;
         }
-
         if (data) {
           setMembersCount(data.totalMembers || 0);
           setSpotsLeft(data.slotsLeft || 0);
@@ -34,15 +37,12 @@ export function FoundingLandingPage() {
         console.error('Error:', error);
       }
     };
-
     fetchStats();
-    
+
     // Poll for updates every 30 seconds for real-time scarcity
     const interval = setInterval(fetchStats, 30000);
-    
     return () => clearInterval(interval);
   }, []);
-
   const handleJoinNow = async () => {
     if (!user) {
       toast({
@@ -52,7 +52,6 @@ export function FoundingLandingPage() {
       });
       return;
     }
-
     if (spotsLeft <= 0) {
       toast({
         title: "Brak miejsc",
@@ -61,11 +60,12 @@ export function FoundingLandingPage() {
       });
       return;
     }
-
     setIsLoading(true);
-    
     try {
-      const { data, error } = await supabase.functions.invoke('founding-registration', {
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('founding-registration', {
         body: {
           email: user.email || '',
           name: user.user_metadata?.name || '',
@@ -76,15 +76,13 @@ export function FoundingLandingPage() {
           }
         }
       });
-
       if (error) {
         throw error;
       }
-
       if (data?.success) {
         toast({
           title: "Gratulacje! 🎉",
-          description: "Dołączyłeś do Founding 100! Sprawdź swoją skrzynkę mailową.",
+          description: "Dołączyłeś do Founding 100! Sprawdź swoją skrzynkę mailową."
         });
         setMembersCount(data.totalMembers || 0);
         setSpotsLeft(data.slotsLeft || 0);
@@ -112,18 +110,15 @@ export function FoundingLandingPage() {
   // Get dynamic messaging based on spots left
   const getUrgencyMessage = () => {
     if (spotsLeft > 3) {
-      return (
-        <div className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-200 rounded-xl p-4">
+      return <div className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-200 rounded-xl p-4">
           <div className="flex items-center justify-center gap-2 text-orange-600 font-semibold animate-pulse">
             <Flame className="w-5 h-5" />
             <span>🔥 Zostało tylko {spotsLeft} miejsc!</span>
             <Flame className="w-5 h-5" />
           </div>
-        </div>
-      );
+        </div>;
     } else if (spotsLeft === 3) {
-      return (
-        <div className="relative">
+      return <div className="relative">
           <div className="animate-bounce bg-yellow-500/20 border border-yellow-500 rounded-xl p-4">
             <div className="flex items-center justify-center gap-2 text-lg font-bold text-yellow-600 animate-pulse">
               <span className="text-2xl">⚠️</span>
@@ -131,33 +126,24 @@ export function FoundingLandingPage() {
               <span className="text-2xl">⚠️</span>
             </div>
           </div>
-        </div>
-      );
+        </div>;
     } else {
-      return (
-        <div className="bg-muted/50 border border-border rounded-xl p-4">
+      return <div className="bg-muted/50 border border-border rounded-xl p-4">
           <p className="text-lg text-muted-foreground text-center">
             Darmowe miejsca się wyczerpały, ale możesz zapisać się za darmo na Free Trial
           </p>
-        </div>
-      );
+        </div>;
     }
   };
-
-  return (
-    <>
-      <Seo 
-        title="Dołącz do Founding 100 - Mentavo AI"
-        description="Dołącz do pierwszych 100 użytkowników Mentavo AI i otrzymaj darmowy miesiąc Premium."
-        jsonLd={{
-          "@context": "https://schema.org",
-          "@type": "SpecialOffer",
-          "name": "Founding 100 Program - Mentavo AI",
-          "description": "Ekskluzywny program dla pierwszych 100 użytkowników Mentavo AI",
-          "validThrough": "2025-12-31",
-          "url": window.location.href
-        }}
-      />
+  return <>
+      <Seo title="Dołącz do Founding 100 - Mentavo AI" description="Dołącz do pierwszych 100 użytkowników Mentavo AI i otrzymaj darmowy miesiąc Premium." jsonLd={{
+      "@context": "https://schema.org",
+      "@type": "SpecialOffer",
+      "name": "Founding 100 Program - Mentavo AI",
+      "description": "Ekskluzywny program dla pierwszych 100 użytkowników Mentavo AI",
+      "validThrough": "2025-12-31",
+      "url": window.location.href
+    }} />
       
       <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
         {/* Header */}
@@ -204,19 +190,28 @@ export function FoundingLandingPage() {
               </h2>
               
               <div className="space-y-4">
-                {[
-                  { icon: Gift, text: "Darmowy miesiąc Premium", color: "text-success" },
-                  { icon: Users, text: "Wpływ na rozwój aplikacji", color: "text-primary" },
-                  { icon: Star, text: "Status Foundera na zawsze", color: "text-secondary" },
-                  { icon: ChevronRight, text: "+3 dni za polecenie znajomego", color: "text-warning" }
-                ].map((benefit, index) => (
-                  <div key={index} className="flex items-center justify-center gap-4 p-3 rounded-lg bg-background/50">
+                {[{
+                icon: Gift,
+                text: "Darmowy miesiąc Premium",
+                color: "text-success"
+              }, {
+                icon: Users,
+                text: "Wpływ na rozwój aplikacji",
+                color: "text-primary"
+              }, {
+                icon: Star,
+                text: "Status Foundera na zawsze",
+                color: "text-secondary"
+              }, {
+                icon: ChevronRight,
+                text: "+3 dni za polecenie znajomego",
+                color: "text-warning"
+              }].map((benefit, index) => <div key={index} className="flex items-center gap-4 p-3 rounded-lg bg-background/50">
                     <div className={`${benefit.color} bg-current/10 p-2 rounded-lg`}>
                       <benefit.icon className={`w-5 h-5 ${benefit.color}`} />
                     </div>
-                    <span className="text-foreground font-medium text-center">{benefit.text}</span>
-                  </div>
-                ))}
+                    <span className="text-foreground font-medium">{benefit.text}</span>
+                  </div>)}
               </div>
             </CardContent>
           </Card>
@@ -229,19 +224,12 @@ export function FoundingLandingPage() {
           </h2>
           
           <div className="space-y-4">
-            {[
-              "Rejestrujesz się → Dostęp do AI",
-              "Testujesz → Dzielisz się opinią",
-              "Zapraszasz znajomych → Bonusy",
-              "Twój feedback → Nowe funkcje"
-            ].map((step, index) => (
-              <div key={index} className="flex items-center justify-center gap-4 p-4 bg-card/30 rounded-xl border border-primary/5">
+            {["Rejestrujesz się → Dostęp do AI", "Testujesz → Dzielisz się opinią", "Zapraszasz znajomych → Bonusy", "Twój feedback → Nowe funkcje"].map((step, index) => <div key={index} className="flex items-center gap-4 p-4 bg-card/30 rounded-xl border border-primary/5">
                 <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white font-semibold text-sm">
                   {index + 1}
                 </div>
-                <span className="text-foreground font-medium text-center">{step}</span>
-              </div>
-            ))}
+                <span className="text-foreground font-medium">{step}</span>
+              </div>)}
           </div>
         </section>
 
@@ -255,38 +243,15 @@ export function FoundingLandingPage() {
               </div>
             </div>
             
-            <Button 
-              onClick={handleJoinNow}
-              disabled={isLoading || spotsLeft === 0}
-              className={`w-full h-14 text-lg font-semibold rounded-xl shadow-lg disabled:opacity-50 transition-all duration-300 ${
-                spotsLeft === 3 
-                  ? "h-16 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white animate-pulse" 
-                  : spotsLeft < 3
-                  ? "bg-muted hover:bg-muted/80 text-muted-foreground"
-                  : "bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white"
-              }`}
-            >
-              {isLoading ? (
-                "Dołączam..."
-              ) : spotsLeft === 0 ? (
-                "Brak miejsc"
-              ) : spotsLeft < 3 ? (
-                "Zapisz się na Free Trial"
-              ) : spotsLeft === 3 ? (
-                "DOŁĄCZ TERAZ - OSTATNIE MIEJSCA!"
-              ) : (
-                "Dołącz teraz"
-              )}
+            <Button onClick={handleJoinNow} disabled={isLoading || spotsLeft === 0} className={`w-full h-14 text-lg font-semibold rounded-xl shadow-lg disabled:opacity-50 transition-all duration-300 ${spotsLeft === 3 ? "h-16 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white animate-pulse" : spotsLeft < 3 ? "bg-muted hover:bg-muted/80 text-muted-foreground" : "bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white"}`}>
+              {isLoading ? "Dołączam..." : spotsLeft === 0 ? "Brak miejsc" : spotsLeft < 3 ? "Zapisz się na Free Trial" : spotsLeft === 3 ? "DOŁĄCZ TERAZ - OSTATNIE MIEJSCA!" : "Dołącz teraz"}
             </Button>
 
             <div className="text-center">
-              <p className="text-sm text-muted-foreground">
-                Członek #{membersCount + 1} z 100
-              </p>
+              
             </div>
           </div>
         </section>
       </div>
-    </>
-  );
+    </>;
 }
