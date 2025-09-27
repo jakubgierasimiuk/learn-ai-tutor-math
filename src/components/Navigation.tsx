@@ -46,7 +46,7 @@ export const Navigation = () => {
           {/* Founding 100 Button */}
           <Button 
             asChild
-            className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 animate-pulse hidden md:flex"
+            className="gradient-hero text-primary-foreground shadow-primary hover:opacity-95 hover-lift hidden md:flex"
             size="sm"
           >
             <Link 
@@ -153,7 +153,7 @@ export const Navigation = () => {
                   {/* Mobile Founding 100 Button */}
                   <Button 
                     asChild
-                    className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white shadow-lg animate-pulse w-full"
+                    className="gradient-hero text-primary-foreground shadow-primary w-full hover:opacity-95"
                     size="sm"
                   >
                     <Link 
@@ -224,7 +224,7 @@ export const Navigation = () => {
                 {/* Mobile Founding 100 Button for non-logged users */}
                 <Button 
                   asChild
-                  className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white shadow-lg animate-pulse w-full"
+                  className="gradient-hero text-primary-foreground shadow-primary w-full hover:opacity-95"
                   size="sm"
                 >
                   <Link 
