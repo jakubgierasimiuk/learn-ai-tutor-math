@@ -7,6 +7,7 @@ const corsHeaders = {
 
 interface FoundingRegistrationRequest {
   email: string;
+  password?: string;
   name?: string;
   phone?: string;
   referralCode?: string;
@@ -47,26 +48,24 @@ Deno.serve(async (req) => {
       );
     }
 
-    // For POST requests, require authentication
+    // Handle authentication - optional for new user creation
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Authorization required' }),
-        { status: 401, headers: corsHeaders }
-      );
+    let userId = null;
+    let userEmail = null;
+    let userName = null;
+    let isExistingUser = false;
+
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data: userData, error: authError } = await supabase.auth.getUser(token);
+      
+      if (userData?.user && !authError) {
+        userId = userData.user.id;
+        userEmail = userData.user.email;
+        userName = userData.user.user_metadata?.name;
+        isExistingUser = true;
+      }
     }
-
-    const token = authHeader.replace('Bearer ', '');
-    const { data: userData, error: authError } = await supabase.auth.getUser(token);
-
-    if (authError || !userData.user) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid authentication' }),
-        { status: 401, headers: corsHeaders }
-      );
-    }
-
-    const userId = userData.user.id;
 
     if (req.method === 'POST') {
       const body: FoundingRegistrationRequest = await req.json();
@@ -94,6 +93,43 @@ Deno.serve(async (req) => {
         );
       }
 
+      // If user is not authenticated, create a new account
+      if (!isExistingUser) {
+        console.log('Creating new user account for:', body.email);
+        
+        // Generate password if not provided
+        const password = body.password || Math.random().toString(36).substring(2, 15);
+        
+        try {
+          const { data: newUser, error: signUpError } = await supabase.auth.admin.createUser({
+            email: body.email,
+            password: password,
+            user_metadata: {
+              name: body.name || body.email.split('@')[0]
+            },
+            email_confirm: true // Auto-confirm email
+          });
+
+          if (signUpError) {
+            console.error('Error creating user:', signUpError);
+            return new Response(
+              JSON.stringify({ error: 'Failed to create account: ' + signUpError.message }),
+              { status: 400, headers: corsHeaders }
+            );
+          }
+
+          userId = newUser.user.id;
+          userEmail = newUser.user.email;
+          userName = newUser.user.user_metadata?.name;
+        } catch (error) {
+          console.error('Error in user creation:', error);
+          return new Response(
+            JSON.stringify({ error: 'Failed to create account' }),
+            { status: 500, headers: corsHeaders }
+          );
+        }
+      }
+
       // Handle referral if provided
       let referredBy = null;
       if (body.referralCode) {
@@ -118,8 +154,8 @@ Deno.serve(async (req) => {
         .from('founding_members')
         .insert({
           user_id: userId,
-          email: body.email,
-          name: body.name,
+          email: userEmail || body.email,
+          name: userName || body.name,
           phone: body.phone,
           referral_code: body.referralCode,
           referred_by: referredBy,
@@ -147,6 +183,32 @@ Deno.serve(async (req) => {
         );
       }
 
+      // Grant 30-day premium subscription
+      try {
+        const premiumEndDate = new Date();
+        premiumEndDate.setDate(premiumEndDate.getDate() + 30);
+
+        await supabase
+          .from('user_subscriptions')
+          .upsert({
+            user_id: userId,
+            subscription_type: 'premium',
+            status: 'active',
+            subscription_end_date: premiumEndDate.toISOString(),
+            token_limit_soft: 50000,
+            token_limit_hard: 60000,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'user_id'
+          });
+
+        console.log('Premium subscription granted to user:', userId);
+      } catch (error) {
+        console.error('Error granting premium subscription:', error);
+        // Continue anyway - user is still registered as founding member
+      }
+
       // Award referral bonus if applicable
       if (referredBy) {
         // Add bonus days to referrer
@@ -165,7 +227,8 @@ Deno.serve(async (req) => {
           success: true,
           foundingPosition: foundingMember.founding_position,
           slotsLeft: newSpotsLeft || 0,
-          totalMembers: newCount || 0
+          totalMembers: newCount || 0,
+          premiumGranted: true
         }),
         { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
