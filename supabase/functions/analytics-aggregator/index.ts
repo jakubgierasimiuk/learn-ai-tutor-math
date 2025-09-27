@@ -42,8 +42,9 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Analytics aggregation error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
-      JSON.stringify({ error: 'Aggregation failed', details: error.message }),
+      JSON.stringify({ error: 'Aggregation failed', details: errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
@@ -76,7 +77,7 @@ async function processDailyAggregation(supabase: any) {
   // Group events by date and route
   const groupedEvents: Record<string, Record<string, any[]>> = {};
   
-  pageViewEvents.forEach(event => {
+  pageViewEvents.forEach((event: any) => {
     const date = event.created_at.split('T')[0];
     const route = event.route || '/';
     
@@ -234,7 +235,7 @@ async function calculateBounceRates(supabase: any) {
   // Calculate bounce rates by page
   const pageStats: Record<string, { total: number; bounces: number; totalDuration: number }> = {};
   
-  sessions.forEach(session => {
+  sessions.forEach((session: any) => {
     const page = session.entry_page || '/';
     if (!pageStats[page]) {
       pageStats[page] = { total: 0, bounces: 0, totalDuration: 0 };

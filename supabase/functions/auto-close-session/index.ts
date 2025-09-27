@@ -64,17 +64,13 @@ serve(async (req) => {
     if (shouldGenerateSummary) {
       console.log(`Generating summary for session ${sessionId} with ${interactionCount} interactions`);
       
-      // Call session-summary function in background
-      EdgeRuntime.waitUntil(
-        generateSessionSummary(sessionId, sessionType, userId, supabase)
-      );
+      // Generate session summary in background
+      generateSessionSummary(sessionId, sessionType, userId, supabase).catch(console.error);
     } else {
       console.log(`Closing session ${sessionId} without summary (only ${interactionCount} interactions)`);
       
-      // Just close the session without generating summary
-      EdgeRuntime.waitUntil(
-        closeSessionDirectly(sessionId, sessionType, userId, supabase)
-      );
+      // Close the session without generating summary
+      closeSessionDirectly(sessionId, sessionType, userId, supabase).catch(console.error);
     }
 
     // Return immediate response
@@ -89,13 +85,15 @@ serve(async (req) => {
     );
 
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
     console.error('[AUTO-CLOSE-SESSION] Error in auto-close-session:', { 
-      message: error.message,
-      stack: error.stack
+      message: errorMessage,
+      stack: errorStack
     });
     
     return new Response(
-      JSON.stringify({ error: error.message }), 
+      JSON.stringify({ error: errorMessage }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
@@ -160,7 +158,7 @@ async function generateSessionSummary(sessionId: string, sessionType: string, us
     const interactionsData = interactions || [];
 
     // Prepare summary data
-    const interactionSummary = interactionsData.map((interaction, index) => ({
+    const interactionSummary = interactionsData.map((interaction: any, index: number) => ({
       sequence: index + 1,
       user_input: interaction.user_input || '',
       ai_response: interaction.ai_response || '',
@@ -172,7 +170,7 @@ async function generateSessionSummary(sessionId: string, sessionType: string, us
       total_interactions: interactionsData.length,
       total_duration_minutes: Math.round((Date.now() - new Date(sessionData.started_at).getTime()) / 60000),
       average_response_time: interactionsData.length > 0 
-        ? Math.round(interactionsData.reduce((sum, i) => sum + (i.response_time_ms || 0), 0) / interactionsData.length)
+        ? Math.round(interactionsData.reduce((sum: number, i: any) => sum + (i.response_time_ms || 0), 0) / interactionsData.length)
         : 0,
       skills_practiced: sessionData.skill_id ? [sessionData.skill_id] : [],
       hints_used: sessionData.hints_used || 0,
@@ -187,7 +185,7 @@ SESSION TYPE: ${sessionType}
 SESSION METRICS: ${JSON.stringify(sessionMetrics, null, 2)}
 
 INTERACTION HISTORY:
-${interactionSummary.map(i => `
+${interactionSummary.map((i: any) => `
 User: ${i.user_input}
 AI: ${i.ai_response}
 ---`).join('\n')}

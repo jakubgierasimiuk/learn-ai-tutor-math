@@ -94,10 +94,10 @@ serve(async (req) => {
     const sanitizedEmail = email.toLowerCase().trim();
 
     // Find user by email
-    const { data: users, error: userError } = await supabaseAdmin.auth.admin.listUsers();
+    const { data: users, error: usersError } = await supabaseAdmin.auth.admin.listUsers();
     
-    if (userError) {
-      throw new Error(`Failed to fetch users: ${userError.message}`);
+    if (usersError) {
+      throw new Error(`Failed to fetch users: ${usersError.message}`);
     }
 
     const targetUser = users.users.find(u => u.email === sanitizedEmail);

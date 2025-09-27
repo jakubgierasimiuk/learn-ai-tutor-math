@@ -62,7 +62,7 @@ serve(async (req) => {
     const tokensUsedTotal = tokenUsageData || 0;
     logStep("Token usage calculated", { tokensUsedTotal });
 
-    let subscriptionType: 'free' | 'paid' | 'super' | 'expired' = 'free';
+    let subscriptionType: 'free' | 'paid' | 'super' | 'expired' | 'limited_free' = 'free';
     let subscriptionStatus = 'active';
     let subscriptionEnd: string | null = null;
     let stripeCustomerId: string | null = null;

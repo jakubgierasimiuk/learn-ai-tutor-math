@@ -216,8 +216,9 @@ Keep the summary concise but informative, focusing on learning progress and peda
 
   } catch (error) {
     console.error('Error generating session summary:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
-      JSON.stringify({ error: error.message }), 
+      JSON.stringify({ error: errorMessage }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

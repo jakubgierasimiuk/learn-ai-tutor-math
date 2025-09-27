@@ -137,13 +137,15 @@ serve(async (req) => {
     );
 
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
     console.error('[CLEANUP-SESSIONS] Error in cleanup-sessions:', { 
-      message: error.message,
-      stack: error.stack
+      message: errorMessage,
+      stack: errorStack
     });
     
     return new Response(
-      JSON.stringify({ error: error.message }), 
+      JSON.stringify({ error: errorMessage }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
@@ -209,7 +211,7 @@ async function generateSessionSummary(sessionId: string, sessionType: string, us
     console.log('[CLEANUP-SESSIONS] Interactions fetched:', interactionsData.length);
 
     // Prepare summary data
-    const interactionSummary = interactionsData.map((interaction, index) => ({
+    const interactionSummary = interactionsData.map((interaction: any, index: number) => ({
       sequence: index + 1,
       user_input: interaction.user_input || '',
       ai_response: interaction.ai_response || '',
@@ -221,7 +223,7 @@ async function generateSessionSummary(sessionId: string, sessionType: string, us
       total_interactions: interactionsData.length,
       total_duration_minutes: Math.round((Date.now() - new Date(sessionData.started_at).getTime()) / 60000),
       average_response_time: interactionsData.length > 0 
-        ? Math.round(interactionsData.reduce((sum, i) => sum + (i.response_time_ms || 0), 0) / interactionsData.length)
+        ? Math.round(interactionsData.reduce((sum: number, i: any) => sum + (i.response_time_ms || 0), 0) / interactionsData.length)
         : 0,
       skills_practiced: sessionData.skill_id ? [sessionData.skill_id] : [],
       hints_used: sessionData.hints_used || 0,
@@ -237,7 +239,7 @@ SESSION DURATION: ${sessionMetrics.total_duration_minutes} minutes
 TOTAL INTERACTIONS: ${sessionMetrics.total_interactions}
 
 INTERACTION HISTORY:
-${interactionSummary.slice(0, 10).map(i => `
+${interactionSummary.slice(0, 10).map((i: any) => `
 User: ${i.user_input}
 AI: ${i.ai_response}
 ---`).join('\n')}
@@ -336,7 +338,9 @@ Keep it brief since this was an auto-cleanup.
     console.log(`[CLEANUP-SESSIONS] Successfully generated cleanup summary for session ${sessionId}`);
 
   } catch (error) {
-    console.error(`[CLEANUP-SESSIONS] Error generating cleanup summary for session ${sessionId}:`, error.message, error.stack);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    console.error(`[CLEANUP-SESSIONS] Error generating cleanup summary for session ${sessionId}:`, errorMessage, errorStack);
     // Fall back to closing session without summary
     console.log(`[CLEANUP-SESSIONS] Falling back to direct session close for: ${sessionId}`);
     await closeSessionDirectly(sessionId, sessionType, userId, supabase);
@@ -382,6 +386,8 @@ async function closeSessionDirectly(sessionId: string, sessionType: string, user
     console.log(`[CLEANUP-SESSIONS] Successfully closed session ${sessionId} without summary`);
 
   } catch (error) {
-    console.error(`[CLEANUP-SESSIONS] Error closing session ${sessionId}:`, error.message, error.stack);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    console.error(`[CLEANUP-SESSIONS] Error closing session ${sessionId}:`, errorMessage, errorStack);
   }
 }

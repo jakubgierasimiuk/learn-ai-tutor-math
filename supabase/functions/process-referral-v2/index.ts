@@ -206,7 +206,7 @@ serve(async (req) => {
       }
 
       // Calculate risk score
-      const riskScore = await supabaseService.rpc('calculate_risk_score', {
+      const { data: riskScore, error: riskError } = await supabaseService.rpc('calculate_risk_score', {
         p_user_id: user.id,
         p_phone_verified: phoneVerified,
         p_phone_is_voip: false, // Will be set from verification
@@ -215,6 +215,13 @@ serve(async (req) => {
         p_onboarding_completed: onboardingCompleted,
         p_learning_time_minutes: learningMinutes,
       });
+
+      if (riskError) {
+        console.error('Error calculating risk score:', riskError);
+        throw new Error('Failed to calculate risk score');
+      }
+
+      const finalRiskScore = riskScore || 0;
 
       console.log('Calculated risk score:', riskScore);
 
@@ -243,7 +250,7 @@ serve(async (req) => {
         payload: {
           referrer_id: referral.referrer_id,
           referred_user_id: user.id,
-          risk_score: riskScore,
+          risk_score: finalRiskScore,
           timestamp: activated_at,
         }
       });
@@ -252,10 +259,10 @@ serve(async (req) => {
       let rewardStatus = 'pending';
       let releasedAt = null;
 
-      if (riskScore >= 85) {
+      if (finalRiskScore >= 85) {
         rewardStatus = 'released';
         releasedAt = new Date().toISOString();
-      } else if (riskScore >= 70) {
+      } else if (finalRiskScore >= 70) {
         rewardStatus = 'pending'; // Will be released by CRON after 48-72h
       } else {
         rewardStatus = 'pending'; // Manual review needed
@@ -356,8 +363,9 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in process-referral-v2 function:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return new Response(JSON.stringify({ 
-      error: error.message || 'Internal server error' 
+      error: errorMessage
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
