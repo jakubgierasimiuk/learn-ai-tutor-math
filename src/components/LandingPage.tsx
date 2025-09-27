@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-education.jpg";
 import { logEvent } from "@/lib/logger";
 import { TestimonialsCarousel } from "./TestimonialsCarousel";
+import { RotatingTestimonial } from "./RotatingTestimonial";
 export function LandingPage() {
   const handleCtaClick = (action: string) => {
     logEvent('landing_cta_click', {
@@ -182,26 +183,8 @@ export function LandingPage() {
                     <p className="text-muted-foreground">którzy już poprawili swoje oceny</p>
                   </div>
                   
-                  {/* Mini testimonial */}
-                  <div className="bg-muted/50 rounded-xl p-6 border border-border/50">
-                    <div className="flex items-center gap-4 mb-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-accent to-accent rounded-full flex items-center justify-center">
-                        <span className="text-accent-foreground font-bold text-sm">AK</span>
-                      </div>
-                      <div>
-                        <p className="font-semibold text-foreground text-sm">Anna K.</p>
-                        <p className="text-xs text-muted-foreground">Klasa 2 LO</p>
-                      </div>
-                    </div>
-                    <p className="text-foreground text-sm italic">
-                      "W końcu rozumiem pochodne! AI tłumaczy w sposób, który dociera do mnie."
-                    </p>
-                    <div className="flex gap-1 mt-2">
-                      {[...Array(5)].map((_, i) => (
-                        <span key={i} className="text-warning text-sm">⭐</span>
-                      ))}
-                    </div>
-                  </div>
+                  {/* Rotating Mini testimonial */}
+                  <RotatingTestimonial />
                 </div>
                 
                 {/* Floating elements */}
