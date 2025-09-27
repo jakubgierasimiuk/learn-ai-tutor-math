@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useRoles } from "@/hooks/useRoles";
-import { Brain, BookOpen, MessageCircle, LogOut, Upload, TrendingUp, Database, Clock, Settings, Crown, Bug } from "lucide-react";
+import { Brain, BookOpen, MessageCircle, LogOut, Upload, TrendingUp, Database, Clock, Settings, Crown, Bug, Flame } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { logEvent } from "@/lib/logger";
@@ -42,6 +42,22 @@ export const Navigation = () => {
             />
             <span className="text-xl font-bold font-['Poppins'] hidden sm:block">Mentavo AI</span>
           </Link>
+
+          {/* Founding 100 Button */}
+          <Button 
+            asChild
+            className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 animate-pulse hidden md:flex"
+            size="sm"
+          >
+            <Link 
+              to="/founding" 
+              className="flex items-center gap-2 font-medium"
+              onClick={() => logEvent('founding_100_click', { source: 'desktop_nav' })}
+            >
+              <Flame className="w-4 h-4" />
+              Founding 100
+            </Link>
+          </Button>
 
           {user ? <>
               {/* Desktop Navigation - Logged In */}
@@ -134,6 +150,24 @@ export const Navigation = () => {
         {isOpen && <div className="md:hidden py-4 border-t border-border animate-fadeIn">
             {user ? <>
                 <div className="flex flex-col gap-4">
+                  {/* Mobile Founding 100 Button */}
+                  <Button 
+                    asChild
+                    className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white shadow-lg animate-pulse w-full"
+                    size="sm"
+                  >
+                    <Link 
+                      to="/founding" 
+                      className="flex items-center gap-2 font-medium justify-center"
+                      onClick={() => {
+                        setIsOpen(false);
+                        logEvent('founding_100_click', { source: 'mobile_nav' });
+                      }}
+                    >
+                      <Flame className="w-4 h-4" />
+                      Founding 100
+                    </Link>
+                  </Button>
                   <Link to="/study" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/study') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
                     <Brain className="w-4 h-4" />
                     Study & Learn
@@ -187,6 +221,24 @@ export const Navigation = () => {
                   </Button>
                 </div>
               </> : <div className="flex flex-col gap-4">
+                {/* Mobile Founding 100 Button for non-logged users */}
+                <Button 
+                  asChild
+                  className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white shadow-lg animate-pulse w-full"
+                  size="sm"
+                >
+                  <Link 
+                    to="/founding" 
+                    className="flex items-center gap-2 font-medium justify-center"
+                    onClick={() => {
+                      setIsOpen(false);
+                      logEvent('founding_100_click', { source: 'mobile_nav_guest' });
+                    }}
+                  >
+                    <Flame className="w-4 h-4" />
+                    Founding 100
+                  </Link>
+                </Button>
                 <Button asChild variant="outline" className="w-full" onClick={() => setIsOpen(false)}>
                   <Link to="/auth">
                     Zaloguj się
