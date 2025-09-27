@@ -52,7 +52,8 @@ export const SocialLoginButtons = ({ loading, setLoading }: SocialLoginButtonsPr
         {loading ? "Logowanie..." : "Kontynuuj z Google"}
       </Button>
       
-      <Button
+      {/* Facebook login temporarily hidden */}
+      {/* <Button
         onClick={() => handleSocialLogin('facebook')}
         disabled={loading}
         variant="outline"
@@ -60,7 +61,7 @@ export const SocialLoginButtons = ({ loading, setLoading }: SocialLoginButtonsPr
       >
         <FaFacebook className="w-5 h-5 mr-3" />
         {loading ? "Logowanie..." : "Kontynuuj z Facebook"}
-      </Button>
+      </Button> */}
     </div>
   );
 };
