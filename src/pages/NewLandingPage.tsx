@@ -207,7 +207,7 @@ const NewLandingPage = () => {
   const handleCTAClick = (source: string) => {
     // Track analytics
     console.log(`CTA clicked from: ${source}`);
-    window.location.href = '/app/auth?trial=true';
+    window.location.href = '/auth?trial=true';
   };
 
   const scrollToSection = (sectionId: string) => {
@@ -269,7 +269,7 @@ const NewLandingPage = () => {
             <div className="hidden md:flex items-center space-x-4">
               <Button 
                 variant="ghost" 
-                onClick={() => window.location.href = '/app/auth'}
+                onClick={() => window.location.href = '/auth'}
               >
                 {t.login}
               </Button>
@@ -322,7 +322,7 @@ const NewLandingPage = () => {
                 <div className="flex space-x-4 pt-4">
                   <Button 
                     variant="ghost" 
-                    onClick={() => window.location.href = '/app/auth'}
+                    onClick={() => window.location.href = '/auth'}
                     className="flex-1"
                   >
                     {t.login}
