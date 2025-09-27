@@ -1,7 +1,8 @@
 // Learner Profile Updater with Cognitive Analytics
 // Updates user profiles with real-time cognitive insights
 
-import { FlowStateIndicators, StudentProfile } from './adaptivePedagogy.ts';
+import { FlowStateIndicators } from './cognitiveAnalysis.ts';
+import { StudentProfile } from './adaptivePedagogy.ts';
 
 interface SessionAnalytics {
   responseTime: number;
@@ -47,33 +48,33 @@ export async function updateLearnerProfileWithCognition(
       // Updated cognitive profile (exponential moving average)
       cognitive_profile: {
         working_memory_capacity: exponentialMovingAverage(
-          existingProfile.cognitive_profile?.working_memory_capacity || update.cognitiveProfile.workingMemoryCapacity,
-          update.cognitiveProfile.workingMemoryCapacity,
+          existingProfile.cognitive_profile?.working_memory_capacity || (update.cognitiveProfile.workingMemoryCapacity || 7),
+          update.cognitiveProfile.workingMemoryCapacity || 7,
           alpha
         ),
         processing_speed: exponentialMovingAverage(
-          existingProfile.cognitive_profile?.processing_speed || update.cognitiveProfile.processingSpeed,
-          update.cognitiveProfile.processingSpeed,
+          existingProfile.cognitive_profile?.processing_speed || (update.cognitiveProfile.processingSpeed || 50),
+          update.cognitiveProfile.processingSpeed || 50,
           alpha
         ),
         attention_regulation_index: exponentialMovingAverage(
-          existingProfile.cognitive_profile?.attention_regulation_index || update.cognitiveProfile.attentionRegulationIndex,
-          update.cognitiveProfile.attentionRegulationIndex,
+          existingProfile.cognitive_profile?.attention_regulation_index || (update.cognitiveProfile.attentionRegulationIndex || 0.5),
+          update.cognitiveProfile.attentionRegulationIndex || 0.5,
           alpha
         ),
         inhibitory_control_index: exponentialMovingAverage(
-          existingProfile.cognitive_profile?.inhibitory_control_index || update.cognitiveProfile.inhibitoryControlIndex,
-          update.cognitiveProfile.inhibitoryControlIndex,
+          existingProfile.cognitive_profile?.inhibitory_control_index || (update.cognitiveProfile.inhibitoryControlIndex || 0.5),
+          update.cognitiveProfile.inhibitoryControlIndex || 0.5,
           alpha
         ),
         self_efficacy: exponentialMovingAverage(
-          existingProfile.cognitive_profile?.self_efficacy || update.cognitiveProfile.selfEfficacy,
-          update.cognitiveProfile.selfEfficacy,
+          existingProfile.cognitive_profile?.self_efficacy || (update.cognitiveProfile.selfEfficacy || 0.5),
+          update.cognitiveProfile.selfEfficacy || 0.5,
           alpha
         ),
         persistence_index: exponentialMovingAverage(
-          existingProfile.cognitive_profile?.persistence_index || update.cognitiveProfile.persistenceIndex,
-          update.cognitiveProfile.persistenceIndex,
+          existingProfile.cognitive_profile?.persistence_index || (update.cognitiveProfile.persistenceIndex || 0),
+          update.cognitiveProfile.persistenceIndex || 0,
           alpha
         ),
         cognitive_style: update.cognitiveProfile.cognitiveStyle,
@@ -146,8 +147,8 @@ function calculateConsistency(sessions: any[]): number {
   if (sessions.length < 3) return 0.5;
   
   const accuracies = sessions.map(s => s.is_correct ? 1 : 0);
-  const mean = accuracies.reduce((a, b) => a + b, 0) / accuracies.length;
-  const variance = accuracies.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / accuracies.length;
+  const mean = accuracies.reduce((a: number, b: number) => a + b, 0) / accuracies.length;
+  const variance = accuracies.reduce((a: number, b: number) => a + Math.pow(b - mean, 2), 0) / accuracies.length;
   
   return Math.max(0, 1 - Math.sqrt(variance));
 }
@@ -241,7 +242,7 @@ function calculateTrendSlope(sessions: any[]): number {
   const y = sessions.map(s => s.is_correct ? 1 : 0);
   
   const sumX = x.reduce((a, b) => a + b, 0);
-  const sumY = y.reduce((a, b) => a + b, 0);
+  const sumY = y.reduce((a: number, b: number) => a + b, 0);
   const sumXY = x.reduce((sum, xi, i) => sum + xi * y[i], 0);
   const sumXX = x.reduce((sum, xi) => sum + xi * xi, 0);
   

@@ -94,7 +94,7 @@ serve(async (req) => {
 
       } catch (error) {
         console.error(`❌ Failed to process user ${trial.user_id}:`, error);
-        errors.push({ user_id: trial.user_id, error: error.message });
+        errors.push({ user_id: trial.user_id, error: (error as Error).message });
       }
     }
 
@@ -115,7 +115,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('❌ Critical error in trial-expiry-check:', error);
     return new Response(JSON.stringify({ 
-      error: error.message,
+      error: (error as Error).message,
       details: 'Critical error in trial expiry check'
     }), {
       status: 500,

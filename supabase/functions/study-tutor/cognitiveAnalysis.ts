@@ -5,12 +5,10 @@ import { StudentProfile, StudentResponsePattern } from './adaptivePedagogy.ts';
 
 // Calculate flow state indicators based on cognitive science principles
 // Define FlowStateIndicators type at the top of cognitiveAnalysis.ts
-interface FlowStateIndicators {
-  engagement: number;
-  frustration: number;
-  cognitiveLoad: number;
-  flow: number;
+export interface FlowStateIndicators {
   responseTimeVariance: number;
+  errorStabilityIndex: number;
+  selfCorrectionFrequency: number;
   perceivedChallenge: number;
   engagementLevel: number;
   frustrationLevel: number;
@@ -18,15 +16,15 @@ interface FlowStateIndicators {
 
 export function calculateFlowState(responseTime: number, profile: StudentProfile): FlowStateIndicators {
   // Response time variance calculation (attention regulation)
-  const expectedResponseTime = profile.processingSpeed * 1000; // convert to ms
+  const expectedResponseTime = (profile.processingSpeed || 50) * 1000; // convert to ms
   const timeDeviation = Math.abs(responseTime - expectedResponseTime) / expectedResponseTime;
   const responseTimeVariance = Math.min(1, timeDeviation);
   
   // Error stability based on recent performance patterns
-  const errorStabilityIndex = 1 - (profile.commonMistakes.length / 10); // normalize to 0-1
+  const errorStabilityIndex = 1 - ((profile.commonMistakes?.length || 0) / 10); // normalize to 0-1
   
   // Self-correction frequency (metacognitive awareness)
-  const selfCorrectionFrequency = profile.persistenceIndex / 5; // normalize attempts to 0-1
+  const selfCorrectionFrequency = (profile.persistenceIndex || 0) / 5; // normalize attempts to 0-1
   
   // Perceived challenge based on working memory load
   const cognitiveLoad = calculateCognitiveLoad(profile);
@@ -50,9 +48,9 @@ export function calculateFlowState(responseTime: number, profile: StudentProfile
 
 // Calculate cognitive load using Sweller's Cognitive Load Theory
 export function calculateCognitiveLoad(profile: StudentProfile): number {
-  const intrinsicLoad = profile.difficultyLevel / 10; // task complexity
-  const extraneousLoad = profile.knowledgeGaps.length / 5; // missing prerequisites
-  const germaneLoad = profile.workingMemoryCapacity / 9; // available processing capacity
+  const intrinsicLoad = (profile.difficultyLevel || 5) / 10; // task complexity
+  const extraneousLoad = (profile.knowledgeGaps?.length || 0) / 5; // missing prerequisites
+  const germaneLoad = (profile.workingMemoryCapacity || 7) / 9; // available processing capacity
   
   // CLT formula: effective load = (intrinsic + extraneous) / germane
   const cognitiveLoad = (intrinsicLoad + extraneousLoad) / Math.max(0.1, germaneLoad);
@@ -124,7 +122,7 @@ export function selectPedagogicalStrategy(
     case 'persistent':
       return 'interleaving'; // varied practice
     default:
-      return profile.preferredPedagogyStyle;
+      return profile.preferredPedagogyStyle || 'fading';
   }
 }
 
@@ -146,7 +144,7 @@ export function calculateDifficultyAdjustment(
   // Response pattern-based adjustment
   switch (responsePattern) {
     case 'quick_correct':
-      adjustment += profile.selfEfficacy > 0.8 ? 1 : 0;
+      adjustment += (profile.selfEfficacy || 0.5) > 0.8 ? 1 : 0;
       break;
     case 'method_error':
       adjustment -= 1;
@@ -167,13 +165,13 @@ export function calculateDifficultyAdjustment(
 // Calculate engagement level based on multiple cognitive indicators
 function calculateEngagementLevel(profile: StudentProfile, responseTimeVariance: number): number {
   // Base engagement from self-efficacy and persistence
-  let engagement = (profile.selfEfficacy + profile.persistenceIndex / 5) / 2;
+  let engagement = ((profile.selfEfficacy || 0.5) + (profile.persistenceIndex || 0) / 5) / 2;
   
   // Attention regulation bonus
   engagement += (1 - responseTimeVariance) * 0.2;
   
   // Working memory efficiency bonus
-  engagement += (profile.workingMemoryCapacity / 9) * 0.1;
+  engagement += ((profile.workingMemoryCapacity || 7) / 9) * 0.1;
   
   return Math.min(1, engagement);
 }
@@ -183,18 +181,19 @@ function calculateFrustrationLevel(profile: StudentProfile, cognitiveLoad: numbe
   let frustration = 0;
   
   // Cognitive overload contributes to frustration
-  if (cognitiveLoad > profile.cognitiveLoadThreshold) {
-    frustration += (cognitiveLoad - profile.cognitiveLoadThreshold) * 0.5;
+  const threshold = profile.cognitiveLoadThreshold || 1.0;
+  if (cognitiveLoad > threshold) {
+    frustration += (cognitiveLoad - threshold) * 0.5;
   }
   
   // Low self-efficacy increases frustration
-  frustration += (1 - profile.selfEfficacy) * 0.3;
+  frustration += (1 - (profile.selfEfficacy || 0.5)) * 0.3;
   
   // Frequent mistakes increase frustration
-  frustration += (profile.commonMistakes.length / 10) * 0.2;
+  frustration += ((profile.commonMistakes?.length || 0) / 10) * 0.2;
   
   // Inhibitory control deficit increases frustration
-  frustration += (1 - profile.inhibitoryControlIndex) * 0.2;
+  frustration += (1 - (profile.inhibitoryControlIndex || 0.5)) * 0.2;
   
   return Math.min(1, frustration);
 }
@@ -253,7 +252,7 @@ export function shouldTakeMicroBreak(
   profile: StudentProfile, 
   flowState: FlowStateIndicators
 ): boolean {
-  const optimalSessionLength = calculateOptimalSessionLength(profile.ageGroup);
+  const optimalSessionLength = calculateOptimalSessionLength(profile.ageGroup || 'middle');
   
   return (
     sessionDuration >= optimalSessionLength || 

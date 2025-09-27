@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useReferral } from "@/hooks/useReferral";
 import { Navigation } from "@/components/Navigation";
 import HomePage from "./pages/HomePage";
+import NewLandingPage from "./pages/NewLandingPage";
 import QuizPage from "./pages/QuizPage";
 import { Dashboard } from "@/components/Dashboard";
 import DashboardPage from "./pages/DashboardPage";
@@ -155,7 +156,8 @@ const App = () => (
           <LoggingBootstrap />
           <RouteSeo />
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<NewLandingPage />} />
+            <Route path="/app" element={<HomePage />} />
             <Route path="/founding" element={<FoundingLandingPage />} />
             <Route path="/auth" element={<AuthPage />} />
             

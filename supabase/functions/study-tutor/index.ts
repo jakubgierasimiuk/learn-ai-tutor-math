@@ -1100,8 +1100,10 @@ async function handleChat(req: Request): Promise<Response> {
     let userId = undefined;
     if (authHeader) {
       try {
-        const { data: { user } } = await supabaseClient.auth.getUser(authHeader.replace('Bearer ', ''));
-        userId = user?.id;
+        if (supabaseClient) {
+          const { data: { user } } = await supabaseClient.auth.getUser(authHeader.replace('Bearer ', ''));
+          userId = user?.id;
+        }
       } catch (error) {
         console.log("Could not get user from auth header:", error);
       }
@@ -1122,7 +1124,7 @@ async function handleChat(req: Request): Promise<Response> {
           
           // Check if user has a paid subscription
           const { data: subscription } = await supabaseClient.functions.invoke('check-subscription', {
-            headers: { Authorization: authHeader }
+            headers: { Authorization: authHeader || '' }
           });
 
           const isFreeTier = subscription?.subscription_type === 'free';
@@ -1352,7 +1354,7 @@ MAKSYMALNIE 150 słów + JEDNO pytanie na końcu. NIGDY więcej! Jeśli musisz w
     console.log('Extracted AI message:', aiMessage);
 
     // Update token usage if user is identified
-    if (userId && tokensUsed > 0) {
+    if (userId && tokensUsed > 0 && supabaseClient) {
       const { error: tokenError } = await supabaseClient.rpc('update_token_usage', {
         p_user_id: userId,
         p_tokens_used: tokensUsed

@@ -107,7 +107,7 @@ function calculateProcessingSpeed(responseTime: number, ageGroup: string): numbe
     'high_school': 4000  // 4 seconds
   };
   
-  const baseline = baselines[ageGroup] || 5000;
+  const baseline = baselines[ageGroup as keyof typeof baselines] || 5000;
   
   // Convert to percentile (faster = higher percentile)
   const speedRatio = baseline / Math.max(1000, responseTime);

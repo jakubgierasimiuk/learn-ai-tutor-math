@@ -243,7 +243,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in verify-sms function:', error);
     return new Response(JSON.stringify({ 
-      error: error.message || 'Internal server error' 
+      error: (error as Error).message || 'Internal server error' 
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
