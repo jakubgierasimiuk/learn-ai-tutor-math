@@ -108,8 +108,128 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Content Import Section */}
-      
+      {/* Free Trial Hero Section */}
+      <section className="relative py-24 px-6 bg-gradient-to-br from-primary/10 via-background to-accent/10 overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute top-10 right-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-10 left-10 w-48 h-48 bg-accent/5 rounded-full blur-2xl animate-float" style={{animationDelay: '3s'}}></div>
+        
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left side - Content */}
+            <div className="text-center lg:text-left">
+              {/* Premium badge */}
+              <div className="inline-flex items-center gap-2 bg-success/10 rounded-full px-6 py-3 mb-6 border border-success/20 animate-fadeIn">
+                <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
+                <span className="text-success font-semibold text-sm uppercase tracking-wide">100% DARMOWE</span>
+              </div>
+              
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-foreground leading-tight animate-fadeIn" style={{animationDelay: '0.2s'}}>
+                Rozpocznij za darmo<br />
+                <span className="text-primary">bez zobowiązań</span>
+              </h2>
+              
+              <p className="text-xl md:text-2xl mb-8 text-muted-foreground leading-relaxed animate-fadeIn" style={{animationDelay: '0.4s'}}>
+                <strong className="text-foreground">7 dni pełnego dostępu.</strong><br />
+                Bez karty płatniczej. Bez automatycznego odnowienia.
+              </p>
+              
+              {/* Benefits list */}
+              <div className="space-y-4 mb-10 animate-fadeIn" style={{animationDelay: '0.6s'}}>
+                {[
+                  "Pełny dostęp do wszystkich tematów",
+                  "Nielimitowane pytania do AI",
+                  "Personalizowane ścieżki nauki",
+                  "Raporty postępów",
+                  "Anuluj w każdej chwili"
+                ].map((benefit, index) => (
+                  <div key={index} className="flex items-center gap-4">
+                    <div className="w-6 h-6 bg-success rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-success-foreground text-sm font-bold">✓</span>
+                    </div>
+                    <span className="text-foreground font-medium">{benefit}</span>
+                  </div>
+                ))}
+              </div>
+              
+              {/* CTA Button */}
+              <div className="animate-fadeIn" style={{animationDelay: '0.8s'}}>
+                <Button asChild size="lg" className="shadow-primary hover-lift text-xl px-12 py-6 font-bold mb-4 w-full lg:w-auto" onClick={() => handleCtaClick('free_trial_hero')}>
+                  <Link to="/auth">
+                    <span className="flex items-center justify-center gap-3">
+                      <Sparkles className="w-6 h-6" />
+                      Rozpocznij 7-dniowy darmowy trial
+                    </span>
+                  </Link>
+                </Button>
+                <p className="text-sm text-muted-foreground mt-2">
+                  🔒 Nie potrzebujesz karty płatniczej
+                </p>
+              </div>
+            </div>
+            
+            {/* Right side - Visual */}
+            <div className="relative animate-fadeIn" style={{animationDelay: '1s'}}>
+              <div className="relative">
+                {/* Main card */}
+                <div className="bg-card rounded-3xl p-8 border border-border shadow-primary backdrop-blur-sm">
+                  <div className="text-center mb-6">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary to-primary-glow rounded-2xl mb-4">
+                      <GraduationCap className="w-8 h-8 text-primary-foreground" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-foreground mb-2">Dołącz do 500+ uczniów</h3>
+                    <p className="text-muted-foreground">którzy już poprawili swoje oceny</p>
+                  </div>
+                  
+                  {/* Mini testimonial */}
+                  <div className="bg-muted/50 rounded-xl p-6 border border-border/50">
+                    <div className="flex items-center gap-4 mb-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-accent to-accent rounded-full flex items-center justify-center">
+                        <span className="text-accent-foreground font-bold text-sm">AK</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-foreground text-sm">Anna K.</p>
+                        <p className="text-xs text-muted-foreground">Klasa 2 LO</p>
+                      </div>
+                    </div>
+                    <p className="text-foreground text-sm italic">
+                      "W końcu rozumiem pochodne! AI tłumaczy w sposób, który dociera do mnie."
+                    </p>
+                    <div className="flex gap-1 mt-2">
+                      {[...Array(5)].map((_, i) => (
+                        <span key={i} className="text-warning text-sm">⭐</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Floating elements */}
+                <div className="absolute -top-4 -right-4 w-8 h-8 bg-success/20 rounded-full animate-float" style={{animationDelay: '2s'}}></div>
+                <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-accent/20 rounded-full animate-float" style={{animationDelay: '4s'}}></div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Bottom trust signals */}
+          <div className="mt-16 text-center animate-fadeIn" style={{animationDelay: '1.2s'}}>
+            <p className="text-muted-foreground mb-6 text-lg">Zacznij już dziś i zobacz różnicę</p>
+            <div className="flex justify-center gap-8 flex-wrap">
+              <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm rounded-xl px-4 py-2 border border-border">
+                <div className="w-2 h-2 bg-success rounded-full"></div>
+                <span className="text-foreground font-medium text-sm">Bez ryzyka</span>
+              </div>
+              <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm rounded-xl px-4 py-2 border border-border">
+                <div className="w-2 h-2 bg-primary rounded-full"></div>
+                <span className="text-foreground font-medium text-sm">Natychmiastowy dostęp</span>
+              </div>
+              <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm rounded-xl px-4 py-2 border border-border">
+                <div className="w-2 h-2 bg-accent rounded-full"></div>
+                <span className="text-foreground font-medium text-sm">Anuluj w każdej chwili</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* mentavo.ai Section */}
       <section className="py-24 px-6 bg-muted/30">
