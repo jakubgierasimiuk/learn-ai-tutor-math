@@ -5,7 +5,11 @@ import heroImage from "@/assets/hero-education.jpg";
 import { logEvent } from "@/lib/logger";
 import { TestimonialsCarousel } from "./TestimonialsCarousel";
 import { RotatingTestimonial } from "./RotatingTestimonial";
+import { useAuth } from "@/hooks/useAuth";
+
 export function LandingPage() {
+  const { user } = useAuth();
+  
   const handleCtaClick = (action: string) => {
     logEvent('landing_cta_click', {
       action
@@ -62,9 +66,9 @@ export function LandingPage() {
                   Zadaj pytanie, wyślij zdjęcie zadania lub po prostu powiedz czego nie rozumiesz. 
                   AI pomoże Ci krok po kroku.
                 </p>
-                <Button asChild className="w-full shadow-primary" onClick={() => handleCtaClick('signup')}>
-                  <Link to="/auth">
-                    Załóż darmowe konto
+                <Button asChild className="w-full shadow-primary" onClick={() => handleCtaClick(user ? 'chat' : 'signup')}>
+                  <Link to={user ? "/chat" : "/auth"}>
+                    {user ? "Korepetycje z AI" : "Załóż darmowe konto"}
                   </Link>
                 </Button>
               </div>
@@ -81,9 +85,9 @@ export function LandingPage() {
                   Systematyczna nauka z AI. Wybierz temat, rozwiązuj zadania dopasowane do Twojego poziomu
                   i śledź postępy.
                 </p>
-                <Button asChild variant="outline" className="w-full hover-lift" onClick={() => handleCtaClick('study')}>
-                  <Link to="/auth">
-                    Zacznij naukę
+                <Button asChild variant="outline" className="w-full hover-lift" onClick={() => handleCtaClick(user ? 'study_dashboard' : 'study')}>
+                  <Link to={user ? "/dashboard" : "/auth"}>
+                    {user ? "Przejdź do nauki" : "Zacznij naukę"}
                   </Link>
                 </Button>
               </div>
@@ -156,11 +160,11 @@ export function LandingPage() {
               
               {/* CTA Button */}
               <div className="animate-fadeIn" style={{animationDelay: '0.8s'}}>
-                <Button asChild size="lg" className="shadow-primary hover-lift text-xl px-12 py-6 font-bold mb-4 w-full lg:w-auto" onClick={() => handleCtaClick('free_trial_hero')}>
-                  <Link to="/auth">
+                <Button asChild size="lg" className="shadow-primary hover-lift text-xl px-12 py-6 font-bold mb-4 w-full lg:w-auto" onClick={() => handleCtaClick(user ? 'dashboard' : 'free_trial_hero')}>
+                  <Link to={user ? "/dashboard" : "/auth"}>
                     <span className="flex items-center justify-center gap-3">
                       <Sparkles className="w-6 h-6" />
-                      Rozpocznij 7-dniowy darmowy trial
+                      {user ? "Przejdź do dashboardu" : "Rozpocznij 7-dniowy darmowy trial"}
                     </span>
                   </Link>
                 </Button>
@@ -259,9 +263,9 @@ export function LandingPage() {
             </div>
           </div>
           
-          <Button asChild className="shadow-primary hover-lift text-lg px-8 py-4" size="lg" onClick={() => handleCtaClick('see_ai_tutor_demo')}>
-            <Link to="/auth">
-              Zobacz, jak działa mentavo.ai
+          <Button asChild className="shadow-primary hover-lift text-lg px-8 py-4" size="lg" onClick={() => handleCtaClick(user ? 'chat_ai' : 'see_ai_tutor_demo')}>
+            <Link to={user ? "/chat" : "/auth"}>
+              {user ? "Zadaj pytanie AI" : "Zobacz, jak działa mentavo.ai"}
             </Link>
           </Button>
         </div>
@@ -310,9 +314,9 @@ export function LandingPage() {
             </div>
           </div>
           
-          <Button asChild variant="outline" className="hover-lift text-lg px-8 py-4" size="lg" onClick={() => handleCtaClick('check_progress')}>
-            <Link to="/auth">
-              Sprawdź swoje postępy
+          <Button asChild variant="outline" className="hover-lift text-lg px-8 py-4" size="lg" onClick={() => handleCtaClick(user ? 'progress' : 'check_progress')}>
+            <Link to={user ? "/progress" : "/auth"}>
+              {user ? "Zobacz swoje postępy" : "Sprawdź swoje postępy"}
             </Link>
           </Button>
         </div>
@@ -379,12 +383,12 @@ export function LandingPage() {
               To mniej niż koszt jednej godziny korepetycji – a korzystasz ile chcesz, kiedy chcesz.
             </p>
             
-            <Button asChild size="lg" className="shadow-primary hover-lift text-xl px-12 py-6 font-bold" onClick={() => handleCtaClick('start_trial')}>
-              <Link to="/auth">
+            <Button asChild size="lg" className="shadow-primary hover-lift text-xl px-12 py-6 font-bold" onClick={() => handleCtaClick(user ? 'subscription' : 'start_trial')}>
+              <Link to={user ? "/account" : "/auth"}>
                 <span className="flex items-center gap-3">
                   <Sparkles className="w-6 h-6" />
-                  Rozpocznij darmowy okres próbny
-                  <span className="bg-accent/20 rounded-full px-3 py-1 text-sm">7 dni</span>
+                  {user ? "Zarządzaj subskrypcją" : "Rozpocznij darmowy okres próbny"}
+                  {!user && <span className="bg-accent/20 rounded-full px-3 py-1 text-sm">7 dni</span>}
                 </span>
               </Link>
             </Button>
