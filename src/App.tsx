@@ -45,6 +45,7 @@ import { ViralPopups } from "@/components/viral/ViralPopups";
 import { SMSTriggerManager } from "@/components/SMSTriggerManager";
 import { SurveyProvider } from "@/components/SurveyProvider";
 import { FoundingLandingPage } from "@/components/FoundingLandingPage";
+import FoundingRegistrationPage from "@/pages/FoundingRegistrationPage";
 import { LanguageProvider } from "@/hooks/useLanguage";
 
 const queryClient = new QueryClient();
@@ -162,6 +163,9 @@ const App = () => (
             <Route path="/" element={<NewLandingPage />} />
             <Route path="/app" element={<HomePage />} />
             <Route path="/founding" element={<FoundingLandingPage />} />
+            <Route path="/founding/register" element={
+              <FoundingRegistrationPage />
+            } />
             <Route path="/auth" element={<AuthPage />} />
             
             {/* Onboarding routes - accessible to authenticated users */}

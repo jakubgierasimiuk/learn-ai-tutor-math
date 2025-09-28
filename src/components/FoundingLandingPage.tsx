@@ -1,21 +1,17 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Seo } from "@/components/Seo";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { 
-  Check, Flame, Users, Star, Gift, ChevronRight, Mail, Lock, 
+  Check, Flame, Users, Star, Gift, ChevronRight,
   MessageCircle, Target, BarChart3, FlaskConical,
   DollarSign, Frown, Home, Shield, Clock, Zap,
   TrendingUp, Heart, Award, BookOpen, Brain
 } from "lucide-react";
-import { FaGoogle } from "react-icons/fa";
 
 export function FoundingLandingPage() {
   const { user } = useAuth();
@@ -23,10 +19,6 @@ export function FoundingLandingPage() {
   const [membersCount, setMembersCount] = useState<number>(0);
   const [spotsLeft, setSpotsLeft] = useState<number>(100);
   const [isLoading, setIsLoading] = useState(false);
-  const [showRegistrationForm, setShowRegistrationForm] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [socialLoading, setSocialLoading] = useState(false);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -64,103 +56,20 @@ export function FoundingLandingPage() {
   }, [user]);
 
   const handleJoinNow = async () => {
-    if (!user && !showRegistrationForm) {
-      setShowRegistrationForm(true);
+    // Redirect to registration page instead of showing inline form
+    if (!user) {
+      window.location.href = '/founding/register';
       return;
     }
 
-    if (spotsLeft <= 0) {
-      toast({
-        title: "Brak miejsc",
-        description: "Niestety, wszystkie miejsca zostały już zajęte",
-        variant: "destructive"
-      });
-      return;
-    }
+    // If user is already logged in, redirect to registration page with join parameter
+    window.location.href = '/founding/register?join=true';
 
-    setIsLoading(true);
-    try {
-      const requestBody = user ? {
-        // Already authenticated user (Google OAuth or existing user)
-        email: user.email || '',
-        name: user.user_metadata?.name || '',
-        deviceInfo: {
-          userAgent: navigator.userAgent,
-          screenWidth: window.screen.width,
-          screenHeight: window.screen.height
-        }
-      } : {
-        // New user registration
-        email: email.trim(),
-        password: password || undefined,
-        name: email.split('@')[0], // Use email prefix as default name
-        deviceInfo: {
-          userAgent: navigator.userAgent,
-          screenWidth: window.screen.width,
-          screenHeight: window.screen.height
-        }
-      };
-
-      const { data, error } = await supabase.functions.invoke('founding-registration', {
-        body: requestBody
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      if (data?.success) {
-        toast({
-          title: "Gratulacje! 🎉",
-          description: user 
-            ? "Dołączyłeś do Founding 100! Dostałeś darmowy miesiąc Premium."
-            : "Konto zostało utworzone! Dołączyłeś do Founding 100 z darmowym miesiącem Premium. Sprawdź email z danymi do logowania."
-        });
-        setMembersCount(data.totalMembers || 0);
-        setSpotsLeft(data.slotsLeft || 0);
-        setShowRegistrationForm(false);
-        setEmail("");
-        setPassword("");
-      } else if (data?.code === 'ALREADY_REGISTERED') {
-        toast({
-          title: "Już jesteś w programie!",
-          description: "Jesteś już członkiem Founding 100",
-          variant: "default"
-        });
-      } else {
-        throw new Error(data?.error || 'Registration failed');
-      }
-    } catch (error) {
-      console.error('Error joining Founding 100:', error);
-      toast({
-        title: "Błąd",
-        description: "Wystąpił błąd podczas rejestracji. Spróbuj ponownie.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleGoogleJoin = () => {
-    setSocialLoading(true);
-    // Redirect to founding page with join parameter after Google OAuth
-    const redirectUrl = `${window.location.origin}/founding?join=true`;
-    
-    supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: redirectUrl,
-      },
-    }).catch((error) => {
-      console.error('Google OAuth error:', error);
-      setSocialLoading(false);
-      toast({
-        title: "Błąd",
-        description: "Wystąpił problem z logowaniem Google",
-        variant: "destructive"
-      });
-    });
+    // Redirect to registration page for Google OAuth
+    window.location.href = '/founding/register';
   };
 
   return (
@@ -234,103 +143,17 @@ export function FoundingLandingPage() {
                   ))}
                 </div>
 
-                {/* Registration Form or CTA */}
-                {showRegistrationForm && !user ? (
-                  <Card className="bg-card/80 backdrop-blur-sm">
-                    <CardContent className="p-6">
-                      <div className="space-y-4">
-                        <div className="text-center">
-                          <h3 className="text-lg font-semibold mb-2">Dołącz do Founding 100</h3>
-                          <p className="text-sm text-muted-foreground">Utwórz konto i otrzymaj darmowy miesiąc Premium</p>
-                        </div>
-
-                        <div className="space-y-3">
-                          <div>
-                            <Label htmlFor="email" className="text-sm font-medium">Email</Label>
-                            <div className="relative">
-                              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                              <Input
-                                id="email"
-                                type="email"
-                                placeholder="twoj@email.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="pl-10"
-                                required
-                              />
-                            </div>
-                          </div>
-
-                          <div>
-                            <Label htmlFor="password" className="text-sm font-medium">Hasło (opcjonalne)</Label>
-                            <div className="relative">
-                              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                              <Input
-                                id="password"
-                                type="password"
-                                placeholder="Zostaw puste dla losowego hasła"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="pl-10"
-                              />
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-1">Jeśli zostawisz puste, wygenerujemy hasło i wyślemy je na email</p>
-                          </div>
-
-                          <Button 
-                            onClick={handleJoinNow} 
-                            disabled={isLoading || !email.trim() || spotsLeft === 0} 
-                            className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white"
-                          >
-                            {isLoading ? "Tworzę konto..." : "Utwórz konto i dołącz"}
-                          </Button>
-
-                          <div className="relative">
-                            <div className="absolute inset-0 flex items-center">
-                              <Separator className="w-full" />
-                            </div>
-                            <div className="relative flex justify-center text-xs uppercase">
-                              <span className="bg-card px-2 text-muted-foreground">lub</span>
-                            </div>
-                          </div>
-
-                          <Button
-                            onClick={handleGoogleJoin}
-                            disabled={socialLoading || spotsLeft === 0}
-                            variant="outline"
-                            className="w-full h-12 text-base font-medium"
-                          >
-                            <FaGoogle className="w-5 h-5 mr-3 text-red-500" />
-                            {socialLoading ? "Przekierowuję..." : "Dołącz przez Google"}
-                          </Button>
-
-                          <Button
-                            onClick={() => {
-                              setShowRegistrationForm(false);
-                              setEmail("");
-                              setPassword("");
-                            }}
-                            variant="ghost"
-                            className="w-full"
-                          >
-                            Anuluj
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <Button 
-                      onClick={handleJoinNow} 
-                      disabled={isLoading || spotsLeft === 0} 
-                      size="lg"
-                      className="text-lg font-semibold bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white px-8 py-6"
-                    >
-                      {isLoading ? (user ? "Dołączam..." : "Rejestruję...") : spotsLeft === 0 ? "Brak miejsc" : user ? "Dołącz teraz" : "Zostań Founding Member"}
-                    </Button>
-                  </div>
-                )}
+                {/* CTA Button */}
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button 
+                    onClick={handleJoinNow} 
+                    disabled={isLoading || spotsLeft === 0} 
+                    size="lg"
+                    className="text-lg font-semibold bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white px-8 py-6"
+                  >
+                    {isLoading ? (user ? "Dołączam..." : "Rejestruję...") : spotsLeft === 0 ? "Brak miejsc" : user ? "Dołącz teraz" : "Zostań Founding Member"}
+                  </Button>
+                </div>
 
                 <p className="text-sm text-muted-foreground">
                   Bez zobowiązań • Możesz zrezygnować w każdej chwili
