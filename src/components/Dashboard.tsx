@@ -202,6 +202,40 @@ export const Dashboard = () => {
         {/* Premium Status Card */}
         <PremiumStatusCard />
 
+        {/* Quick Actions */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="w-5 h-5 text-primary" />
+              Szybkie akcje
+            </CardTitle>
+            <CardDescription>Kontynuuj swoją naukę</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Link to="/chat">
+                <Button className="w-full h-auto p-4 flex-col gap-2">
+                  <Brain className="w-6 h-6" />
+                  <div className="text-center">
+                    <div className="font-medium">Korepetycje z AI</div>
+                    <div className="text-xs opacity-80">Rozpocznij</div>
+                  </div>
+                </Button>
+              </Link>
+              
+              <Link to="/study">
+                <Button variant="outline" className="w-full h-auto p-4 flex-col gap-2">
+                  <BookOpen className="w-6 h-6" />
+                  <div className="text-center">
+                    <div className="font-medium">Study&Learn</div>
+                    <div className="text-xs opacity-80">wybierz nową lekcję</div>
+                  </div>
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="card-hover">
@@ -257,39 +291,6 @@ export const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="w-5 h-5 text-primary" />
-              Szybkie akcje
-            </CardTitle>
-            <CardDescription>Kontynuuj swoją naukę</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Link to="/chat">
-                <Button className="w-full h-auto p-4 flex-col gap-2">
-                  <Brain className="w-6 h-6" />
-                  <div className="text-center">
-                    <div className="font-medium">korepetycje z AI</div>
-                    <div className="text-xs opacity-80">rozpocznij</div>
-                  </div>
-                </Button>
-              </Link>
-              
-              <Link to="/study">
-                <Button variant="outline" className="w-full h-auto p-4 flex-col gap-2">
-                  <BookOpen className="w-6 h-6" />
-                  <div className="text-center">
-                    <div className="font-medium">Study&Learn</div>
-                    <div className="text-xs opacity-80">wybierz nową lekcję</div>
-                  </div>
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Achievements */}
