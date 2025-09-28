@@ -20,6 +20,7 @@ import {
 import { TokenLimitDashboard } from "@/components/TokenLimitDashboard";
 import { AnalyticsSection } from "@/components/AnalyticsSection";
 import { RealTimeAnalytics } from "@/components/RealTimeAnalytics";
+import { SubscriptionStatsCard } from "@/components/SubscriptionStatsCard";
 
 export const AdminPanel = () => {
   const [selectedView, setSelectedView] = useState<"owner" | "admin">("owner");
@@ -269,8 +270,9 @@ export const AdminPanel = () => {
 
       {selectedView === "admin" && (
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Przegląd</TabsTrigger>
+            <TabsTrigger value="subscriptions">Subskrypcje</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="realtime">Real-time</TabsTrigger>
             <TabsTrigger value="token-limits">Limity Tokenów</TabsTrigger>
@@ -418,6 +420,10 @@ export const AdminPanel = () => {
               </CardContent>
             </Card>
             </div>
+          </TabsContent>
+          
+          <TabsContent value="subscriptions" className="space-y-6">
+            <SubscriptionStatsCard />
           </TabsContent>
           
           <TabsContent value="analytics" className="space-y-6">

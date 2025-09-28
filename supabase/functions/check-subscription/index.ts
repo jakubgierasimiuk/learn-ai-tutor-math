@@ -145,6 +145,16 @@ serve(async (req) => {
         }
       }
       
+      // Check if free account exceeded token limits (should move to expired)
+      if (currentSub.subscription_type === 'free' && subscriptionType === 'free') {
+        const hardLimit = freeLimit?.token_limit_hard || 25000;
+        if (tokensUsedTotal >= hardLimit) {
+          subscriptionType = 'expired';
+          monthlyTokensUsed = 0;
+          logStep("Free account exceeded hard token limit - moved to expired");
+        }
+      }
+      
       // Handle subscription type transitions
       if (currentSub.subscription_type === 'paid' && subscriptionType === 'expired') {
         // Transition from paid to expired - reset monthly tokens and set to expired plan

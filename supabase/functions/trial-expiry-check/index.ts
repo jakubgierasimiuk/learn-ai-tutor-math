@@ -26,10 +26,10 @@ serve(async (req) => {
   try {
     console.log('🔍 Starting trial expiry check...');
 
-    // Find users whose trial has expired
+    // Find users whose trial has expired (free accounts with expired trial_end_date)
     const { data: expiredTrials, error: queryError } = await supabase
       .from('user_subscriptions')
-      .select('user_id, trial_end_date, subscription_type')
+      .select('user_id, trial_end_date, subscription_type, tokens_used_total, token_limit_hard')
       .eq('subscription_type', 'free')
       .not('trial_end_date', 'is', null)
       .lt('trial_end_date', new Date().toISOString());
@@ -59,14 +59,25 @@ serve(async (req) => {
       try {
         console.log(`⚡ Processing trial expiry for user ${trial.user_id}`);
 
-        // Update subscription to limited_free and reset monthly usage
+        // Check if account exceeded token limits - if so, move to expired instead
+        const tokensUsed = trial.tokens_used_total || 0;
+        const hardLimit = trial.token_limit_hard || 25000;
+        const newSubscriptionType = tokensUsed >= hardLimit ? 'expired' : 'limited_free';
+        
+        // Update appropriate token limits based on new subscription type
+        const newLimits = newSubscriptionType === 'expired' 
+          ? { token_limit_soft: 5000, token_limit_hard: 5000 }
+          : { token_limit_soft: 1000, token_limit_hard: 1200 };
+
+        // Update subscription and reset monthly usage
         const { error: updateError } = await supabase
           .from('user_subscriptions')
           .update({
-            subscription_type: 'limited_free',
+            subscription_type: newSubscriptionType,
             monthly_tokens_used: 0,
             billing_cycle_start: new Date().toISOString(),
             trial_end_date: null, // Clear trial end date
+            ...newLimits
           })
           .eq('user_id', trial.user_id);
 
@@ -84,8 +95,10 @@ serve(async (req) => {
             event_type: 'trial_expired',
             payload: {
               from_plan: 'free',
-              to_plan: 'limited_free',
+              to_plan: newSubscriptionType,
               trial_end_date: trial.trial_end_date,
+              tokens_used: tokensUsed,
+              token_limit_exceeded: tokensUsed >= hardLimit,
             },
           });
 
