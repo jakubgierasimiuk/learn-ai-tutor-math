@@ -6,6 +6,7 @@ import { Seo } from "@/components/Seo";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import { 
   Check, Flame, Users, Star, Gift, ChevronRight,
   MessageCircle, Target, BarChart3, FlaskConical,
@@ -16,6 +17,7 @@ import {
 export function FoundingLandingPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [membersCount, setMembersCount] = useState<number>(0);
   const [spotsLeft, setSpotsLeft] = useState<number>(100);
   const [isLoading, setIsLoading] = useState(false);
@@ -91,12 +93,15 @@ export function FoundingLandingPage() {
         {/* Header */}
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-4">
           <div className="container flex items-center justify-between">
-            <div className="flex items-center space-x-2">
+            <button 
+              onClick={() => navigate('/')}
+              className="flex items-center space-x-2 hover:opacity-80 transition-opacity cursor-pointer"
+            >
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
                 <span className="text-white font-bold text-xl">M</span>
               </div>
               <span className="text-xl font-semibold">Mentavo AI</span>
-            </div>
+            </button>
             <Button 
               onClick={handleJoinNow}
               disabled={spotsLeft === 0}
