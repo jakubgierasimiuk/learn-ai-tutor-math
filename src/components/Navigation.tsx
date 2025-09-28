@@ -15,7 +15,9 @@ export const Navigation = () => {
     user,
     signOut
   } = useAuth();
-  const { isAdmin } = useRoles();
+  const {
+    isAdmin
+  } = useRoles();
   const [isOpen, setIsOpen] = useState(false);
   const [isBugReportOpen, setIsBugReportOpen] = useState(false);
   const location = useLocation();
@@ -35,28 +37,13 @@ export const Navigation = () => {
         <div className="flex items-center justify-between h-12 md:h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <img 
-              src={mentavoLogoIcon} 
-              alt="Mentavo AI Logo" 
-              className="w-10 h-10"
-            />
+            <img src={mentavoLogoIcon} alt="Mentavo AI Logo" className="w-10 h-10" />
             <span className="text-xl font-bold font-['Poppins'] hidden sm:block">Mentavo AI</span>
           </Link>
 
           {/* Founding 100 Button */}
-          <Button 
-            asChild
-            className="gradient-hero text-primary-foreground shadow-primary hover:opacity-95 hover-lift hidden md:flex"
-            size="sm"
-          >
-            <Link 
-              to="/founding" 
-              className="flex items-center gap-2 font-medium"
-              onClick={() => logEvent('founding_100_click', { source: 'desktop_nav' })}
-            >
-              <Flame className="w-4 h-4" />
-              Founding 100
-            </Link>
+          <Button asChild className="gradient-hero text-primary-foreground shadow-primary hover:opacity-95 hover-lift hidden md:flex" size="sm">
+            
           </Button>
 
           {user ? <>
@@ -66,8 +53,7 @@ export const Navigation = () => {
                   <Brain className="w-4 h-4" />
                   Study & Learn
                 </Link>
-                {isAdmin && (
-                  <>
+                {isAdmin && <>
                     <Link to="/dashboard" className={`flex items-center gap-2 transition-smooth ${isActive('/dashboard') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
                       <Crown className="w-4 h-4" />
                       Dashboard Zarządczy
@@ -76,8 +62,7 @@ export const Navigation = () => {
                       <Database className="w-4 h-4" />
                       AI Logs
                     </Link>
-                  </>
-                )}
+                  </>}
                 <Link to="/sessions" className={`flex items-center gap-2 transition-smooth ${isActive('/sessions') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
                   <Clock className="w-4 h-4" />
                   Sesje
@@ -93,16 +78,12 @@ export const Navigation = () => {
 
               {/* User Info & Logout */}
               <div className="hidden md:flex items-center gap-4">
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => {
-                    setIsBugReportOpen(true);
-                    logEvent('bug_report_opened', { source: 'desktop_nav' });
-                  }}
-                  className="flex items-center gap-2 text-muted-foreground hover:text-orange-500"
-                  title="Zgłoś problem"
-                >
+                <Button variant="ghost" size="sm" onClick={() => {
+              setIsBugReportOpen(true);
+              logEvent('bug_report_opened', {
+                source: 'desktop_nav'
+              });
+            }} className="flex items-center gap-2 text-muted-foreground hover:text-orange-500" title="Zgłoś problem">
                   <Bug className="w-4 h-4" />
                   Zgłoś problem
                 </Button>
@@ -151,19 +132,13 @@ export const Navigation = () => {
             {user ? <>
                 <div className="flex flex-col gap-4">
                   {/* Mobile Founding 100 Button */}
-                  <Button 
-                    asChild
-                    className="gradient-hero text-primary-foreground shadow-primary w-full hover:opacity-95"
-                    size="sm"
-                  >
-                    <Link 
-                      to="/founding" 
-                      className="flex items-center gap-2 font-medium justify-center"
-                      onClick={() => {
-                        setIsOpen(false);
-                        logEvent('founding_100_click', { source: 'mobile_nav' });
-                      }}
-                    >
+                  <Button asChild className="gradient-hero text-primary-foreground shadow-primary w-full hover:opacity-95" size="sm">
+                    <Link to="/founding" className="flex items-center gap-2 font-medium justify-center" onClick={() => {
+                setIsOpen(false);
+                logEvent('founding_100_click', {
+                  source: 'mobile_nav'
+                });
+              }}>
                       <Flame className="w-4 h-4" />
                       Founding 100
                     </Link>
@@ -176,8 +151,7 @@ export const Navigation = () => {
                     <MessageCircle className="w-4 h-4" />
                     Mentavo AI
                   </Link>
-                  {isAdmin && (
-                    <>
+                  {isAdmin && <>
                       <Link to="/dashboard" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/dashboard') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
                         <Crown className="w-4 h-4" />
                         Dashboard Zarządczy
@@ -186,23 +160,20 @@ export const Navigation = () => {
                         <Database className="w-4 h-4" />
                         AI Logs
                       </Link>
-                    </>
-                  )}
+                    </>}
                   <Link to="/sessions" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/sessions') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
                     <Clock className="w-4 h-4" />
                     Sesje
                   </Link>
                 </div>
                 <div className="flex flex-col gap-2 pt-4 border-t border-border">
-                  <Button 
-                    variant="ghost" 
-                    className="w-full flex items-center gap-2 text-muted-foreground hover:text-orange-500" 
-                    onClick={() => {
-                      setIsBugReportOpen(true);
-                      setIsOpen(false);
-                      logEvent('bug_report_opened', { source: 'mobile_nav' });
-                    }}
-                  >
+                  <Button variant="ghost" className="w-full flex items-center gap-2 text-muted-foreground hover:text-orange-500" onClick={() => {
+              setIsBugReportOpen(true);
+              setIsOpen(false);
+              logEvent('bug_report_opened', {
+                source: 'mobile_nav'
+              });
+            }}>
                     <Bug className="w-4 h-4" />
                     Zgłoś problem
                   </Button>
@@ -222,19 +193,13 @@ export const Navigation = () => {
                 </div>
               </> : <div className="flex flex-col gap-4">
                 {/* Mobile Founding 100 Button for non-logged users */}
-                <Button 
-                  asChild
-                  className="gradient-hero text-primary-foreground shadow-primary w-full hover:opacity-95"
-                  size="sm"
-                >
-                  <Link 
-                    to="/founding" 
-                    className="flex items-center gap-2 font-medium justify-center"
-                    onClick={() => {
-                      setIsOpen(false);
-                      logEvent('founding_100_click', { source: 'mobile_nav_guest' });
-                    }}
-                  >
+                <Button asChild className="gradient-hero text-primary-foreground shadow-primary w-full hover:opacity-95" size="sm">
+                  <Link to="/founding" className="flex items-center gap-2 font-medium justify-center" onClick={() => {
+              setIsOpen(false);
+              logEvent('founding_100_click', {
+                source: 'mobile_nav_guest'
+              });
+            }}>
                     <Flame className="w-4 h-4" />
                     Founding 100
                   </Link>
@@ -257,11 +222,6 @@ export const Navigation = () => {
       </div>
       
       {/* Bug Report Modal */}
-      {user && (
-        <BugReportModal 
-          open={isBugReportOpen} 
-          onOpenChange={setIsBugReportOpen} 
-        />
-      )}
+      {user && <BugReportModal open={isBugReportOpen} onOpenChange={setIsBugReportOpen} />}
     </nav>;
 };
