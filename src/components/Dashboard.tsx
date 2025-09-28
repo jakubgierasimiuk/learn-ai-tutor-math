@@ -328,8 +328,8 @@ export const Dashboard = () => {
             <CardDescription>Kontynuuj swoją naukę</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Link to="/study-dashboard">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Link to="/study">
                 <Button className="w-full h-auto p-4 flex-col gap-2">
                   <BookOpen className="w-6 h-6" />
                   <div className="text-center">
@@ -347,10 +347,6 @@ export const Dashboard = () => {
                     <div className="text-xs opacity-80">Zadaj pytanie AI</div>
                   </div>
                 </Button>
-              </Link>
-
-              <Link to="/quiz">
-                
               </Link>
             </div>
           </CardContent>
