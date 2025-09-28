@@ -9,10 +9,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Seo } from "@/components/Seo";
 import { Link, useNavigate } from "react-router-dom";
 import { SocialLoginButtons } from "@/components/SocialLoginButtons";
-
 export default function FoundingRegistrationPage() {
-  const { user } = useAuth();
-  const { toast } = useToast();
+  const {
+    user
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,7 +27,9 @@ export default function FoundingRegistrationPage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const { data } = await supabase.rpc('get_virtual_spots_left');
+        const {
+          data
+        } = await supabase.rpc('get_virtual_spots_left');
         setSpotsLeft(data || 0);
       } catch (error) {
         console.error('Error fetching spots:', error);
@@ -42,7 +47,6 @@ export default function FoundingRegistrationPage() {
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, [user]);
-
   const handleJoinNow = async () => {
     if (spotsLeft !== null && spotsLeft <= 0) {
       toast({
@@ -52,7 +56,6 @@ export default function FoundingRegistrationPage() {
       });
       return;
     }
-
     setIsLoading(true);
     try {
       const requestBody = user ? {
@@ -68,33 +71,32 @@ export default function FoundingRegistrationPage() {
         // New user registration
         email: email.trim(),
         password: password || undefined,
-        name: email.split('@')[0], // Use email prefix as default name
+        name: email.split('@')[0],
+        // Use email prefix as default name
         deviceInfo: {
           userAgent: navigator.userAgent,
           screenWidth: window.screen.width,
           screenHeight: window.screen.height
         }
       };
-
-      const { data, error } = await supabase.functions.invoke('founding-registration', {
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('founding-registration', {
         body: requestBody
       });
-
       if (error) {
         throw error;
       }
-
       if (data?.success) {
         toast({
           title: "Gratulacje! 🎉",
-          description: user 
-            ? "Dołączyłeś do Founding 100! Dostałeś darmowy miesiąc Premium."
-            : "Konto zostało utworzone! Dołączyłeś do Founding 100 z darmowym miesiącem Premium. Sprawdź email z danymi do logowania."
+          description: user ? "Dołączyłeś do Founding 100! Dostałeś darmowy miesiąc Premium." : "Konto zostało utworzone! Dołączyłeś do Founding 100 z darmowym miesiącem Premium. Sprawdź email z danymi do logowania."
         });
         setSpotsLeft(data.slotsLeft || 0);
         setEmail("");
         setPassword("");
-        
+
         // Redirect to dashboard after successful registration
         setTimeout(() => {
           if (user) {
@@ -124,18 +126,16 @@ export default function FoundingRegistrationPage() {
       setIsLoading(false);
     }
   };
-
   const handleGoogleJoin = () => {
     setSocialLoading(true);
     // Redirect back to this page with join parameter after Google OAuth
     const redirectUrl = `${window.location.origin}/founding/register?join=true`;
-    
     supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: redirectUrl,
-      },
-    }).catch((error) => {
+        redirectTo: redirectUrl
+      }
+    }).catch(error => {
       console.error('Google OAuth error:', error);
       setSocialLoading(false);
       toast({
@@ -145,13 +145,8 @@ export default function FoundingRegistrationPage() {
       });
     });
   };
-
-  return (
-    <>
-      <Seo 
-        title="Rejestracja Founding 100 - Mentavo AI" 
-        description="Dołącz do pierwszych 100 użytkowników Mentavo AI i otrzymaj darmowy miesiąc Premium oraz ekskluzywne korzyści."
-      />
+  return <>
+      <Seo title="Rejestracja Founding 100 - Mentavo AI" description="Dołącz do pierwszych 100 użytkowników Mentavo AI i otrzymaj darmowy miesiąc Premium oraz ekskluzywne korzyści." />
       
       <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex flex-col">
         {/* Header */}
@@ -162,11 +157,9 @@ export default function FoundingRegistrationPage() {
               Powrót do Founding 100
             </Link>
             <div className="text-sm text-muted-foreground">
-              {spotsLeft !== null && (
-                <span className="font-medium">
+              {spotsLeft !== null && <span className="font-medium">
                   Pozostało miejsc: <span className="text-primary font-bold">{spotsLeft}</span>
-                </span>
-              )}
+                </span>}
             </div>
           </div>
         </header>
@@ -179,9 +172,7 @@ export default function FoundingRegistrationPage() {
               <div className="inline-block px-4 py-2 bg-primary/10 rounded-full">
                 <span className="text-sm font-medium text-primary">Founding 100</span>
               </div>
-              <h1 className="text-3xl font-bold tracking-tight">
-                Dołącz do ekskluzywnego programu
-              </h1>
+              <h1 className="text-3xl font-bold tracking-tight">Dołącz jako pierwszy, miesiąc w prezencie!</h1>
               <p className="text-muted-foreground">
                 Zostań jednym z pierwszych 100 użytkowników i otrzymaj darmowy miesiąc Premium
               </p>
@@ -194,41 +185,26 @@ export default function FoundingRegistrationPage() {
                   {user ? "Potwierdź dołączenie" : "Utwórz konto"}
                 </CardTitle>
                 <CardDescription className="text-center">
-                  {user 
-                    ? "Kliknij poniżej, aby dołączyć do Founding 100"
-                    : "Uzupełnij dane, aby dołączyć do programu"
-                  }
+                  {user ? "Kliknij poniżej, aby dołączyć do Founding 100" : "Uzupełnij dane, aby dołączyć do programu"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {user ? (
-                  // Already logged in - just confirm joining
-                  <div className="space-y-4">
+                {user ?
+              // Already logged in - just confirm joining
+              <div className="space-y-4">
                     <div className="p-4 bg-muted rounded-lg">
                       <p className="text-sm text-muted-foreground">Zalogowany jako:</p>
                       <p className="font-medium">{user.email}</p>
                     </div>
-                    <Button 
-                      onClick={handleJoinNow} 
-                      disabled={isLoading || (spotsLeft !== null && spotsLeft <= 0)}
-                      className="w-full"
-                      size="lg"
-                    >
+                    <Button onClick={handleJoinNow} disabled={isLoading || spotsLeft !== null && spotsLeft <= 0} className="w-full" size="lg">
                       {isLoading ? "Dołączam..." : "Dołącz do Founding 100"}
                     </Button>
-                  </div>
-                ) : (
-                  // Not logged in - show registration form
-                  <div className="space-y-4">
+                  </div> :
+              // Not logged in - show registration form
+              <div className="space-y-4">
                     {/* Social Login */}
                     <div className="space-y-3">
-                      <Button
-                        onClick={handleGoogleJoin}
-                        disabled={socialLoading || (spotsLeft !== null && spotsLeft <= 0)}
-                        variant="outline"
-                        className="w-full"
-                        size="lg"
-                      >
+                      <Button onClick={handleGoogleJoin} disabled={socialLoading || spotsLeft !== null && spotsLeft <= 0} variant="outline" className="w-full" size="lg">
                         {socialLoading ? "Łączę z Google..." : "Dołącz przez Google"}
                       </Button>
                     </div>
@@ -249,44 +225,25 @@ export default function FoundingRegistrationPage() {
                       <div className="space-y-2">
                         <div className="relative">
                           <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                          <Input
-                            type="email"
-                            placeholder="Twój email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="pl-10"
-                            required
-                          />
+                          <Input type="email" placeholder="Twój email" value={email} onChange={e => setEmail(e.target.value)} className="pl-10" required />
                         </div>
                       </div>
                       
                       <div className="space-y-2">
                         <div className="relative">
                           <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                          <Input
-                            type="password"
-                            placeholder="Hasło (opcjonalne - będzie wygenerowane)"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="pl-10"
-                          />
+                          <Input type="password" placeholder="Hasło (opcjonalne - będzie wygenerowane)" value={password} onChange={e => setPassword(e.target.value)} className="pl-10" />
                         </div>
                         <p className="text-xs text-muted-foreground">
                           Jeśli nie podasz hasła, wygenerujemy je i wyślemy na email
                         </p>
                       </div>
 
-                      <Button 
-                        onClick={handleJoinNow} 
-                        disabled={isLoading || !email.trim() || (spotsLeft !== null && spotsLeft <= 0)}
-                        className="w-full"
-                        size="lg"
-                      >
+                      <Button onClick={handleJoinNow} disabled={isLoading || !email.trim() || spotsLeft !== null && spotsLeft <= 0} className="w-full" size="lg">
                         {isLoading ? "Tworzę konto..." : "Dołącz do Founding 100"}
                       </Button>
                     </div>
-                  </div>
-                )}
+                  </div>}
 
                 {/* Benefits Reminder */}
                 <div className="border-t pt-4">
@@ -317,6 +274,5 @@ export default function FoundingRegistrationPage() {
           </div>
         </div>
       </div>
-    </>
-  );
+    </>;
 }
