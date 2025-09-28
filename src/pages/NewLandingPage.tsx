@@ -80,18 +80,19 @@ const NewLandingPage = () => {
               </button>
               
               {/* Language Switcher */}
-              <div className="flex items-center space-x-1 bg-muted/50 rounded-lg p-1">
+              <div className="flex items-center space-x-1">
                 {languages.map((lang) => (
                   <button
                     key={lang.code}
                     onClick={() => setLanguage(lang.code)}
-                    className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                    className={`flex items-center justify-center w-10 h-10 rounded-md text-xl transition-all duration-200 ${
                       language === lang.code
                         ? 'bg-primary text-primary-foreground shadow-sm' 
-                        : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+                        : 'hover:bg-muted'
                     }`}
+                    title={lang.name}
                   >
-                    <span className="text-lg">{lang.flag}</span>
+                    {lang.flag}
                   </button>
                 ))}
               </div>
@@ -135,22 +136,21 @@ const NewLandingPage = () => {
                 <button onClick={() => scrollToSection('faq')} className="block w-full text-left text-muted-foreground hover:text-foreground">
                   FAQ
                 </button>
-                <div className="flex justify-center space-x-1 pt-2">
-                  <div className="flex bg-muted/50 rounded-lg p-1">
-                    {languages.map((lang) => (
-                      <button
-                        key={lang.code}
-                        onClick={() => setLanguage(lang.code)}
-                        className={`flex items-center justify-center px-3 py-2 rounded-md transition-all duration-200 ${
-                          language === lang.code
-                            ? 'bg-primary text-primary-foreground shadow-sm' 
-                            : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
-                        }`}
-                      >
-                        <span className="text-lg">{lang.flag}</span>
-                      </button>
-                    ))}
-                  </div>
+                <div className="flex justify-center space-x-2 pt-2">
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => setLanguage(lang.code)}
+                      className={`flex items-center justify-center w-12 h-12 rounded-md text-2xl transition-all duration-200 ${
+                        language === lang.code
+                          ? 'bg-primary text-primary-foreground shadow-sm' 
+                          : 'hover:bg-muted'
+                      }`}
+                      title={lang.name}
+                    >
+                      {lang.flag}
+                    </button>
+                  ))}
                 </div>
                 <div className="flex space-x-4 pt-4">
                   <Button 
