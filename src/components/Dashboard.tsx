@@ -333,8 +333,8 @@ export const Dashboard = () => {
                 <Button className="w-full h-auto p-4 flex-col gap-2">
                   <BookOpen className="w-6 h-6" />
                   <div className="text-center">
-                    <div className="font-medium">Przeglądaj umiejętności</div>
-                    <div className="text-xs opacity-80">Wybierz nową umiejętność</div>
+                    <div className="font-medium">Study&Learn</div>
+                    <div className="text-xs opacity-80">wybierz nową lekcję</div>
                   </div>
                 </Button>
               </Link>
@@ -343,8 +343,8 @@ export const Dashboard = () => {
                 <Button variant="outline" className="w-full h-auto p-4 flex-col gap-2">
                   <Brain className="w-6 h-6" />
                   <div className="text-center">
-                    <div className="font-medium">mentavo.ai</div>
-                    <div className="text-xs opacity-80">Zadaj pytanie AI</div>
+                    <div className="font-medium">korepetycje z AI</div>
+                    <div className="text-xs opacity-80">rozpocznij</div>
                   </div>
                 </Button>
               </Link>
