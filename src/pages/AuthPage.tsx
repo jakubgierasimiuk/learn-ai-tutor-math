@@ -10,6 +10,45 @@ import { SocialLoginButtons } from "@/components/SocialLoginButtons";
 import { ArrowLeft, CheckCircle, Users, Zap, Gift } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
+// Function to translate Supabase error messages to Polish
+const translateAuthError = (errorMessage: string): string => {
+  const errorTranslations: { [key: string]: string } = {
+    "User already registered": "Użytkownik już istnieje",
+    "Email not confirmed": "Email nie został potwierdzony",
+    "Invalid login credentials": "Nieprawidłowe dane logowania",
+    "Password should be at least 6 characters": "Hasło powinno mieć co najmniej 6 znaków",
+    "Email address not valid": "Nieprawidłowy adres email", 
+    "Password is too weak": "Hasło jest za słabe",
+    "Invalid email": "Nieprawidłowy email",
+    "Invalid password": "Nieprawidłowe hasło",
+    "Email already exists": "Email już istnieje",
+    "Email already taken": "Email już jest zajęty",
+    "Account already exists": "Konto już istnieje",
+    "User not found": "Użytkownik nie znaleziony",
+    "Email rate limit exceeded": "Przekroczono limit wysyłania emaili",
+    "Too many requests": "Zbyt wiele żądań",
+    "Signup disabled": "Rejestracja wyłączona",
+    "Email confirmation required": "Wymagane potwierdzenie email",
+    "Password reset required": "Wymagane zresetowanie hasła"
+  };
+
+  // Check for exact matches first
+  if (errorTranslations[errorMessage]) {
+    return errorTranslations[errorMessage];
+  }
+
+  // Check for partial matches (case insensitive)
+  const lowerMessage = errorMessage.toLowerCase();
+  for (const [englishError, polishError] of Object.entries(errorTranslations)) {
+    if (lowerMessage.includes(englishError.toLowerCase())) {
+      return polishError;
+    }
+  }
+
+  // If no translation found, return original message
+  return errorMessage;
+};
+
 export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -66,7 +105,7 @@ export default function AuthPage() {
       if (error) {
         toast({
           title: "Błąd logowania",
-          description: error.message,
+          description: translateAuthError(error.message),
           variant: "destructive",
         });
       } else {
@@ -103,7 +142,7 @@ export default function AuthPage() {
       if (error) {
         toast({
           title: "Błąd rejestracji",
-          description: error.message,
+          description: translateAuthError(error.message),
           variant: "destructive",
         });
       } else {
@@ -142,7 +181,7 @@ export default function AuthPage() {
       if (error) {
         toast({
           title: "Błąd",
-          description: error.message,
+          description: translateAuthError(error.message),
           variant: "destructive",
         });
       } else {
@@ -183,7 +222,7 @@ export default function AuthPage() {
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) {
-        toast({ title: "Błąd", description: error.message, variant: "destructive" });
+        toast({ title: "Błąd", description: translateAuthError(error.message), variant: "destructive" });
       } else {
         toast({ title: "Hasło zaktualizowane", description: "Zalogowano na nowe hasło" });
         setRecoveryMode(false);
