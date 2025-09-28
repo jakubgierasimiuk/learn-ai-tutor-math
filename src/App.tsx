@@ -161,7 +161,11 @@ const App = () => (
             <CurriculumSeeder />
             <Routes>
             <Route path="/" element={<NewLandingPage />} />
-            <Route path="/app" element={<HomePage />} />
+            <Route path="/app" element={
+              <AuthenticatedLayout>
+                <DashboardPage />
+              </AuthenticatedLayout>
+            } />
             <Route path="/founding" element={<FoundingLandingPage />} />
             <Route path="/founding/register" element={
               <FoundingRegistrationPage />
