@@ -29,7 +29,8 @@ export default function AuthPage() {
     const search = window.location.search || "";
     const isRecovery = recoveryMode || hash.includes("type=recovery") || search.includes("type=recovery");
     if (user && !isRecovery) {
-      navigate("/");
+      // do not auto-redirect; allow access to auth page even when logged in
+      // users may want to switch accounts or manage password
     }
   }, [user, navigate, recoveryMode]);
 

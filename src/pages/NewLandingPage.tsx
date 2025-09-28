@@ -3,6 +3,7 @@ import { ChevronDown, Star, CheckCircle, ArrowRight, Menu, X, Globe } from 'luci
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
 import {
   Accordion,
   AccordionContent,
@@ -26,6 +27,7 @@ const languages: LanguageOption[] = [
 
 const NewLandingPage = () => {
   const { language, setLanguage, t } = useLanguage();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -37,10 +39,10 @@ const NewLandingPage = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleCTAClick = (source: string) => {
+const handleCTAClick = (source: string) => {
     // Track analytics
     console.log(`CTA clicked from: ${source}`);
-    window.location.href = `/auth?trial=true&lang=${language}`;
+    navigate(`/auth?trial=true&lang=${language}`);
   };
 
   const scrollToSection = (sectionId: string) => {
@@ -102,7 +104,7 @@ const NewLandingPage = () => {
             <div className="hidden md:flex items-center space-x-4">
               <Button 
                 variant="ghost" 
-                onClick={() => window.location.href = `/auth?lang=${language}`}
+                onClick={() => navigate(`/auth?lang=${language}`)}
               >
                 {t.login}
               </Button>
@@ -155,7 +157,7 @@ const NewLandingPage = () => {
                 <div className="flex space-x-4 pt-4">
                   <Button 
                     variant="ghost" 
-                    onClick={() => window.location.href = `/auth?lang=${language}`}
+                    onClick={() => navigate(`/auth?lang=${language}`)}
                     className="flex-1"
                   >
                     {t.login}
