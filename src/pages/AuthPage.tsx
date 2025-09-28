@@ -330,48 +330,36 @@ export default function AuthPage() {
                 </div>
               </div>
 
-              {/* Email Signup Collapsible */}
-              <Collapsible open={showEmailSignup} onOpenChange={setShowEmailSignup}>
-                <CollapsibleTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    className="w-full h-12 text-base font-medium border-dashed"
-                  >
-                    📧 Użyj adresu email
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-4 mt-4">
-                  <form onSubmit={(e) => { e.preventDefault(); handleSignUp(); }} className="space-y-4">
-                    <div className="space-y-3">
-                      <Input
-                        type="email"
-                        placeholder="Twój adres email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="h-12 text-base"
-                        required
-                      />
-                      <Input
-                        type="password"
-                        placeholder="Utwórz hasło (min. 8 znaków)"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="h-12 text-base"
-                        required
-                      />
-                    </div>
-                    <Button 
-                      type="submit"
-                      className="w-full h-12 text-base font-medium button-glow"
-                      disabled={loading}
-                    >
-                      {loading ? "Tworzenie konta..." : "Utwórz darmowe konto"}
-                    </Button>
-                  </form>
-                </CollapsibleContent>
-              </Collapsible>
+              {/* Email Signup Form - Always Visible */}
+              <form onSubmit={(e) => { e.preventDefault(); handleSignUp(); }} className="space-y-4">
+                <div className="space-y-3">
+                  <Input
+                    type="email"
+                    placeholder="Twój adres email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="h-12 text-base"
+                    required
+                  />
+                  <Input
+                    type="password"
+                    placeholder="Utwórz hasło (min. 8 znaków)"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="h-12 text-base"
+                    required
+                  />
+                </div>
+                <Button 
+                  type="submit"
+                  className="w-full h-12 text-base font-medium button-glow"
+                  disabled={loading}
+                >
+                  {loading ? "Tworzenie konta..." : "🚀 Rozpocznij darmowy trial"}
+                </Button>
+              </form>
 
-              {/* Login Link */}
+              {/* Login Toggle */}
               <Collapsible open={showLogin} onOpenChange={setShowLogin}>
                 <div className="text-center">
                   <CollapsibleTrigger asChild>
