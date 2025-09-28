@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/accordion';
 import { Seo } from '@/components/Seo';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useAuth } from '@/hooks/useAuth';
 
 // Language context
 interface LanguageOption {
@@ -27,9 +28,17 @@ const languages: LanguageOption[] = [
 
 const NewLandingPage = () => {
   const { language, setLanguage, t } = useLanguage();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+
+  // Redirect authenticated users to app
+  useEffect(() => {
+    if (user) {
+      navigate("/app");
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     const handleScroll = () => {

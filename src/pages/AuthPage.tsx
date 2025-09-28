@@ -113,7 +113,7 @@ export default function AuthPage() {
           title: "Zalogowano pomyślnie",
           description: "Witaj z powrotem!",
         });
-        navigate("/");
+        navigate("/app");
       }
     } catch (error) {
       toast({
@@ -228,7 +228,7 @@ export default function AuthPage() {
         setRecoveryMode(false);
         setNewPassword("");
         setConfirmPassword("");
-        navigate("/");
+        navigate("/app");
       }
     } finally {
       setLoading(false);
