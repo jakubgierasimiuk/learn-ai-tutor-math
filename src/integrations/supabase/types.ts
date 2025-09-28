@@ -883,7 +883,11 @@ export type Database = {
       }
       founding_scarcity_state: {
         Row: {
+          accumulated_decrease: number | null
           created_at: string
+          cycle_start_date: string | null
+          daily_consumed_spots: number | null
+          daily_target_decrease: number | null
           hourly_decrease_rate: number
           id: string
           last_update: string
@@ -892,7 +896,11 @@ export type Database = {
           virtual_spots_taken: number
         }
         Insert: {
+          accumulated_decrease?: number | null
           created_at?: string
+          cycle_start_date?: string | null
+          daily_consumed_spots?: number | null
+          daily_target_decrease?: number | null
           hourly_decrease_rate?: number
           id?: string
           last_update?: string
@@ -901,7 +909,11 @@ export type Database = {
           virtual_spots_taken?: number
         }
         Update: {
+          accumulated_decrease?: number | null
           created_at?: string
+          cycle_start_date?: string | null
+          daily_consumed_spots?: number | null
+          daily_target_decrease?: number | null
           hourly_decrease_rate?: number
           id?: string
           last_update?: string
