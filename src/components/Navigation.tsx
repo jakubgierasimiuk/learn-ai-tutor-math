@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useRoles } from "@/hooks/useRoles";
-import { Brain, BookOpen, MessageCircle, LogOut, Upload, TrendingUp, Database, Clock, Settings, Crown, Bug, Flame } from "lucide-react";
+import { Brain, BookOpen, MessageCircle, LogOut, Upload, TrendingUp, Database, Clock, Settings, Crown, Bug, Flame, Gift } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { logEvent } from "@/lib/logger";
@@ -52,6 +52,10 @@ export const Navigation = () => {
                 <Link to="/study" className={`flex items-center gap-2 transition-smooth ${isActive('/study') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
                   <Brain className="w-4 h-4" />
                   Study & Learn
+                </Link>
+                <Link to="/referral" className={`flex items-center gap-2 transition-smooth ${isActive('/referral') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
+                  <Gift className="w-4 h-4" />
+                  Poleć znajomym
                 </Link>
                 {isAdmin && <>
                     <Link to="/dashboard" className={`flex items-center gap-2 transition-smooth ${isActive('/dashboard') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
@@ -150,6 +154,10 @@ export const Navigation = () => {
                   <Link to="/chat" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/chat') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
                     <MessageCircle className="w-4 h-4" />
                     Mentavo AI
+                  </Link>
+                  <Link to="/referral" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/referral') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
+                    <Gift className="w-4 h-4" />
+                    Poleć znajomym
                   </Link>
                   {isAdmin && <>
                       <Link to="/dashboard" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/dashboard') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>

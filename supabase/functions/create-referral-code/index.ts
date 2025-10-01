@@ -102,6 +102,12 @@ serve(async (req) => {
       throw new Error(`Error inserting code: ${insertError.message}`);
     }
 
+    // Also save the code to profiles.referral_code for easy access
+    await supabaseClient
+      .from("profiles")
+      .update({ referral_code: newCode! })
+      .eq("user_id", user.id);
+
     // Initialize user referral stats if not exists
     const { error: statsError } = await supabaseClient
       .from("user_referral_stats")

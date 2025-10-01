@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
-import { useReferral } from "@/hooks/useReferral";
+import { useReferralV2 } from "@/hooks/useReferralV2";
 import { Navigation } from "@/components/Navigation";
 import HomePage from "./pages/HomePage";
 import NewLandingPage from "./pages/NewLandingPage";
@@ -52,7 +52,7 @@ const queryClient = new QueryClient();
 
 const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  useReferral(); // Initialize referral processing
+  // Referral processing v2 is handled in useReferralV2 hook via URL params
 
   if (loading) {
     return (

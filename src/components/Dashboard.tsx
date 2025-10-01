@@ -212,7 +212,7 @@ export const Dashboard = () => {
             <CardDescription>Kontynuuj swoją naukę</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Link to="/chat">
                 <Button className="w-full h-auto p-4 flex-col gap-2">
                   <Brain className="w-6 h-6" />
@@ -229,6 +229,16 @@ export const Dashboard = () => {
                   <div className="text-center">
                     <div className="font-medium">Study&Learn</div>
                     <div className="text-xs opacity-80">wybierz nową lekcję</div>
+                  </div>
+                </Button>
+              </Link>
+
+              <Link to="/referral">
+                <Button variant="outline" className="w-full h-auto p-4 flex-col gap-2 border-primary/50 hover:border-primary hover:bg-primary/5">
+                  <TrendingUp className="w-6 h-6 text-primary" />
+                  <div className="text-center">
+                    <div className="font-medium">Poleć znajomym</div>
+                    <div className="text-xs opacity-80">Zdobądź nagrody</div>
                   </div>
                 </Button>
               </Link>

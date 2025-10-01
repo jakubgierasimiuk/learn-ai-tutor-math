@@ -107,13 +107,38 @@ serve(async (req) => {
 
     // Update user's subscription or token balance based on conversion
     if (convertTo === 'days') {
-      // TODO: Integrate with subscription system to add days
-      // For now, this would be handled by the subscription service
-      console.log(`Adding ${amount} days to user ${user.id}`);
+      // Add days to trial_end_date in user_subscriptions
+      const { data: subscription } = await supabaseService
+        .from('user_subscriptions')
+        .select('trial_end_date')
+        .eq('user_id', user.id)
+        .single();
+
+      const currentEndDate = subscription?.trial_end_date 
+        ? new Date(subscription.trial_end_date)
+        : new Date();
+      
+      // If end date is in the past, start from now
+      const baseDate = currentEndDate > new Date() ? currentEndDate : new Date();
+      const newEndDate = new Date(baseDate);
+      newEndDate.setDate(newEndDate.getDate() + amount);
+
+      await supabaseService
+        .from('user_subscriptions')
+        .upsert({
+          user_id: user.id,
+          trial_end_date: newEndDate.toISOString(),
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id'
+        });
+
+      console.log(`Added ${amount} days to user ${user.id}, new end date: ${newEndDate.toISOString()}`);
     } else if (convertTo === 'tokens') {
-      // TODO: Integrate with token balance system
-      // This would typically update a user_tokens table or similar
-      console.log(`Adding ${amount} tokens to user ${user.id}`);
+      // For tokens, we create a positive adjustment in the system
+      // The token system will read from rewards table with kind='tokens' and status='released'
+      // This is already handled by the insert above, no additional action needed
+      console.log(`Added ${amount} tokens to user ${user.id} via rewards table`);
     }
 
     // Log the conversion event

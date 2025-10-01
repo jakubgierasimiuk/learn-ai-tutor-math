@@ -44,10 +44,18 @@ export default function ReferralPage() {
     shareReferralUrl,
     getTierInfo,
     getStageInfo,
+    generateCode,
   } = useReferralV2();
 
   const [selectedReward, setSelectedReward] = useState<any>(null);
   const referralUrl = getReferralUrl();
+
+  // Auto-generate referral code if user doesn't have one
+  useEffect(() => {
+    if (user && !referralCode && !isLoading) {
+      generateCode();
+    }
+  }, [user, referralCode, isLoading]);
 
   const currentTier = stats?.current_tier || 'beginner';
   const TierIcon = tierInfo[currentTier]?.icon || Target;
