@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -21,55 +21,115 @@ import { TokenLimitDashboard } from "@/components/TokenLimitDashboard";
 import { AnalyticsSection } from "@/components/AnalyticsSection";
 import { RealTimeAnalytics } from "@/components/RealTimeAnalytics";
 import { SubscriptionStatsCard } from "@/components/SubscriptionStatsCard";
+import { supabase } from "@/integrations/supabase/client";
 
 export const AdminPanel = () => {
   const [selectedView, setSelectedView] = useState<"owner" | "admin">("owner");
+  const [ownerMetrics, setOwnerMetrics] = useState({
+    mau: 0,
+    mrr: 0,
+    conversionRate: 0,
+    churn: 0,
+    retentionD7: 0,
+    newRegistrations: 0,
+    activeSubscriptions: 0,
+    arpu: 0,
+    ltv: 0
+  });
 
-  // Mock data - replace with real data from hooks/API
-  const ownerMetrics = {
-    mau: 2850,
-    mrr: 142450,
-    conversionRate: 18.5,
-    churn: 3.2,
-    retentionD7: 42.8,
-    newRegistrations: 127,
-    activeSubscriptions: 2851,
-    arpu: 49.99,
-    ltv: 899.82
+  const [adminMetrics, setAdminMetrics] = useState({
+    aiResponseTime: 0,
+    tokenUsageDaily: 0,
+    aiErrors: 0,
+    uptime: 100,
+    pseudoActivity: 0,
+    contentBlocked: 0
+  });
+
+  const [topReferrers, setTopReferrers] = useState<Array<{ name: string; referrals: number; reward: number }>>([]);
+  const [difficultTopics, setDifficultTopics] = useState<Array<{ topic: string; errors: number; errorRate: number }>>([]);
+  const [aiErrors, setAiErrors] = useState<Array<{ type: string; count: number; trend: string }>>([]);
+
+  useEffect(() => {
+    fetchRealData();
+  }, []);
+
+  const fetchRealData = async () => {
+    try {
+      // Fetch real user count
+      const { count: userCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch active subscriptions
+      const { data: subscriptions } = await supabase
+        .from('user_subscriptions')
+        .select('*')
+        .eq('status', 'active');
+
+      // Fetch referrals data
+      const { data: referralsData } = await supabase
+        .from('referrals')
+        .select(`
+          referrer_id,
+          profiles!referrals_referrer_id_fkey(name)
+        `)
+        .eq('stage', 'converted');
+
+      // Process referrals to get top referrers
+      const referrerCounts = referralsData?.reduce((acc: any, ref: any) => {
+        const referrerId = ref.referrer_id;
+        if (!acc[referrerId]) {
+          acc[referrerId] = {
+            name: ref.profiles?.name || 'Użytkownik',
+            referrals: 0,
+            reward: 0
+          };
+        }
+        acc[referrerId].referrals += 1;
+        acc[referrerId].reward += 50; // 50zł per referral
+        return acc;
+      }, {});
+
+      const topReferrersList = Object.values(referrerCounts || {})
+        .sort((a: any, b: any) => b.referrals - a.referrals)
+        .slice(0, 5) as Array<{ name: string; referrals: number; reward: number }>;
+
+      setOwnerMetrics({
+        mau: userCount || 0,
+        mrr: (subscriptions?.length || 0) * 49.99,
+        conversionRate: 0,
+        churn: 0,
+        retentionD7: 0,
+        newRegistrations: 0,
+        activeSubscriptions: subscriptions?.length || 0,
+        arpu: subscriptions?.length ? 49.99 : 0,
+        ltv: 0
+      });
+
+      setTopReferrers(topReferrersList);
+
+      // Fetch AI metrics
+      const { data: aiLogs } = await supabase
+        .from('ai_conversation_log')
+        .select('tokens_used, processing_time_ms')
+        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+
+      const totalTokens = aiLogs?.reduce((sum, log) => sum + (log.tokens_used || 0), 0) || 0;
+      const avgResponseTime = aiLogs?.length 
+        ? aiLogs.reduce((sum, log) => sum + (log.processing_time_ms || 0), 0) / aiLogs.length / 1000
+        : 0;
+
+      setAdminMetrics(prev => ({
+        ...prev,
+        tokenUsageDaily: totalTokens,
+        aiResponseTime: Number(avgResponseTime.toFixed(2))
+      }));
+
+    } catch (error) {
+      console.error('Error fetching admin data:', error);
+    }
   };
-
-  const adminMetrics = {
-    aiResponseTime: 1.2,
-    tokenUsageDaily: 45670,
-    aiErrors: 23,
-    uptime: 99.8,
-    pseudoActivity: 12.3,
-    contentBlocked: 17
-  };
-
-  const topReferrers = [
-    { name: "Anna K.", referrals: 23, reward: 1150 },
-    { name: "Michał P.", referrals: 19, reward: 950 },
-    { name: "Karolina W.", referrals: 16, reward: 800 },
-    { name: "Tomasz M.", referrals: 14, reward: 700 },
-    { name: "Julia S.", referrals: 12, reward: 600 }
-  ];
-
-  const difficultTopics = [
-    { topic: "Nierówności kwadratowe", errors: 1247, errorRate: 68.3 },
-    { topic: "Funkcje wykładnicze", errors: 1089, errorRate: 61.7 },
-    { topic: "Pochodne funkcji", errors: 956, errorRate: 58.9 },
-    { topic: "Całki oznaczone", errors: 834, errorRate: 55.2 },
-    { topic: "Trygonometria", errors: 789, errorRate: 52.8 }
-  ];
-
-  const aiErrors = [
-    { type: "Niepoprawne obliczenia", count: 89, trend: "↑" },
-    { type: "Błędne wyjaśnienia", count: 67, trend: "↓" },
-    { type: "Timeout odpowiedzi", count: 45, trend: "→" },
-    { type: "Niewłaściwy format", count: 23, trend: "↑" },
-    { type: "Problemy z LaTeX", count: 18, trend: "↓" }
-  ];
 
   return (
     <div className="space-y-6">
