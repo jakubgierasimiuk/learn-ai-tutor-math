@@ -10,10 +10,12 @@ import { useReferralV2 } from '@/hooks/useReferralV2';
 
 interface SubscriptionData {
   subscription_type: 'free' | 'paid' | 'super';
-  monthly_token_limit: number;
+  token_limit_soft: number;
+  token_limit_hard: number;
+  tokens_used_total: number;
+  monthly_tokens_used?: number;
   subscription_end?: string;
   is_active: boolean;
-  tokens_used_this_month?: number;
 }
 
 export const SubscriptionManager = () => {
@@ -201,10 +203,12 @@ export const SubscriptionManager = () => {
 
               <div className="bg-muted/50 p-3 rounded-lg">
                 <p className="text-sm font-medium">
-                  Limit tokenów: {subscription.monthly_token_limit.toLocaleString()}
+                  Limit tokenów: {subscription.token_limit_hard.toLocaleString()}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Tokeny resetują się co miesiąc w dniu wykupienia subskrypcji
+                  {subscription.subscription_type === 'free' 
+                    ? 'Tokeny są liczone od rejestracji' 
+                    : 'Tokeny resetują się co miesiąc w dniu wykupienia subskrypcji'}
                 </p>
               </div>
 

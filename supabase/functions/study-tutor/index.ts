@@ -1128,7 +1128,7 @@ async function handleChat(req: Request): Promise<Response> {
           });
 
           const isFreeTier = subscription?.subscription_type === 'free';
-          const tokenLimit = subscription?.monthly_token_limit || 500;
+          const tokenLimit = subscription?.token_limit_hard || 25000;
 
           console.log(`Token check for user ${userId}:`, {
             tokensUsed,
