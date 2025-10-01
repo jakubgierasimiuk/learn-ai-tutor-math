@@ -358,8 +358,16 @@ export const AIChat = () => {
       console.log('chatData.message:', chatData?.message);
       console.log('chatData keys:', chatData ? Object.keys(chatData) : 'no keys');
       console.log('=== END DEBUG ===');
-      if (chatError) {
-        console.error('Chat error details:', JSON.stringify(chatError, null, 2));
+      
+      // Check for token limit exceeded error (429)
+      if (chatError || (chatData?.error === 'Token limit exceeded')) {
+        console.error('Chat error details:', JSON.stringify(chatError || chatData, null, 2));
+        
+        // Special handling for token limit errors
+        if (chatData?.error === 'Token limit exceeded') {
+          throw new Error(chatData.message || 'Osiągnięto limit tokenów. Ulepsz plan, aby kontynuować naukę.');
+        }
+        
         throw new Error('Wystąpił problem podczas rozmowy z AI.');
       }
       if (!chatData) {
