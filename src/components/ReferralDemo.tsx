@@ -145,14 +145,14 @@ export const ReferralDemo = () => {
             <p className="text-sm font-medium mb-2">Twój kod demo:</p>
             <div className="flex gap-2">
               <Input 
-                value={`https://mentavo.ai?ref=${demoReferralCode}`}
+                value={`https://mentavo.pl?ref=${demoReferralCode}`}
                 readOnly 
                 className="font-mono text-xs"
               />
               <Button 
                 size="sm" 
                 variant="outline"
-                onClick={() => navigator.clipboard.writeText(`https://mentavo.ai?ref=${demoReferralCode}`)}
+                onClick={() => navigator.clipboard.writeText(`https://mentavo.pl?ref=${demoReferralCode}`)}
               >
                 Kopiuj
               </Button>

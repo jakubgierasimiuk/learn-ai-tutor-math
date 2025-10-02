@@ -103,7 +103,7 @@ function LoggingBootstrap() {
 function RouteSeo() {
   const location = useLocation();
   const path = location.pathname;
-  const canonical = `https://mentavo.ai${path}`;
+  const canonical = `https://mentavo.pl${path}`;
   const map: Record<string, { title: string; description: string }> = {
     
     '/dashboard': { title: 'Panel ucznia – mentavo.ai', description: 'Twoje postępy, aktywność i szybkie skróty.' },

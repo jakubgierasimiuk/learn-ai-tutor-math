@@ -21,7 +21,7 @@ const MaterialsPage: React.FC = () => {
       link.setAttribute('rel', 'canonical');
       document.head.appendChild(link);
     }
-    link.setAttribute('href', 'https://mentavo.ai/materials');
+    link.setAttribute('href', 'https://mentavo.pl/materials');
   }, []);
 
   return (
