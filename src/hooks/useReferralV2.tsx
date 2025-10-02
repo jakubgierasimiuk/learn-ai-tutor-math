@@ -233,7 +233,7 @@ export const useReferralV2 = () => {
   // Utility functions
   const getReferralUrl = () => {
     if (!referralCode) return '';
-    return `${window.location.origin}?ref=${referralCode}`;
+    return `https://mentavo.ai?ref=${referralCode}`;
   };
 
   const copyReferralUrl = async () => {
