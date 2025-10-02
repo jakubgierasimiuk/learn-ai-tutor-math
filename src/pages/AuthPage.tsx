@@ -129,7 +129,7 @@ export default function AuthPage() {
   const handleSignUp = async () => {
     setLoading(true);
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `https://mentavo.pl/`;
       
       const { error } = await supabase.auth.signUp({
         email,
@@ -175,7 +175,7 @@ export default function AuthPage() {
     setLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth?type=recovery`
+        redirectTo: `https://mentavo.pl/auth?type=recovery`
       });
 
       if (error) {

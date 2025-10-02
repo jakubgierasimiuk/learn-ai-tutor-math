@@ -129,7 +129,7 @@ export default function FoundingRegistrationPage() {
   const handleGoogleJoin = () => {
     setSocialLoading(true);
     // Redirect back to this page with join parameter after Google OAuth
-    const redirectUrl = `${window.location.origin}/founding/register?join=true`;
+    const redirectUrl = `https://mentavo.pl/founding/register?join=true`;
     supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
