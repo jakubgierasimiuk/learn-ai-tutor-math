@@ -187,7 +187,7 @@ export const SMSVerification: React.FC<SMSVerificationProps> = ({
             className="flex-1 text-xs"
             onClick={() => {
               // Copy referral link
-              const referralUrl = `${window.location.origin}?ref=YOUR_CODE`;
+              const referralUrl = `https://mentavo.ai?ref=YOUR_CODE`;
               navigator.clipboard.writeText(referralUrl);
               toast({
                 title: "Link skopiowany!",

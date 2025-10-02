@@ -129,7 +129,7 @@ export const useReferralStats = (): UseReferralStatsReturn => {
     }
   });
 
-  const referralUrl = referralCode ? `${window.location.origin}?ref=${referralCode}` : "";
+  const referralUrl = referralCode ? `https://mentavo.ai?ref=${referralCode}` : "";
 
   const copyReferralUrl = async () => {
     try {
