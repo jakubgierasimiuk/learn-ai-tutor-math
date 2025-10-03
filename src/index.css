@@ -319,10 +319,6 @@
     animation: blob 7s infinite;
   }
 
-  .animate-bounce-slow {
-    animation: bounce-slow 3s ease-in-out infinite;
-  }
-
   .animation-delay-2000 {
     animation-delay: 2s;
   }
@@ -395,17 +391,6 @@
   }
   100% {
     transform: translate(0px, 0px) scale(1);
-  }
-}
-
-@keyframes bounce-slow {
-  0%, 100% {
-    transform: translateY(-5%);
-    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
-  }
-  50% {
-    transform: translateY(0);
-    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
   }
 }
 

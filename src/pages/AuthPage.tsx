@@ -147,8 +147,13 @@ export default function AuthPage() {
           variant: "destructive",
         });
       } else {
-        // Navigate to success page with email
-        navigate("/registration-success", { state: { email } });
+        // User is automatically logged in if email confirmation is disabled
+        toast({
+          title: "Konto utworzone pomyślnie! 🎉",
+          description: "Witaj w Mentavo AI",
+        });
+        // Navigate to main app
+        navigate("/app");
       }
     } catch (error) {
       toast({

@@ -15,7 +15,6 @@ import DashboardPage from "./pages/DashboardPage";
 import ChatPage from "./pages/ChatPage";
 
 import AuthPage from "./pages/AuthPage";
-import RegistrationSuccessPage from "./pages/RegistrationSuccessPage";
 import SmartRecommendations from "./pages/SmartRecommendations";
 import SocialPage from "./pages/SocialPage";
 import GamificationPage from "./pages/GamificationPage";
@@ -174,7 +173,6 @@ const App = () => (
               <FoundingRegistrationPage />
             } />
             <Route path="/auth" element={<AuthPage />} />
-            <Route path="/registration-success" element={<RegistrationSuccessPage />} />
             
             {/* Onboarding routes - accessible to authenticated users */}
             <Route path="/onboarding/welcome" element={
