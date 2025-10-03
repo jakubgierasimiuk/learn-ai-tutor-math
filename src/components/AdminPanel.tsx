@@ -51,6 +51,76 @@ export const AdminPanel = () => {
   const [deleting, setDeleting] = useState(false);
   const { toast } = useToast();
 
+  const TEST_EMAILS = [
+    'jakgie123@yahoo.com',
+    'ytrewq.trewq456@yahoo.com',
+    'niezapowiedzianazmiana@gmail.com',
+    'ytrewq.trewq456@gmail.com'
+  ];
+
+  const handleDeleteTestUsers = async () => {
+    setDeleting(true);
+    try {
+      // Fetch user IDs for test emails
+      const { data: profiles, error: fetchError } = await supabase
+        .from('profiles')
+        .select('user_id, email')
+        .in('email', TEST_EMAILS);
+
+      if (fetchError) throw fetchError;
+
+      if (!profiles || profiles.length === 0) {
+        toast({
+          title: "Brak użytkowników testowych",
+          description: "Nie znaleziono użytkowników do usunięcia",
+          variant: "default"
+        });
+        return;
+      }
+
+      let successCount = 0;
+      let failCount = 0;
+
+      // Delete each user
+      for (const profile of profiles) {
+        const { error } = await supabase.functions.invoke('delete-user-cascade', {
+          body: { userId: profile.user_id }
+        });
+
+        if (error) {
+          console.error(`Failed to delete ${profile.email}:`, error);
+          failCount++;
+        } else {
+          successCount++;
+        }
+      }
+
+      if (successCount > 0) {
+        toast({
+          title: "Sukces!",
+          description: `Usunięto ${successCount} użytkowników testowych${failCount > 0 ? ` (${failCount} błędów)` : ''}`,
+          variant: "default"
+        });
+        fetchRealData();
+      } else {
+        toast({
+          title: "Błąd",
+          description: "Nie udało się usunąć żadnego użytkownika",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting test users:', error);
+      toast({
+        title: "Błąd",
+        description: "Wystąpił błąd podczas usuwania użytkowników",
+        variant: "destructive"
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const [topReferrers, setTopReferrers] = useState<Array<{ name: string; referrals: number; reward: number }>>([]);
   const [difficultTopics, setDifficultTopics] = useState<Array<{ topic: string; errors: number; errorRate: number }>>([]);
   const [aiErrors, setAiErrors] = useState<Array<{ type: string; count: number; trend: string }>>([]);
@@ -147,6 +217,14 @@ export const AdminPanel = () => {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button 
+            onClick={handleDeleteTestUsers} 
+            disabled={deleting}
+            variant="destructive"
+            size="sm"
+          >
+            {deleting ? "Usuwanie..." : "Usuń testowych"}
+          </Button>
           <button
             onClick={() => setSelectedView("owner")}
             className={`px-4 py-2 rounded-lg transition-colors ${
