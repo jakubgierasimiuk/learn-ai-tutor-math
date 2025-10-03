@@ -64,9 +64,12 @@ serve(async (req) => {
     }
 
     // Get client info for fraud detection
-    const clientIP = req.headers.get('x-forwarded-for') || 
-                    req.headers.get('x-real-ip') || 
-                    'unknown';
+    // x-forwarded-for can contain multiple IPs (e.g., "client, proxy1, proxy2")
+    // We take only the first one (the original client IP)
+    const forwardedFor = req.headers.get('x-forwarded-for');
+    const clientIP = forwardedFor 
+      ? forwardedFor.split(',')[0].trim()
+      : (req.headers.get('x-real-ip') || 'unknown');
     const userAgent = req.headers.get('user-agent') || 'unknown';
 
     if (action === 'register') {
