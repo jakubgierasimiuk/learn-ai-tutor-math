@@ -43,9 +43,11 @@ interface RewardV2 {
 }
 
 export const useReferralV2 = () => {
+  console.log('[Referral] 🎬 Hook execution started');
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [referralCode, setReferralCode] = useState<string>('');
+  console.log('[Referral] 🎬 Hook state initialized, user:', user?.email || 'anonymous');
 
   // Fetch user's referral stats
   const { data: stats, isLoading: statsLoading } = useQuery({
