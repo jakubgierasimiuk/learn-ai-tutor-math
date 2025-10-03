@@ -135,15 +135,24 @@ export const useReferralV2 = () => {
   // Process referral from URL
   const processReferralMutation = useMutation({
     mutationFn: async ({ referralCode, action }: { referralCode: string; action: string }) => {
+      console.log('[Referral] 🚀 Invoking process-referral-v2 with:', { referralCode, action });
       const { data, error } = await supabase.functions.invoke('process-referral-v2', {
         body: { referralCode, action }
       });
-      if (error) throw error;
+      if (error) {
+        console.error('[Referral] ❌ Edge function error:', error);
+        throw error;
+      }
+      console.log('[Referral] ✅ Edge function success:', data);
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('[Referral] 🎉 Mutation success, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['referral-stats-v2'] });
       queryClient.invalidateQueries({ queryKey: ['rewards-v2'] });
+    },
+    onError: (error) => {
+      console.error('[Referral] 💥 Mutation error:', error);
     },
   });
 
@@ -190,14 +199,19 @@ export const useReferralV2 = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const refCode = urlParams.get('ref');
     
+    console.log('[Referral] 🔍 Checking URL params, user:', user ? user.email : 'none', 'refCode:', refCode);
+    
     if (refCode) {
-      console.log('[Referral] Found ref code in URL:', refCode);
+      console.log('[Referral] 📥 Found ref code in URL:', refCode);
       saveReferralCode(refCode);
 
       // If user is already logged in, process immediately
       if (user) {
+        console.log('[Referral] 👤 User is logged in, processing immediately');
         processReferralMutation.mutate({ referralCode: refCode, action: 'register' });
         clearReferralCode();
+      } else {
+        console.log('[Referral] 🔒 User not logged in, will process after auth');
       }
       
       // Clean up URL
@@ -209,18 +223,28 @@ export const useReferralV2 = () => {
 
   // Process referral after user registers/logs in
   useEffect(() => {
-    if (!user) return;
+    console.log('[Referral] 🔐 Auth state changed, user:', user ? user.email : 'none');
+    
+    if (!user) {
+      console.log('[Referral] ❌ No user, skipping referral processing');
+      return;
+    }
     
     const storedRefCode = getReferralCode();
+    console.log('[Referral] 📦 Checking localStorage for referral code:', storedRefCode);
+    
     if (storedRefCode) {
-      console.log('[Referral] Processing stored referral code for new user:', storedRefCode);
+      console.log('[Referral] 🎯 Processing stored referral code for new user:', storedRefCode);
       processReferralMutation.mutate({ 
         referralCode: storedRefCode, 
         action: 'register' 
       });
       
       // Clear after processing
+      console.log('[Referral] 🧹 Clearing referral code from localStorage');
       clearReferralCode();
+    } else {
+      console.log('[Referral] ℹ️ No stored referral code found');
     }
   }, [user]);
 
