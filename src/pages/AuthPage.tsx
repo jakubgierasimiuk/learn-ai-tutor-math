@@ -147,10 +147,8 @@ export default function AuthPage() {
           variant: "destructive",
         });
       } else {
-        toast({
-          title: "Konto utworzone",
-          description: "Sprawdź swoją skrzynkę email aby potwierdzić konto",
-        });
+        // Navigate to success page with email
+        navigate("/registration-success", { state: { email } });
       }
     } catch (error) {
       toast({
