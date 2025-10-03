@@ -10,6 +10,7 @@ import { SocialLoginButtons } from "@/components/SocialLoginButtons";
 import { ArrowLeft, CheckCircle, Users, Zap, Gift } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { PRODUCTION_DOMAIN } from "@/lib/constants";
+import { saveReferralCode } from "@/lib/referralStorage";
 
 // Function to translate Supabase error messages to Polish
 const translateAuthError = (errorMessage: string): string => {
@@ -62,6 +63,17 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+
+  // Save referral code from URL if present (for cases where user lands directly on /auth with ref)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    
+    if (refCode) {
+      console.log('[AuthPage] Detected referral code, saving to localStorage:', refCode);
+      saveReferralCode(refCode);
+    }
+  }, []);
 
   // Redirect if already authenticated, except during password recovery
   useEffect(() => {

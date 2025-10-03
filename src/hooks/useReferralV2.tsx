@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { saveReferralCode, getReferralCode, clearReferralCode } from '@/lib/referralStorage';
 
 interface ReferralStatsV2 {
   user_id: string;
@@ -184,21 +185,36 @@ export const useReferralV2 = () => {
     fetchReferralCode();
   }, [user]);
 
-  // Process referral from URL on mount
+  // Save referral code from URL to localStorage (even if not logged in yet)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const refCode = urlParams.get('ref');
     
-    if (refCode && user) {
-      processReferralMutation.mutate({ 
-        referralCode: refCode, 
-        action: 'register' 
-      });
+    if (refCode) {
+      console.log('[Referral] Found ref code in URL:', refCode);
+      saveReferralCode(refCode);
       
       // Clean up URL
       const url = new URL(window.location.href);
       url.searchParams.delete('ref');
       window.history.replaceState({}, '', url.toString());
+    }
+  }, []);
+
+  // Process referral after user registers/logs in
+  useEffect(() => {
+    if (!user) return;
+    
+    const storedRefCode = getReferralCode();
+    if (storedRefCode) {
+      console.log('[Referral] Processing stored referral code for new user:', storedRefCode);
+      processReferralMutation.mutate({ 
+        referralCode: storedRefCode, 
+        action: 'register' 
+      });
+      
+      // Clear after processing
+      clearReferralCode();
     }
   }, [user]);
 

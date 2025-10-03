@@ -1,14 +1,27 @@
 import { BookOpen, GraduationCap, Layers, HelpCircle, Sparkles, Users, Trophy, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
 import heroImage from "@/assets/hero-education.jpg";
 import { logEvent } from "@/lib/logger";
 import { TestimonialsCarousel } from "./TestimonialsCarousel";
 import { RotatingTestimonial } from "./RotatingTestimonial";
 import { useAuth } from "@/hooks/useAuth";
+import { saveReferralCode } from "@/lib/referralStorage";
 
 export function LandingPage() {
   const { user } = useAuth();
+  
+  // Save referral code from URL on landing page load
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    
+    if (refCode) {
+      console.log('[LandingPage] Detected referral code, saving to localStorage:', refCode);
+      saveReferralCode(refCode);
+    }
+  }, []);
   
   const handleCtaClick = (action: string) => {
     logEvent('landing_cta_click', {
