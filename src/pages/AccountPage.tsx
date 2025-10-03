@@ -211,7 +211,7 @@ const AccountPage = () => {
           </Card>
 
           {/* SMS Verification and Bonuses */}
-          <SMSActivationSection variant="account" />
+          {/* <SMSActivationSection variant="account" /> */} {/* Tymczasowo wyłączone - problemy z API SMS */}
 
           {/* Subscription Information */}
           <Card>

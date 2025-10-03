@@ -96,7 +96,7 @@ export default function ReferralPage() {
       <RealTimeCounters variant="full" showProgress={true} />
 
       {/* SMS Activation Section */}
-      <SMSActivationSection variant="referral" />
+      {/* <SMSActivationSection variant="referral" /> */} {/* Tymczasowo wyłączone - problemy z API SMS */}
 
       {/* Referral Link Section */}
       <Card>
