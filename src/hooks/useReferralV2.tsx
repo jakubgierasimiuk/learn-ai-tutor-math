@@ -199,11 +199,12 @@ export const useReferralV2 = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const refCode = urlParams.get('ref');
     
-    console.log('[Referral] 🔍 Checking URL params, user:', user ? user.email : 'none', 'refCode:', refCode);
+    console.log('[Referral] 🔍 URL Check - user:', user?.email || 'none', 'refCode:', refCode, 'localStorage:', getReferralCode());
     
     if (refCode) {
       console.log('[Referral] 📥 Found ref code in URL:', refCode);
       saveReferralCode(refCode);
+      console.log('[Referral] 💾 Saved to localStorage, value:', getReferralCode());
 
       // If user is already logged in, process immediately
       if (user) {
@@ -214,7 +215,7 @@ export const useReferralV2 = () => {
         console.log('[Referral] 🔒 User not logged in, will process after auth');
       }
       
-      // Clean up URL
+      // Clean up URL (but keep code in localStorage for post-auth processing)
       const url = new URL(window.location.href);
       url.searchParams.delete('ref');
       window.history.replaceState({}, '', url.toString());
@@ -223,28 +224,33 @@ export const useReferralV2 = () => {
 
   // Process referral after user registers/logs in
   useEffect(() => {
-    console.log('[Referral] 🔐 Auth state changed, user:', user ? user.email : 'none');
+    console.log('[Referral] 🔐 Auth Check - user:', user?.email || 'none');
     
     if (!user) {
-      console.log('[Referral] ❌ No user, skipping referral processing');
+      console.log('[Referral] ❌ No user, skipping');
       return;
     }
     
     const storedRefCode = getReferralCode();
-    console.log('[Referral] 📦 Checking localStorage for referral code:', storedRefCode);
+    console.log('[Referral] 📦 localStorage check:', storedRefCode);
     
     if (storedRefCode) {
-      console.log('[Referral] 🎯 Processing stored referral code for new user:', storedRefCode);
-      processReferralMutation.mutate({ 
-        referralCode: storedRefCode, 
-        action: 'register' 
-      });
+      console.log('[Referral] 🎯 Processing stored code:', storedRefCode);
       
-      // Clear after processing
-      console.log('[Referral] 🧹 Clearing referral code from localStorage');
-      clearReferralCode();
+      // Add delay to ensure auth is fully set up
+      setTimeout(() => {
+        console.log('[Referral] ⏱️ Delayed processing - calling edge function');
+        processReferralMutation.mutate({ 
+          referralCode: storedRefCode, 
+          action: 'register' 
+        });
+        
+        // Clear after processing
+        console.log('[Referral] 🧹 Clearing from localStorage');
+        clearReferralCode();
+      }, 1000); // 1 second delay to ensure auth token is ready
     } else {
-      console.log('[Referral] ℹ️ No stored referral code found');
+      console.log('[Referral] ℹ️ No stored code found');
     }
   }, [user]);
 
