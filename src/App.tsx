@@ -47,6 +47,7 @@ import { SurveyProvider } from "@/components/SurveyProvider";
 import { FoundingLandingPage } from "@/components/FoundingLandingPage";
 import FoundingRegistrationPage from "@/pages/FoundingRegistrationPage";
 import { LanguageProvider } from "@/hooks/useLanguage";
+import { DomainGuard } from "@/components/DomainGuard";
 
 const queryClient = new QueryClient();
 
@@ -156,6 +157,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <DomainGuard />
             <LoggingBootstrap />
             <RouteSeo />
             <CurriculumSeeder />

@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { SocialLoginButtons } from "@/components/SocialLoginButtons";
 import { ArrowLeft, CheckCircle, Users, Zap, Gift } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { PRODUCTION_DOMAIN } from "@/lib/constants";
 
 // Function to translate Supabase error messages to Polish
 const translateAuthError = (errorMessage: string): string => {
@@ -129,7 +130,7 @@ export default function AuthPage() {
   const handleSignUp = async () => {
     setLoading(true);
     try {
-      const redirectUrl = `https://mentavo.pl/`;
+      const redirectUrl = `${PRODUCTION_DOMAIN}/`;
       
       const { error } = await supabase.auth.signUp({
         email,
@@ -175,7 +176,7 @@ export default function AuthPage() {
     setLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `https://mentavo.pl/auth?type=recovery`
+        redirectTo: `${PRODUCTION_DOMAIN}/auth?type=recovery`
       });
 
       if (error) {

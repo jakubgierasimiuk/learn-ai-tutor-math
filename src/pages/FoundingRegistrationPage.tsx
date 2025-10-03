@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Seo } from "@/components/Seo";
 import { Link, useNavigate } from "react-router-dom";
 import { SocialLoginButtons } from "@/components/SocialLoginButtons";
+import { PRODUCTION_DOMAIN } from "@/lib/constants";
 export default function FoundingRegistrationPage() {
   const {
     user
@@ -129,7 +130,7 @@ export default function FoundingRegistrationPage() {
   const handleGoogleJoin = () => {
     setSocialLoading(true);
     // Redirect back to this page with join parameter after Google OAuth
-    const redirectUrl = `https://mentavo.pl/founding/register?join=true`;
+    const redirectUrl = `${PRODUCTION_DOMAIN}/founding/register?join=true`;
     supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {

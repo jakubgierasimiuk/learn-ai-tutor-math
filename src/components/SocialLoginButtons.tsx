@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { FaGoogle, FaFacebook } from "react-icons/fa";
+import { PRODUCTION_DOMAIN } from "@/lib/constants";
 
 // Function to translate Supabase auth errors to Polish
 const translateAuthError = (errorMessage: string): string => {
@@ -50,7 +51,7 @@ export const SocialLoginButtons = ({ loading, setLoading }: SocialLoginButtonsPr
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `https://mentavo.pl/`,
+          redirectTo: `${PRODUCTION_DOMAIN}/`,
         },
       });
 
