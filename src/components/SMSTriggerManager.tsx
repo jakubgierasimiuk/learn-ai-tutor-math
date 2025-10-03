@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { SMSActivationModal } from '@/components/SMSActivationModal';
 import { useSMSGamification } from '@/hooks/useSMSGamification';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsReferred } from '@/hooks/useIsReferred';
 import { useReferralV2 } from '@/hooks/useReferralV2';
 import { useViralTriggers } from '@/hooks/useViralTriggers';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,6 +12,7 @@ export const SMSTriggerManager: React.FC = () => {
   const [userHasPhone, setUserHasPhone] = useState(false);
   const [userDeclined, setUserDeclined] = useState(false);
   const { user } = useAuth();
+  const { isReferred } = useIsReferred();
   const { getSMSTriggerConditions } = useSMSGamification();
   const { checkActivation } = useReferralV2();
   const { triggerMilestone } = useViralTriggers();

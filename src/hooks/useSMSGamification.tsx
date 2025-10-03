@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useReferralV2 } from '@/hooks/useReferralV2';
+import { useIsReferred } from '@/hooks/useIsReferred';
 import { useTokenUsage } from '@/hooks/useTokenUsage';
 import { useViralTriggers } from '@/hooks/useViralTriggers';
 
@@ -14,7 +14,7 @@ interface SMSTriggerConditions {
 
 export const useSMSGamification = () => {
   const { user } = useAuth();
-  const { referralCode } = useReferralV2();
+  const { isReferred } = useIsReferred();
   const { getTokenStatus, getRemainingTokens, shouldShowUpgradePrompt } = useTokenUsage();
   const { showSocialProof } = useViralTriggers();
   const [hasShownSMSToday, setHasShownSMSToday] = useState(false);
@@ -23,8 +23,11 @@ export const useSMSGamification = () => {
   const getSMSTriggerConditions = (): SMSTriggerConditions => {
     if (!user) return { showSMSPrompt: false, urgencyLevel: 'none', triggerReason: '', personalizedMessage: '', rewardAmount: 4000 };
 
-    // Check if user came with referral code (from URL params)
-    const hasReferralCode = new URLSearchParams(window.location.search).get('ref') || referralCode;
+    // Check if user came with referral code (from URL params) OR was referred by someone
+    const urlRefParam = new URLSearchParams(window.location.search).get('ref');
+    const hasReferralCode = !!urlRefParam || isReferred;
+    
+    console.log('[useSMSGamification] Trigger check:', { urlRefParam, isReferred, hasReferralCode });
     
     const tokenStatus = getTokenStatus();
     const remainingTokens = getRemainingTokens();
@@ -76,7 +79,8 @@ export const useSMSGamification = () => {
   // Generate personalized SMS message based on user context
   const getPersonalizedSMSContext = () => {
     const conditions = getSMSTriggerConditions();
-    const hasReferral = referralCode || new URLSearchParams(window.location.search).get('ref');
+    const urlRefParam = new URLSearchParams(window.location.search).get('ref');
+    const hasReferral = !!urlRefParam || isReferred;
     
     return {
       ...conditions,
