@@ -7,6 +7,44 @@ import { supabase } from '@/integrations/supabase/client';
 import { useViralTriggers } from '@/hooks/useViralTriggers';
 import { Phone, Shield, Clock, Share2, Users } from 'lucide-react';
 
+// Function to translate SMS API errors to Polish user-friendly messages
+const translateSMSError = (errorMessage: string): string => {
+  const message = errorMessage.toLowerCase();
+  
+  // Verification errors
+  if (message.includes('invalid') && message.includes('code')) {
+    return 'Wprowadzony kod jest nieprawidłowy. Sprawdź SMS i spróbuj ponownie.';
+  }
+  if (message.includes('expired') || message.includes('expire')) {
+    return 'Kod weryfikacyjny wygasł. Wyślij nowy kod i spróbuj ponownie.';
+  }
+  if (message.includes('not found') || message.includes('no verification')) {
+    return 'Nie znaleziono aktywnej weryfikacji. Wyślij kod ponownie.';
+  }
+  
+  // SMS sending errors
+  if (message.includes('rate limit') || message.includes('too many')) {
+    return 'Wysłano zbyt wiele SMS-ów. Poczekaj 5 minut i spróbuj ponownie.';
+  }
+  if (message.includes('invalid phone') || message.includes('invalid number')) {
+    return 'Nieprawidłowy numer telefonu. Sprawdź format (np. +48 123 456 789).';
+  }
+  if (message.includes('sms api') || message.includes('failed to send')) {
+    return 'Nie udało się wysłać SMS. Sprawdź numer telefonu i spróbuj ponownie.';
+  }
+  
+  // Network/server errors
+  if (message.includes('network') || message.includes('timeout')) {
+    return 'Problem z połączeniem. Sprawdź internet i spróbuj ponownie.';
+  }
+  if (message.includes('edge function') || message.includes('2xx')) {
+    return 'Błąd serwera. Spróbuj ponownie za chwilę lub skontaktuj się z pomocą techniczną.';
+  }
+  
+  // Generic fallback
+  return 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie lub skontaktuj się z pomocą techniczną.';
+};
+
 interface SMSVerificationProps {
   onVerificationComplete: (phoneNumber: string) => void;
   onSkip?: () => void;
@@ -72,11 +110,11 @@ export const SMSVerification: React.FC<SMSVerificationProps> = ({
       });
 
       if (error) {
-        throw new Error(error.message || 'Błąd wysyłania SMS');
+        throw error;
       }
 
       toast({
-        title: "SMS wysłany",
+        title: "✅ SMS wysłany",
         description: "Kod weryfikacyjny został wysłany na Twój telefon",
       });
 
@@ -93,11 +131,15 @@ export const SMSVerification: React.FC<SMSVerificationProps> = ({
         });
       }, 3000);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending SMS:', error);
+      const friendlyMessage = translateSMSError(
+        error?.message || error?.error?.message || String(error)
+      );
+      
       toast({
-        title: "Błąd",
-        description: error instanceof Error ? error.message : 'Nie udało się wysłać SMS',
+        title: "Nie udało się wysłać SMS",
+        description: friendlyMessage,
         variant: "destructive",
       });
     } finally {
@@ -127,12 +169,12 @@ export const SMSVerification: React.FC<SMSVerificationProps> = ({
       });
 
       if (error) {
-        throw new Error(error.message || 'Nieprawidłowy kod');
+        throw error;
       }
 
       toast({
-        title: "Telefon zweryfikowany",
-        description: "Numer telefonu został pomyślnie zweryfikowany",
+        title: "✅ Telefon zweryfikowany",
+        description: "Numer telefonu został pomyślnie zweryfikowany. Odblokowałeś dodatkowe funkcje!",
       });
 
       // Trigger viral milestone
@@ -143,11 +185,15 @@ export const SMSVerification: React.FC<SMSVerificationProps> = ({
 
       onVerificationComplete(formattedPhone);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error verifying SMS:', error);
+      const friendlyMessage = translateSMSError(
+        error?.message || error?.error?.message || String(error)
+      );
+      
       toast({
-        title: "Błąd",
-        description: error instanceof Error ? error.message : 'Nieprawidłowy kod weryfikacyjny',
+        title: "Weryfikacja nie powiodła się",
+        description: friendlyMessage,
         variant: "destructive",
       });
     } finally {
