@@ -43,7 +43,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (!isMounted) return;
             
             try {
-              // Ensure user profile exists
+              // Validate that the auth user still exists server-side
+              const { data: userCheck, error: userErr } = await supabase.auth.getUser();
+              const notFound = (userErr as any)?.code === 'user_not_found' ||
+                (userErr as any)?.message?.includes('User from sub claim in JWT does not exist');
+
+              if (userErr && notFound) {
+                // Stale/invalid session for deleted user → force local sign-out and clear state
+                await supabase.auth.signOut();
+                if (!isMounted) return;
+                setSession(null);
+                setUser(null);
+                setLoading(false);
+                return;
+              }
+
+              // Ensure user profile exists (only if user is valid)
               const { data: existingProfile, error: profileErr } = await supabase
                 .from('profiles')
                 .select('user_id')
@@ -82,6 +97,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // Validate session against server (handles deleted users with stale local tokens)
+      if (session?.user) {
+        setTimeout(async () => {
+          if (!isMounted) return;
+          const { error: userErr } = await supabase.auth.getUser();
+          const notFound = (userErr as any)?.code === 'user_not_found' ||
+            (userErr as any)?.message?.includes('User from sub claim in JWT does not exist');
+          if (userErr && notFound) {
+            await supabase.auth.signOut();
+            if (!isMounted) return;
+            setSession(null);
+            setUser(null);
+          }
+        }, 50);
+      }
     });
 
     return () => {
