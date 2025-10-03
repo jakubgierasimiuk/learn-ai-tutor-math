@@ -74,7 +74,7 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
           <Navigation />
           <CurriculumSeeder />
           <ViralPopups />
-          <SMSTriggerManager />
+          {/* <SMSTriggerManager /> */} {/* Tymczasowo wyłączone - problemy z API SMS */}
           <main>
             {children}
           </main>
