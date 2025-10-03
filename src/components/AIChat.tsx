@@ -67,9 +67,12 @@ export const AIChat = () => {
     detectUIHelpRequest
   } = useMathSymbols();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const inputContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Dynamic bottom padding to ensure last message is visible above the sticky input
+  const [bottomPadding, setBottomPadding] = useState<number>(120);
   const [contextualSymbols, setContextualSymbols] = useState<string[]>([]);
   const [showSuccessPrompt, setShowSuccessPrompt] = useState(false);
-
   // Add one-time message when tokens are exhausted
   useEffect(() => {
     if (shouldShowSoftPaywall() && !hasShownTokenExhaustedMessage && messages.length > 1) {
@@ -97,6 +100,22 @@ export const AIChat = () => {
     const timeoutId = setTimeout(scrollToBottom, 100);
     return () => clearTimeout(timeoutId);
   }, [messages, isLoading]);
+
+  // Keep messages above the input by tracking the input container height
+  useEffect(() => {
+    const el = inputContainerRef.current;
+    if (!el) return;
+
+    const updatePadding = () => {
+      const h = el.getBoundingClientRect().height || 0;
+      setBottomPadding(h + 16); // add a small safety gap
+    };
+
+    updatePadding();
+    const ro = new ResizeObserver(updatePadding);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   // Auto-close session on page unload
   useEffect(() => {
@@ -594,7 +613,7 @@ export const AIChat = () => {
         </div>
         
         {/* Messages Container */}
-        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto scroll-smooth pb-4">
+        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto scroll-smooth" style={{ paddingBottom: bottomPadding }}>
           <div className="space-y-6">
             {messages.map((message, index) => {
             const prevMessage = messages[index - 1];
@@ -659,7 +678,7 @@ export const AIChat = () => {
           </div>}
 
         {/* Fixed Input Area or Lock Banner */}
-        <div className="sticky bottom-0 bg-background/80 backdrop-blur-sm pt-4">
+        <div ref={inputContainerRef} className="sticky bottom-0 bg-background/80 backdrop-blur-sm pt-4">
           {shouldShowSoftPaywall() ? (
             // Show lock banner when tokens exhausted
             <Card className="border-orange-200 bg-gradient-to-r from-orange-50 to-red-50 mb-4">
