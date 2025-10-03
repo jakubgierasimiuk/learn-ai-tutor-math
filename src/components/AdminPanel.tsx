@@ -22,6 +22,8 @@ import { AnalyticsSection } from "@/components/AnalyticsSection";
 import { RealTimeAnalytics } from "@/components/RealTimeAnalytics";
 import { SubscriptionStatsCard } from "@/components/SubscriptionStatsCard";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export const AdminPanel = () => {
   const [selectedView, setSelectedView] = useState<"owner" | "admin">("owner");
@@ -45,6 +47,9 @@ export const AdminPanel = () => {
     pseudoActivity: 0,
     contentBlocked: 0
   });
+
+  const [deleting, setDeleting] = useState(false);
+  const { toast } = useToast();
 
   const [topReferrers, setTopReferrers] = useState<Array<{ name: string; referrals: number; reward: number }>>([]);
   const [difficultTopics, setDifficultTopics] = useState<Array<{ topic: string; errors: number; errorRate: number }>>([]);
