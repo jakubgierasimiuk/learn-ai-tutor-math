@@ -193,13 +193,19 @@ export const useReferralV2 = () => {
     if (refCode) {
       console.log('[Referral] Found ref code in URL:', refCode);
       saveReferralCode(refCode);
+
+      // If user is already logged in, process immediately
+      if (user) {
+        processReferralMutation.mutate({ referralCode: refCode, action: 'register' });
+        clearReferralCode();
+      }
       
       // Clean up URL
       const url = new URL(window.location.href);
       url.searchParams.delete('ref');
       window.history.replaceState({}, '', url.toString());
     }
-  }, []);
+  }, [user]);
 
   // Process referral after user registers/logs in
   useEffect(() => {

@@ -128,6 +128,12 @@ function RouteSeo() {
   return <Seo title={match.title} description={match.description} canonical={canonical} />;
 }
 
+function ReferralBootstrap() {
+  // Mount referral processing globally so it works on public pages and after auth
+  useReferralV2();
+  return null;
+}
+
 function CurriculumSeeder() {
   useEffect(() => {
     const key = 'curriculumSeededV1';
@@ -160,6 +166,7 @@ const App = () => (
             <DomainGuard />
             <LoggingBootstrap />
             <RouteSeo />
+            <ReferralBootstrap />
             <CurriculumSeeder />
             <Routes>
             <Route path="/" element={<NewLandingPage />} />
