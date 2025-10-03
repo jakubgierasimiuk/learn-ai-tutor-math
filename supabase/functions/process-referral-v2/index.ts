@@ -107,8 +107,17 @@ serve(async (req) => {
         .single();
 
       if (referralError) {
-        throw new Error("Failed to create referral record");
+        console.error('[Referral] ❌ Database error creating referral:', {
+          error: referralError,
+          message: referralError.message,
+          details: referralError.details,
+          hint: referralError.hint,
+          code: referralError.code
+        });
+        throw new Error(`Failed to create referral record: ${referralError.message}`);
       }
+      
+      console.log('[Referral] ✅ Created referral:', newReferral);
 
       // Log referral event
       await supabaseService.from('referral_events').insert({
