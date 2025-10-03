@@ -23,6 +23,9 @@ export const TokenUsageProgress = () => {
   const hardLimit = subscription.token_limit_hard;
   const percentage = getUsagePercentage();
   const status = getTokenStatus();
+
+  // Hide token usage until user reaches 20,000 tokens
+  if (tokensUsed < 20000) return null;
   const getProgressColor = () => {
     switch (status) {
       case 'critical':
