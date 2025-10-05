@@ -91,22 +91,24 @@ serve(async (req) => {
         });
       }
 
-      // Create new referral record
+      // Create new referral record with proper stage field
+      const referralData = {
+        referrer_id: referrer.user_id,
+        referred_user_id: user.id,
+        referral_code: referralCode,
+        stage: 'invited',
+        ip: clientIP,
+        risk_score: 0,
+        notes: {
+          registered_at: new Date().toISOString(),
+          user_agent: userAgent,
+          ip: clientIP,
+        }
+      };
+      
       const { data: newReferral, error: referralError } = await supabaseService
         .from('referrals')
-        .insert({
-          referrer_id: referrer.user_id,
-          referred_user_id: user.id,
-          referral_code: referralCode,
-          stage: 'invited',
-          ip: clientIP,
-          risk_score: 0,
-          notes: {
-            registered_at: new Date().toISOString(),
-            user_agent: userAgent,
-            ip: clientIP,
-          }
-        })
+        .insert(referralData)
         .select()
         .single();
 
