@@ -93,8 +93,8 @@ serve(async (req) => {
         });
       }
 
-      // Create new referral record with proper stage field
-      const referralData = {
+      // Create new referral record with proper stage field (defensive: never send 'status')
+      const newReferralPayload = {
         referrer_id: referrer.user_id,
         referred_user_id: user.id,
         referral_code: referralCode,
@@ -105,12 +105,19 @@ serve(async (req) => {
           registered_at: new Date().toISOString(),
           user_agent: userAgent,
           ip: clientIP,
-        }
-      };
+        },
+      } as const;
+      // Extra safety in case of accidental 'status' key somewhere upstream
+      // deno-lint-ignore no-explicit-any
+      const sanitizedPayload: any = { ...newReferralPayload };
+      if ('status' in sanitizedPayload) {
+        delete sanitizedPayload.status;
+      }
+      console.log('[Referral] 🧾 Insert payload (referrals):', sanitizedPayload);
       
       const { data: newReferral, error: referralError } = await supabaseService
         .from('referrals')
-        .insert(referralData)
+        .insert(sanitizedPayload)
         .select()
         .single();
 
