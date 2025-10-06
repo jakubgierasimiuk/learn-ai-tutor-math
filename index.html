@@ -33,6 +33,37 @@
   </head>
 
   <body>
+    <!-- Inline script to capture referral code before React loads -->
+    <script>
+      (function() {
+        try {
+          const REFERRAL_CODE_KEY = 'mentavo_referral_code';
+          const REFERRAL_CODE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+          // Check URL params
+          const urlParams = new URLSearchParams(window.location.search);
+          const refCode = urlParams.get('ref');
+          
+          // Check URL hash
+          const hashParams = new URLSearchParams(window.location.hash.substring(1));
+          const hashRefCode = hashParams.get('ref');
+          
+          const codeToSave = refCode || hashRefCode;
+          
+          if (codeToSave) {
+            const data = {
+              code: codeToSave,
+              timestamp: Date.now()
+            };
+            localStorage.setItem(REFERRAL_CODE_KEY, JSON.stringify(data));
+            console.log('[Referral Pre-React] Saved code:', codeToSave);
+          }
+        } catch (error) {
+          console.error('[Referral Pre-React] Error:', error);
+        }
+      })();
+    </script>
+    
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

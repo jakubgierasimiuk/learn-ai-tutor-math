@@ -212,19 +212,25 @@ export const useReferralV2 = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const refCode = urlParams.get('ref');
     
-    console.log('[Referral] 🔍 URL Check - user:', user?.email || 'none', 'refCode:', refCode, 'localStorage:', getReferralCode());
+    // Also check URL hash for ref code
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const hashRefCode = hashParams.get('ref');
     
-    if (refCode) {
-      console.log('[Referral] 📥 Found ref code in URL:', refCode);
-      saveReferralCode(refCode);
+    const codeToProcess = refCode || hashRefCode;
+    
+    console.log('[Referral] 🔍 URL Check - user:', user?.email || 'none', 'refCode:', codeToProcess, 'localStorage:', getReferralCode());
+    
+    if (codeToProcess) {
+      console.log('[Referral] 📥 Found ref code in URL:', codeToProcess);
+      saveReferralCode(codeToProcess);
       console.log('[Referral] 💾 Saved to localStorage, value:', getReferralCode());
 
-      // If user is already logged in, process immediately
+      // If user is already logged in, process immediately with retry
       if (user) {
-        console.log('[Referral] 👤 User is logged in, processing immediately');
-        processReferralMutation.mutate({ referralCode: refCode, action: 'register' });
-         // clearReferralCode will run on success (see onSuccess)
-
+        console.log('[Referral] 👤 User is logged in, processing immediately with short delay');
+        setTimeout(() => {
+          processReferralMutation.mutate({ referralCode: codeToProcess, action: 'register' });
+        }, 500);
       } else {
         console.log('[Referral] 🔒 User not logged in, will process after auth');
       }
@@ -232,6 +238,9 @@ export const useReferralV2 = () => {
       // Clean up URL (but keep code in localStorage for post-auth processing)
       const url = new URL(window.location.href);
       url.searchParams.delete('ref');
+      if (hashRefCode) {
+        url.hash = '';
+      }
       window.history.replaceState({}, '', url.toString());
     }
   }, [user]);

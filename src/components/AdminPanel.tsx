@@ -24,6 +24,7 @@ import { SubscriptionStatsCard } from "@/components/SubscriptionStatsCard";
 import { AdminDeleteTestUsers } from "@/components/AdminDeleteTestUsers";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 
 export const AdminPanel = () => {
@@ -50,6 +51,9 @@ export const AdminPanel = () => {
   });
 
   const [deleting, setDeleting] = useState(false);
+  const [linkReferralEmail, setLinkReferralEmail] = useState("");
+  const [linkReferralCode, setLinkReferralCode] = useState("");
+  const [linkingReferral, setLinkingReferral] = useState(false);
   const { toast } = useToast();
 
   const TEST_EMAILS = [
@@ -58,6 +62,46 @@ export const AdminPanel = () => {
     'niezapowiedzianazmiana@gmail.com',
     'ytrewq.trewq456@gmail.com'
   ];
+
+  const handleLinkReferral = async () => {
+    if (!linkReferralEmail || !linkReferralCode) {
+      toast({
+        title: "Błąd",
+        description: "Podaj email użytkownika i kod polecający",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLinkingReferral(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-link-referral', {
+        body: {
+          inviteeEmail: linkReferralEmail,
+          referralCode: linkReferralCode
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Sukces",
+        description: data.message || "Użytkownik został podlinkowany do kodu polecającego i otrzymał bonusy"
+      });
+
+      setLinkReferralEmail("");
+      setLinkReferralCode("");
+    } catch (error: any) {
+      console.error('Link referral error:', error);
+      toast({
+        title: "Błąd",
+        description: error.message || "Nie udało się podlinkować użytkownika",
+        variant: "destructive"
+      });
+    } finally {
+      setLinkingReferral(false);
+    }
+  };
 
   const handleDeleteTestUsers = async () => {
     setDeleting(true);
@@ -567,6 +611,44 @@ export const AdminPanel = () => {
 
             {/* Delete Test Users Section */}
             <AdminDeleteTestUsers />
+
+            {/* Link Referral Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Podlinkuj Użytkownika do Kodu Polecającego</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Email użytkownika (invitee)</label>
+                    <Input
+                      type="email"
+                      placeholder="user@example.com"
+                      value={linkReferralEmail}
+                      onChange={(e) => setLinkReferralEmail(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Kod polecający (np. INZAXOVE)</label>
+                    <Input
+                      type="text"
+                      placeholder="ABCD1234"
+                      value={linkReferralCode}
+                      onChange={(e) => setLinkReferralCode(e.target.value.toUpperCase())}
+                    />
+                  </div>
+                  <Button 
+                    onClick={handleLinkReferral}
+                    disabled={!linkReferralEmail || !linkReferralCode || linkingReferral}
+                  >
+                    {linkingReferral ? "Linkowanie..." : "Podlinkuj Referral"}
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    To utworzy rekord w tabeli referrals ze stage='invited' i nada invitee bonusy (7 dni + 4000 tokenów).
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
           
           <TabsContent value="subscriptions" className="space-y-6">
