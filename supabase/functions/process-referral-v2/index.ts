@@ -129,11 +129,9 @@ serve(async (req) => {
       }
       console.log('[Referral] 🧾 Insert payload (referrals):', sanitizedPayload);
       
-      const { data: newReferral, error: referralError } = await supabaseService
+      const { error: referralError } = await supabaseService
         .from('referrals')
-        .insert(sanitizedPayload)
-        .select()
-        .single();
+        .insert(sanitizedPayload);
 
       if (referralError) {
         console.error('[Referral] ❌ Database error creating referral:', {
@@ -145,8 +143,21 @@ serve(async (req) => {
         });
         throw new Error(`Failed to create referral record: ${referralError.message}`);
       }
+
+      // Now fetch the created referral separately
+      const { data: newReferral, error: fetchError } = await supabaseService
+        .from('referrals')
+        .select()
+        .eq('referred_user_id', user.id)
+        .eq('referral_code', referralCode)
+        .single();
+
+      if (fetchError || !newReferral) {
+        console.error('[Referral] ❌ Error fetching created referral:', fetchError);
+        throw new Error('Failed to retrieve created referral record');
+      }
       
-      console.log('[Referral] ✅ Created referral:', newReferral);
+      console.log('[Referral] ✅ Created and retrieved referral:', newReferral);
 
       // Log referral event
       await supabaseService.from('referral_events').insert({
