@@ -21,6 +21,7 @@ import { TokenLimitDashboard } from "@/components/TokenLimitDashboard";
 import { AnalyticsSection } from "@/components/AnalyticsSection";
 import { RealTimeAnalytics } from "@/components/RealTimeAnalytics";
 import { SubscriptionStatsCard } from "@/components/SubscriptionStatsCard";
+import { AdminDeleteTestUsers } from "@/components/AdminDeleteTestUsers";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -563,6 +564,9 @@ export const AdminPanel = () => {
               </CardContent>
             </Card>
             </div>
+
+            {/* Delete Test Users Section */}
+            <AdminDeleteTestUsers />
           </TabsContent>
           
           <TabsContent value="subscriptions" className="space-y-6">
