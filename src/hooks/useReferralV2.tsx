@@ -146,15 +146,26 @@ export const useReferralV2 = () => {
         throw error;
       }
       console.log('[Referral] ✅ Edge function success:', data);
-      return data;
+      return data as { success?: boolean };
     },
-    onSuccess: (data) => {
+    retry: 3,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
+    onSuccess: (data, variables) => {
       console.log('[Referral] 🎉 Mutation success, invalidating queries');
+      // Clear stored code ONLY after confirmed register success
+      if (variables?.action === 'register' && data?.success) {
+        console.log('[Referral] 🧹 Clearing referral code after confirmed success');
+        clearReferralCode();
+      }
       queryClient.invalidateQueries({ queryKey: ['referral-stats-v2'] });
       queryClient.invalidateQueries({ queryKey: ['rewards-v2'] });
     },
-    onError: (error) => {
+    onError: (error, variables) => {
       console.error('[Referral] 💥 Mutation error:', error);
+      // Keep code in storage for retry; inform user softly when in immediate flow
+      if (variables?.action === 'register') {
+        toast.error('Nie udało się przetworzyć polecenia. Spróbujemy ponownie.');
+      }
     },
   });
 
@@ -212,7 +223,8 @@ export const useReferralV2 = () => {
       if (user) {
         console.log('[Referral] 👤 User is logged in, processing immediately');
         processReferralMutation.mutate({ referralCode: refCode, action: 'register' });
-        clearReferralCode();
+         // clearReferralCode will run on success (see onSuccess)
+
       } else {
         console.log('[Referral] 🔒 User not logged in, will process after auth');
       }
@@ -247,9 +259,8 @@ export const useReferralV2 = () => {
           action: 'register' 
         });
         
-        // Clear after processing
-        console.log('[Referral] 🧹 Clearing from localStorage');
-        clearReferralCode();
+        // Do not clear here; code will be cleared on successful register in onSuccess
+
       }, 1000); // 1 second delay to ensure auth token is ready
     } else {
       console.log('[Referral] ℹ️ No stored code found');

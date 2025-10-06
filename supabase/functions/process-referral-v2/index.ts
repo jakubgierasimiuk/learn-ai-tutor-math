@@ -5,6 +5,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Max-Age': '86400',
 };
 
 // Request payload interface
@@ -69,10 +71,22 @@ serve(async (req) => {
     // Get client info for fraud detection
     // x-forwarded-for can contain multiple IPs (e.g., "client, proxy1, proxy2")
     // We take only the first one (the original client IP)
-    const forwardedFor = req.headers.get('x-forwarded-for');
-    const clientIP = forwardedFor 
-      ? forwardedFor.split(',')[0].trim()
-      : (req.headers.get('x-real-ip') || 'unknown');
+    const forwardedForHeader = req.headers.get('x-forwarded-for');
+    const firstForwarded = forwardedForHeader?.split(',').map(s => s.trim()).filter(Boolean)[0] ?? null;
+    const realIP = req.headers.get('x-real-ip');
+    const rawIP = firstForwarded || realIP || null;
+
+    const isValidIPv4 = (ip: string) => {
+      const m = ip.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+      if (!m) return false;
+      return m.slice(1).every((o) => {
+        const n = Number(o);
+        return n >= 0 && n <= 255;
+      });
+    };
+    const isValidIPv6 = (ip: string) => ip.includes(':') && ip.length <= 45; // coarse but safe enough to avoid 'unknown'
+
+    const clientIP = rawIP && (isValidIPv4(rawIP) || isValidIPv6(rawIP)) ? rawIP : null;
     const userAgent = req.headers.get('user-agent') || 'unknown';
 
     if (action === 'register') {
@@ -93,18 +107,18 @@ serve(async (req) => {
         });
       }
 
-      // Create new referral record with proper stage field (defensive: never send 'status')
       const newReferralPayload = {
         referrer_id: referrer.user_id,
         referred_user_id: user.id,
         referral_code: referralCode,
         stage: 'invited',
-        ip: clientIP,
+        ip: clientIP, // may be null if unavailable/invalid
         risk_score: 0,
         notes: {
           registered_at: new Date().toISOString(),
           user_agent: userAgent,
           ip: clientIP,
+          ip_raw: rawIP ?? 'unknown',
         },
       } as const;
       // Extra safety in case of accidental 'status' key somewhere upstream
