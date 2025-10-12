@@ -22,6 +22,8 @@ import { AnalyticsSection } from "@/components/AnalyticsSection";
 import { RealTimeAnalytics } from "@/components/RealTimeAnalytics";
 import { SubscriptionStatsCard } from "@/components/SubscriptionStatsCard";
 import { AdminDeleteTestUsers } from "@/components/AdminDeleteTestUsers";
+import { ReferralsDebugPanel } from "@/components/ReferralsDebugPanel";
+import { ReferralTestScenarios } from "@/components/ReferralTestScenarios";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -458,12 +460,14 @@ export const AdminPanel = () => {
 
       {selectedView === "admin" && (
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview">Przegląd</TabsTrigger>
             <TabsTrigger value="subscriptions">Subskrypcje</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="realtime">Real-time</TabsTrigger>
             <TabsTrigger value="token-limits">Limity Tokenów</TabsTrigger>
+            <TabsTrigger value="referrals">Referrals</TabsTrigger>
+            <TabsTrigger value="referral-tests">Testy</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview" className="space-y-6">
@@ -665,6 +669,14 @@ export const AdminPanel = () => {
           
           <TabsContent value="token-limits">
             <TokenLimitDashboard />
+          </TabsContent>
+
+          <TabsContent value="referrals">
+            <ReferralsDebugPanel />
+          </TabsContent>
+          
+          <TabsContent value="referral-tests">
+            <ReferralTestScenarios />
           </TabsContent>
         </Tabs>
       )}

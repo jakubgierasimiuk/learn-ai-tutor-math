@@ -182,20 +182,31 @@ export const ReferralDemo = () => {
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium">2. Znajomy się rejestruje</p>
-                <p className="text-xs text-muted-foreground">Otrzymuje 7 dni darmowo</p>
+                <p className="text-xs text-muted-foreground">Otrzymuje 7 dni + 4000 tokenów</p>
               </div>
-              <Badge variant="secondary">7 dni trial</Badge>
+              <Badge variant="secondary">Bonusy start</Badge>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 bg-background rounded-lg border">
+              <div className="w-8 h-8 bg-amber-500/10 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-4 h-4 text-amber-500" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium">3. Znajomy aktywuje konto</p>
+                <p className="text-xs text-muted-foreground">Weryfikacja telefonu + 20 min nauki</p>
+              </div>
+              <Badge variant="outline">Ty: 3 dni lub 4000 tokenów</Badge>
             </div>
 
             <div className="flex items-center gap-3 p-3 bg-background rounded-lg border">
               <div className="w-8 h-8 bg-green-500/10 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-4 h-4 text-green-500" />
+                <Gift className="w-4 h-4 text-green-500" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium">3. Znajomy kupuje subskrypcję</p>
-                <p className="text-xs text-muted-foreground">Po okresie próbnym</p>
+                <p className="text-sm font-medium">4. Znajomy kupuje subskrypcję</p>
+                <p className="text-xs text-muted-foreground">Może być od razu lub po trialu</p>
               </div>
-              <Badge variant="default">Polecenie zaliczone!</Badge>
+              <Badge variant="default">Ty: 30 dni Premium!</Badge>
             </div>
 
             <div className="flex items-center gap-3 p-3 bg-background rounded-lg border border-primary/20">
@@ -219,11 +230,19 @@ export const ReferralDemo = () => {
             <Gift className="w-4 h-4" />
             Schemat nagród:
           </h4>
-          <div className="text-sm space-y-1">
-            <p>• <strong>2 polecenia:</strong> 1 miesiąc darmowy</p>
-            <p>• <strong>5 poleceń:</strong> 2 miesiące darmowe</p>
-            <p>• <strong>10 poleceń:</strong> 5 miesięcy + punkty na nagrody</p>
-            <p>• <strong>Powyżej 10:</strong> Karty podarunkowe (Spotify, Netflix, Steam...)</p>
+          <div className="text-sm space-y-2">
+            <div className="font-medium text-primary">Za każdą konwersję (zakup przez znajomego):</div>
+            <p>• Zawsze <strong>30 dni Premium</strong> dla Ciebie</p>
+            
+            <div className="font-medium text-primary mt-3">Bonusy za milestones:</div>
+            <p>• <strong>2 konwersje:</strong> +30 dni bonusu (razem 60 dni)</p>
+            <p>• <strong>5 konwersji:</strong> +60 dni bonusu (razem 210 dni)</p>
+            <p>• <strong>10 konwersji:</strong> +150 dni bonusu (razem 510 dni = 17 miesięcy!)</p>
+            <p>• <strong>Powyżej 10:</strong> 1 punkt za każdą konwersję (wymienialny na tokeny/dni)</p>
+            
+            <div className="mt-3 p-3 bg-primary/5 rounded border border-primary/20">
+              <p className="text-xs"><strong>💡 Pro tip:</strong> Znajomy może kupić od razu bez czekania na trial - nadal otrzymasz pełną nagrodę!</p>
+            </div>
           </div>
         </div>
       </CardContent>

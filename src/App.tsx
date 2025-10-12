@@ -7,14 +7,14 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useReferralV2 } from "@/hooks/useReferralV2";
 import { Navigation } from "@/components/Navigation";
-import HomePage from "./pages/HomePage";
-import NewLandingPage from "./pages/NewLandingPage";
+import HomePage from './pages/HomePage';
+import AuthPage from './pages/AuthPage';
+import DashboardPage from './pages/DashboardPage';
+import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage';
+import NewLandingPage from './pages/NewLandingPage';
 import QuizPage from "./pages/QuizPage";
 import { Dashboard } from "@/components/Dashboard";
-import DashboardPage from "./pages/DashboardPage";
 import ChatPage from "./pages/ChatPage";
-
-import AuthPage from "./pages/AuthPage";
 import SmartRecommendations from "./pages/SmartRecommendations";
 import SocialPage from "./pages/SocialPage";
 import GamificationPage from "./pages/GamificationPage";
@@ -216,6 +216,11 @@ const App = () => (
             <Route path="/dashboard" element={
               <AuthenticatedLayout>
                 <DashboardPage />
+              </AuthenticatedLayout>
+            } />
+            <Route path="/subscription-success" element={
+              <AuthenticatedLayout>
+                <SubscriptionSuccessPage />
               </AuthenticatedLayout>
             } />
             <Route path="/chat" element={

@@ -51,6 +51,7 @@ export const SubscriptionManager = () => {
   const handleUpgrade = async () => {
     if (!user) return;
     
+    setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { plan: 'paid' }
@@ -59,22 +60,13 @@ export const SubscriptionManager = () => {
       if (error) throw error;
       
       // Open Stripe checkout in new tab
+      // Success handling is now done on /subscription-success page
       window.open(data.url, '_blank');
       
       toast({
         title: "Przekierowanie do płatności",
         description: "Otwarto nową kartę z formularzem płatności"
       });
-
-      // Listen for successful payment completion
-      const handlePaymentSuccess = () => {
-        // Auto-trigger conversion completion
-        completeConversion();
-        window.removeEventListener('focus', handlePaymentSuccess);
-      };
-      
-      // Simple way to detect user returning from payment
-      window.addEventListener('focus', handlePaymentSuccess);
     } catch (error) {
       console.error('Error creating checkout:', error);
       toast({
@@ -82,6 +74,8 @@ export const SubscriptionManager = () => {
         description: "Nie udało się utworzyć sesji płatności",
         variant: "destructive"
       });
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -345,21 +345,111 @@ serve(async (req) => {
     }
 
     if (action === 'complete_conversion') {
-      // Find the referral
+      logStep('🎯 Starting complete_conversion action');
+      
+      // Find the referral - check all stages (invited, activated)
       const { data: referral } = await supabaseService
         .from('referrals')
         .select('*')
         .eq('referred_user_id', user.id)
         .eq('referral_code', referralCode)
-        .eq('stage', 'activated')
         .maybeSingle();
 
       if (!referral) {
-        throw new Error("Referral not found or not activated");
+        logStep('ERROR: Referral not found', { userId: user.id, code: referralCode });
+        throw new Error("Referral not found");
+      }
+      
+      logStep('Found referral', { stage: referral.stage, id: referral.id });
+
+      // Check if already converted to prevent duplicates
+      if (referral.stage === 'converted') {
+        logStep('ℹ️ Already converted, skipping', { referral_id: referral.id });
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            message: 'Referral already converted',
+            stage: 'converted'
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
+        );
+      }
+      
+      // AUTO-ACTIVATION: If user purchases before activation, auto-activate them first
+      if (referral.stage === 'invited') {
+        logStep('⚠️ User purchasing before activation - auto-activating', { 
+          referral_id: referral.id,
+          risk_score: 'low (30)'
+        });
+        
+        // Auto-activate with low risk_score (30) since no verification happened
+        const { error: autoActivationError } = await supabaseService
+          .from('referrals')
+          .update({
+            stage: 'activated',
+            activated_at: new Date().toISOString(),
+            risk_score: 30,
+            notes: {
+              ...referral.notes,
+              auto_activated: true,
+              reason: 'User purchased before completing activation criteria'
+            }
+          })
+          .eq('id', referral.id);
+        
+        if (autoActivationError) {
+          logStep('ERROR during auto-activation', { error: autoActivationError.message });
+          throw autoActivationError;
+        }
+        
+        // Grant small activation reward to referrer (convertible 3 days)
+        const { error: activationRewardError } = await supabaseService
+          .from('rewards')
+          .insert({
+            user_id: referral.referrer_id,
+            kind: 'convertible',
+            amount: 3,
+            status: 'released',
+            source: 'referral_activation',
+            meta: { 
+              convertible_to: ['days', 'tokens'],
+              days_amount: 3,
+              tokens_amount: 4000,
+              referral_id: referral.id,
+              auto_activated: true
+            },
+            released_at: new Date().toISOString(),
+          });
+        
+        if (activationRewardError) {
+          logStep('WARN: Failed to grant auto-activation reward', { error: activationRewardError.message });
+        } else {
+          logStep('✅ Auto-activation reward granted to referrer', { 
+            referrer_id: referral.referrer_id,
+            reward: '3 days (convertible)'
+          });
+        }
+        
+        // Log auto-activation event
+        await supabaseService.from('referral_events').insert({
+          referral_id: referral.id,
+          event_type: 'auto_activated',
+          payload: {
+            risk_score: 30,
+            reason: 'User purchased subscription before meeting activation criteria',
+            timestamp: new Date().toISOString()
+          }
+        });
+        
+        logStep('✅ Auto-activation complete');
+      } else if (referral.stage !== 'activated') {
+        logStep('ERROR: Referral in invalid stage', { currentStage: referral.stage });
+        throw new Error(`Cannot complete conversion - referral is in stage: ${referral.stage}. Expected: activated or invited.`);
       }
 
       // Update referral to converted
       const converted_at = new Date().toISOString();
+      logStep('📝 Updating referral stage to converted', { referral_id: referral.id });
       await supabaseService
         .from('referrals')
         .update({
@@ -373,6 +463,7 @@ serve(async (req) => {
         .eq('id', referral.id);
 
       // Log conversion event
+      logStep('📋 Logging conversion event');
       await supabaseService.from('referral_events').insert({
         referral_id: referral.id,
         event_type: 'referral_converted',
@@ -384,24 +475,56 @@ serve(async (req) => {
       });
 
       // Give conversion reward to referrer (+30 days)
+      logStep('🎁 Granting conversion reward to referrer', { 
+        referrer_id: referral.referrer_id,
+        reward: '30 days Premium'
+      });
       await supabaseService.from('rewards').insert({
         user_id: referral.referrer_id,
         kind: 'days',
         amount: 30,
         status: 'released',
-        source: 'conversion',
-        meta: { referral_id: referral.id },
+        source: 'referral_conversion',
+        meta: { 
+          referral_id: referral.id,
+          referred_user_id: user.id
+        },
         released_at: new Date().toISOString(),
       });
 
-      // Update referral stats (triggers ladder bonuses)
+      // Update referral stats (triggers ladder bonuses via DB trigger)
+      logStep('📊 Updating referral stats (will trigger ladder bonus check)');
       await supabaseService.rpc('update_referral_stats_v2', { 
         p_user_id: referral.referrer_id 
       });
 
+      // Fetch updated stats to log next milestone
+      const { data: updatedStats } = await supabaseService
+        .from('user_referral_stats')
+        .select('successful_referrals, current_tier')
+        .eq('user_id', referral.referrer_id)
+        .maybeSingle();
+      
+      const nextMilestone = updatedStats && updatedStats.successful_referrals < 2 ? 2 : 
+                           updatedStats && updatedStats.successful_referrals < 5 ? 5 : 
+                           updatedStats && updatedStats.successful_referrals < 10 ? 10 : 'none';
+      
+      logStep('✅ Conversion completed successfully', {
+        referralId: referral.id,
+        referrerId: referral.referrer_id,
+        stage: 'converted',
+        totalConversions: updatedStats?.successful_referrals || 0,
+        currentTier: updatedStats?.current_tier || 'beginner',
+        nextMilestone: nextMilestone
+      });
+
       return new Response(JSON.stringify({ 
         success: true, 
-        message: 'Referral conversion completed successfully' 
+        message: 'Referral conversion completed successfully',
+        stats: {
+          total_conversions: updatedStats?.successful_referrals || 0,
+          next_milestone: nextMilestone
+        }
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,

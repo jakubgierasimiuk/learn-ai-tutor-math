@@ -3553,6 +3553,7 @@ export type Database = {
           current_tier: string
           free_months_earned: number
           id: string
+          milestone_rewards_claimed: number[] | null
           successful_referrals: number
           total_points: number
           updated_at: string
@@ -3564,6 +3565,7 @@ export type Database = {
           current_tier?: string
           free_months_earned?: number
           id?: string
+          milestone_rewards_claimed?: number[] | null
           successful_referrals?: number
           total_points?: number
           updated_at?: string
@@ -3575,6 +3577,7 @@ export type Database = {
           current_tier?: string
           free_months_earned?: number
           id?: string
+          milestone_rewards_claimed?: number[] | null
           successful_referrals?: number
           total_points?: number
           updated_at?: string
