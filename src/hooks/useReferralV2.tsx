@@ -260,17 +260,28 @@ export const useReferralV2 = () => {
     if (storedRefCode) {
       console.log('[Referral] 🎯 Processing stored code:', storedRefCode);
       
-      // Add delay to ensure auth is fully set up
-      setTimeout(() => {
-        console.log('[Referral] ⏱️ Delayed processing - calling edge function');
-        processReferralMutation.mutate({ 
-          referralCode: storedRefCode, 
-          action: 'register' 
+      // Check if user already has a referral record to avoid duplicate processing
+      supabase
+        .from('referrals')
+        .select('id')
+        .eq('referred_user_id', user.id)
+        .maybeSingle()
+        .then(({ data, error }) => {
+          if (data) {
+            console.log('[Referral] ✅ User already has referral, clearing localStorage');
+            clearReferralCode();
+            return;
+          }
+          
+          // Add delay to ensure auth is fully set up
+          setTimeout(() => {
+            console.log('[Referral] ⏱️ Delayed processing - calling edge function');
+            processReferralMutation.mutate({ 
+              referralCode: storedRefCode, 
+              action: 'register' 
+            });
+          }, 1000); // 1 second delay to ensure auth token is ready
         });
-        
-        // Do not clear here; code will be cleared on successful register in onSuccess
-
-      }, 1000); // 1 second delay to ensure auth token is ready
     } else {
       console.log('[Referral] ℹ️ No stored code found');
     }
