@@ -41,11 +41,6 @@ export const Navigation = () => {
             <span className="text-xl font-bold font-['Poppins'] hidden sm:block">Mentavo AI</span>
           </Link>
 
-          {/* Founding 100 Button */}
-          <Button asChild className="gradient-hero text-primary-foreground shadow-primary hover:opacity-95 hover-lift hidden md:flex" size="sm">
-            
-          </Button>
-
           {user ? <>
               {/* Desktop Navigation - Logged In */}
               <div className="hidden md:flex items-center gap-8">
@@ -135,18 +130,6 @@ export const Navigation = () => {
         {isOpen && <div className="md:hidden py-4 border-t border-border animate-fadeIn">
             {user ? <>
                 <div className="flex flex-col gap-4">
-                  {/* Mobile Founding 100 Button */}
-                  <Button asChild className="gradient-hero text-primary-foreground shadow-primary w-full hover:opacity-95" size="sm">
-                    <Link to="/founding" className="flex items-center gap-2 font-medium justify-center" onClick={() => {
-                setIsOpen(false);
-                logEvent('founding_100_click', {
-                  source: 'mobile_nav'
-                });
-              }}>
-                      <Flame className="w-4 h-4" />
-                      Founding 100
-                    </Link>
-                  </Button>
                   <Link to="/study" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/study') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
                     <Brain className="w-4 h-4" />
                     Study & Learn

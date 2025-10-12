@@ -52,20 +52,34 @@ export const SubscriptionManager = () => {
     if (!user) return;
     
     setLoading(true);
+    
     try {
+      // Open blank window BEFORE async operation (Safari compatibility)
+      const newWindow = window.open('', '_blank');
+      
+      if (!newWindow) {
+        toast({
+          title: "Zablokowane pop-up",
+          description: "Odblokuj wyskakujące okna w przeglądarce",
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
+      
+      // Create checkout session
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { plan: 'paid' }
       });
       
       if (error) throw error;
       
-      // Open Stripe checkout in new tab
-      // Success handling is now done on /subscription-success page
-      window.open(data.url, '_blank');
+      // Redirect the already-opened window to checkout URL
+      newWindow.location.href = data.url;
       
       toast({
         title: "Przekierowanie do płatności",
-        description: "Otwarto nową kartę z formularzem płatności"
+        description: "Otwarto stronę płatności Stripe"
       });
     } catch (error) {
       console.error('Error creating checkout:', error);
