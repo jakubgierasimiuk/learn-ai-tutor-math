@@ -62,7 +62,7 @@ export const SubscriptionManager = () => {
       if (!data?.url) throw new Error('Brak adresu płatności');
 
       // Always redirect in the same tab (fixes Safari/Chrome pop-up blockers)
-      window.location.href = data.url;
+      try { (window.top || window).location.href = data.url; } catch { window.location.href = data.url; }
     } catch (error) {
       console.error('Error creating checkout:', error);
       toast({
@@ -83,7 +83,7 @@ export const SubscriptionManager = () => {
       
       if (error) throw error;
       
-      window.open(data.url, '_blank');
+      try { (window.top || window).location.href = data.url; } catch { window.location.href = data.url; }
     } catch (error) {
       console.error('Error accessing customer portal:', error);
       toast({

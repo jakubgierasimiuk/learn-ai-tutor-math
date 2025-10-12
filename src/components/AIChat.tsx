@@ -705,7 +705,7 @@ export const AIChat = () => {
                         });
                         if (error) throw error;
                         if (data?.url) {
-                          window.location.href = data.url;
+                          try { (window.top || window).location.href = data.url; } catch { window.location.href = data.url; }
                         }
                       } catch (error) {
                         console.error('Upgrade error:', error);

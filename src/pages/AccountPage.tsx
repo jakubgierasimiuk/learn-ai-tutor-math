@@ -108,12 +108,7 @@ const AccountPage = () => {
       }
 
       if (data?.url) {
-        // Otwórz Stripe Checkout w nowej karcie
-        window.open(data.url, '_blank');
-        toast({
-          title: "Przekierowanie do płatności",
-          description: "Otwarto stronę płatności w nowej karcie",
-        });
+        try { (window.top || window).location.href = data.url; } catch { window.location.href = data.url; }
       } else {
         toast({
           title: "Błąd",
