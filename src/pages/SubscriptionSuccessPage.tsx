@@ -40,7 +40,9 @@ export default function SubscriptionSuccessPage() {
         console.error('[SubscriptionSuccess] Referral conversion error:', error);
         
         // Don't show error if user simply wasn't referred
-        if (error.message?.includes('not found') || error.message?.includes('no referral')) {
+        if (error.message?.includes('not found') || 
+            error.message?.includes('no referral') || 
+            error.message?.includes('No referral code found')) {
           console.log('[SubscriptionSuccess] User was not referred - this is okay');
           setReferralError(null);
         } else {

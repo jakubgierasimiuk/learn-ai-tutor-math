@@ -303,15 +303,23 @@ export const useReferralV2 = () => {
 
   // Complete conversion (called from payment flow)
   const completeConversion = async () => {
-    if (!user || !referralCode) return;
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+    
+    if (!referralCode) {
+      throw new Error('No referral code found - user was not referred');
+    }
     
     try {
-      await processReferralMutation.mutateAsync({ 
+      const result = await processReferralMutation.mutateAsync({ 
         referralCode, 
         action: 'complete_conversion' 
       });
+      return result;
     } catch (error) {
       console.error('Error completing conversion:', error);
+      throw error;
     }
   };
 
