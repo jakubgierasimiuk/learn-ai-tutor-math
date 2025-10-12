@@ -54,33 +54,15 @@ export const SubscriptionManager = () => {
     setLoading(true);
     
     try {
-      // Open blank window BEFORE async operation (Safari compatibility)
-      const newWindow = window.open('', '_blank');
-      
-      if (!newWindow) {
-        toast({
-          title: "Zablokowane pop-up",
-          description: "Odblokuj wyskakujące okna w przeglądarce",
-          variant: "destructive"
-        });
-        setLoading(false);
-        return;
-      }
-      
-      // Create checkout session
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { plan: 'paid' }
       });
-      
+
       if (error) throw error;
-      
-      // Redirect the already-opened window to checkout URL
-      newWindow.location.href = data.url;
-      
-      toast({
-        title: "Przekierowanie do płatności",
-        description: "Otwarto stronę płatności Stripe"
-      });
+      if (!data?.url) throw new Error('Brak adresu płatności');
+
+      // Always redirect in the same tab (fixes Safari/Chrome pop-up blockers)
+      window.location.href = data.url;
     } catch (error) {
       console.error('Error creating checkout:', error);
       toast({
