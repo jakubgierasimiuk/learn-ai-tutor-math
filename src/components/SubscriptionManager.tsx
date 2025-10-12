@@ -134,23 +134,30 @@ export const SubscriptionManager = () => {
       case 'paid':
         return {
           name: 'Plan Płatny',
-          tokens: '5,000,000 tokenów/miesiąc',
+          tokens: '10,000,000 tokenów/miesiąc',
           price: '49.99 PLN/miesiąc',
-          features: ['5,000,000 tokenów AI', 'Wsparcie email', 'Wszystkie funkcje']
+          features: ['10,000,000 tokenów AI', 'Priorytetowe wsparcie', 'Zaawansowane funkcje AI', 'Dostęp do beta funkcji']
         };
       case 'super':
         return {
-          name: 'Plan Super',
-          tokens: '15,000,000 tokenów/miesiąc',
+          name: 'Plan Super (Admin)',
+          tokens: 'Nieograniczone tokeny',
           price: 'Plan specjalny',
-          features: ['15,000,000 tokenów AI', 'VIP wsparcie', 'Wszystkie funkcje', 'Ekskluzywne funkcje']
+          features: ['Nieograniczone tokeny', 'VIP wsparcie', 'Wszystkie funkcje premium', 'Dostęp API', 'Dedykowane sesje']
+        };
+      case 'test':
+        return {
+          name: 'Plan Testowy',
+          tokens: 'Nieograniczone tokeny',
+          price: 'Dla developerów',
+          features: ['Nieograniczone tokeny', 'Wszystkie funkcje', 'Dostęp developerski']
         };
       default:
         return {
           name: 'Plan Darmowy',
-          tokens: '10,000 tokenów/miesiąc',
+          tokens: '25,000 tokenów (7 dni trial)',
           price: 'Darmowy',
-          features: ['10,000 tokenów AI', 'Podstawowe funkcje', 'Wsparcie społeczności']
+          features: ['25,000 tokenów AI', 'Podstawowe funkcje', 'Wsparcie społeczności']
         };
     }
   };
@@ -234,9 +241,10 @@ export const SubscriptionManager = () => {
                 <div className="text-sm text-muted-foreground">miesięcznie</div>
               </div>
               <ul className="space-y-2 text-sm">
-                <li>✓ 5,000,000 tokenów AI</li>
-                <li>✓ Wsparcie email</li>
-                <li>✓ Wszystkie funkcje</li>
+                <li>✓ 10,000,000 tokenów AI miesięcznie</li>
+                <li>✓ Priorytetowe wsparcie</li>
+                <li>✓ Zaawansowane funkcje AI</li>
+                <li>✓ Dostęp do beta funkcji</li>
               </ul>
               <Button 
                 onClick={handleUpgrade} 
