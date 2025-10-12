@@ -112,10 +112,33 @@ Deno.serve(async (req) => {
 
           if (signUpError) {
             console.error('Error creating user:', signUpError);
-            return new Response(
-              JSON.stringify({ error: 'Failed to create account: ' + signUpError.message }),
-              { status: 400, headers: corsHeaders }
-            );
+            
+            // If user already exists, try to get the existing user
+            if (signUpError.message.includes('already been registered')) {
+              const { data: existingUser } = await supabase.auth.admin.listUsers();
+              const user = existingUser?.users?.find(u => u.email === body.email);
+              
+              if (user) {
+                userId = user.id;
+                userEmail = user.email;
+                userName = user.user_metadata?.name;
+                isExistingUser = true;
+                console.log('User already exists, using existing account:', userId);
+              } else {
+                return new Response(
+                  JSON.stringify({ 
+                    error: 'Konto z tym adresem email już istnieje. Zaloguj się, aby dołączyć do programu.',
+                    code: 'USER_EXISTS'
+                  }),
+                  { status: 409, headers: corsHeaders }
+                );
+              }
+            } else {
+              return new Response(
+                JSON.stringify({ error: 'Nie udało się utworzyć konta: ' + signUpError.message }),
+                { status: 400, headers: corsHeaders }
+              );
+            }
           }
 
           userId = newUser.user.id;
@@ -144,26 +167,43 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Get client IP
-      const clientIP = req.headers.get('x-forwarded-for') || 
-                      req.headers.get('x-real-ip') || 
-                      'unknown';
+      // Get client IP - extract first IP if multiple are present (proxy chain)
+      let clientIP = req.headers.get('x-forwarded-for') || 
+                     req.headers.get('x-real-ip') || 
+                     'unknown';
+      
+      // x-forwarded-for can contain multiple IPs separated by comma (proxy chain)
+      // Take only the first one (client's real IP)
+      if (clientIP && clientIP.includes(',')) {
+        clientIP = clientIP.split(',')[0].trim();
+      }
+      
+      // Validate IP format for inet column
+      if (clientIP !== 'unknown' && !clientIP.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/)) {
+        clientIP = 'unknown';
+      }
 
       // Register founding member
+      const foundingMemberData: any = {
+        user_id: userId,
+        email: userEmail || body.email,
+        name: userName || body.name,
+        phone: body.phone,
+        referral_code: body.referralCode,
+        referred_by: referredBy,
+        device_info: body.deviceInfo,
+        utm_params: body.utmParams,
+        registration_source: 'landing_page'
+      };
+      
+      // Only add registration_ip if it's a valid IP (not 'unknown')
+      if (clientIP !== 'unknown') {
+        foundingMemberData.registration_ip = clientIP;
+      }
+      
       const { data: foundingMember, error: insertError } = await supabase
         .from('founding_members')
-        .insert({
-          user_id: userId,
-          email: userEmail || body.email,
-          name: userName || body.name,
-          phone: body.phone,
-          referral_code: body.referralCode,
-          referred_by: referredBy,
-          registration_ip: clientIP,
-          device_info: body.deviceInfo,
-          utm_params: body.utmParams,
-          registration_source: 'landing_page'
-        })
+        .insert(foundingMemberData)
         .select()
         .single();
 
