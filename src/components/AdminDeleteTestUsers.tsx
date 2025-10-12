@@ -11,8 +11,8 @@ export function AdminDeleteTestUsers() {
   const deleteTestUsers = async () => {
     setLoading(true);
     const userIds = [
-      'e2610091-6414-4c9b-8846-5eea20dbe584', // ytrewq.trewq@yahoo.com
-      '4aec36a4-a967-4e05-ae26-78edaf3308eb'  // jakub.gierasimiuk@o2.pl
+      '2a5adc5d-19eb-4185-8236-bf4eabd3f006', // j.gierasimiuk@goodspeed.pl
+      '14738b6a-2ca0-45ad-9d20-38e3a8324091'  // jakub.gierasimiuk@o2.pl
     ];
 
     try {
@@ -56,7 +56,7 @@ export function AdminDeleteTestUsers() {
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground mb-4">
-          Usuń użytkowników: ytrewq.trewq@yahoo.com i jakub.gierasimiuk@o2.pl wraz ze wszystkimi danymi
+          Usuń użytkowników: j.gierasimiuk@goodspeed.pl i jakub.gierasimiuk@o2.pl wraz ze wszystkimi danymi
         </p>
         <Button onClick={deleteTestUsers} disabled={loading} variant="destructive">
           {loading ? "Usuwanie..." : "Usuń użytkowników testowych"}
