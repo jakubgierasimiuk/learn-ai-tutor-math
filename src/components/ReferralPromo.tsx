@@ -71,7 +71,7 @@ export const ReferralPromo = () => {
 
   return (
     <Card className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
-      <CardContent className="p-6">
+      <CardContent className="p-3 md:p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
@@ -97,27 +97,27 @@ export const ReferralPromo = () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mb-4">
-          <div className="text-center">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 md:gap-4 mb-4">
+          <div className="text-center p-2">
             <div className="flex items-center justify-center mb-1">
               <Users className="w-4 h-4 text-primary mr-1" />
-              <span className="font-semibold">{stats?.successful_referrals || 0}</span>
+              <span className="font-semibold text-base md:text-lg">{stats?.successful_referrals || 0}</span>
             </div>
             <p className="text-xs text-muted-foreground">Polecenia</p>
           </div>
           
-          <div className="text-center">
+          <div className="text-center p-2">
             <div className="flex items-center justify-center mb-1">
               <Trophy className="w-4 h-4 text-primary mr-1" />
-              <span className="font-semibold">{stats?.free_months_earned || 0}</span>
+              <span className="font-semibold text-base md:text-lg">{stats?.free_months_earned || 0}</span>
             </div>
             <p className="text-xs text-muted-foreground">Darmowe mies.</p>
           </div>
           
-          <div className="text-center">
+          <div className="text-center p-2">
             <div className="flex items-center justify-center mb-1">
               <Gift className="w-4 h-4 text-primary mr-1" />
-              <span className="font-semibold">{stats?.available_points || 0}</span>
+              <span className="font-semibold text-base md:text-lg">{stats?.available_points || 0}</span>
             </div>
             <p className="text-xs text-muted-foreground">Punkty</p>
           </div>

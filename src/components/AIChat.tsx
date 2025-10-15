@@ -593,11 +593,8 @@ export const AIChat = () => {
     navigate(`/study/lesson/${skillId}`);
   };
   return <div className="min-h-screen bg-background flex flex-col">
-      {/* Fixed Header */}
-      
-
       {/* Main Chat Area */}
-      <div className="flex-1 max-w-4xl mx-auto w-full px-4 py-6 flex flex-col">
+      <div className="flex-1 w-full max-w-full md:max-w-4xl md:mx-auto px-2 md:px-4 py-2 md:py-6 flex flex-col">
         {/* Token Usage & Upgrade Prompts */}
         <div className="mb-4 space-y-2">
           <UpgradePrompts context="chat" compact />
@@ -614,7 +611,7 @@ export const AIChat = () => {
         
         {/* Messages Container */}
         <div ref={scrollAreaRef} className="flex-1 overflow-y-auto scroll-smooth" style={{ paddingBottom: bottomPadding }}>
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             {messages.map((message, index) => {
             const prevMessage = messages[index - 1];
             const showTimestamp = !prevMessage || new Date(message.timestamp).getTime() - new Date(prevMessage.timestamp).getTime() > 300000; // 5 minutes
@@ -629,14 +626,14 @@ export const AIChat = () => {
                       </span>
                     </div>}
                   
-                  <div className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      {message.role === 'user' ? <User className="w-4 h-4 text-primary" /> : <Bot className="w-4 h-4 text-primary" />}
+                  <div className={`flex gap-2 md:gap-3 ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      {message.role === 'user' ? <User className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" /> : <Bot className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />}
                     </div>
                     
-                    <div className={`flex-1 max-w-[80%] ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
-                      <div className={`inline-block px-4 py-3 rounded-2xl ${message.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-muted/50 border border-border/50'}`}>
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                    <div className={`flex-1 max-w-[85%] md:max-w-[80%] ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
+                      <div className={`inline-block px-3 md:px-4 py-2 md:py-3 rounded-2xl ${message.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-muted/50 border border-border/50'}`}>
+                        <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap break-words">
                           {message.content}
                         </p>
                       </div>
@@ -678,7 +675,7 @@ export const AIChat = () => {
           </div>}
 
         {/* Fixed Input Area or Lock Banner */}
-        <div ref={inputContainerRef} className="sticky bottom-0 bg-background/80 backdrop-blur-sm pt-4">
+        <div ref={inputContainerRef} className="sticky bottom-0 bg-background/95 backdrop-blur-sm pt-2 md:pt-4 -mx-2 md:mx-0 px-2 md:px-0">
           {shouldShowSoftPaywall() ? (
             // Show lock banner when tokens exhausted
             <Card className="border-orange-200 bg-gradient-to-r from-orange-50 to-red-50 mb-4">
@@ -726,7 +723,7 @@ export const AIChat = () => {
               <div className="mb-3">
                 <MathSymbolPanel quickSymbols={contextualSymbols.length > 0 ? contextualSymbols : quickSymbols} onSymbolSelect={handleSymbolSelect} />
               </div>
-              <div className="flex items-end gap-3 p-4 bg-muted/30 border border-border/50 rounded-2xl">
+              <div className="flex items-end gap-2 md:gap-3 p-2 md:p-4 bg-muted/30 border border-border/50 rounded-2xl">
                 <Input 
                   type="text" 
                   placeholder={t.chatPlaceholder} 
@@ -734,13 +731,13 @@ export const AIChat = () => {
                   onChange={e => setInput(e.target.value)} 
                   onKeyPress={handleKeyPress} 
                   disabled={isLoading} 
-                  className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60" 
+                  className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60 text-sm md:text-base" 
                 />
                 <Button 
                   onClick={sendMessage} 
                   disabled={isLoading || !input.trim()} 
                   size="sm" 
-                  className="h-10 w-10 p-0 rounded-xl"
+                  className="h-9 w-9 md:h-10 md:w-10 p-0 rounded-xl flex-shrink-0"
                 >
                   {isLoading ? (
                     <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />

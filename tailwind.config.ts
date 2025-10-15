@@ -12,12 +12,23 @@ export default {
 	theme: {
 		container: {
 			center: true,
-			padding: '2rem',
+			padding: {
+				DEFAULT: '0.5rem',
+				sm: '1rem',
+				md: '2rem'
+			},
 			screens: {
 				'2xl': '1400px'
 			}
 		},
 		extend: {
+			screens: {
+				'xs': '375px',
+			},
+			spacing: {
+				'safe-bottom': 'env(safe-area-inset-bottom)',
+				'safe-top': 'env(safe-area-inset-top)',
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',

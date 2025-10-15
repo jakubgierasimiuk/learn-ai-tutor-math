@@ -191,8 +191,8 @@ export const Dashboard = () => {
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>;
   }
-  return <div className="min-h-screen bg-background p-6">
-      <div className="container mx-auto max-w-6xl space-y-6">
+  return <div className="min-h-screen bg-background p-2 md:p-6">
+      <div className="container mx-auto max-w-full md:max-w-6xl space-y-4 md:space-y-6">
         {/* Header */}
         <div className="space-y-2">
           <h1 className="text-4xl font-bold gradient-text">Dashboard</h1>
@@ -211,33 +211,33 @@ export const Dashboard = () => {
             </CardTitle>
             <CardDescription>Kontynuuj swoją naukę</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <CardContent className="p-3 md:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-4">
               <Link to="/chat">
-                <Button className="w-full h-auto p-4 flex-col gap-2">
-                  <Brain className="w-6 h-6" />
-                  <div className="text-center">
-                    <div className="font-medium">Korepetycje z AI</div>
+                <Button className="w-full h-16 md:h-auto md:p-4 flex flex-row md:flex-col gap-2 md:gap-2 items-center justify-start md:justify-center px-3 md:px-4">
+                  <Brain className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0" />
+                  <div className="text-left md:text-center">
+                    <div className="font-medium text-sm md:text-base">Korepetycje z AI</div>
                     <div className="text-xs opacity-80">Rozpocznij</div>
                   </div>
                 </Button>
               </Link>
               
               <Link to="/study">
-                <Button variant="outline" className="w-full h-auto p-4 flex-col gap-2">
-                  <BookOpen className="w-6 h-6" />
-                  <div className="text-center">
-                    <div className="font-medium">Study&Learn</div>
+                <Button variant="outline" className="w-full h-16 md:h-auto md:p-4 flex flex-row md:flex-col gap-2 md:gap-2 items-center justify-start md:justify-center px-3 md:px-4">
+                  <BookOpen className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0" />
+                  <div className="text-left md:text-center">
+                    <div className="font-medium text-sm md:text-base">Study&Learn</div>
                     <div className="text-xs opacity-80">wybierz nową lekcję</div>
                   </div>
                 </Button>
               </Link>
 
               <Link to="/referral">
-                <Button variant="outline" className="w-full h-auto p-4 flex-col gap-2 border-primary/50 hover:border-primary hover:bg-primary/5">
-                  <TrendingUp className="w-6 h-6 text-primary" />
-                  <div className="text-center">
-                    <div className="font-medium">Poleć znajomym</div>
+                <Button variant="outline" className="w-full h-16 md:h-auto md:p-4 flex flex-row md:flex-col gap-2 md:gap-2 items-center justify-start md:justify-center px-3 md:px-4 border-primary/50 hover:border-primary hover:bg-primary/5">
+                  <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-primary flex-shrink-0" />
+                  <div className="text-left md:text-center">
+                    <div className="font-medium text-sm md:text-base">Poleć znajomym</div>
                     <div className="text-xs opacity-80">Zdobądź nagrody</div>
                   </div>
                 </Button>
@@ -247,7 +247,7 @@ export const Dashboard = () => {
         </Card>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
           <Card className="card-hover">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-sm font-medium">
