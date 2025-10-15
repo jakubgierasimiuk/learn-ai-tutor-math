@@ -592,9 +592,9 @@ export const AIChat = () => {
     // Navigate to the selected skill lesson
     navigate(`/study/lesson/${skillId}`);
   };
-  return <div className="min-h-screen bg-background flex flex-col">
+  return <div className="min-h-screen bg-background flex flex-col relative">
       {/* Main Chat Area */}
-      <div className="flex-1 w-full max-w-full md:max-w-4xl md:mx-auto px-2 md:px-4 py-2 md:py-6 flex flex-col">
+      <div className="flex-1 w-full max-w-full md:max-w-4xl md:mx-auto px-2 md:px-4 py-2 md:py-6 flex flex-col pb-40 md:pb-6">
         {/* Token Usage & Upgrade Prompts */}
         <div className="mb-4 space-y-2">
           <UpgradePrompts context="chat" compact />
@@ -610,7 +610,7 @@ export const AIChat = () => {
         </div>
         
         {/* Messages Container */}
-        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto scroll-smooth" style={{ paddingBottom: bottomPadding }}>
+        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto scroll-smooth pb-4">
           <div className="space-y-4 md:space-y-6">
             {messages.map((message, index) => {
             const prevMessage = messages[index - 1];
@@ -675,7 +675,7 @@ export const AIChat = () => {
           </div>}
 
         {/* Fixed Input Area or Lock Banner */}
-        <div ref={inputContainerRef} className="sticky bottom-0 bg-background/95 backdrop-blur-sm pt-2 md:pt-4 -mx-2 md:mx-0 px-2 md:px-0">
+        <div ref={inputContainerRef} className="fixed md:relative bottom-0 left-0 right-0 bg-background border-t md:border-t-0 p-3 md:p-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:pb-4 z-10">
           {shouldShowSoftPaywall() ? (
             // Show lock banner when tokens exhausted
             <Card className="border-orange-200 bg-gradient-to-r from-orange-50 to-red-50 mb-4">
@@ -723,7 +723,7 @@ export const AIChat = () => {
               <div className="mb-3">
                 <MathSymbolPanel quickSymbols={contextualSymbols.length > 0 ? contextualSymbols : quickSymbols} onSymbolSelect={handleSymbolSelect} />
               </div>
-              <div className="flex items-end gap-2 md:gap-3 p-2 md:p-4 bg-muted/30 border border-border/50 rounded-2xl">
+              <div className="flex items-end gap-2 md:gap-3 p-2 md:p-3 bg-muted/30 border-2 border-border/50 focus-within:border-primary/50 rounded-2xl transition-colors">
                 <Input 
                   type="text" 
                   placeholder={t.chatPlaceholder} 
@@ -731,7 +731,7 @@ export const AIChat = () => {
                   onChange={e => setInput(e.target.value)} 
                   onKeyPress={handleKeyPress} 
                   disabled={isLoading} 
-                  className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60 text-sm md:text-base" 
+                  className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60 text-base" 
                 />
                 <Button 
                   onClick={sendMessage} 
