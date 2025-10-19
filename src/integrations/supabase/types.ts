@@ -2096,6 +2096,7 @@ export type Database = {
           first_lesson_completed: boolean | null
           id: string
           initial_level: string | null
+          is_founding_member: boolean | null
           learner_profile: Json | null
           learning_goal: string | null
           level: number
@@ -2119,6 +2120,7 @@ export type Database = {
           first_lesson_completed?: boolean | null
           id?: string
           initial_level?: string | null
+          is_founding_member?: boolean | null
           learner_profile?: Json | null
           learning_goal?: string | null
           level?: number
@@ -2142,6 +2144,7 @@ export type Database = {
           first_lesson_completed?: boolean | null
           id?: string
           initial_level?: string | null
+          is_founding_member?: boolean | null
           learner_profile?: Json | null
           learning_goal?: string | null
           level?: number

@@ -144,6 +144,21 @@ serve(async (req) => {
           logStep("Trial expired - downgraded to limited_free");
         }
       }
+
+      // Check if founding member paid subscription expired (no Stripe)
+      if (currentSub.subscription_type === 'paid') {
+        const subscriptionEndDate = currentSub.subscription_end_date 
+          ? new Date(currentSub.subscription_end_date) 
+          : null;
+        
+        // If subscription expired and no active Stripe subscription
+        if (subscriptionEndDate && new Date() > subscriptionEndDate && !stripeCustomerId) {
+          subscriptionType = 'limited_free';
+          monthlyTokensUsed = 0;
+          subscriptionEnd = null;
+          logStep("Founding member subscription expired - downgraded to limited_free");
+        }
+      }
       
       // Check if free account exceeded token limits (should move to expired)
       if (currentSub.subscription_type === 'free' && subscriptionType === 'free') {

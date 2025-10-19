@@ -223,38 +223,71 @@ Deno.serve(async (req) => {
         );
       }
 
-      // Grant 30-day premium subscription
+      // Grant 30-day PAID subscription (10M tokens)
       try {
         const premiumEndDate = new Date();
         premiumEndDate.setDate(premiumEndDate.getDate() + 30);
 
-        await supabase
+        const { error: subError } = await supabase
           .from('user_subscriptions')
           .upsert({
             user_id: userId,
-            subscription_type: 'premium',
+            subscription_type: 'paid',
             status: 'active',
             subscription_end_date: premiumEndDate.toISOString(),
-            token_limit_soft: 50000,
-            token_limit_hard: 60000,
+            token_limit_soft: 10000000,
+            token_limit_hard: 10000000,
+            monthly_tokens_used: 0,
+            billing_cycle_start: new Date().toISOString(),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           }, {
             onConflict: 'user_id'
           });
 
-        console.log('Premium subscription granted to user:', userId);
+        if (subError) {
+          console.error('Error granting paid subscription:', subError);
+          throw new Error('Failed to grant subscription');
+        }
+
+        // Set founding member flag in profile
+        await supabase
+          .from('profiles')
+          .update({ is_founding_member: true })
+          .eq('user_id', userId);
+
+        console.log('Paid subscription (30 days, 10M tokens) granted to founding member:', userId);
       } catch (error) {
-        console.error('Error granting premium subscription:', error);
+        console.error('Error granting paid subscription:', error);
         // Continue anyway - user is still registered as founding member
       }
 
       // Award referral bonus if applicable
       if (referredBy) {
-        // Add bonus days to referrer
+        // Get referrer's current subscription
+        const { data: referrerSub } = await supabase
+          .from('user_subscriptions')
+          .select('subscription_end_date')
+          .eq('user_id', referredBy)
+          .single();
+        
+        if (referrerSub?.subscription_end_date) {
+          // Extend subscription by 3 days
+          const newEndDate = new Date(referrerSub.subscription_end_date);
+          newEndDate.setDate(newEndDate.getDate() + 3);
+          
+          await supabase
+            .from('user_subscriptions')
+            .update({ subscription_end_date: newEndDate.toISOString() })
+            .eq('user_id', referredBy);
+        }
+        
+        // Update bonus counter
         await supabase
           .from('founding_members')
-          .update({ bonus_days_earned: 3 })
+          .update({ 
+            bonus_days_earned: 3
+          })
           .eq('user_id', referredBy);
       }
 

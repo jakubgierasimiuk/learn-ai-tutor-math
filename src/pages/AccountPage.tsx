@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,30 @@ const AccountPage = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [profile, setProfile] = useState<any>(null);
+  const [foundingInfo, setFoundingInfo] = useState<any>(null);
+
+  // Fetch profile and founding member info
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from('profiles')
+        .select('is_founding_member')
+        .eq('user_id', user.id)
+        .single()
+        .then(({ data }) => {
+          setProfile(data);
+          if (data?.is_founding_member) {
+            supabase
+              .from('founding_members')
+              .select('founding_position')
+              .eq('user_id', user.id)
+              .single()
+              .then(({ data: fmData }) => setFoundingInfo(fmData));
+          }
+        });
+    }
+  }, [user]);
 
   const handlePasswordChange = async () => {
     if (newPassword !== confirmPassword) {
@@ -208,8 +232,43 @@ const AccountPage = () => {
           {/* SMS Verification and Bonuses */}
           {/* <SMSActivationSection variant="account" /> */} {/* Tymczasowo wyłączone - problemy z API SMS */}
 
+          {/* Founding Member Benefits - Show if applicable */}
+          {profile?.is_founding_member && foundingInfo && (
+            <Card className="border-primary/50 lg:col-span-2">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Crown className="h-5 w-5 text-primary" />
+                  Founding Member Benefits
+                </CardTitle>
+                <CardDescription>
+                  Jesteś częścią ekskluzywnej grupy 100 założycieli
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>30 dni Premium (10M tokenów) - wartość 49.99 PLN</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>Ekskluzywna pozycja #{foundingInfo.founding_position} z 100</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>Dodatkowe 3 dni Premium za każde polecenie</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span>Pierwszeństwo w dostępie do nowych funkcji</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Subscription Information */}
-          <Card>
+          <Card className={profile?.is_founding_member ? "" : "lg:col-span-2"}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CreditCard className="w-5 h-5" />

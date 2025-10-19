@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { PremiumStatusCard } from "@/components/PremiumStatusCard";
-import { Trophy, Target, TrendingUp, Clock, Flame, BookOpen, Star, Award, Calendar, BarChart3, Brain, Zap, Crown } from "lucide-react";
+import { Trophy, Target, TrendingUp, Clock, Flame, BookOpen, Star, Award, Calendar, BarChart3, Brain, Zap, Crown, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTokenUsage } from "@/hooks/useTokenUsage";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -34,6 +34,11 @@ interface RecentActivity {
   completed_at: string;
   points_earned: number;
 }
+interface FoundingMemberInfo {
+  founding_position: number;
+  subscription_end_date: string;
+  bonus_days_earned: number;
+}
 export const Dashboard = () => {
   const {
     user
@@ -49,6 +54,8 @@ export const Dashboard = () => {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [foundingInfo, setFoundingInfo] = useState<FoundingMemberInfo | null>(null);
+  const [profile, setProfile] = useState<any>(null);
   useEffect(() => {
     fetchDashboardData();
     checkDiagnosticStatus();
@@ -76,8 +83,27 @@ export const Dashboard = () => {
     try {
       // Fetch user profile and basic stats
       const {
-        data: profile
-      } = await supabase.from("profiles").select("total_points").eq("user_id", user?.id).maybeSingle();
+        data: profileData
+      } = await supabase.from("profiles").select("total_points, is_founding_member").eq("user_id", user?.id).maybeSingle();
+      
+      setProfile(profileData);
+
+      // Fetch founding member info if applicable
+      if (profileData?.is_founding_member) {
+        const { data: foundingData } = await supabase
+          .from('founding_members')
+          .select('founding_position, bonus_days_earned')
+          .eq('user_id', user?.id)
+          .single();
+        
+        if (foundingData && subscription?.subscription_end) {
+          setFoundingInfo({
+            founding_position: foundingData.founding_position,
+            subscription_end_date: subscription.subscription_end,
+            bonus_days_earned: foundingData.bonus_days_earned || 0
+          });
+        }
+      }
 
       // Fetch skill progress stats
       const {
@@ -149,7 +175,7 @@ export const Dashboard = () => {
         points_earned: Math.round((a.engagement_score || 0.5) * 20) + 10 // Estimate based on engagement
       })) || [];
       setStats({
-        total_points: profile?.total_points || 0,
+        total_points: profileData?.total_points || 0,
         lessons_completed: masteredSkills.length,
         topics_started: skillsStarted,
         current_streak: streakData?.current_streak || 0,
@@ -201,6 +227,37 @@ export const Dashboard = () => {
 
         {/* Premium Status Card */}
         <PremiumStatusCard />
+
+        {/* Founding Member Card */}
+        {profile?.is_founding_member && foundingInfo && (
+          <Card className="border-2 border-primary/50 bg-gradient-to-br from-primary/5 to-secondary/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Crown className="h-5 w-5 text-primary" />
+                Founding Member #{foundingInfo.founding_position}
+              </CardTitle>
+              <CardDescription>
+                Jesteś częścią ekskluzywnej grupy 100 założycieli
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Status Premium kończy się</span>
+                  <span className="font-semibold">{formatDate(foundingInfo.subscription_end_date)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Wartość benefitów</span>
+                  <span className="font-semibold text-primary">49.99 PLN</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Bonus za polecenia</span>
+                  <span className="font-semibold">{foundingInfo.bonus_days_earned} dni</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Quick Actions */}
         <Card>

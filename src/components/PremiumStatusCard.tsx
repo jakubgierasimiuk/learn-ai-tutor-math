@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,7 @@ export const PremiumStatusCard = () => {
   const [isUpgrading, setIsUpgrading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const [isFoundingMember, setIsFoundingMember] = useState(false);
   const {
     subscription,
     getRemainingTokens,
@@ -29,6 +30,18 @@ export const PremiumStatusCard = () => {
     getTrialDaysLeft,
     shouldShowUpgradePrompt
   } = useTokenUsage();
+
+  // Check if user is founding member
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from('profiles')
+        .select('is_founding_member')
+        .eq('user_id', user.id)
+        .single()
+        .then(({ data }) => setIsFoundingMember(data?.is_founding_member || false));
+    }
+  }, [user]);
 
   if (!subscription || !shouldShowUpgradePrompt()) return null;
 
@@ -67,7 +80,12 @@ export const PremiumStatusCard = () => {
   };
 
   const getSubscriptionBadge = () => {
-    if (subscription.subscription_type === 'paid') return { label: 'Premium', variant: 'default' as const };
+    if (subscription.subscription_type === 'paid') {
+      return { 
+        label: isFoundingMember ? 'Founding Member Premium' : 'Premium', 
+        variant: 'default' as const 
+      };
+    }
     if (onTrial) return { label: 'Trial Premium', variant: 'secondary' as const };
     return { label: 'Plan Darmowy', variant: 'secondary' as const };
   };
