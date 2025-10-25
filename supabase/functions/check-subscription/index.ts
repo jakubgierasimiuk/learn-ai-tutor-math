@@ -124,9 +124,30 @@ serve(async (req) => {
     // Get current subscription from database to check for transitions and trial status
     const { data: currentSub } = await supabaseClient
       .from('user_subscriptions')
-      .select('subscription_type, monthly_tokens_used, trial_end_date, billing_cycle_start')
+      .select('subscription_type, monthly_tokens_used, trial_end_date, billing_cycle_start, subscription_end_date, token_limit_soft, token_limit_hard')
       .eq('user_id', user.id)
       .single();
+
+    // Check if user has active paid subscription from database (e.g., founding members)
+    if (currentSub?.subscription_type === 'paid' && currentSub.subscription_end_date) {
+      const subEndDate = new Date(currentSub.subscription_end_date);
+      const now = new Date();
+      
+      if (now <= subEndDate) {
+        // Active paid subscription (non-Stripe, e.g., founding member)
+        subscriptionType = 'paid';
+        subscriptionEnd = currentSub.subscription_end_date;
+        billingCycleStart = currentSub.billing_cycle_start || billingCycleStart;
+        
+        logStep("Active paid subscription from database (founding member)", {
+          subscriptionEnd,
+          tokenLimitHard: currentSub.token_limit_hard
+        });
+      } else {
+        // Paid subscription expired - will be handled by expiry logic below
+        logStep("Paid subscription expired, will downgrade to limited_free");
+      }
+    }
 
     // Check for trial expiry and handle transitions
     let isTrialExpired = false;
