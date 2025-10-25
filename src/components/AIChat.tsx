@@ -17,21 +17,44 @@ import { useTokenUsage } from '@/hooks/useTokenUsage';
 import { useMathSymbols } from '@/hooks/useMathSymbols';
 import MathSymbolPanel from '@/components/MathSymbolPanel';
 import { useLanguage } from '@/hooks/useLanguage';
+import { ExampleQuestions } from '@/components/chat/ExampleQuestions';
+import { DiagnosticChoices } from '@/components/chat/DiagnosticChoices';
+import { TipsPanel } from '@/components/chat/TipsPanel';
+interface DiagnosticChoice {
+  label: string;
+  value: string;
+  icon: string;
+  description?: string;
+}
+
 interface Message {
   id: string;
   content: string;
   role: 'user' | 'assistant';
   timestamp: Date;
+  quickReplies?: string[];
+  diagnosticOptions?: {
+    question: string;
+    choices: DiagnosticChoice[];
+  };
+  messageType?: 'welcome' | 'diagnostic' | 'standard' | 'coaching';
 }
 export const AIChat = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   
+  // Check if this is first time user
+  const isFirstTime = !localStorage.getItem('mentavo_welcome_completed');
+  
   const [messages, setMessages] = useState<Message[]>([{
     id: '1',
-    content: t.chatWelcome,
+    content: isFirstTime 
+      ? '👋 Cześć! Jestem Twoim AI nauczycielem matematyki.\n\nMożesz zapytać mnie o cokolwiek - od podstaw do matury.\nNie ma głupich pytań, tylko nieodkryte odpowiedzi! 💡'
+      : 'Witaj z powrotem! O czym dziś porozmawiamy?',
     role: 'assistant',
-    timestamp: new Date()
+    timestamp: new Date(),
+    messageType: isFirstTime ? 'welcome' : 'standard',
+    quickReplies: isFirstTime ? [] : undefined // Will be populated by ExampleQuestions component
   }]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -394,12 +417,28 @@ export const AIChat = () => {
         throw new Error('Brak odpowiedzi z AI.');
       }
       const aiResponseContent = chatData.message || chatData || 'Rozpocznijmy naukę tej umiejętności!';
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: aiResponseContent,
-        role: 'assistant',
-        timestamp: new Date()
-      };
+      
+      // Parse response - support both plain string and structured response
+      let assistantMessage: Message;
+      if (typeof chatData === 'object' && chatData.diagnosticOptions) {
+        // Structured response with diagnostic options
+        assistantMessage = {
+          id: (Date.now() + 1).toString(),
+          content: chatData.message,
+          role: 'assistant',
+          timestamp: new Date(),
+          diagnosticOptions: chatData.diagnosticOptions,
+          messageType: 'diagnostic'
+        };
+      } else {
+        // Plain text response
+        assistantMessage = {
+          id: (Date.now() + 1).toString(),
+          content: aiResponseContent,
+          role: 'assistant',
+          timestamp: new Date()
+        };
+      }
       setMessages(prev => [...prev, assistantMessage]);
 
       // Check for success moments and trigger conversion prompts
@@ -593,6 +632,11 @@ export const AIChat = () => {
     navigate(`/study/lesson/${skillId}`);
   };
   return <div className="min-h-screen bg-background flex flex-col relative">
+      {/* Tips Panel - floating in top right */}
+      <div className="fixed top-4 right-4 z-20">
+        <TipsPanel />
+      </div>
+      
       {/* Main Chat Area */}
       <div className="flex-1 w-full max-w-full md:max-w-4xl md:mx-auto px-2 md:px-4 py-2 md:py-6 flex flex-col pb-40 md:pb-6">
         {/* Token Usage & Upgrade Prompts */}
@@ -632,11 +676,33 @@ export const AIChat = () => {
                     </div>
                     
                     <div className={`flex-1 max-w-[85%] md:max-w-[80%] ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
-                      <div className={`inline-block px-3 md:px-4 py-2 md:py-3 rounded-2xl ${message.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-muted/50 border border-border/50'}`}>
-                        <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap break-words">
-                          {message.content}
-                        </p>
-                      </div>
+                       <div className={`inline-block px-3 md:px-4 py-2 md:py-3 rounded-2xl ${message.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-muted/50 border border-border/50'}`}>
+                         <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap break-words">
+                           {message.content}
+                         </p>
+                         
+                         {/* Example Questions for welcome message */}
+                         {message.messageType === 'welcome' && message.role === 'assistant' && (
+                           <ExampleQuestions onSelect={(question) => {
+                             setInput(question);
+                             localStorage.setItem('mentavo_welcome_completed', 'true');
+                             setTimeout(() => sendMessage(), 100);
+                           }} />
+                         )}
+                         
+                         {/* Diagnostic Choices */}
+                         {message.diagnosticOptions && message.role === 'assistant' && (
+                           <DiagnosticChoices
+                             question={message.diagnosticOptions.question}
+                             choices={message.diagnosticOptions.choices}
+                             onSelect={(value) => {
+                               const choiceText = message.diagnosticOptions!.choices.find(c => c.value === value)?.label || value;
+                               setInput(choiceText);
+                               setTimeout(() => sendMessage(), 100);
+                             }}
+                           />
+                         )}
+                       </div>
                     </div>
                   </div>
                 </div>;

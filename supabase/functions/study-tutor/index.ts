@@ -1029,6 +1029,58 @@ Odpowiadaj po polsku i bądź zachęcający!`
 }
 
 // Public chat endpoint (no JWT required)
+// Helper function to detect confusion patterns
+function detectConfusionPattern(message: string): { needsDiagnostic: boolean; reason?: string } {
+  const sanitized = message.toLowerCase().trim();
+  
+  // Pattern 1: Explicit confusion statements
+  const confusionKeywords = ['nie rozumiem', 'nie wiem', 'niezrozumiałe', 'co to znaczy', 'nie kumam'];
+  if (confusionKeywords.some(keyword => sanitized.includes(keyword))) {
+    return { needsDiagnostic: true, reason: 'explicit_confusion' };
+  }
+  
+  // Pattern 2: Very short response (< 15 chars) without math notation
+  const hasMathNotation = /[x=+\-*/^√∫∑πΔαβγ0-9]/.test(message);
+  if (message.length < 15 && !hasMathNotation) {
+    return { needsDiagnostic: true, reason: 'too_short' };
+  }
+  
+  return { needsDiagnostic: false };
+}
+
+// Build standard diagnostic options
+function buildDiagnosticOptions() {
+  return {
+    question: "Co dokładnie sprawia problem?",
+    choices: [
+      {
+        label: "Nie rozumiem DLACZEGO to robimy",
+        value: "conceptual_gap",
+        icon: "💭",
+        description: "Wyjaśnię koncepcję i cel"
+      },
+      {
+        label: "Wiem co to jest, ale NIE WIEM JAK użyć",
+        value: "procedural_gap",
+        icon: "🔧",
+        description: "Pokażę zastosowanie krok po kroku"
+      },
+      {
+        label: "Gubię się w KROKACH obliczeń",
+        value: "computational_gap",
+        icon: "🧮",
+        description: "Rozłożę obliczenia na małe części"
+      },
+      {
+        label: "Wszystko - nie wiem od czego zacząć",
+        value: "complete_confusion",
+        icon: "🌊",
+        description: "Zacznijmy od samych podstaw"
+      }
+    ]
+  };
+}
+
 async function handleChat(req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -1157,6 +1209,20 @@ async function handleChat(req: Request): Promise<Response> {
         console.log('Error checking subscription/tokens:', error);
         // Continue without blocking - don't fail on subscription check errors
       }
+    }
+    
+    // Detect confusion patterns and return diagnostic options if needed
+    const confusionCheck = detectConfusionPattern(message);
+    if (confusionCheck.needsDiagnostic) {
+      console.log('Confusion pattern detected:', confusionCheck.reason);
+      const diagnosticOptions = buildDiagnosticOptions();
+      
+      return new Response(JSON.stringify({
+        message: "Widzę że to sprawia trudność. Pomóżmy sobie nawzajem!",
+        diagnosticOptions
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Build enriched educational context if enabled
