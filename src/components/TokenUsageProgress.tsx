@@ -24,9 +24,9 @@ export const TokenUsageProgress = () => {
   const percentage = getUsagePercentage();
   const status = getTokenStatus();
 
-  // Hide token usage until user reaches 15% of their limit (85% remaining)
+  // Show token usage only when user reaches 85% of their limit
   const usagePercentage = (tokensUsed / hardLimit) * 100;
-  if (usagePercentage < 15) return null;
+  if (usagePercentage < 85) return null;
   const getProgressColor = () => {
     switch (status) {
       case 'critical':

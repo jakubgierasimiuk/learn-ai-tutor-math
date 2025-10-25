@@ -639,9 +639,9 @@ export const AIChat = () => {
       </div>
       
       {/* Main Chat Area */}
-      <div className="flex-1 w-full max-w-full md:max-w-4xl md:mx-auto px-2 md:px-4 py-2 md:py-6 flex flex-col">
+      <div className="flex-1 w-full max-w-full md:max-w-4xl md:mx-auto px-0 md:px-4 py-2 md:py-6 flex flex-col">
         {/* Token Usage & Upgrade Prompts */}
-        <div className="mb-4 space-y-2">
+        <div className="mb-4 space-y-2 px-2 md:px-0">
           <UpgradePrompts context="chat" compact />
           <TokenUsageProgress />
           
@@ -655,7 +655,7 @@ export const AIChat = () => {
         </div>
         
         {/* Messages Container */}
-        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto scroll-smooth pb-[200px] md:pb-6">
+        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto scroll-smooth pb-[200px] md:pb-6 px-2 md:px-0">
           <div className="space-y-4 md:space-y-6">
             {messages.map((message, index) => {
             const prevMessage = messages[index - 1];
