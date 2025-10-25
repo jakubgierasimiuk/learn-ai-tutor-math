@@ -1211,19 +1211,19 @@ async function handleChat(req: Request): Promise<Response> {
       }
     }
     
-    // Detect confusion patterns and return diagnostic options if needed
-    const confusionCheck = detectConfusionPattern(message);
-    if (confusionCheck.needsDiagnostic) {
-      console.log('Confusion pattern detected:', confusionCheck.reason);
-      const diagnosticOptions = buildDiagnosticOptions();
-      
-      return new Response(JSON.stringify({
-        message: "Widzę że to sprawia trudność. Pomóżmy sobie nawzajem!",
-        diagnosticOptions
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    // Diagnostic options disabled - was causing confusion instead of helping
+    // const confusionCheck = detectConfusionPattern(message);
+    // if (confusionCheck.needsDiagnostic) {
+    //   console.log('Confusion pattern detected:', confusionCheck.reason);
+    //   const diagnosticOptions = buildDiagnosticOptions();
+    //   
+    //   return new Response(JSON.stringify({
+    //     message: "Widzę że to sprawia trudność. Pomóżmy sobie nawzajem!",
+    //     diagnosticOptions
+    //   }), {
+    //     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    //   });
+    // }
 
     // Build enriched educational context if enabled
     let enrichedContextData = null;
