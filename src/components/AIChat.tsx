@@ -58,6 +58,7 @@ export const AIChat = () => {
   }]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isEndingSession, setIsEndingSession] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [sequenceNumber, setSequenceNumber] = useState(0);
   const [enrichedContext, setEnrichedContext] = useState(false);
@@ -564,7 +565,7 @@ export const AIChat = () => {
   const endSession = async () => {
     if (!sessionId || !user?.id) return;
     try {
-      setIsLoading(true);
+      setIsEndingSession(true);
 
       // Generate session summary
       const {
@@ -606,7 +607,7 @@ export const AIChat = () => {
         variant: "destructive"
       });
     } finally {
-      setIsLoading(false);
+      setIsEndingSession(false);
     }
   };
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -809,7 +810,14 @@ export const AIChat = () => {
               
               <div className="flex items-center justify-start pt-2 px-1">
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <button onClick={endSession} className="hover:text-foreground transition-colors duration-200 font-medium">
+                  <button 
+                    onClick={endSession} 
+                    disabled={isEndingSession}
+                    className="hover:text-foreground transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {isEndingSession && (
+                      <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    )}
                     Zakończ sesję
                   </button>
                 </div>
