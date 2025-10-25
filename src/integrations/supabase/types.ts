@@ -836,7 +836,7 @@ export type Database = {
           phone: string | null
           referral_code: string | null
           referred_by: string | null
-          registration_ip: unknown | null
+          registration_ip: unknown
           registration_source: string | null
           status: string | null
           updated_at: string
@@ -854,7 +854,7 @@ export type Database = {
           phone?: string | null
           referral_code?: string | null
           referred_by?: string | null
-          registration_ip?: unknown | null
+          registration_ip?: unknown
           registration_source?: string | null
           status?: string | null
           updated_at?: string
@@ -872,7 +872,7 @@ export type Database = {
           phone?: string | null
           referral_code?: string | null
           referred_by?: string | null
-          registration_ip?: unknown | null
+          registration_ip?: unknown
           registration_source?: string | null
           status?: string | null
           updated_at?: string
@@ -1564,7 +1564,7 @@ export type Database = {
           device_fingerprint: string | null
           granted_at: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           is_granted: boolean | null
           metadata: Json | null
           revoked_at: string | null
@@ -1579,7 +1579,7 @@ export type Database = {
           device_fingerprint?: string | null
           granted_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           is_granted?: boolean | null
           metadata?: Json | null
           revoked_at?: string | null
@@ -1594,7 +1594,7 @@ export type Database = {
           device_fingerprint?: string | null
           granted_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           is_granted?: boolean | null
           metadata?: Json | null
           revoked_at?: string | null
@@ -1622,7 +1622,7 @@ export type Database = {
           description: string | null
           device_fingerprint: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           reward_type: string
           source: string
           status: string | null
@@ -1638,7 +1638,7 @@ export type Database = {
           description?: string | null
           device_fingerprint?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           reward_type: string
           source: string
           status?: string | null
@@ -1654,7 +1654,7 @@ export type Database = {
           description?: string | null
           device_fingerprint?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           reward_type?: string
           source?: string
           status?: string | null
@@ -2262,7 +2262,7 @@ export type Database = {
           created_at: string
           device_hash: string | null
           id: string
-          ip: unknown | null
+          ip: unknown
           notes: Json | null
           phone_hash: string | null
           referral_code: string
@@ -2278,7 +2278,7 @@ export type Database = {
           created_at?: string
           device_hash?: string | null
           id?: string
-          ip?: unknown | null
+          ip?: unknown
           notes?: Json | null
           phone_hash?: string | null
           referral_code: string
@@ -2294,7 +2294,7 @@ export type Database = {
           created_at?: string
           device_hash?: string | null
           id?: string
-          ip?: unknown | null
+          ip?: unknown
           notes?: Json | null
           phone_hash?: string | null
           referral_code?: string
@@ -3915,30 +3915,15 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: undefined
       }
-      check_security_settings: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      check_security_settings: { Args: never; Returns: Json }
       check_social_achievements: {
         Args: { p_user_id: string }
         Returns: undefined
       }
-      cleanup_analytics_cache: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      generate_join_code: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      generate_random_id: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      generate_referral_code: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      cleanup_analytics_cache: { Args: never; Returns: undefined }
+      generate_join_code: { Args: never; Returns: string }
+      generate_random_id: { Args: never; Returns: number }
+      generate_referral_code: { Args: never; Returns: string }
       get_due_cards_for_user: {
         Args: { target_user_id: string }
         Returns: {
@@ -3959,10 +3944,7 @@ export type Database = {
           title: string
         }[]
       }
-      get_founding_members_count: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      get_founding_members_count: { Args: never; Returns: number }
       get_learning_analytics: {
         Args: { target_user_id?: string }
         Returns: {
@@ -4014,14 +3996,8 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: number
       }
-      get_virtual_spots_left: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      get_weekly_benchmarks: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      get_virtual_spots_left: { Args: never; Returns: number }
+      get_weekly_benchmarks: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -4029,18 +4005,12 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_admin: { Args: never; Returns: boolean }
       is_group_admin: {
         Args: { _group_id: number; _user_id: string }
         Returns: boolean
       }
-      migrate_existing_marketing_consents: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      migrate_existing_marketing_consents: { Args: never; Returns: undefined }
       resume_lesson_summary: {
         Args: { p_skill_id: string; p_user_id: string }
         Returns: Json
@@ -4049,18 +4019,12 @@ export type Database = {
         Args: { p_points: number; p_user_id: string }
         Returns: undefined
       }
-      update_referral_stats: {
-        Args: { p_user_id: string }
-        Returns: undefined
-      }
+      update_referral_stats: { Args: { p_user_id: string }; Returns: undefined }
       update_referral_stats_v2: {
         Args: { p_user_id: string }
         Returns: undefined
       }
-      update_user_streak: {
-        Args: { p_user_id: string }
-        Returns: undefined
-      }
+      update_user_streak: { Args: { p_user_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "user" | "admin"
