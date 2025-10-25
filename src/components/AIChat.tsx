@@ -672,8 +672,8 @@ export const AIChat = () => {
                     </div>}
                   
                   <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[90%] md:max-w-[85%] ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
-                       <div className={`inline-block px-3 md:px-4 py-2 md:py-3 rounded-2xl ${message.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-muted/50 border border-border/50'}`}>
+                    <div className={`${message.role === 'user' ? 'max-w-[90%] md:max-w-[85%] text-right' : 'w-full md:max-w-[85%] text-left'}`}>
+                       <div className={`${message.role === 'user' ? 'inline-block ml-auto bg-primary text-primary-foreground' : 'block w-full bg-muted/50 border border-border/50'} px-3 md:px-4 py-2 md:py-3 rounded-2xl`}>
                          <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap break-words">
                            {message.content}
                          </p>
@@ -706,8 +706,8 @@ export const AIChat = () => {
           })}
             
             {isLoading && <div className="flex justify-start">
-                <div className="max-w-[90%] md:max-w-[85%]">
-                  <div className="inline-block bg-muted/50 border border-border/50 px-4 py-3 rounded-2xl">
+                <div className="w-full md:max-w-[85%]">
+                  <div className="block w-full bg-muted/50 border border-border/50 px-4 py-3 rounded-2xl">
                     <div className="flex space-x-1">
                       <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-pulse"></div>
                       <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-pulse delay-75"></div>
