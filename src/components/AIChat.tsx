@@ -92,6 +92,7 @@ export const AIChat = () => {
   } = useMathSymbols();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputContainerRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // Dynamic bottom padding to ensure last message is visible above the sticky input
   const [bottomPadding, setBottomPadding] = useState<number>(120);
@@ -112,18 +113,9 @@ export const AIChat = () => {
     }
   }, [shouldShowSoftPaywall, hasShownTokenExhaustedMessage, messages.length]);
 
-  // Auto-scroll to bottom when messages change
+  // Auto-scroll to bottom when messages change using invisible anchor
   useEffect(() => {
-    const scrollToBottom = () => {
-      if (scrollAreaRef.current) {
-        scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-      }
-    };
-
-    // Immediate scroll + delayed scroll to handle dynamic content
-    scrollToBottom();
-    const timeoutId = setTimeout(scrollToBottom, 200);
-    return () => clearTimeout(timeoutId);
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
   // Keep messages above the input by tracking the input container height
@@ -717,6 +709,9 @@ export const AIChat = () => {
                   </div>
                 </div>
               </div>}
+            
+            {/* Invisible anchor for auto-scroll */}
+            <div ref={messagesEndRef} />
           </div>
         </div>
 
