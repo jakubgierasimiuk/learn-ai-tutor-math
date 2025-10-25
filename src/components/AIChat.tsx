@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
-import { MessageCircle, Send, Bot, User, Brain, Settings, Crown } from 'lucide-react';
+import { MessageCircle, Send, Brain, Settings, Crown } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -119,8 +119,9 @@ export const AIChat = () => {
       }
     };
 
-    // Small delay to ensure DOM has updated
-    const timeoutId = setTimeout(scrollToBottom, 100);
+    // Immediate scroll + delayed scroll to handle dynamic content
+    scrollToBottom();
+    const timeoutId = setTimeout(scrollToBottom, 200);
     return () => clearTimeout(timeoutId);
   }, [messages, isLoading]);
 
@@ -638,7 +639,7 @@ export const AIChat = () => {
       </div>
       
       {/* Main Chat Area */}
-      <div className="flex-1 w-full max-w-full md:max-w-4xl md:mx-auto px-2 md:px-4 py-2 md:py-6 flex flex-col pb-40 md:pb-6">
+      <div className="flex-1 w-full max-w-full md:max-w-4xl md:mx-auto px-2 md:px-4 py-2 md:py-6 flex flex-col">
         {/* Token Usage & Upgrade Prompts */}
         <div className="mb-4 space-y-2">
           <UpgradePrompts context="chat" compact />
@@ -654,7 +655,7 @@ export const AIChat = () => {
         </div>
         
         {/* Messages Container */}
-        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto scroll-smooth pb-4">
+        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto scroll-smooth pb-[200px] md:pb-6">
           <div className="space-y-4 md:space-y-6">
             {messages.map((message, index) => {
             const prevMessage = messages[index - 1];
@@ -670,12 +671,8 @@ export const AIChat = () => {
                       </span>
                     </div>}
                   
-                  <div className={`flex gap-2 md:gap-3 ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      {message.role === 'user' ? <User className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" /> : <Bot className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />}
-                    </div>
-                    
-                    <div className={`flex-1 max-w-[85%] md:max-w-[80%] ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
+                  <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[90%] md:max-w-[85%] ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
                        <div className={`inline-block px-3 md:px-4 py-2 md:py-3 rounded-2xl ${message.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-muted/50 border border-border/50'}`}>
                          <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap break-words">
                            {message.content}
@@ -708,11 +705,8 @@ export const AIChat = () => {
                 </div>;
           })}
             
-            {isLoading && <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Bot className="w-4 h-4 text-primary" />
-                </div>
-                <div className="flex-1">
+            {isLoading && <div className="flex justify-start">
+                <div className="max-w-[90%] md:max-w-[85%]">
                   <div className="inline-block bg-muted/50 border border-border/50 px-4 py-3 rounded-2xl">
                     <div className="flex space-x-1">
                       <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-pulse"></div>
@@ -813,14 +807,11 @@ export const AIChat = () => {
                 </Button>
               </div>
               
-              <div className="flex items-center justify-between pt-3 px-1">
+              <div className="flex items-center justify-start pt-2 px-1">
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <button onClick={endSession} className="hover:text-foreground transition-colors duration-200 font-medium">
                     Zakończ sesję
                   </button>
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  Tokens: {getUsagePercentage()}% używane
                 </div>
               </div>
             </>
