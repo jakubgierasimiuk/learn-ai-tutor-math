@@ -62,8 +62,80 @@ const handleCTAClick = (source: string) => {
   return (
     <>
       <Seo 
-        title="Mentavo AI - Inteligentna nauka matematyki z AI tutorem"
-        description="Spersonalizowany tutor matematyczny dostępny 24/7. 7 dni za darmo, później tylko 49,99 zł/miesiąc. Dostosowuje się do Twojego stylu nauki."
+        title="Mentavo AI - Inteligentna Nauka Matematyki | Tutor AI 24/7"
+        description="Mentavo AI to spersonalizowany tutor matematyki dostępny 24/7. Testuj za darmo przez 7 dni, potem 49,99 zł/mies. Dostosowuje się do Twojego stylu nauki i pomaga osiągnąć lepsze wyniki."
+        canonical="https://mentavo.pl/"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              "@id": "https://mentavo.pl/#organization",
+              "name": "Mentavo AI",
+              "url": "https://mentavo.pl",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://mentavo.pl/mentavo-logo-full.png",
+                "width": 512,
+                "height": 512
+              },
+              "description": "Mentavo AI - inteligentny tutor matematyki dostępny 24/7. Spersonalizowana nauka z AI.",
+              "sameAs": [
+                "https://www.facebook.com/mentavoai",
+                "https://www.instagram.com/mentavoai"
+              ],
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "email": "kontakt@mentavo.ai",
+                "contactType": "customer service"
+              }
+            },
+            {
+              "@type": "WebSite",
+              "@id": "https://mentavo.pl/#website",
+              "url": "https://mentavo.pl",
+              "name": "Mentavo AI",
+              "publisher": {
+                "@id": "https://mentavo.pl/#organization"
+              }
+            },
+            {
+              "@type": "SoftwareApplication",
+              "name": "Mentavo AI",
+              "operatingSystem": "Web, iOS, Android",
+              "applicationCategory": "EducationalApplication",
+              "offers": {
+                "@type": "Offer",
+                "price": "49.99",
+                "priceCurrency": "PLN",
+                "availability": "https://schema.org/InStock",
+                "priceValidUntil": "2026-12-31"
+              },
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "4.8",
+                "ratingCount": "150"
+              },
+              "description": "Inteligentny tutor matematyki wykorzystujący AI do personalizacji nauki. Dostępny 24/7, pomaga uczniom szkół średnich osiągać lepsze wyniki."
+            },
+            {
+              "@type": "Product",
+              "name": "Mentavo AI Premium",
+              "description": "Dostęp do pełnych funkcji AI tutora matematyki z personalizowaną ścieżką nauki",
+              "brand": {
+                "@id": "https://mentavo.pl/#organization"
+              },
+              "offers": {
+                "@type": "Offer",
+                "url": "https://mentavo.pl/auth?trial=true",
+                "priceCurrency": "PLN",
+                "price": "49.99",
+                "availability": "https://schema.org/InStock",
+                "priceValidUntil": "2026-12-31"
+              }
+            }
+          ]
+        }}
       />
       
       <div className="min-h-screen bg-background">

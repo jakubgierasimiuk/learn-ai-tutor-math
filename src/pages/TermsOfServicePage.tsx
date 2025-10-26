@@ -5,8 +5,26 @@ const TermsOfServicePage = () => {
   return (
     <>
       <Seo 
-        title="Regulamin – mentavo.ai" 
-        description="Regulamin aplikacji Mentavo AI. Poznaj zasady korzystania z naszej platformy edukacyjnej." 
+        title="Regulamin Serwisu | Warunki Korzystania - Mentavo AI" 
+        description="Przeczytaj regulamin Mentavo AI. Zasady korzystania z platformy, subskrypcje, płatności i prawa użytkowników. Aktualna wersja z września 2024." 
+        canonical="https://mentavo.pl/terms-of-service"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Regulamin - Mentavo AI",
+          "description": "Regulamin aplikacji edukacyjnej Mentavo AI",
+          "url": "https://mentavo.pl/terms-of-service",
+          "mainEntity": {
+            "@type": "Article",
+            "headline": "Regulamin Aplikacji Mentavo AI",
+            "datePublished": "2024-09-01",
+            "dateModified": "2024-09-01",
+            "author": {
+              "@type": "Organization",
+              "name": "Mentavo AI"
+            }
+          }
+        }}
       />
       <div className="min-h-screen bg-background py-8 px-4">
         <div className="max-w-4xl mx-auto">

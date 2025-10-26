@@ -5,8 +5,26 @@ const PrivacyPolicyPage = () => {
   return (
     <>
       <Seo 
-        title="Polityka Prywatności – mentavo.ai" 
-        description="Polityka prywatności i plików cookies Mentavo AI. Dowiedz się, jak chronimy Twoje dane osobowe." 
+        title="Polityka Prywatności | Ochrona Danych Osobowych - Mentavo AI" 
+        description="Poznaj politykę prywatności Mentavo AI. Dowiedz się, jak zbieramy, chronimy i przetwarzamy Twoje dane osobowe zgodnie z RODO. Pełna przejrzystość i bezpieczeństwo." 
+        canonical="https://mentavo.pl/privacy-policy"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Polityka Prywatności - Mentavo AI",
+          "description": "Polityka prywatności i ochrony danych osobowych w Mentavo AI",
+          "url": "https://mentavo.pl/privacy-policy",
+          "mainEntity": {
+            "@type": "Article",
+            "headline": "Polityka Prywatności i Plików Cookies Mentavo AI",
+            "datePublished": "2024-09-01",
+            "dateModified": "2024-09-01",
+            "author": {
+              "@type": "Organization",
+              "name": "Mentavo AI"
+            }
+          }
+        }}
       />
       <div className="min-h-screen bg-background py-8 px-4">
         <div className="max-w-4xl mx-auto">

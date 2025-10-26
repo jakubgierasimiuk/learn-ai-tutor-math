@@ -77,15 +77,36 @@ export function FoundingLandingPage() {
   return (
     <>
       <Seo 
-        title="Founding 100 - Dołącz do pierwszych 100 użytkowników Mentavo AI" 
-        description="Zostań jednym z pierwszych 100 użytkowników Mentavo AI. Miesiąc Premium za darmo i ekskluzywne korzyści dla Founding Members."
+        title="Founding 100 - Zostań Założycielem Mentavo AI | Darmowy Miesiąc Premium" 
+        description="Dołącz do pierwszych 100 użytkowników Mentavo AI i otrzymaj miesiąc Premium za darmo (wartość 49 zł). Wpłyń na rozwój aplikacji i uzyskaj status Founding Member na zawsze."
+        canonical="https://mentavo.pl/founding"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "SpecialOffer",
           "name": "Founding 100 Program - Mentavo AI",
-          "description": "Ekskluzywny program dla pierwszych 100 użytkowników Mentavo AI",
+          "description": "Ekskluzywny program dla pierwszych 100 użytkowników Mentavo AI. Bezpłatny miesiąc Premium, wpływ na rozwój i status Founding Member.",
+          "url": "https://mentavo.pl/founding",
           "validThrough": "2025-12-31",
-          "url": window.location.href
+          "category": "Education",
+          "eligibleRegion": {
+            "@type": "Country",
+            "name": "Poland"
+          },
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "PLN",
+            "availability": "https://schema.org/LimitedAvailability",
+            "inventoryLevel": {
+              "@type": "QuantitativeValue",
+              "value": spotsLeft
+            }
+          },
+          "provider": {
+            "@type": "Organization",
+            "name": "Mentavo AI",
+            "url": "https://mentavo.pl"
+          }
         }} 
       />
       
