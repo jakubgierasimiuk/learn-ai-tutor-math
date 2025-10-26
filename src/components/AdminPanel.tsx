@@ -49,7 +49,9 @@ export const AdminPanel = () => {
     aiErrors: 0,
     uptime: 100,
     pseudoActivity: 0,
-    contentBlocked: 0
+    contentBlocked: 0,
+    freeAccounts: 0,
+    foundingAccounts: 0
   });
 
   const [deleting, setDeleting] = useState(false);
@@ -242,10 +244,24 @@ export const AdminPanel = () => {
         ? aiLogs.reduce((sum, log) => sum + (log.processing_time_ms || 0), 0) / aiLogs.length / 1000
         : 0;
 
+      // Fetch free accounts count
+      const { count: freeAccountsCount } = await supabase
+        .from('user_subscriptions')
+        .select('*', { count: 'exact', head: true })
+        .eq('subscription_type', 'free');
+
+      // Fetch founding members count
+      const { count: foundingMembersCount } = await supabase
+        .from('founding_members')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'registered');
+
       setAdminMetrics(prev => ({
         ...prev,
         tokenUsageDaily: totalTokens,
-        aiResponseTime: Number(avgResponseTime.toFixed(2))
+        aiResponseTime: Number(avgResponseTime.toFixed(2)),
+        freeAccounts: freeAccountsCount || 0,
+        foundingAccounts: foundingMembersCount || 0
       }));
 
     } catch (error) {
@@ -471,6 +487,35 @@ export const AdminPanel = () => {
           </TabsList>
           
           <TabsContent value="overview" className="space-y-6">
+            {/* Account Statistics */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Konta Darmowe</CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{adminMetrics.freeAccounts}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Aktywne konta free
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Konta Founding</CardTitle>
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{adminMetrics.foundingAccounts}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Zarejestrowanych członków założycieli
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
             {/* Admin KPIs */}
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <Card>
