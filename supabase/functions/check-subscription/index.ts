@@ -128,18 +128,52 @@ serve(async (req) => {
       .eq('user_id', user.id)
       .single();
 
-    // Check if user has active paid subscription from database (e.g., founding members)
-    if (currentSub?.subscription_type === 'paid' && currentSub.subscription_end_date) {
+    // Check if user is a founding member
+    const { data: foundingMember } = await supabaseClient
+      .from('founding_members')
+      .select('created_at, status')
+      .eq('user_id', user.id)
+      .eq('status', 'registered')
+      .single();
+
+    // If founding member without Stripe, grant them 30-day paid subscription
+    if (foundingMember && !stripeCustomerId) {
+      const foundingDate = new Date(foundingMember.created_at);
+      const expiryDate = new Date(foundingDate);
+      expiryDate.setDate(expiryDate.getDate() + 30);
+      
+      const now = new Date();
+      
+      if (now <= expiryDate) {
+        // Active founding member subscription
+        subscriptionType = 'paid';
+        subscriptionEnd = expiryDate.toISOString();
+        billingCycleStart = foundingDate.toISOString();
+        
+        logStep("Active founding member subscription", {
+          foundingDate: foundingDate.toISOString(),
+          subscriptionEnd,
+          daysRemaining: Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+        });
+      } else {
+        // Founding member subscription expired
+        subscriptionType = 'limited_free';
+        subscriptionEnd = null;
+        logStep("Founding member subscription expired - downgraded to limited_free");
+      }
+    }
+    // Check if user has active paid subscription from database (non-founding)
+    else if (currentSub?.subscription_type === 'paid' && currentSub.subscription_end_date) {
       const subEndDate = new Date(currentSub.subscription_end_date);
       const now = new Date();
       
       if (now <= subEndDate) {
-        // Active paid subscription (non-Stripe, e.g., founding member)
+        // Active paid subscription (non-Stripe, non-founding)
         subscriptionType = 'paid';
         subscriptionEnd = currentSub.subscription_end_date;
         billingCycleStart = currentSub.billing_cycle_start || billingCycleStart;
         
-        logStep("Active paid subscription from database (founding member)", {
+        logStep("Active paid subscription from database", {
           subscriptionEnd,
           tokenLimitHard: currentSub.token_limit_hard
         });

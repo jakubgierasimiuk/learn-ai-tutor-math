@@ -58,6 +58,7 @@ export const AdminPanel = () => {
   const [linkReferralEmail, setLinkReferralEmail] = useState("");
   const [linkReferralCode, setLinkReferralCode] = useState("");
   const [linkingReferral, setLinkingReferral] = useState(false);
+  const [fixingFounding, setFixingFounding] = useState(false);
   const { toast } = useToast();
 
   const TEST_EMAILS = [
@@ -167,6 +168,31 @@ export const AdminPanel = () => {
       });
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleFixFoundingSubscriptions = async () => {
+    setFixingFounding(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('fix-founding-subscriptions');
+
+      if (error) throw error;
+
+      toast({
+        title: "Sukces!",
+        description: data.message || "Naprawiono subskrypcje founding members",
+      });
+
+      fetchRealData();
+    } catch (error: any) {
+      console.error('Error fixing founding subscriptions:', error);
+      toast({
+        title: "Błąd",
+        description: error.message || "Nie udało się naprawić subskrypcji",
+        variant: "destructive"
+      });
+    } finally {
+      setFixingFounding(false);
     }
   };
 
@@ -287,6 +313,14 @@ export const AdminPanel = () => {
             size="sm"
           >
             {deleting ? "Usuwanie..." : "Usuń testowych"}
+          </Button>
+          <Button 
+            onClick={handleFixFoundingSubscriptions} 
+            disabled={fixingFounding}
+            variant="outline"
+            size="sm"
+          >
+            {fixingFounding ? "Naprawianie..." : "Napraw Founding"}
           </Button>
           <button
             onClick={() => setSelectedView("owner")}
