@@ -37,8 +37,7 @@ export const Navigation = () => {
         <div className="flex items-center justify-between h-12 md:h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <img src={mentavoLogoIcon} alt="Mentavo AI Logo" className="w-10 h-10" />
-            <span className="text-xl font-bold font-['Poppins'] hidden sm:block">Mentavo AI</span>
+            <img src={mentavoLogoFull} alt="Mentavo AI Logo" className="h-10" />
           </Link>
 
           {user ? <>
