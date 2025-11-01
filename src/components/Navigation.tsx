@@ -109,7 +109,7 @@ export const Navigation = () => {
                   </Button>
                 </Link>
                 <Link to="/auth">
-                  <Button className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-primary hover-lift" onClick={() => handleCtaClick('header_signup')}>
+                  <Button className="bg-primary hover:bg-primary/90 shadow-primary hover-lift" onClick={() => handleCtaClick('header_signup')}>
                     Odblokuj nieograniczoną naukę
                   </Button>
                 </Link>
@@ -200,7 +200,7 @@ export const Navigation = () => {
                     Zaloguj się
                   </Link>
                 </Button>
-                <Button asChild className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90" onClick={() => {
+                <Button asChild className="w-full bg-primary hover:bg-primary/90" onClick={() => {
             setIsOpen(false);
             handleCtaClick('mobile_signup');
           }}>

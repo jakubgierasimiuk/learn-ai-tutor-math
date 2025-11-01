@@ -14,9 +14,9 @@ import {
   Sparkles,
 } from "lucide-react";
 import mentavoLogo from "@/assets/mentavo-logo-full.png";
-import shapes3d from "@/assets/mentavo-3d-shapes.svg";
 import { saveReferralCode } from "@/lib/referralStorage";
 import { Seo } from "@/components/Seo";
+import { ThreeDShapes } from "@/components/ThreeDShapes";
 
 const NewLandingPage = () => {
   const navigate = useNavigate();
@@ -94,15 +94,14 @@ const NewLandingPage = () => {
                 <Button 
                   size="lg" 
                   onClick={handleStartTrial}
-                  className="bg-neutral hover:bg-neutral/90 text-white font-semibold text-lg h-14 px-8"
+                  className="bg-[#1E3A5F] hover:bg-[#1E3A5F]/90 text-white font-semibold text-lg h-14 px-8 shadow-elegant"
                 >
                   Bezpłatny dostęp przez 7 dni
                 </Button>
                 <Button 
                   size="lg" 
-                  variant="outline"
                   onClick={handleStartLearning}
-                  className="border-2 border-primary text-primary hover:bg-primary hover:text-white font-semibold text-lg h-14 px-8"
+                  className="bg-[#4A90E2] hover:bg-[#4A90E2]/90 text-white font-semibold text-lg h-14 px-8 shadow-primary"
                 >
                   Rozpocznij naukę
                 </Button>
@@ -120,12 +119,8 @@ const NewLandingPage = () => {
               </div>
             </div>
 
-            <div className="relative hidden lg:block">
-              <img 
-                src={shapes3d} 
-                alt="3D Geometric Shapes" 
-                className="w-full h-auto animate-float"
-              />
+            <div className="relative hidden lg:block h-[500px]">
+              <ThreeDShapes />
             </div>
           </div>
         </section>
@@ -145,8 +140,8 @@ const NewLandingPage = () => {
             <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
               <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
                 <CardContent className="p-8 text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                    <DollarSign className="w-8 h-8 text-primary" />
+                  <div className="w-16 h-16 rounded-full bg-[#4A90E2] flex items-center justify-center mx-auto">
+                    <DollarSign className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="font-poppins font-semibold text-xl text-neutral">
                     Wysokie koszty
@@ -159,8 +154,8 @@ const NewLandingPage = () => {
 
               <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
                 <CardContent className="p-8 text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                    <Clock className="w-8 h-8 text-primary" />
+                  <div className="w-16 h-16 rounded-full bg-[#4A90E2] flex items-center justify-center mx-auto">
+                    <Clock className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="font-poppins font-semibold text-xl text-neutral">
                     Ograniczone godziny
@@ -173,8 +168,8 @@ const NewLandingPage = () => {
 
               <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
                 <CardContent className="p-8 text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                    <Users className="w-8 h-8 text-primary" />
+                  <div className="w-16 h-16 rounded-full bg-[#4A90E2] flex items-center justify-center mx-auto">
+                    <Users className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="font-poppins font-semibold text-xl text-neutral">
                     Brak personalizacji
@@ -203,8 +198,8 @@ const NewLandingPage = () => {
             <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
               <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
                 <CardContent className="p-8 text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mx-auto">
-                    <Bot className="w-8 h-8 text-secondary" />
+                  <div className="w-16 h-16 rounded-full bg-[#4A90E2] flex items-center justify-center mx-auto">
+                    <Bot className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="font-poppins font-semibold text-xl text-neutral">
                     24/7 Dostępność
@@ -217,8 +212,8 @@ const NewLandingPage = () => {
 
               <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
                 <CardContent className="p-8 text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mx-auto">
-                    <TrendingUp className="w-8 h-8 text-secondary" />
+                  <div className="w-16 h-16 rounded-full bg-[#4A90E2] flex items-center justify-center mx-auto">
+                    <TrendingUp className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="font-poppins font-semibold text-xl text-neutral">
                     Przystępna cena
@@ -231,8 +226,8 @@ const NewLandingPage = () => {
 
               <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
                 <CardContent className="p-8 text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mx-auto">
-                    <BookOpen className="w-8 h-8 text-secondary" />
+                  <div className="w-16 h-16 rounded-full bg-[#4A90E2] flex items-center justify-center mx-auto">
+                    <BookOpen className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="font-poppins font-semibold text-xl text-neutral">
                     Interaktywne uczenie
@@ -247,7 +242,7 @@ const NewLandingPage = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="bg-gradient-to-br from-primary via-primary to-secondary py-20">
+        <section className="bg-[#4A90E2] py-20">
           <div className="container mx-auto px-4 text-center">
             <div className="max-w-3xl mx-auto space-y-8">
               <h2 className="font-poppins font-bold text-4xl text-white">
@@ -266,7 +261,7 @@ const NewLandingPage = () => {
               <Button 
                 size="lg"
                 onClick={handleStartLearning}
-                className="bg-white text-primary hover:bg-white/90 font-semibold text-lg h-14 px-12"
+                className="bg-white text-[#4A90E2] hover:bg-white/90 font-semibold text-lg h-14 px-12 shadow-elegant"
               >
                 Rozpocznij naukę
               </Button>
@@ -279,7 +274,7 @@ const NewLandingPage = () => {
         </section>
 
         {/* Footer */}
-        <footer className="bg-neutral py-12">
+        <footer className="bg-[#1E3A5F] py-12">
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="flex items-center gap-2">
