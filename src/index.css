@@ -308,6 +308,10 @@
   .shadow-card {
     box-shadow: var(--shadow-card);
   }
+
+  .shadow-elevated {
+    box-shadow: 0 4px 20px -4px hsl(215 25% 27% / 0.12);
+  }
   
   .transition-smooth {
     transition: var(--transition-smooth);

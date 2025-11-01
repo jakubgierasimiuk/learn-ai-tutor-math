@@ -1,467 +1,313 @@
-import { BookOpen, GraduationCap, Layers, HelpCircle, Sparkles, Users, Trophy, Database } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
 import { useEffect } from "react";
-import heroImage from "@/assets/hero-education.jpg";
-import { logEvent } from "@/lib/logger";
-import { TestimonialsCarousel } from "./TestimonialsCarousel";
-import { RotatingTestimonial } from "./RotatingTestimonial";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  DollarSign,
+  Clock,
+  Users,
+  Bot,
+  TrendingUp,
+  BookOpen,
+  CheckCircle2,
+  Sparkles,
+} from "lucide-react";
+import mentavoLogo from "@/assets/mentavo-logo-full.png";
+import shapes3d from "@/assets/mentavo-3d-shapes.svg";
 import { saveReferralCode } from "@/lib/referralStorage";
+import { logEvent } from "@/lib/logger";
 
 export function LandingPage() {
+  const navigate = useNavigate();
   const { user } = useAuth();
-  
-  // Save referral code from URL on landing page load
+
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const refCode = urlParams.get('ref');
-    
+    const refCode = urlParams.get("ref");
     if (refCode) {
-      console.log('[LandingPage] Detected referral code, saving to localStorage:', refCode);
+      console.log("[LandingPage] Detected referral code, saving:", refCode);
       saveReferralCode(refCode);
     }
   }, []);
-  
-  const handleCtaClick = (action: string) => {
-    logEvent('landing_cta_click', {
-      action
-    });
+
+  const handleStartTrial = () => {
+    logEvent("landing_cta_click", { action: "start_trial" });
+    if (user) {
+      navigate("/dashboard");
+    } else {
+      navigate("/auth?mode=signup&trial=true");
+    }
   };
-  return <div className="min-h-screen bg-background text-foreground">
+
+  const handleStartLearning = () => {
+    logEvent("landing_cta_click", { action: "start_learning" });
+    if (user) {
+      navigate("/dashboard");
+    } else {
+      navigate("/auth?mode=signup");
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Navigation */}
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <img src={mentavoLogo} alt="Mentavo AI" className="h-8" />
+          </div>
+          <div className="flex items-center gap-4">
+            {user ? (
+              <Button onClick={() => navigate("/dashboard")} variant="default">
+                Dashboard
+              </Button>
+            ) : (
+              <>
+                <Button onClick={() => navigate("/auth")} variant="ghost">
+                  Zaloguj się
+                </Button>
+                <Button onClick={handleStartTrial}>
+                  Bezpłatny dostęp przez 7 dni
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </header>
 
       {/* Hero Section */}
-      <section className="relative py-24 px-6 overflow-hidden">
-        {/* Elegant background */}
-        <div className="absolute inset-0 gradient-elegant opacity-50"></div>
-        
-        {/* Subtle geometric elements */}
-        <div className="absolute top-32 right-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-20 left-10 w-48 h-48 bg-accent/5 rounded-full blur-2xl animate-float" style={{
-        animationDelay: '3s'
-      }}></div>
-        
-        <div className="relative z-10 max-w-6xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-card/80 backdrop-blur-sm rounded-full px-6 py-3 mb-8 border border-border shadow-card animate-fadeIn">
-            <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
-            <span className="text-muted-foreground font-medium">Najnowsza technologia AI</span>
-          </div>
-          
-          <h1 className="text-5xl md:text-7xl font-bold mb-8 text-foreground leading-tight animate-fadeIn" style={{
-          animationDelay: '0.2s'
-        }}>
-            Twój <span className="text-primary">osobisty nauczyciel</span><br />
-            matematyki zawsze pod ręką
-          </h1>
-          
-          <p className="text-xl md:text-2xl max-w-4xl mx-auto mb-12 text-muted-foreground leading-relaxed animate-fadeIn" style={{
-          animationDelay: '0.4s'
-        }}>
-            Ucz się matematyki we własnym tempie z AI, które rozumie Twoje potrzeby. 
-            Personalizowane wyjaśnienia, interaktywne zadania i stały dostęp do pomocy.
-          </p>
-          
-          
-          {/* Główne opcje nauki */}
-          <div className="max-w-4xl mx-auto animate-fadeIn" style={{
-          animationDelay: '0.6s'
-        }}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Chat z mentavo.ai */}
-              <div className="group relative p-8 rounded-2xl bg-card border border-border hover-lift shadow-card">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-xl flex items-center justify-center">
-                    <span className="text-2xl">🤖</span>
-                  </div>
-                  <h3 className="text-xl font-semibold text-foreground">Chat z mentavo.ai</h3>
-                </div>
-                <p className="text-muted-foreground mb-6 leading-relaxed">
-                  Zadaj pytanie, wyślij zdjęcie zadania lub po prostu powiedz czego nie rozumiesz. 
-                  AI pomoże Ci krok po kroku.
-                </p>
-                <Button asChild className="w-full shadow-primary" onClick={() => handleCtaClick(user ? 'chat' : 'signup')}>
-                  <Link to={user ? "/chat" : "/auth"}>
-                    {user ? "Korepetycje z AI" : "Załóż darmowe konto"}
-                  </Link>
-                </Button>
-              </div>
-
-              {/* Study & Learn */}
-              <div className="group relative p-8 rounded-2xl bg-card border border-border hover-lift shadow-card">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-gradient-to-br from-accent to-accent rounded-xl flex items-center justify-center">
-                    <BookOpen className="w-6 h-6 text-accent-foreground" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-foreground">Study & Learn</h3>
-                </div>
-                <p className="text-muted-foreground mb-6 leading-relaxed">
-                  Systematyczna nauka z AI. Wybierz temat, rozwiązuj zadania dopasowane do Twojego poziomu
-                  i śledź postępy.
-                </p>
-                <Button asChild variant="outline" className="w-full hover-lift" onClick={() => handleCtaClick(user ? 'study_dashboard' : 'study')}>
-                  <Link to={user ? "/dashboard" : "/auth"}>
-                    {user ? "Przejdź do nauki" : "Zacznij naukę"}
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-          
-          {/* Stats badges */}
-          <div className="flex justify-center gap-8 mt-16 flex-wrap animate-fadeIn" style={{
-          animationDelay: '0.8s'
-        }}>
-            <div className="bg-card/80 backdrop-blur-sm rounded-xl px-6 py-4 border border-border shadow-card">
-              <div className="flex items-center gap-3">
-                <Users className="w-5 h-5 text-success" />
-                <span className="text-foreground font-semibold">500+ zadań</span>
-              </div>
-            </div>
-            <div className="bg-card/80 backdrop-blur-sm rounded-xl px-6 py-4 border border-border shadow-card">
-              <div className="flex items-center gap-3">
-                <Trophy className="w-5 h-5 text-warning" />
-                <span className="text-foreground font-semibold">Natychmiastowe feedback</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Free Trial Hero Section */}
-      <section className="relative py-24 px-6 bg-gradient-to-br from-primary/10 via-background to-accent/10 overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute top-10 right-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-10 left-10 w-48 h-48 bg-accent/5 rounded-full blur-2xl animate-float" style={{animationDelay: '3s'}}></div>
-        
-        <div className="max-w-6xl mx-auto relative z-10">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Left side - Content */}
-            <div className="text-center lg:text-left">
-              {/* Premium badge */}
-              <div className="inline-flex items-center gap-2 bg-success/10 rounded-full px-6 py-3 mb-6 border border-success/20 animate-fadeIn">
-                <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
-                <span className="text-success font-semibold text-sm uppercase tracking-wide">100% DARMOWE</span>
-              </div>
-              
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-foreground leading-tight animate-fadeIn" style={{animationDelay: '0.2s'}}>
-                Rozpocznij za darmo<br />
-                <span className="text-primary">bez zobowiązań</span>
-              </h2>
-              
-              <p className="text-xl md:text-2xl mb-8 text-muted-foreground leading-relaxed animate-fadeIn" style={{animationDelay: '0.4s'}}>
-                <strong className="text-foreground">7 dni pełnego dostępu.</strong><br />
-                Bez karty płatniczej. Bez automatycznego odnowienia.
-              </p>
-              
-              {/* Benefits list */}
-              <div className="space-y-4 mb-10 animate-fadeIn" style={{animationDelay: '0.6s'}}>
-                {[
-                  "Pełny dostęp do wszystkich tematów",
-                  "Nielimitowane pytania do AI",
-                  "Personalizowane ścieżki nauki",
-                  "Raporty postępów",
-                  "Anuluj w każdej chwili"
-                ].map((benefit, index) => (
-                  <div key={index} className="flex items-center gap-4">
-                    <div className="w-6 h-6 bg-success rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-success-foreground text-sm font-bold">✓</span>
-                    </div>
-                    <span className="text-foreground font-medium">{benefit}</span>
-                  </div>
-                ))}
-              </div>
-              
-              {/* CTA Button */}
-              <div className="animate-fadeIn" style={{animationDelay: '0.8s'}}>
-                <Button asChild size="lg" className="shadow-primary hover-lift text-xl px-12 py-6 font-bold mb-4 w-full lg:w-auto" onClick={() => handleCtaClick(user ? 'dashboard' : 'free_trial_hero')}>
-                  <Link to={user ? "/dashboard" : "/auth"}>
-                    <span className="flex items-center justify-center gap-3">
-                      <Sparkles className="w-6 h-6" />
-                      {user ? "Przejdź do dashboardu" : "Rozpocznij 7-dniowy darmowy trial"}
-                    </span>
-                  </Link>
-                </Button>
-                <p className="text-sm text-muted-foreground mt-2">
-                  🔒 Nie potrzebujesz karty płatniczej
-                </p>
-              </div>
+      <section className="container mx-auto px-4 py-20 lg:py-32">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="space-y-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
+              <Sparkles className="w-4 h-4" />
+              Zaufany przez tysiące uczniów
             </div>
             
-            {/* Right side - Visual */}
-            <div className="relative animate-fadeIn" style={{animationDelay: '1s'}}>
-              <div className="relative">
-                {/* Main card */}
-                <div className="bg-card rounded-3xl p-8 border border-border shadow-primary backdrop-blur-sm">
-                  <div className="text-center mb-6">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary to-primary-glow rounded-2xl mb-4">
-                      <GraduationCap className="w-8 h-8 text-primary-foreground" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-foreground mb-2">Dołącz do 500+ uczniów</h3>
-                    <p className="text-muted-foreground">którzy już poprawili swoje oceny</p>
-                  </div>
-                  
-                  {/* Rotating Mini testimonial */}
-                  <RotatingTestimonial />
-                </div>
-                
-                {/* Floating elements */}
-                <div className="absolute -top-4 -right-4 w-8 h-8 bg-success/20 rounded-full animate-float" style={{animationDelay: '2s'}}></div>
-                <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-accent/20 rounded-full animate-float" style={{animationDelay: '4s'}}></div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Bottom trust signals */}
-          <div className="mt-16 text-center animate-fadeIn" style={{animationDelay: '1.2s'}}>
-            <p className="text-muted-foreground mb-6 text-lg">Zacznij już dziś i zobacz różnicę</p>
-            <div className="flex justify-center gap-8 flex-wrap">
-              <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm rounded-xl px-4 py-2 border border-border">
-                <div className="w-2 h-2 bg-success rounded-full"></div>
-                <span className="text-foreground font-medium text-sm">Bez ryzyka</span>
-              </div>
-              <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm rounded-xl px-4 py-2 border border-border">
-                <div className="w-2 h-2 bg-primary rounded-full"></div>
-                <span className="text-foreground font-medium text-sm">Natychmiastowy dostęp</span>
-              </div>
-              <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm rounded-xl px-4 py-2 border border-border">
-                <div className="w-2 h-2 bg-accent rounded-full"></div>
-                <span className="text-foreground font-medium text-sm">Anuluj w każdej chwili</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Carousel */}
-      <TestimonialsCarousel />
-
-      {/* mentavo.ai Section */}
-      <section className="py-24 px-6 bg-muted/30">
-        <div className="max-w-6xl mx-auto text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary to-primary-glow rounded-2xl mb-8 shadow-primary animate-float">
-            <GraduationCap className="w-8 h-8 text-primary-foreground" />
-          </div>
-          
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
-            Twój nauczyciel, który zawsze ma czas
-          </h2>
-          
-          <p className="text-xl mb-16 max-w-3xl mx-auto text-muted-foreground leading-relaxed">
-            mentavo.ai dostosowuje się do Ciebie i Twojego stylu nauki
-          </p>
-          
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            <div className="bg-card rounded-2xl p-8 border border-border hover-lift shadow-card">
-              <div className="w-14 h-14 bg-gradient-to-br from-success to-success rounded-xl flex items-center justify-center mb-6 mx-auto">
-                <span className="text-2xl">📚</span>
-              </div>
-              <h3 className="font-semibold text-xl mb-4 text-foreground">Krok po kroku</h3>
-              <p className="text-muted-foreground">Tłumaczy zadania w prosty i zrozumiały sposób</p>
-            </div>
+            <h1 className="font-poppins font-bold text-5xl lg:text-6xl text-neutral leading-tight">
+              AI Tutor Matematyczny
+            </h1>
             
-            <div className="bg-card rounded-2xl p-8 border border-border hover-lift shadow-card">
-              <div className="w-14 h-14 bg-gradient-to-br from-accent to-accent rounded-xl flex items-center justify-center mb-6 mx-auto">
-                <span className="text-2xl">🎯</span>
-              </div>
-              <h3 className="font-semibold text-xl mb-4 text-foreground">Dopasowany poziom</h3>
-              <p className="text-muted-foreground">Dostosowuje trudność do Twojej wiedzy</p>
-            </div>
-            
-            <div className="bg-card rounded-2xl p-8 border border-border hover-lift shadow-card">
-              <div className="w-14 h-14 bg-gradient-to-br from-warning to-warning rounded-xl flex items-center justify-center mb-6 mx-auto">
-                <span className="text-2xl">⚡</span>
-              </div>
-              <h3 className="font-semibold text-xl mb-4 text-foreground">Szybka pomoc</h3>
-              <p className="text-muted-foreground">Przygotowuje do sprawdzianów i egzaminów</p>
-            </div>
-          </div>
-          
-          <Button asChild className="shadow-primary hover-lift text-lg px-8 py-4" size="lg" onClick={() => handleCtaClick(user ? 'chat_ai' : 'see_ai_tutor_demo')}>
-            <Link to={user ? "/chat" : "/auth"}>
-              {user ? "Zadaj pytanie AI" : "Zobacz, jak działa mentavo.ai"}
-            </Link>
-          </Button>
-        </div>
-      </section>
-
-      {/* Study & Learn Section */}
-      <section className="py-24 px-6 text-center">
-        <div className="max-w-6xl mx-auto">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-accent to-accent rounded-2xl mb-8 shadow-accent animate-float" style={{
-          animationDelay: '1s'
-        }}>
-            <BookOpen className="w-8 h-8 text-accent-foreground" />
-          </div>
-          
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
-            Cała matematyka liceum w jednym miejscu
-          </h2>
-          
-          <p className="text-xl mb-16 max-w-3xl mx-auto text-muted-foreground leading-relaxed">
-            Study & Learn to interaktywna baza tematów zgodna z programem MEN
-          </p>
-          
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            <div className="bg-card rounded-2xl p-8 border border-border hover-lift shadow-card">
-              <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-glow rounded-2xl flex items-center justify-center mb-6 mx-auto">
-                <span className="text-3xl">📖</span>
-              </div>
-              <h3 className="font-bold text-xl mb-4 text-foreground">Wszystkie działy</h3>
-              <p className="text-muted-foreground text-lg">Od równań po całki - kompletny materiał</p>
-            </div>
-            
-            <div className="bg-card rounded-2xl p-8 border border-border hover-lift shadow-card">
-              <div className="w-16 h-16 bg-gradient-to-br from-success to-success rounded-2xl flex items-center justify-center mb-6 mx-auto">
-                <span className="text-3xl">📊</span>
-              </div>
-              <h3 className="font-bold text-xl mb-4 text-foreground">Czytelny progres</h3>
-              <p className="text-muted-foreground text-lg">Raporty pokazują co już umiesz</p>
-            </div>
-            
-            <div className="bg-card rounded-2xl p-8 border border-border hover-lift shadow-card">
-              <div className="w-16 h-16 bg-gradient-to-br from-accent to-accent rounded-2xl flex items-center justify-center mb-6 mx-auto">
-                <span className="text-3xl">⚡</span>
-              </div>
-              <h3 className="font-bold text-xl mb-4 text-foreground">Krótkie lekcje</h3>
-              <p className="text-muted-foreground text-lg">Quizy zamiast nudnych podręczników</p>
-            </div>
-          </div>
-          
-          <Button asChild variant="outline" className="hover-lift text-lg px-8 py-4" size="lg" onClick={() => handleCtaClick(user ? 'progress' : 'check_progress')}>
-            <Link to={user ? "/progress" : "/auth"}>
-              {user ? "Zobacz swoje postępy" : "Sprawdź swoje postępy"}
-            </Link>
-          </Button>
-        </div>
-      </section>
-
-      {/* Why Us Section */}
-      <section className="py-24 px-6 bg-muted/30">
-        <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-16 text-foreground">
-            Dlaczego uczniowie wybierają mentavo.ai?
-          </h2>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="group bg-card rounded-3xl p-8 border border-border hover-lift shadow-card">
-              <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-glow rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:animate-float">
-                <Layers className="w-8 h-8 text-primary-foreground" />
-              </div>
-              <h3 className="font-bold text-2xl mb-4 text-foreground">Uczysz się tak, jak lubisz</h3>
-              <p className="text-muted-foreground text-lg leading-relaxed">Aplikacja dopasowuje tempo i sposób tłumaczenia do Ciebie.</p>
-            </div>
-            
-            <div className="group bg-card rounded-3xl p-8 border border-border hover-lift shadow-card">
-              <div className="w-16 h-16 bg-gradient-to-br from-accent to-accent rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:animate-float" style={{
-              animationDelay: '0.5s'
-            }}>
-                <GraduationCap className="w-8 h-8 text-accent-foreground" />
-              </div>
-              <h3 className="font-bold text-2xl mb-4 text-foreground">Dostęp zawsze i wszędzie</h3>
-              <p className="text-muted-foreground text-lg leading-relaxed">Na telefonie i komputerze, bez ograniczeń czasowych.</p>
-            </div>
-            
-            <div className="group bg-card rounded-3xl p-8 border border-border hover-lift shadow-card">
-              <div className="w-16 h-16 bg-gradient-to-br from-success to-success rounded-2xl flex items-center justify-center mb-6 mx-auto group-hover:animate-float" style={{
-              animationDelay: '1s'
-            }}>
-                <BookOpen className="w-8 h-8 text-success-foreground" />
-              </div>
-              <h3 className="font-bold text-2xl mb-4 text-foreground">Pełna podstawa programowa</h3>
-              <p className="text-muted-foreground text-lg leading-relaxed">Wszystko od podstaw po rozszerzenie, w jednym miejscu.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section className="py-24 px-6 bg-gradient-elegant relative overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-accent/5 rounded-full blur-2xl"></div>
-        
-        <div className="max-w-4xl mx-auto relative z-10 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-8 text-foreground">
-            Pełen dostęp za jedną niską cenę
-          </h2>
-          
-          <div className="bg-card rounded-3xl p-12 border border-border shadow-primary backdrop-blur-sm">
-            <div className="text-6xl md:text-7xl font-black mb-4 text-primary">
-              49,99 zł
-            </div>
-            <p className="text-lg text-muted-foreground mb-2">miesięcznie</p>
-            
-            <p className="text-xl mb-8 max-w-2xl mx-auto text-muted-foreground leading-relaxed">
-              Nielimitowane lekcje, szybkie powtórki i dostęp do wszystkich tematów.
-              To mniej niż koszt jednej godziny korepetycji – a korzystasz ile chcesz, kiedy chcesz.
+            <p className="text-xl text-muted-foreground leading-relaxed">
+              Spersonalizowana nauka matematyki z AI, dostępna 24/7. 
+              Osiągnij lepsze wyniki szybciej i taniej niż z tradycyjnymi korepetycjami.
             </p>
-            
-            <Button asChild size="lg" className="shadow-primary hover-lift text-xl px-12 py-6 font-bold" onClick={() => handleCtaClick(user ? 'subscription' : 'start_trial')}>
-              <Link to={user ? "/account" : "/auth"}>
-                <span className="flex items-center gap-3">
-                  <Sparkles className="w-6 h-6" />
-                  {user ? "Zarządzaj subskrypcją" : "Rozpocznij darmowy okres próbny"}
-                  {!user && <span className="bg-accent/20 rounded-full px-3 py-1 text-sm">7 dni</span>}
-                </span>
-              </Link>
-            </Button>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button 
+                size="lg" 
+                onClick={handleStartTrial}
+                className="bg-neutral hover:bg-neutral/90 text-white font-semibold text-lg h-14 px-8"
+              >
+                Bezpłatny dostęp przez 7 dni
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline"
+                onClick={handleStartLearning}
+                className="border-2 border-primary text-primary hover:bg-primary hover:text-white font-semibold text-lg h-14 px-8"
+              >
+                Rozpocznij naukę
+              </Button>
+            </div>
+
+            <div className="flex items-center gap-6 pt-4">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-primary" />
+                <span className="text-sm text-muted-foreground">Bez karty kredytowej</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-primary" />
+                <span className="text-sm text-muted-foreground">Anuluj w każdej chwili</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative hidden lg:block">
+            <img 
+              src={shapes3d} 
+              alt="3D Geometric Shapes" 
+              className="w-full h-auto animate-float"
+            />
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-24 px-6 max-w-5xl mx-auto">
-        <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center text-foreground">
-          Najczęściej zadawane pytania
-        </h2>
-        
-        <div className="space-y-6">
-          {[{
-          question: "Czy to zastępuje nauczyciela?",
-          answer: "Aplikacja działa jak osobisty przewodnik. Prowadzi Cię krok po kroku, sprawdza postępy i pokazuje, co musisz powtórzyć."
-        }, {
-          question: "Czy działa na telefonie?",
-          answer: "Tak – działa w przeglądarce na komputerze i telefonie. Nie musisz nic instalować."
-        }, {
-          question: "Czy oprócz matematyki są inne przedmioty?",
-          answer: "Na początek matematyka. Wkrótce dodamy fizykę, chemię i biologię."
-        }, {
-          question: "Czy potrzebuję karty płatniczej do darmowego triala?",
-          answer: "Nie. Rejestrujesz się i korzystasz przez 7 dni bez żadnych zobowiązań."
-        }, {
-          question: "Czy mogę zobaczyć raporty postępów?",
-          answer: "Tak – każdy uczeń ma panel z procentami opanowania materiału."
-        }].map((faq, index) => <div key={index} className="group bg-card rounded-2xl p-8 border border-border hover-lift shadow-card">
-              <h3 className="font-bold text-xl mb-4 flex items-center gap-3 text-foreground">
-                <HelpCircle className="w-6 h-6 text-accent group-hover:animate-float" />
-                {faq.question}
-              </h3>
-              <p className="text-muted-foreground text-lg leading-relaxed pl-9">
-                {faq.answer}
-              </p>
-            </div>)}
+      {/* Problem Section */}
+      <section className="bg-support-light py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="font-poppins font-bold text-4xl text-neutral mb-4">
+              Tradycyjne korepetycje mają swoje ograniczenia
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Rozumiemy, że tradycyjne metody nauki nie zawsze są idealne
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
+              <CardContent className="p-8 text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                  <DollarSign className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="font-poppins font-semibold text-xl text-neutral">
+                  Wysokie koszty
+                </h3>
+                <p className="text-muted-foreground">
+                  Tradycyjne korepetycje mogą kosztować nawet 100-150 zł za godzinę, co szybko się sumuje
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
+              <CardContent className="p-8 text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                  <Clock className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="font-poppins font-semibold text-xl text-neutral">
+                  Ograniczone godziny
+                </h3>
+                <p className="text-muted-foreground">
+                  Musisz dopasować się do harmonogramu korepetytora, co nie zawsze jest wygodne
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
+              <CardContent className="p-8 text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                  <Users className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="font-poppins font-semibold text-xl text-neutral">
+                  Brak personalizacji
+                </h3>
+                <p className="text-muted-foreground">
+                  Jeden styl nauczania nie pasuje do każdego ucznia i jego unikalnych potrzeb
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Solution Section */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="font-poppins font-bold text-4xl text-neutral mb-4">
+              Mentavo AI: Inteligentne rozwiązanie
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Nowoczesna platforma, która dostosowuje się do Twoich potrzeb
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
+              <CardContent className="p-8 text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mx-auto">
+                  <Bot className="w-8 h-8 text-secondary" />
+                </div>
+                <h3 className="font-poppins font-semibold text-xl text-neutral">
+                  24/7 Dostępność
+                </h3>
+                <p className="text-muted-foreground">
+                  Ucz się kiedy chcesz, gdzie chcesz. AI Tutor jest zawsze gotowy do pomocy
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
+              <CardContent className="p-8 text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mx-auto">
+                  <TrendingUp className="w-8 h-8 text-secondary" />
+                </div>
+                <h3 className="font-poppins font-semibold text-xl text-neutral">
+                  Przystępna cena
+                </h3>
+                <p className="text-muted-foreground">
+                  Za cenę jednej godziny korepetycji otrzymujesz cały miesiąc nieograniczonego dostępu
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
+              <CardContent className="p-8 text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mx-auto">
+                  <BookOpen className="w-8 h-8 text-secondary" />
+                </div>
+                <h3 className="font-poppins font-semibold text-xl text-neutral">
+                  Interaktywne uczenie
+                </h3>
+                <p className="text-muted-foreground">
+                  Spersonalizowane ścieżki nauki dopasowane do Twojego poziomu i tempa
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-gradient-to-br from-primary via-primary to-secondary py-20">
+        <div className="container mx-auto px-4 text-center">
+          <div className="max-w-3xl mx-auto space-y-8">
+            <h2 className="font-poppins font-bold text-4xl text-white">
+              Kluczowe funkcje platformy
+            </h2>
+            
+            <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/20 backdrop-blur-sm text-white text-lg font-semibold">
+              <Sparkles className="w-5 h-5" />
+              Darmowy trial 7 dni
+            </div>
+
+            <p className="text-2xl text-white font-poppins font-semibold">
+              Plan miesięczny 49,99 zł
+            </p>
+
+            <Button 
+              size="lg"
+              onClick={handleStartLearning}
+              className="bg-white text-primary hover:bg-white/90 font-semibold text-lg h-14 px-12"
+            >
+              Rozpocznij naukę
+            </Button>
+
+            <p className="text-white/90 text-sm">
+              Bez zobowiązań • Anuluj w każdej chwili
+            </p>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-muted py-16 px-6 text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-elegant opacity-30"></div>
-        <div className="max-w-5xl mx-auto relative z-10">
-          <div className="mb-8">
-            <div className="inline-flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center">
-                <GraduationCap className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <span className="text-2xl font-bold text-foreground">mentavo.ai</span>
+      <footer className="bg-neutral py-12">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-2">
+              <img src={mentavoLogo} alt="Mentavo AI" className="h-8 invert" />
+            </div>
+            
+            <div className="flex gap-6 text-white/80 text-sm">
+              <a href="/privacy-policy" className="hover:text-white transition-colors">
+                Polityka Prywatności
+              </a>
+              <a href="/terms-of-service" className="hover:text-white transition-colors">
+                Regulamin
+              </a>
+              <a href="mailto:kontakt@mentavo.ai" className="hover:text-white transition-colors">
+                Kontakt
+              </a>
             </div>
           </div>
-          <p className="text-muted-foreground mb-8">© 2025 mentavo.ai. Wszelkie prawa zastrzeżone.</p>
-          <div className="flex justify-center gap-8 text-muted-foreground">
-            <a href="/terms-of-service" className="hover:text-primary transition-colors hover:underline">Regulamin</a>
-            <a href="/privacy-policy" className="hover:text-primary transition-colors hover:underline">Polityka prywatności</a>
-            <a href="mailto:kontakt@mentavo.ai" className="hover:text-primary transition-colors hover:underline">Kontakt</a>
+
+          <div className="mt-8 text-center text-white/60 text-sm">
+            © 2025 Mentavo AI. Wszystkie prawa zastrzeżone.
           </div>
         </div>
       </footer>
-    </div>;
+    </div>
+  );
 }
