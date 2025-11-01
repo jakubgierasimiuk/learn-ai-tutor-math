@@ -59,7 +59,7 @@ const NewLandingPage = () => {
         <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <img src={mentavoLogo} alt="Mentavo AI" className="h-10" />
+              <img src={mentavoLogo} alt="Mentavo AI" className="h-12" />
             </div>
             <div className="flex items-center gap-4">
               <Button onClick={() => navigate("/auth")} variant="ghost">
@@ -278,7 +278,7 @@ const NewLandingPage = () => {
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="flex items-center gap-2">
-                <img src={mentavoLogo} alt="Mentavo AI" className="h-10 invert" />
+                <img src={mentavoLogo} alt="Mentavo AI" className="h-12 invert" />
               </div>
               
               <div className="flex gap-6 text-white/80 text-sm">
