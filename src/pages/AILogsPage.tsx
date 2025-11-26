@@ -26,15 +26,28 @@ interface AILog {
   ai_response: string;
   parameters: any;
   user_input?: string;
+  user_id?: string;
   processing_time_ms?: number;
   tokens_used?: number;
   model_used?: string;
   timestamp: string;
 }
 
+interface LearningInteraction {
+  id: string;
+  session_id: string;
+  sequence_number: number;
+  user_input?: string;
+  ai_response?: string;
+  interaction_type: string;
+  response_time_ms?: number;
+  interaction_timestamp: string;
+}
+
 interface SessionGroup {
   sessionId: string;
   logs: AILog[];
+  learningInteractions: LearningInteraction[];
   startTime: string;
   totalLogs: number;
   functions: string[];
@@ -43,6 +56,7 @@ interface SessionGroup {
   totalCost: number;
   userId: string;
   hasFormalSession: boolean;
+  hasFullPrompts: boolean;
 }
 
 const AILogsPage = () => {
@@ -109,6 +123,7 @@ const AILogsPage = () => {
       // Check which session IDs correspond to formal sessions
       const sessionIds = [...new Set(filteredLogs.map(log => log.session_id).filter(id => id))];
       let formalSessionIds = new Set<string>();
+      const learningInteractionsMap = new Map<string, LearningInteraction[]>();
       
       if (sessionIds.length > 0) {
         // Check study_sessions
@@ -125,6 +140,22 @@ const AILogsPage = () => {
           
         if (studySessions) studySessions.forEach(s => formalSessionIds.add(s.id));
         if (unifiedSessions) unifiedSessions.forEach(s => formalSessionIds.add(s.id));
+
+        // Fetch learning_interactions for these sessions
+        const { data: interactions } = await supabase
+          .from('learning_interactions')
+          .select('*')
+          .in('session_id', sessionIds)
+          .order('sequence_number', { ascending: true });
+        
+        if (interactions) {
+          interactions.forEach(interaction => {
+            if (!learningInteractionsMap.has(interaction.session_id)) {
+              learningInteractionsMap.set(interaction.session_id, []);
+            }
+            learningInteractionsMap.get(interaction.session_id)!.push(interaction);
+          });
+        }
       }
 
       // Group by session
@@ -167,17 +198,22 @@ const AILogsPage = () => {
         // Get user ID from any log in the session
         const userId = sortedLogs[0]?.user_input ? sortedLogs.find(log => log.user_input)?.session_id?.substring(0, 8) || 'unknown' : 'system';
         
+        const learningInteractions = learningInteractionsMap.get(sessionId) || [];
+        const hasFullPrompts = sortedLogs.some(log => log.full_prompt && log.full_prompt.length > 0);
+        
         return {
           sessionId,
           logs: sortedLogs,
+          learningInteractions,
           startTime: sortedLogs[0]?.timestamp || '',
           totalLogs: sortedLogs.length,
           functions: [...new Set(sortedLogs.map(log => log.function_name))],
-          activeChatMinutes: Math.round(activeChatMinutes * 10) / 10, // Round to 1 decimal
+          activeChatMinutes: Math.round(activeChatMinutes * 10) / 10,
           totalTokens,
-          totalCost: Math.round(totalCost * 100) / 100, // Round to 2 decimal places
+          totalCost: Math.round(totalCost * 100) / 100,
           userId: sessionId.substring(0, 8) + '...',
-          hasFormalSession: formalSessionIds.has(sessionId)
+          hasFormalSession: formalSessionIds.has(sessionId),
+          hasFullPrompts
         };
       }).sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
 
@@ -391,6 +427,15 @@ const AILogsPage = () => {
                               Tylko AI
                             </Badge>
                           )}
+                          {session.hasFullPrompts ? (
+                            <Badge variant="default" className="ml-2 text-xs bg-green-100 text-green-800">
+                              Pełne prompty
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="ml-2 text-xs text-yellow-600 border-yellow-300">
+                              Brak promptów
+                            </Badge>
+                          )}
                         </CardTitle>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
                           <div className="flex items-center gap-1">
@@ -434,6 +479,57 @@ const AILogsPage = () => {
                 <CollapsibleContent>
                   <CardContent className="pt-0">
                     <Separator className="mb-6" />
+                    
+                    {/* Show warning if no full prompts */}
+                    {!session.hasFullPrompts && session.learningInteractions.length > 0 && (
+                      <Alert className="mb-4 border-yellow-300 bg-yellow-50">
+                        <AlertDescription>
+                          ⚠️ Ta sesja nie ma zapisanych pełnych promptów. Pokazane są tylko wiadomości użytkownika i odpowiedzi AI z tabeli learning_interactions.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                    
+                    {/* Display learning interactions if no AI logs with full prompts */}
+                    {session.learningInteractions.length > 0 && !session.hasFullPrompts && (
+                      <div className="mb-6">
+                        <h3 className="text-sm font-semibold mb-3 text-muted-foreground">
+                          Interakcje uczące (bez pełnych promptów)
+                        </h3>
+                        <div className="space-y-3">
+                          {session.learningInteractions.map((interaction) => (
+                            <div key={interaction.id} className="border rounded-lg p-3 bg-muted/30">
+                              <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
+                                <Badge variant="outline" className="text-xs">
+                                  #{interaction.sequence_number}
+                                </Badge>
+                                <span>{format(new Date(interaction.interaction_timestamp), 'HH:mm:ss')}</span>
+                                <span>•</span>
+                                <span>{interaction.interaction_type}</span>
+                              </div>
+                              
+                              {interaction.user_input && (
+                                <div className="mb-2">
+                                  <Badge variant="outline" className="mb-1 text-xs">USER</Badge>
+                                  <div className="text-sm bg-background p-2 rounded border">
+                                    {interaction.user_input}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {interaction.ai_response && (
+                                <div>
+                                  <Badge variant="secondary" className="mb-1 text-xs">AI</Badge>
+                                  <div className="text-sm bg-muted p-2 rounded">
+                                    {interaction.ai_response}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="space-y-6">
                       {session.logs.map((log) => (
                         <div key={log.id} className="border rounded-lg p-4 space-y-4">

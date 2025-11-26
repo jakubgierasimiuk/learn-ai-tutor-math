@@ -704,6 +704,8 @@ async function handleGetSkillContent(req: Request): Promise<Response> {
 
 
 async function handlePhaseBasedLesson(req: Request): Promise<Response> {
+  const startTime = Date.now() // Track processing time
+  
   try {
     // Extract JWT token from Authorization header
     const authHeader = req.headers.get('authorization')
@@ -1009,6 +1011,29 @@ Odpowiadaj po polsku i bądź zachęcający!`
         }
       } catch (error) {
         console.error('Failed to update skill progress:', error)
+      }
+    }
+
+    // **CRITICAL FIX 4: Log full AI conversation to ai_conversation_log**
+    if (sessionId && userId) {
+      try {
+        await logAIConversation(
+          sessionId,
+          userId,
+          conversationHistory.length + 1,
+          'study-tutor',
+          'phase-based-lesson',
+          conversationMessages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join('\n\n'),
+          aiMessage,
+          { skillId, currentPhase, stepType, sessionType, department },
+          message,
+          Date.now() - startTime,
+          aiData.usage?.total_tokens,
+          'gpt-5-2025-08-07'
+        )
+        console.log('✅ AI conversation logged successfully')
+      } catch (error) {
+        console.error('Failed to log AI conversation:', error)
       }
     }
 
