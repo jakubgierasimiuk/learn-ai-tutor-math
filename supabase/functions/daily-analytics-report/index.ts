@@ -69,6 +69,17 @@ serve(async (req: Request) => {
       console.error("Error fetching paid subscriptions:", paidError);
     }
 
+    // 5. Get founding page visits count
+    const { count: foundingPageVisitsCount, error: foundingVisitsError } = await supabase
+      .from("page_analytics")
+      .select("*", { count: "exact", head: true })
+      .like("route", "/founding%")
+      .gte("created_at", yesterday.toISOString());
+    
+    if (foundingVisitsError) {
+      console.error("Error fetching founding page visits:", foundingVisitsError);
+    }
+
     // Format the report email
     const reportDate = yesterday.toLocaleDateString("pl-PL", {
       year: "numeric",
@@ -153,6 +164,11 @@ serve(async (req: Request) => {
             </div>
             
             <div class="metric-card">
+              <div class="metric-label">🏆 Wizyty na Founding</div>
+              <div class="metric-value">${foundingPageVisitsCount || 0}</div>
+            </div>
+            
+            <div class="metric-card">
               <div class="metric-label">🆓 Nowe konta darmowe</div>
               <div class="metric-value">${freeAccountsCount || 0}</div>
             </div>
@@ -191,6 +207,7 @@ serve(async (req: Request) => {
         reportDate,
         metrics: {
           pageVisits: pageVisitsCount || 0,
+          foundingPageVisits: foundingPageVisitsCount || 0,
           freeAccounts: freeAccountsCount || 0,
           foundingMembers: foundingCount || 0,
           paidSubscriptions: paidCount || 0,
