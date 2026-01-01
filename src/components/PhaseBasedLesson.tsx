@@ -153,14 +153,13 @@ export function PhaseBasedLesson({
       } = await supabase.auth.getUser();
       if (userError || !userData.user) throw new Error('User not authenticated');
 
-      // Check for existing active session - MUST filter by user_id
+      // Check for existing active session - find last active session for user (regardless of skill)
       const {
         data: existingSessions,
         error: sessionError
       } = await supabase.from('study_sessions')
         .select('*')
-        .eq('skill_id', skillId)
-        .eq('user_id', userData.user.id) // SECURITY FIX: Filter by user_id
+        .eq('user_id', userData.user.id)
         .eq('status', 'in_progress')
         .order('started_at', { ascending: false })
         .limit(1);
