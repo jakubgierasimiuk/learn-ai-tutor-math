@@ -620,12 +620,13 @@ async function handleTutor(req: Request): Promise<Response> {
         Authorization: `Bearer ${openAiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: 'You are a helpful math tutor. Follow the guidelines exactly as provided.' },
           { role: 'user', content: prompt }
         ],
-        max_completion_tokens: 10000,
+        max_tokens: 500,
+        temperature: 0.7,
         top_p: 1,
         frequency_penalty: 0,
         presence_penalty: 0,
@@ -873,9 +874,10 @@ Odpowiadaj po polsku i bądź zachęcający!`
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
+        model: 'gpt-4o-mini',
         messages: conversationMessages,
-        max_completion_tokens: 10000,
+        max_tokens: 2000,
+        temperature: 0.7,
       }),
     })
 
@@ -1029,7 +1031,7 @@ Odpowiadaj po polsku i bądź zachęcający!`
           message,
           Date.now() - startTime,
           aiData.usage?.total_tokens,
-          'gpt-5-2025-08-07'
+          'gpt-4o-mini'
         )
         console.log('✅ AI conversation logged successfully')
       } catch (error) {
@@ -1412,9 +1414,10 @@ MAKSYMALNIE 150 słów + JEDNO pytanie na końcu. NIGDY więcej! Jeśli musisz w
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
+        model: 'gpt-4o-mini',
         messages: conversationMessages,
-        max_completion_tokens: 2000, // Set to 2000 for testing
+        max_tokens: 1000,
+        temperature: 0.7,
       }),
     })
 
@@ -1471,14 +1474,14 @@ MAKSYMALNIE 150 słów + JEDNO pytanie na końcu. NIGDY więcej! Jeśli musisz w
       {
         skillId,
         messageHistoryLength: messageHistory?.length || 0,
-        model: 'gpt-5-2025-08-07',
+        model: 'gpt-4o-mini',
         enrichedContext,
         contextDataSize: enrichedContextData ? enrichedContextData.systemPromptAddition.length : 0
       },
       message,
       processingTime,
       aiData.usage?.total_tokens || tokensUsed,
-      'gpt-5-2025-08-07'
+      'gpt-4o-mini'
     );
 
     const finalResponse = { message: aiMessage };
