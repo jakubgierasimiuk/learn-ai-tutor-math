@@ -403,7 +403,7 @@ FALLBACK: Jeśli brak dopasowania: stage="direct", skill_id=null, confidence=0`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: message }
@@ -442,12 +442,12 @@ FALLBACK: Jeśli brak dopasowania: stage="direct", skill_id=null, confidence=0`;
           score: sm.score,
           reason: sm.matchReason
         })),
-        model: 'gpt-5-2025-08-07'
+        model: 'gpt-4o-mini'
       },
       message,
       processingTime,
       aiResponse.usage?.total_tokens,
-      'gpt-5-2025-08-07'
+      'gpt-4o-mini'
     );
     
     let recognitionResult: any = null;
