@@ -20,6 +20,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { ExampleQuestions } from '@/components/chat/ExampleQuestions';
 import { DiagnosticChoices } from '@/components/chat/DiagnosticChoices';
 import { TipsPanel } from '@/components/chat/TipsPanel';
+import { MarkdownMath } from '@/components/MarkdownMath';
 interface DiagnosticChoice {
   label: string;
   value: string;
@@ -61,6 +62,10 @@ export const AIChat = () => {
   const [isEndingSession, setIsEndingSession] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [sequenceNumber, setSequenceNumber] = useState(0);
+
+  // Remember last inferred skill to keep topic continuity when user writes short/ambiguous follow-ups
+  const [lastSkillId, setLastSkillId] = useState<string | null>(null);
+
   const [enrichedContext, setEnrichedContext] = useState(false);
   const [hasShownTokenExhaustedMessage, setHasShownTokenExhaustedMessage] = useState(false);
 
@@ -232,6 +237,10 @@ export const AIChat = () => {
           return msgs;
         });
 
+        // Restore last known skill for continuity (content_id stores the inferred skill)
+        const lastSkill = [...interactions].reverse().find((i: any) => i.content_id)?.content_id || null;
+        setLastSkillId(lastSkill);
+
         // Keep only the initial greeting and add history
         const initialMessage = messages[0];
         setMessages([initialMessage, ...historyMessages]);
@@ -365,6 +374,17 @@ export const AIChat = () => {
         skill_id = skillRecognition?.skill_id;
         skill_name = skillRecognition?.skill_name;
       }
+
+      // Fallback to last known skill for continuity (e.g., short answers like "nie wiem")
+      if (!skill_id && lastSkillId) {
+        skill_id = lastSkillId;
+      }
+
+      // Persist last inferred skill
+      if (skill_id) {
+        setLastSkillId(skill_id);
+      }
+
       console.log(`Rozpoznana umiejętność: ${skill_name} (${skill_id})`);
 
       // Step 2: Start chat with recognized skill (using snake_case)
@@ -666,10 +686,8 @@ export const AIChat = () => {
                   
                   <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`${message.role === 'user' ? 'max-w-[90%] md:max-w-[85%] text-right' : 'w-full md:max-w-[85%] text-left'}`}>
-                       <div className={`${message.role === 'user' ? 'inline-block ml-auto bg-primary text-primary-foreground' : 'block w-full bg-muted/50 border border-border/50'} px-3 md:px-4 py-2 md:py-3 rounded-2xl`}>
-                         <p className="text-sm md:text-base leading-relaxed whitespace-pre-wrap break-words">
-                           {message.content}
-                         </p>
+                         <div className={`${message.role === 'user' ? 'inline-block ml-auto bg-primary text-primary-foreground' : 'block w-full bg-muted/50 border border-border/50'} px-3 md:px-4 py-2 md:py-3 rounded-2xl`}>
+                          <MarkdownMath content={message.content} />
                          
                          {/* Example Questions for welcome message */}
                          {message.messageType === 'welcome' && message.role === 'assistant' && (
