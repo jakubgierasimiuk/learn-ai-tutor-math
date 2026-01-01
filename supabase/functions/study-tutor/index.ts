@@ -874,10 +874,9 @@ Odpowiadaj po polsku i bądź zachęcający!`
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-5-2025-08-07',
         messages: conversationMessages,
-        max_tokens: 2000,
-        temperature: 0.7,
+        max_completion_tokens: 2000,
       }),
     })
 
@@ -1414,10 +1413,9 @@ MAKSYMALNIE 150 słów + JEDNO pytanie na końcu. NIGDY więcej! Jeśli musisz w
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-5-2025-08-07',
         messages: conversationMessages,
-        max_tokens: 1000,
-        temperature: 0.7,
+        max_completion_tokens: 2000,
       }),
     })
 

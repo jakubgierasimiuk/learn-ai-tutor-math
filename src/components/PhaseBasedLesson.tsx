@@ -12,6 +12,7 @@ import { PhaseProgress } from "./PhaseProgress";
 import { useMathSymbols } from "@/hooks/useMathSymbols";
 import MathSymbolPanel from "@/components/MathSymbolPanel";
 import { useTokenUsage } from "@/hooks/useTokenUsage";
+import { MarkdownMath } from "@/components/MarkdownMath";
 interface PhaseData {
   id: string;
   phase_number: number;
@@ -635,9 +636,7 @@ export function PhaseBasedLesson({
                         <div className={`inline-block px-4 py-3 rounded-2xl ${message.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : message.isHint ? 'bg-accent/30 border border-accent/50' : 'bg-muted/50 border border-border/50'}`}>
                           <div className="flex items-start gap-2">
                             {message.role === 'assistant' && message.isHint && <HelpCircle className="h-4 w-4 text-accent-foreground mt-0.5 flex-shrink-0" />}
-                            <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-                              {message.content}
-                            </p>
+                            <MarkdownMath content={message.content} className="w-full" />
                           </div>
                         </div>
                       </div>
