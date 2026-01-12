@@ -42,15 +42,21 @@ export function LandingPage() {
   useEffect(() => {
     const fetchFoundingSpots = async () => {
       try {
+        console.log('[LandingPage] Fetching founding spots...');
         const { data, error } = await supabase.functions.invoke('founding-registration', {
           method: 'GET'
         });
+        
+        console.log('[LandingPage] Response:', data, error);
         
         if (error) {
           console.error('[LandingPage] Error fetching founding spots:', error);
           setSpotsLeft(0);
         } else {
-          setSpotsLeft(data?.spotsLeft ?? 0);
+          // API returns slotsLeft (not spotsLeft)
+          const spots = data?.slotsLeft ?? data?.spotsLeft ?? 0;
+          console.log('[LandingPage] Spots left:', spots);
+          setSpotsLeft(spots);
         }
       } catch (err) {
         console.error('[LandingPage] Failed to fetch founding spots:', err);
