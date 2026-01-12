@@ -280,10 +280,6 @@ const NewLandingPage = () => {
                         <Zap className="w-5 h-5 text-secondary flex-shrink-0" />
                         <span className="text-foreground">Wpływ na rozwój produktu</span>
                       </li>
-                      <li className="flex items-center gap-3">
-                        <Crown className="w-5 h-5 text-primary flex-shrink-0" />
-                        <span className="text-foreground">Ekskluzywne bonusy i nagrody</span>
-                      </li>
                     </ul>
 
                     {/* Spots counter */}
