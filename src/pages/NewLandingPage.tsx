@@ -239,9 +239,9 @@ const NewLandingPage = () => {
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
                 {/* Founding Card - Highlighted */}
-                <Card className="relative overflow-hidden border-2 border-primary bg-white shadow-lg hover:shadow-xl transition-all group">
+                <Card className="relative overflow-hidden border-2 border-primary bg-white shadow-lg hover:shadow-xl transition-all group flex flex-col">
                   {/* Badge */}
                   <div className="absolute top-4 right-4">
                     <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-xs font-bold">
@@ -250,7 +250,7 @@ const NewLandingPage = () => {
                     </span>
                   </div>
                   
-                  <CardContent className="p-8 space-y-6">
+                  <CardContent className="p-8 space-y-6 flex flex-col flex-1">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center">
                         <Crown className="w-6 h-6 text-white" />
@@ -282,6 +282,9 @@ const NewLandingPage = () => {
                       </li>
                     </ul>
 
+                    {/* Spacer to push button to bottom */}
+                    <div className="flex-1" />
+
                     {/* Spots counter */}
                     <div className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-destructive/10 text-destructive">
                       <Flame className="w-4 h-4 animate-pulse" />
@@ -298,8 +301,8 @@ const NewLandingPage = () => {
                 </Card>
 
                 {/* Standard Trial Card */}
-                <Card className="border bg-white shadow-card hover:shadow-elevated transition-all">
-                  <CardContent className="p-8 space-y-6">
+                <Card className="border bg-white shadow-card hover:shadow-elevated transition-all flex flex-col">
+                  <CardContent className="p-8 space-y-6 flex flex-col flex-1">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
                         <Sparkles className="w-6 h-6 text-muted-foreground" />
@@ -333,6 +336,9 @@ const NewLandingPage = () => {
                         <span className="text-muted-foreground">Brak statusu Founding</span>
                       </li>
                     </ul>
+
+                    {/* Spacer to push button to bottom */}
+                    <div className="flex-1" />
 
                     <div className="py-3 px-4 rounded-lg bg-muted/50 text-muted-foreground text-center">
                       <span>Zawsze dostępny</span>
