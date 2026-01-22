@@ -248,7 +248,7 @@ const NewLandingPage = () => {
               </div>
             </div>
 
-            <div className="relative hidden lg:block h-[500px]">
+             <div className="relative hidden lg:block h-[500px] overflow-hidden">
               <ThreeDShapes />
             </div>
           </div>
@@ -314,9 +314,9 @@ const NewLandingPage = () => {
                     <div className="flex-1" />
 
                     {/* Spots counter */}
-                    <div className="flex items-center justify-center gap-2 py-2 sm:py-3 px-3 sm:px-4 rounded-lg bg-destructive/10 text-destructive text-sm sm:text-base">
+                    <div className="flex flex-wrap items-center justify-center gap-2 py-2 sm:py-3 px-3 sm:px-4 rounded-lg bg-destructive/10 text-destructive text-sm sm:text-base">
                       <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-pulse flex-shrink-0" />
-                      <span className="font-semibold">Pozostało tylko {spotsLeft} z 100 miejsc!</span>
+                      <span className="font-semibold text-center break-words">Pozostało tylko {spotsLeft} z 100 miejsc!</span>
                     </div>
 
                     <Button 
