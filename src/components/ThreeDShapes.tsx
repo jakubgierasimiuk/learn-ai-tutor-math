@@ -1,6 +1,6 @@
 export const ThreeDShapes = () => {
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full overflow-hidden pointer-events-none">
       {/* Gradient Blue Sphere */}
       <div 
         className="absolute top-20 right-32 w-40 h-40 rounded-full opacity-90 blur-sm animate-float"
