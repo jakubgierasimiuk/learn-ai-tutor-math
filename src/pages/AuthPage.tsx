@@ -300,11 +300,11 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 relative overflow-hidden">
-      {/* Decorative elements */}
+      {/* Decorative elements - hidden on mobile to prevent overflow */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-      <div className="absolute top-20 left-20 w-64 h-64 bg-gradient-primary rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-      <div className="absolute top-40 right-20 w-64 h-64 bg-gradient-secondary rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-      <div className="absolute bottom-20 left-1/3 w-64 h-64 bg-gradient-accent rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      <div className="absolute top-20 left-20 w-32 sm:w-64 h-32 sm:h-64 bg-gradient-primary rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob hidden sm:block"></div>
+      <div className="absolute top-40 right-20 w-32 sm:w-64 h-32 sm:h-64 bg-gradient-secondary rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000 hidden sm:block"></div>
+      <div className="absolute bottom-20 left-1/3 w-32 sm:w-64 h-32 sm:h-64 bg-gradient-accent rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000 hidden sm:block"></div>
       
       {/* Back button */}
       <div className="absolute top-6 left-6 z-10">

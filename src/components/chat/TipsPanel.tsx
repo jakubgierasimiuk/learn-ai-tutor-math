@@ -36,7 +36,7 @@ export const TipsPanel = () => {
           <Lightbulb className="h-5 w-5 text-primary" />
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-[400px] sm:w-[540px]">
+      <SheetContent className="w-full sm:w-[400px] md:w-[540px] max-w-full">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <Lightbulb className="h-5 w-5 text-primary" />

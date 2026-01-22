@@ -1,5 +1,8 @@
 import { Seo } from '@/components/Seo';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const PrivacyPolicyPage = () => {
   return (
@@ -26,18 +29,29 @@ const PrivacyPolicyPage = () => {
           }
         }}
       />
-      <div className="min-h-screen bg-background py-8 px-4">
+      <div className="min-h-screen bg-background py-4 sm:py-8 px-3 sm:px-4">
         <div className="max-w-4xl mx-auto">
+          {/* Back button */}
+          <div className="mb-4">
+            <Button asChild variant="ghost" size="sm" className="gap-2">
+              <Link to="/">
+                <ArrowLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Strona główna</span>
+                <span className="sm:hidden">Wróć</span>
+              </Link>
+            </Button>
+          </div>
+          
           <Card>
-            <CardHeader>
-              <CardTitle className="text-3xl font-bold text-center mb-4">
+            <CardHeader className="px-4 sm:px-6">
+              <CardTitle className="text-2xl sm:text-3xl font-bold text-center mb-4">
                 Polityka Prywatności i Plików Cookies Mentavo AI
               </CardTitle>
-              <p className="text-muted-foreground text-center">
+              <p className="text-muted-foreground text-center text-sm sm:text-base">
                 Ostatnia aktualizacja: Wrzesień 2024
               </p>
             </CardHeader>
-            <CardContent className="prose prose-slate max-w-none dark:prose-invert">
+            <CardContent className="prose prose-slate max-w-none dark:prose-invert px-4 sm:px-6 prose-sm sm:prose-base">
               <p className="text-lg">
                 Niniejsza Polityka Prywatności wyjaśnia, w jaki sposób Mentavo AI (dalej także: "Aplikacja") przetwarza dane osobowe Użytkowników oraz chroni ich prywatność. Znajdziesz tu informacje o tym, jakie dane zbieramy, w jakim celu to robimy, jak je wykorzystujemy, a także jakie przysługują Ci prawa. Częścią niniejszego dokumentu jest również informacja o wykorzystywaniu przez nas plików cookies i podobnych technologii.
               </p>

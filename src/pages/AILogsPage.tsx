@@ -326,12 +326,12 @@ const AILogsPage = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-4">
-              <div className="flex-1 min-w-[200px]">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
+              <div className="flex-1 min-w-0 sm:min-w-[200px]">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Szukaj w promptach i odpowiedziach..."
+                    placeholder="Szukaj..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
@@ -340,7 +340,7 @@ const AILogsPage = () => {
               </div>
               
               <Select value={functionFilter} onValueChange={setFunctionFilter}>
-                <SelectTrigger className="w-[200px]">
+                <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue placeholder="Funkcja AI" />
                 </SelectTrigger>
                 <SelectContent>
@@ -351,7 +351,7 @@ const AILogsPage = () => {
               </Select>
 
               <Select value={dateFilter} onValueChange={setDateFilter}>
-                <SelectTrigger className="w-[150px]">
+                <SelectTrigger className="w-full sm:w-[140px]">
                   <SelectValue placeholder="Okres" />
                 </SelectTrigger>
                 <SelectContent>
@@ -363,7 +363,7 @@ const AILogsPage = () => {
 
               {isAdmin && (
                 <Select value={userFilter} onValueChange={setUserFilter}>
-                  <SelectTrigger className="w-[200px]">
+                  <SelectTrigger className="w-full sm:w-[180px]">
                     <SelectValue placeholder="Użytkownik" />
                   </SelectTrigger>
                   <SelectContent>
@@ -373,7 +373,7 @@ const AILogsPage = () => {
                 </Select>
               )}
 
-              <Button onClick={loadLogs} variant="outline">
+              <Button onClick={loadLogs} variant="outline" className="w-full sm:w-auto">
                 Odśwież
               </Button>
             </div>
@@ -414,40 +414,42 @@ const AILogsPage = () => {
               >
                 <CollapsibleTrigger asChild>
                   <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="text-lg">
-                          Sesja: {session.sessionId === 'no-session' ? 'Brak sesji' : session.sessionId.slice(0, 8)}...
-                          {session.hasFormalSession ? (
-                            <Badge variant="secondary" className="ml-2 text-xs bg-blue-100 text-blue-800">
-                              Formalna sesja
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="ml-2 text-xs text-orange-600 border-orange-300">
-                              Tylko AI
-                            </Badge>
-                          )}
-                          {session.hasFullPrompts ? (
-                            <Badge variant="default" className="ml-2 text-xs bg-green-100 text-green-800">
-                              Pełne prompty
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="ml-2 text-xs text-yellow-600 border-yellow-300">
-                              Brak promptów
-                            </Badge>
-                          )}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <CardTitle className="text-sm sm:text-lg flex flex-wrap items-center gap-1">
+                          <span className="truncate">Sesja: {session.sessionId === 'no-session' ? 'Brak sesji' : session.sessionId.slice(0, 8)}...</span>
+                          <div className="flex flex-wrap gap-1 mt-1 sm:mt-0">
+                            {session.hasFormalSession ? (
+                              <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800 whitespace-nowrap">
+                                Formalna
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-xs text-orange-600 border-orange-300 whitespace-nowrap">
+                                Tylko AI
+                              </Badge>
+                            )}
+                            {session.hasFullPrompts ? (
+                              <Badge variant="default" className="text-xs bg-green-100 text-green-800 whitespace-nowrap">
+                                Prompty
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-xs text-yellow-600 border-yellow-300 whitespace-nowrap">
+                                Brak
+                              </Badge>
+                            )}
+                          </div>
                         </CardTitle>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground mt-2">
                           <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
+                            <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
                             {format(new Date(session.startTime), 'dd.MM.yyyy HH:mm')}
                           </div>
                           <div className="flex items-center gap-1">
-                            <MessageSquare className="h-4 w-4" />
+                            <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
                             {session.totalLogs} wywołań
                           </div>
                           <div className="flex items-center gap-1">
-                            <Brain className="h-4 w-4" />
+                            <Brain className="h-3 w-3 sm:h-4 sm:w-4" />
                             {session.functions.join(', ')}
                           </div>
                           <div className="flex items-center gap-1">

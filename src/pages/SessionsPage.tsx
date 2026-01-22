@@ -410,19 +410,19 @@ const SessionsPage = () => {
         title="Sesje Nauki - AI Korepetytor"
         description="Przeglądaj historię swoich sesji nauki z AI korepetytorem. Wznów poprzednie sesje i śledź swój postęp."
       />
-      <div className="min-h-screen bg-background p-4">
-        <div className="container mx-auto py-8">
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              {isAdmin ? <Shield className="h-8 w-8" /> : <MessageCircle className="h-8 w-8" />}
-              <h1 className="text-4xl font-bold">Historia Sesji</h1>
+      <div className="min-h-screen bg-background p-3 sm:p-4">
+        <div className="container mx-auto py-4 sm:py-8">
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4">
+              {isAdmin ? <Shield className="h-6 w-6 sm:h-8 sm:w-8" /> : <MessageCircle className="h-6 w-6 sm:h-8 sm:w-8" />}
+              <h1 className="text-2xl sm:text-4xl font-bold">Historia Sesji</h1>
               {isAdmin && (
-                <Badge variant="secondary" className="ml-2">
-                  Administrator
+                <Badge variant="secondary" className="ml-2 text-xs sm:text-sm">
+                  Admin
                 </Badge>
               )}
             </div>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
               {isAdmin 
                 ? "Przeglądaj i wznawiaj sesje nauki ze wszystkich kont użytkowników"
                 : "Przeglądaj i wznawiaj swoje sesje nauki z AI korepetytorem"
@@ -495,7 +495,7 @@ const SessionsPage = () => {
                   <CardTitle>Sesje ({filteredSessions.length})</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ScrollArea className="h-[500px]">
+                  <ScrollArea className="h-[300px] sm:h-[400px] lg:h-[500px]">
                     <div className="space-y-3">
                       {isLoading ? (
                         <div className="text-center py-8 text-muted-foreground">
@@ -680,7 +680,7 @@ const SessionsPage = () => {
                       <CardTitle>Historia rozmowy</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <ScrollArea className="h-[400px]">
+                      <ScrollArea className="h-[250px] sm:h-[300px] lg:h-[400px]">
                         <div className="space-y-4">
                           {sessionHistory.length === 0 ? (
                             <div className="text-center py-8 text-muted-foreground">
@@ -690,12 +690,12 @@ const SessionsPage = () => {
                             sessionHistory.map((message, index) => (
                               <div
                                 key={index}
-                                className={`flex gap-3 ${
+                                className={`flex gap-2 sm:gap-3 ${
                                   message.role === 'user' ? 'justify-end' : 'justify-start'
                                 }`}
                               >
                                 <div
-                                  className={`flex gap-2 max-w-[80%] ${
+                                  className={`flex gap-2 max-w-[90%] sm:max-w-[80%] ${
                                     message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
                                   }`}
                                 >

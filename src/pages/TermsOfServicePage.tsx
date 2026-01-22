@@ -1,5 +1,8 @@
 import { Seo } from '@/components/Seo';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const TermsOfServicePage = () => {
   return (
@@ -26,18 +29,29 @@ const TermsOfServicePage = () => {
           }
         }}
       />
-      <div className="min-h-screen bg-background py-8 px-4">
+      <div className="min-h-screen bg-background py-4 sm:py-8 px-3 sm:px-4">
         <div className="max-w-4xl mx-auto">
+          {/* Back button */}
+          <div className="mb-4">
+            <Button asChild variant="ghost" size="sm" className="gap-2">
+              <Link to="/">
+                <ArrowLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Strona główna</span>
+                <span className="sm:hidden">Wróć</span>
+              </Link>
+            </Button>
+          </div>
+          
           <Card>
-            <CardHeader>
-              <CardTitle className="text-3xl font-bold text-center mb-4">
+            <CardHeader className="px-4 sm:px-6">
+              <CardTitle className="text-2xl sm:text-3xl font-bold text-center mb-4">
                 Regulamin Aplikacji Mentavo AI
               </CardTitle>
-              <p className="text-muted-foreground text-center">
+              <p className="text-muted-foreground text-center text-sm sm:text-base">
                 Ostatnia aktualizacja: Wrzesień 2024
               </p>
             </CardHeader>
-            <CardContent className="prose prose-slate max-w-none dark:prose-invert">
+            <CardContent className="prose prose-slate max-w-none dark:prose-invert px-4 sm:px-6 prose-sm sm:prose-base">
               <p className="text-lg">
                 Witamy w Mentavo AI! Zanim rozpoczniesz korzystanie z naszej edukacyjnej aplikacji AI Tutor ("Aplikacja"), prosimy o uważne zapoznanie się z poniższym Regulaminem. Korzystając z Aplikacji, potwierdzasz, że rozumiesz i akceptujesz warunki Regulaminu. Jeżeli nie zgadzasz się z którymkolwiek punktem, nie zakładaj konta ani nie korzystaj z Aplikacji.
               </p>
