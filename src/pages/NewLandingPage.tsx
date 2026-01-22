@@ -256,57 +256,57 @@ const NewLandingPage = () => {
 
         {/* Choose Your Path Section - only when founding spots available */}
         {hasFoundingSpots && !isLoadingSpots && (
-          <section className="bg-support-light py-16">
+          <section className="bg-support-light py-10 sm:py-12 md:py-16">
             <div className="container mx-auto px-4">
-              <div className="text-center mb-12">
-                <h2 className="font-poppins font-bold text-3xl lg:text-4xl text-neutral mb-4">
+              <div className="text-center mb-8 sm:mb-12">
+                <h2 className="font-poppins font-bold text-2xl sm:text-3xl lg:text-4xl text-neutral mb-3 sm:mb-4">
                   Wybierz swoją ścieżkę
                 </h2>
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                <p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-2">
                   Dołącz do ekskluzywnego programu Founding lub rozpocznij standardowy trial
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
+              <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 max-w-4xl mx-auto items-stretch">
                 {/* Founding Card - Highlighted */}
                 <Card className="relative overflow-hidden border-2 border-primary bg-white shadow-lg hover:shadow-xl transition-all group flex flex-col">
                   {/* Badge */}
-                  <div className="absolute top-4 right-4">
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-xs font-bold">
-                      <Flame className="w-3 h-3" />
+                  <div className="absolute top-3 right-3 sm:top-4 sm:right-4">
+                    <span className="inline-flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-[10px] sm:text-xs font-bold">
+                      <Flame className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                       LIMITOWANE
                     </span>
                   </div>
                   
-                  <CardContent className="p-8 space-y-6 flex flex-col flex-1">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center">
-                        <Crown className="w-6 h-6 text-white" />
+                  <CardContent className="p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6 flex flex-col flex-1">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center flex-shrink-0">
+                        <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                       </div>
-                      <div>
-                        <h3 className="font-poppins font-bold text-xl text-neutral">Founding Member</h3>
-                        <p className="text-sm text-muted-foreground">Ekskluzywny program dla pierwszych 100 osób</p>
+                      <div className="min-w-0">
+                        <h3 className="font-poppins font-bold text-lg sm:text-xl text-neutral">Founding Member</h3>
+                        <p className="text-xs sm:text-sm text-muted-foreground truncate">Ekskluzywny program dla pierwszych 100 osób</p>
                       </div>
                     </div>
 
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-bold text-primary">0 zł</span>
-                      <span className="text-lg text-muted-foreground line-through">49,99 zł</span>
-                      <span className="text-sm text-muted-foreground">/ przez 30 dni</span>
+                    <div className="flex items-baseline gap-1 sm:gap-2 flex-wrap">
+                      <span className="text-3xl sm:text-4xl font-bold text-primary">0 zł</span>
+                      <span className="text-base sm:text-lg text-muted-foreground line-through">49,99 zł</span>
+                      <span className="text-xs sm:text-sm text-muted-foreground">/ przez 30 dni</span>
                     </div>
 
-                    <ul className="space-y-3">
-                      <li className="flex items-center gap-3">
-                        <CheckCircle2 className="w-5 h-5 text-success flex-shrink-0" />
-                        <span className="text-foreground">30 dni pełnego dostępu Premium</span>
+                    <ul className="space-y-2 sm:space-y-3">
+                      <li className="flex items-center gap-2 sm:gap-3">
+                        <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-success flex-shrink-0" />
+                        <span className="text-sm sm:text-base text-foreground">30 dni pełnego dostępu Premium</span>
                       </li>
-                      <li className="flex items-center gap-3">
-                        <Star className="w-5 h-5 text-warning flex-shrink-0" />
-                        <span className="text-foreground">Status Founding Member na zawsze</span>
+                      <li className="flex items-center gap-2 sm:gap-3">
+                        <Star className="w-4 h-4 sm:w-5 sm:h-5 text-warning flex-shrink-0" />
+                        <span className="text-sm sm:text-base text-foreground">Status Founding Member na zawsze</span>
                       </li>
-                      <li className="flex items-center gap-3">
-                        <Zap className="w-5 h-5 text-secondary flex-shrink-0" />
-                        <span className="text-foreground">Wpływ na rozwój produktu</span>
+                      <li className="flex items-center gap-2 sm:gap-3">
+                        <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-secondary flex-shrink-0" />
+                        <span className="text-sm sm:text-base text-foreground">Wpływ na rozwój produktu</span>
                       </li>
                     </ul>
 
@@ -314,14 +314,14 @@ const NewLandingPage = () => {
                     <div className="flex-1" />
 
                     {/* Spots counter */}
-                    <div className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-destructive/10 text-destructive">
-                      <Flame className="w-4 h-4 animate-pulse" />
+                    <div className="flex items-center justify-center gap-2 py-2 sm:py-3 px-3 sm:px-4 rounded-lg bg-destructive/10 text-destructive text-sm sm:text-base">
+                      <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-pulse flex-shrink-0" />
                       <span className="font-semibold">Pozostało tylko {spotsLeft} z 100 miejsc!</span>
                     </div>
 
                     <Button 
                       onClick={handleJoinFounding}
-                      className="w-full h-14 text-lg font-bold bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white"
+                      className="w-full h-11 sm:h-14 text-sm sm:text-lg font-bold bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white"
                     >
                       Zostań Founding Member
                     </Button>
@@ -330,52 +330,52 @@ const NewLandingPage = () => {
 
                 {/* Standard Trial Card */}
                 <Card className="border bg-white shadow-card hover:shadow-elevated transition-all flex flex-col">
-                  <CardContent className="p-8 space-y-6 flex flex-col flex-1">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                        <Sparkles className="w-6 h-6 text-muted-foreground" />
+                  <CardContent className="p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6 flex flex-col flex-1">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                        <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground" />
                       </div>
-                      <div>
-                        <h3 className="font-poppins font-bold text-xl text-neutral">Darmowy Trial</h3>
-                        <p className="text-sm text-muted-foreground">Standardowa wersja próbna</p>
+                      <div className="min-w-0">
+                        <h3 className="font-poppins font-bold text-lg sm:text-xl text-neutral">Darmowy Trial</h3>
+                        <p className="text-xs sm:text-sm text-muted-foreground">Standardowa wersja próbna</p>
                       </div>
                     </div>
 
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-bold text-neutral">0 zł</span>
-                      <span className="text-sm text-muted-foreground">/ przez 7 dni</span>
+                    <div className="flex items-baseline gap-1 sm:gap-2">
+                      <span className="text-3xl sm:text-4xl font-bold text-neutral">0 zł</span>
+                      <span className="text-xs sm:text-sm text-muted-foreground">/ przez 7 dni</span>
                     </div>
 
-                    <ul className="space-y-3">
-                      <li className="flex items-center gap-3">
-                        <CheckCircle2 className="w-5 h-5 text-success flex-shrink-0" />
-                        <span className="text-foreground">7 dni dostępu do platformy</span>
+                    <ul className="space-y-2 sm:space-y-3">
+                      <li className="flex items-center gap-2 sm:gap-3">
+                        <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-success flex-shrink-0" />
+                        <span className="text-sm sm:text-base text-foreground">7 dni dostępu do platformy</span>
                       </li>
-                      <li className="flex items-center gap-3">
-                        <CheckCircle2 className="w-5 h-5 text-success flex-shrink-0" />
-                        <span className="text-foreground">Bez karty kredytowej</span>
+                      <li className="flex items-center gap-2 sm:gap-3">
+                        <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-success flex-shrink-0" />
+                        <span className="text-sm sm:text-base text-foreground">Bez karty kredytowej</span>
                       </li>
-                      <li className="flex items-center gap-3">
-                        <CheckCircle2 className="w-5 h-5 text-success flex-shrink-0" />
-                        <span className="text-foreground">Podstawowe funkcje AI Tutora</span>
+                      <li className="flex items-center gap-2 sm:gap-3">
+                        <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-success flex-shrink-0" />
+                        <span className="text-sm sm:text-base text-foreground">Podstawowe funkcje AI Tutora</span>
                       </li>
-                      <li className="flex items-center gap-3 opacity-50">
-                        <CheckCircle2 className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                        <span className="text-muted-foreground">Brak statusu Founding</span>
+                      <li className="flex items-center gap-2 sm:gap-3 opacity-50">
+                        <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
+                        <span className="text-sm sm:text-base text-muted-foreground">Brak statusu Founding</span>
                       </li>
                     </ul>
 
                     {/* Spacer to push button to bottom */}
                     <div className="flex-1" />
 
-                    <div className="py-3 px-4 rounded-lg bg-muted/50 text-muted-foreground text-center">
+                    <div className="py-2 sm:py-3 px-3 sm:px-4 rounded-lg bg-muted/50 text-muted-foreground text-center text-sm sm:text-base">
                       <span>Zawsze dostępny</span>
                     </div>
 
                     <Button 
                       onClick={handleStartTrial}
                       variant="outline"
-                      className="w-full h-14 text-lg font-semibold border-2"
+                      className="w-full h-11 sm:h-14 text-sm sm:text-lg font-semibold border-2"
                     >
                       Rozpocznij 7-dniowy trial
                     </Button>
@@ -398,44 +398,44 @@ const NewLandingPage = () => {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-5xl mx-auto">
               <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
-                <CardContent className="p-8 text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-[#4A90E2] flex items-center justify-center mx-auto">
-                    <DollarSign className="w-8 h-8 text-white" />
+                <CardContent className="p-5 sm:p-6 md:p-8 text-center space-y-3 sm:space-y-4">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-[#4A90E2] flex items-center justify-center mx-auto">
+                    <DollarSign className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
                   </div>
-                  <h3 className="font-poppins font-semibold text-xl text-neutral">
+                  <h3 className="font-poppins font-semibold text-lg sm:text-xl text-neutral">
                     Wysokie koszty
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-sm sm:text-base text-muted-foreground">
                     Tradycyjne korepetycje mogą kosztować nawet 100-150 zł za godzinę, co szybko się sumuje
                   </p>
                 </CardContent>
               </Card>
 
               <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
-                <CardContent className="p-8 text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-[#4A90E2] flex items-center justify-center mx-auto">
-                    <Clock className="w-8 h-8 text-white" />
+                <CardContent className="p-5 sm:p-6 md:p-8 text-center space-y-3 sm:space-y-4">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-[#4A90E2] flex items-center justify-center mx-auto">
+                    <Clock className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
                   </div>
-                  <h3 className="font-poppins font-semibold text-xl text-neutral">
+                  <h3 className="font-poppins font-semibold text-lg sm:text-xl text-neutral">
                     Ograniczone godziny
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-sm sm:text-base text-muted-foreground">
                     Musisz dopasować się do harmonogramu korepetytora, co nie zawsze jest wygodne
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
-                <CardContent className="p-8 text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-[#4A90E2] flex items-center justify-center mx-auto">
-                    <Users className="w-8 h-8 text-white" />
+              <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all sm:col-span-2 md:col-span-1">
+                <CardContent className="p-5 sm:p-6 md:p-8 text-center space-y-3 sm:space-y-4">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-[#4A90E2] flex items-center justify-center mx-auto">
+                    <Users className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
                   </div>
-                  <h3 className="font-poppins font-semibold text-xl text-neutral">
+                  <h3 className="font-poppins font-semibold text-lg sm:text-xl text-neutral">
                     Brak personalizacji
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-sm sm:text-base text-muted-foreground">
                     Jeden styl nauczania nie pasuje do każdego ucznia i jego unikalnych potrzeb
                   </p>
                 </CardContent>
@@ -456,44 +456,44 @@ const NewLandingPage = () => {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-5xl mx-auto">
               <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
-                <CardContent className="p-8 text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-[#4A90E2] flex items-center justify-center mx-auto">
-                    <Bot className="w-8 h-8 text-white" />
+                <CardContent className="p-5 sm:p-6 md:p-8 text-center space-y-3 sm:space-y-4">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-[#4A90E2] flex items-center justify-center mx-auto">
+                    <Bot className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
                   </div>
-                  <h3 className="font-poppins font-semibold text-xl text-neutral">
+                  <h3 className="font-poppins font-semibold text-lg sm:text-xl text-neutral">
                     24/7 Dostępność
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-sm sm:text-base text-muted-foreground">
                     Ucz się kiedy chcesz, gdzie chcesz. AI Tutor jest zawsze gotowy do pomocy
                   </p>
                 </CardContent>
               </Card>
 
               <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
-                <CardContent className="p-8 text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-[#4A90E2] flex items-center justify-center mx-auto">
-                    <TrendingUp className="w-8 h-8 text-white" />
+                <CardContent className="p-5 sm:p-6 md:p-8 text-center space-y-3 sm:space-y-4">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-[#4A90E2] flex items-center justify-center mx-auto">
+                    <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
                   </div>
-                  <h3 className="font-poppins font-semibold text-xl text-neutral">
+                  <h3 className="font-poppins font-semibold text-lg sm:text-xl text-neutral">
                     Przystępna cena
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-sm sm:text-base text-muted-foreground">
                     Za cenę jednej godziny korepetycji otrzymujesz cały miesiąc nieograniczonego dostępu
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
-                <CardContent className="p-8 text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-[#4A90E2] flex items-center justify-center mx-auto">
-                    <BookOpen className="w-8 h-8 text-white" />
+              <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all sm:col-span-2 md:col-span-1">
+                <CardContent className="p-5 sm:p-6 md:p-8 text-center space-y-3 sm:space-y-4">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-[#4A90E2] flex items-center justify-center mx-auto">
+                    <BookOpen className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
                   </div>
-                  <h3 className="font-poppins font-semibold text-xl text-neutral">
+                  <h3 className="font-poppins font-semibold text-lg sm:text-xl text-neutral">
                     Interaktywne uczenie
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-sm sm:text-base text-muted-foreground">
                     Spersonalizowane ścieżki nauki dopasowane do Twojego poziomu i tempa
                   </p>
                 </CardContent>
