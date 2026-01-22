@@ -106,28 +106,33 @@ const NewLandingPage = () => {
         canonical="https://mentavo.pl/"
       />
       
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white overflow-x-hidden">
         {/* Navigation */}
         <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="container mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <img src={mentavoLogo} alt="Mentavo AI" className="h-14" />
+              <img src={mentavoLogo} alt="Mentavo AI" className="h-10 sm:h-14" />
             </div>
-            <div className="flex items-center gap-4">
-              <Button onClick={() => navigate("/auth")} variant="ghost">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <Button onClick={() => navigate("/auth")} variant="ghost" size="sm" className="hidden sm:flex">
                 Zaloguj się
               </Button>
-              {hasFoundingSpots ? (
+              {isLoadingSpots ? (
+                <div className="h-9 w-24 sm:w-32 bg-muted animate-pulse rounded-md" />
+              ) : hasFoundingSpots ? (
                 <Button 
                   onClick={handleJoinFounding}
-                  className="bg-gradient-to-r from-primary to-secondary text-white"
+                  className="bg-gradient-to-r from-primary to-secondary text-white text-xs sm:text-sm"
+                  size="sm"
                 >
-                  <Flame className="w-4 h-4 mr-2" />
-                  30 dni gratis
+                  <Flame className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">30 dni gratis</span>
+                  <span className="sm:hidden">30 dni</span>
                 </Button>
               ) : (
-                <Button onClick={handleStartTrial}>
-                  Bezpłatny dostęp przez 7 dni
+                <Button onClick={handleStartTrial} size="sm" className="text-xs sm:text-sm">
+                  <span className="hidden sm:inline">7 dni za darmo</span>
+                  <span className="sm:hidden">7 dni</span>
                 </Button>
               )}
             </div>
@@ -135,87 +140,110 @@ const NewLandingPage = () => {
         </header>
 
         {/* Hero Section */}
-        <section className="container mx-auto px-4 py-20 lg:py-32">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
+        <section className="container mx-auto px-4 py-12 sm:py-20 lg:py-32">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <div className="space-y-6 sm:space-y-8">
+              {/* Loading skeleton for badge */}
+              {isLoadingSpots && (
+                <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-muted animate-pulse">
+                  <div className="w-4 h-4 bg-muted-foreground/20 rounded-full flex-shrink-0" />
+                  <div className="w-32 sm:w-48 h-4 bg-muted-foreground/20 rounded" />
+                </div>
+              )}
+              
               {/* Founding Badge - only show when spots available */}
               {hasFoundingSpots && !isLoadingSpots && (
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 text-primary text-sm font-semibold animate-pulse">
-                  <Flame className="w-4 h-4 text-destructive" />
-                  Pozostało tylko {spotsLeft}/100 miejsc w programie Founding!
+                <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 text-primary text-xs sm:text-sm font-semibold animate-pulse">
+                  <Flame className="w-4 h-4 text-destructive flex-shrink-0" />
+                  <span>Pozostało {spotsLeft}/100 miejsc Founding!</span>
                 </div>
               )}
               
               {!hasFoundingSpots && !isLoadingSpots && (
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-                  <Sparkles className="w-4 h-4" />
-                  Zaufany przez tysiące uczniów
+                <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-primary/10 text-primary text-xs sm:text-sm font-medium">
+                  <Sparkles className="w-4 h-4 flex-shrink-0" />
+                  <span>Zaufany przez tysiące uczniów</span>
                 </div>
               )}
               
-              <h1 className="font-poppins font-bold text-5xl lg:text-6xl text-neutral leading-tight">
+              <h1 className="font-poppins font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-neutral leading-tight">
                 AI Tutor Matematyczny
               </h1>
               
-              <p className="text-xl text-muted-foreground leading-relaxed">
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed">
                 Spersonalizowana nauka matematyki z AI, dostępna 24/7. 
                 Osiągnij lepsze wyniki szybciej i taniej niż z tradycyjnymi korepetycjami.
               </p>
 
+              {/* Loading skeleton for CTA */}
+              {isLoadingSpots && (
+                <div className="space-y-4">
+                  <div className="h-12 sm:h-14 w-full sm:w-64 bg-muted animate-pulse rounded-md" />
+                  <div className="flex flex-wrap gap-4">
+                    <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+                    <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+                  </div>
+                </div>
+              )}
+
               {/* Founding CTA when spots available */}
-              {hasFoundingSpots && !isLoadingSpots ? (
+              {hasFoundingSpots && !isLoadingSpots && (
                 <div className="space-y-4">
                   <Button 
                     size="lg" 
                     onClick={handleJoinFounding}
-                    className="w-full sm:w-auto bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold text-lg h-16 px-10 shadow-lg hover:shadow-xl transition-all"
+                    className="w-full sm:w-auto bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold text-sm sm:text-base md:text-lg h-12 sm:h-14 md:h-16 px-6 sm:px-8 md:px-10 shadow-lg hover:shadow-xl transition-all"
                   >
-                    <Crown className="w-5 h-5 mr-2" />
-                    Dołącz do Founding 100 – 30 dni gratis
+                    <Crown className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                    <span className="hidden sm:inline">Dołącz do Founding 100 – 30 dni gratis</span>
+                    <span className="sm:hidden">30 dni Premium gratis</span>
                   </Button>
                   
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
-                      <CheckCircle2 className="w-4 h-4 text-success" />
-                      30 dni Premium za darmo
+                      <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
+                      <span>30 dni Premium za darmo</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <CheckCircle2 className="w-4 h-4 text-success" />
-                      Status Founding na zawsze
+                      <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
+                      <span>Status Founding na zawsze</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <CheckCircle2 className="w-4 h-4 text-success" />
-                      Wpływ na rozwój produktu
+                      <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
+                      <span>Wpływ na rozwój produktu</span>
                     </div>
                   </div>
                 </div>
-              ) : (
-                <div className="flex flex-col sm:flex-row gap-4">
+              )}
+              
+              {!hasFoundingSpots && !isLoadingSpots && (
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                   <Button 
                     size="lg" 
                     onClick={handleStartTrial}
-                    className="bg-[#1E3A5F] hover:bg-[#1E3A5F]/90 text-white font-semibold text-lg h-14 px-8 shadow-elegant"
+                    className="bg-[#1E3A5F] hover:bg-[#1E3A5F]/90 text-white font-semibold text-sm sm:text-base md:text-lg h-12 sm:h-14 px-6 sm:px-8 shadow-elegant"
                   >
-                    Bezpłatny dostęp przez 7 dni
+                    <span className="hidden sm:inline">Bezpłatny dostęp przez 7 dni</span>
+                    <span className="sm:hidden">7 dni za darmo</span>
                   </Button>
                   <Button 
                     size="lg" 
                     onClick={handleStartLearning}
-                    className="bg-[#4A90E2] hover:bg-[#4A90E2]/90 text-white font-semibold text-lg h-14 px-8 shadow-primary"
+                    className="bg-[#4A90E2] hover:bg-[#4A90E2]/90 text-white font-semibold text-sm sm:text-base md:text-lg h-12 sm:h-14 px-6 sm:px-8 shadow-primary"
                   >
                     Rozpocznij naukę
                   </Button>
                 </div>
               )}
 
-              <div className="flex items-center gap-6 pt-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-6 pt-2 sm:pt-4">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-primary" />
-                  <span className="text-sm text-muted-foreground">Bez karty kredytowej</span>
+                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+                  <span className="text-xs sm:text-sm text-muted-foreground">Bez karty kredytowej</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-primary" />
-                  <span className="text-sm text-muted-foreground">Anuluj w każdej chwili</span>
+                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+                  <span className="text-xs sm:text-sm text-muted-foreground">Anuluj w każdej chwili</span>
                 </div>
               </div>
             </div>
@@ -359,13 +387,13 @@ const NewLandingPage = () => {
         )}
 
         {/* Problem Section */}
-        <section className="bg-support-light py-20">
+        <section className="bg-support-light py-12 sm:py-16 md:py-20">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="font-poppins font-bold text-4xl text-neutral mb-4">
+            <div className="text-center mb-10 sm:mb-16">
+              <h2 className="font-poppins font-bold text-2xl sm:text-3xl md:text-4xl text-neutral mb-3 sm:mb-4">
                 Tradycyjne korepetycje mają swoje ograniczenia
               </h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
                 Rozumiemy, że tradycyjne metody nauki nie zawsze są idealne
               </p>
             </div>
@@ -417,13 +445,13 @@ const NewLandingPage = () => {
         </section>
 
         {/* Solution Section */}
-        <section className="py-20">
+        <section className="py-12 sm:py-16 md:py-20">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="font-poppins font-bold text-4xl text-neutral mb-4">
+            <div className="text-center mb-10 sm:mb-16">
+              <h2 className="font-poppins font-bold text-2xl sm:text-3xl md:text-4xl text-neutral mb-3 sm:mb-4">
                 Mentavo AI: Inteligentne rozwiązanie
               </h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
                 Nowoczesna platforma, która dostosowuje się do Twoich potrzeb
               </p>
             </div>
@@ -475,61 +503,62 @@ const NewLandingPage = () => {
         </section>
 
         {/* CTA Section */}
-        <section className={hasFoundingSpots ? "bg-gradient-to-r from-primary to-secondary py-20" : "bg-[#4A90E2] py-20"}>
+        <section className={hasFoundingSpots ? "bg-gradient-to-r from-primary to-secondary py-12 sm:py-16 md:py-20" : "bg-[#4A90E2] py-12 sm:py-16 md:py-20"}>
           <div className="container mx-auto px-4 text-center">
-            <div className="max-w-3xl mx-auto space-y-8">
+            <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8">
               {hasFoundingSpots ? (
                 <>
-                  <h2 className="font-poppins font-bold text-4xl text-white">
+                  <h2 className="font-poppins font-bold text-2xl sm:text-3xl md:text-4xl text-white">
                     Ostatnia szansa na 30 dni gratis!
                   </h2>
                   
-                  <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/20 backdrop-blur-sm text-white text-lg font-semibold">
-                    <Flame className="w-5 h-5 animate-pulse" />
-                    Founding 100 – zostało {spotsLeft} miejsc
+                  <div className="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-white/20 backdrop-blur-sm text-white text-sm sm:text-base md:text-lg font-semibold">
+                    <Flame className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse flex-shrink-0" />
+                    <span>Founding 100 – zostało {spotsLeft} miejsc</span>
                   </div>
 
-                  <p className="text-2xl text-white font-poppins font-semibold">
+                  <p className="text-lg sm:text-xl md:text-2xl text-white font-poppins font-semibold px-2">
                     Dołącz teraz i otrzymaj 30 dni Premium za darmo
                   </p>
 
                   <Button 
                     size="lg"
                     onClick={handleJoinFounding}
-                    className="bg-white text-primary hover:bg-white/90 font-bold text-lg h-14 px-12 shadow-elegant"
+                    className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 font-bold text-sm sm:text-base md:text-lg h-12 sm:h-14 px-8 sm:px-12 shadow-elegant"
                   >
-                    <Crown className="w-5 h-5 mr-2" />
-                    Zostań Founding Member
+                    <Crown className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                    <span className="hidden sm:inline">Zostań Founding Member</span>
+                    <span className="sm:hidden">Zostań Founding</span>
                   </Button>
 
-                  <p className="text-white/90 text-sm">
+                  <p className="text-white/90 text-xs sm:text-sm">
                     Bez zobowiązań • Bez karty kredytowej • Status Founding na zawsze
                   </p>
                 </>
               ) : (
                 <>
-                  <h2 className="font-poppins font-bold text-4xl text-white">
+                  <h2 className="font-poppins font-bold text-2xl sm:text-3xl md:text-4xl text-white">
                     Kluczowe funkcje platformy
                   </h2>
                   
-                  <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/20 backdrop-blur-sm text-white text-lg font-semibold">
-                    <Sparkles className="w-5 h-5" />
-                    Darmowy trial 7 dni
+                  <div className="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-white/20 backdrop-blur-sm text-white text-sm sm:text-base md:text-lg font-semibold">
+                    <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                    <span>Darmowy trial 7 dni</span>
                   </div>
 
-                  <p className="text-2xl text-white font-poppins font-semibold">
+                  <p className="text-lg sm:text-xl md:text-2xl text-white font-poppins font-semibold">
                     Plan miesięczny 49,99 zł
                   </p>
 
                   <Button 
                     size="lg"
                     onClick={handleStartLearning}
-                    className="bg-white text-[#4A90E2] hover:bg-white/90 font-semibold text-lg h-14 px-12 shadow-elegant"
+                    className="w-full sm:w-auto bg-white text-[#4A90E2] hover:bg-white/90 font-semibold text-sm sm:text-base md:text-lg h-12 sm:h-14 px-8 sm:px-12 shadow-elegant"
                   >
                     Rozpocznij naukę
                   </Button>
 
-                  <p className="text-white/90 text-sm">
+                  <p className="text-white/90 text-xs sm:text-sm">
                     Bez zobowiązań • Anuluj w każdej chwili
                   </p>
                 </>
@@ -539,14 +568,14 @@ const NewLandingPage = () => {
         </section>
 
         {/* Footer */}
-        <footer className="bg-[#1E3A5F] py-12">
+        <footer className="bg-[#1E3A5F] py-8 sm:py-12">
           <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex flex-col items-center gap-4 sm:gap-6 md:flex-row md:justify-between">
               <div className="flex items-center gap-2">
-                <img src={mentavoLogo} alt="Mentavo AI" className="h-14 invert" />
+                <img src={mentavoLogo} alt="Mentavo AI" className="h-10 sm:h-14 invert" />
               </div>
               
-              <div className="flex gap-6 text-white/80 text-sm">
+              <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-white/80 text-xs sm:text-sm">
                 <a href="/privacy-policy" className="hover:text-white transition-colors">
                   Polityka Prywatności
                 </a>
@@ -559,7 +588,7 @@ const NewLandingPage = () => {
               </div>
             </div>
 
-            <div className="mt-8 text-center text-white/60 text-sm">
+            <div className="mt-6 sm:mt-8 text-center text-white/60 text-xs sm:text-sm">
               © 2025 Mentavo AI. Wszystkie prawa zastrzeżone.
             </div>
           </div>
