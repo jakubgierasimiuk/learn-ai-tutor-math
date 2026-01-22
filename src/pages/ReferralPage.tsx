@@ -84,10 +84,10 @@ export default function ReferralPage() {
 
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto px-3 sm:p-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold gradient-text">System Poleceń</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl font-bold gradient-text">System Poleceń</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Zapraszaj znajomych i zdobywaj nagrody za każde skuteczne polecenie!
         </p>
       </div>
@@ -107,19 +107,22 @@ export default function ReferralPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Input 
               value={referralUrl} 
               readOnly 
-              className="font-mono text-sm"
+              className="font-mono text-xs sm:text-sm flex-1"
             />
-            <Button onClick={copyReferralUrl} variant="outline">
-              <Copy className="w-4 h-4" />
-            </Button>
-            <Button onClick={shareReferralUrl} variant="default">
-              <Share2 className="w-4 h-4" />
-              Udostępnij
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={copyReferralUrl} variant="outline" className="flex-1 sm:flex-initial">
+                <Copy className="w-4 h-4 mr-2 sm:mr-0" />
+                <span className="sm:hidden">Kopiuj</span>
+              </Button>
+              <Button onClick={shareReferralUrl} variant="default" className="flex-1 sm:flex-initial">
+                <Share2 className="w-4 h-4 mr-2 sm:mr-0" />
+                <span className="sm:hidden">Udostępnij</span>
+              </Button>
+            </div>
           </div>
           <div className="text-sm text-muted-foreground">
             Udostępnij ten link znajomym. Otrzymują 7 dni darmowo + 4000 tokenów, a Ty nagrody za każde skuteczne polecenie!
