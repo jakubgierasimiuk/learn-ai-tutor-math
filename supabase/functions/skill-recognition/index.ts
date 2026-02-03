@@ -69,6 +69,11 @@ const SKILL_SYNONYMS: Record<string, string[]> = {
   "granice": ["granica", "granicy", "limit", "zbieganie", "divergence", "granica funkcji"],
   "ciągłość": ["ciągłość funkcji", "funkcje ciągłe", "continuity", "nieciągłość"],
   
+  // Ciągi i szeregi
+  "ciągi": ["ciąg", "ciągi", "ciąg liczbowy", "ciąg arytmetyczny", "ciąg geometryczny", "sequence", "progresja", "suma ciągu", "wyrazy ciągu", "n-ty wyraz"],
+  "ciągi geometryczne": ["ciąg geometryczny", "geometryczny", "postęp geometryczny", "iloraz ciągu", "q ciągu"],
+  "ciągi arytmetyczne": ["ciąg arytmetyczny", "arytmetyczny", "postęp arytmetyczny", "różnica ciągu", "r ciągu"],
+  
   // Algebra
   "równania": ["równanie", "rozwiązywanie równań", "equation", "solutions", "równanie liniowe", "równanie kwadratowe"],
   "nierówności": ["nierówność", "inequality", "układ nierówności", "nierówność kwadratowa"],
@@ -97,7 +102,8 @@ const SKILL_KEYWORDS: Record<string, string[]> = {
   algebra: ["równanie", "x", "y", "zmienna", "rozwiąż", "solve", "funkcja", "wykres"],
   geometry: ["kąt", "długość", "pole", "objętość", "trójkąt", "okrąg", "bryła", "figura"],
   calculus: ["pochodna", "całka", "granica", "różniczka", "tangent", "pole pod krzywą"],
-  probability: ["prawdopodobieństwo", "szansa", "zdarzenie", "losowy", "statystyka"]
+  probability: ["prawdopodobieństwo", "szansa", "zdarzenie", "losowy", "statystyka"],
+  sequences: ["ciąg", "ciągi", "arytmetyczny", "geometryczny", "wyraz", "n-ty", "suma ciągu", "progresja"]
 };
 
 // Common learning intent phrases
