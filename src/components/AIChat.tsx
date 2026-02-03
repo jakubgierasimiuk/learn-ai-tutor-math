@@ -494,18 +494,28 @@ export const AIChat = () => {
 
   // Enhanced clarification response processing with advanced fuzzy matching
   const processClarificationResponse = async (userResponse: string): Promise<string | null> => {
-    if (!clarificationContext?.candidates) return null;
+    if (!clarificationContext?.candidates || clarificationContext.candidates.length === 0) {
+      console.log('No candidates available for clarification');
+      return null;
+    }
+    
     const normalizedResponse = userResponse.toLowerCase().trim();
-    const {
-      candidates
-    } = clarificationContext;
+    const { candidates } = clarificationContext;
     console.log('Processing clarification response:', userResponse);
-    console.log('Available candidates:', candidates.map(c => c.name));
+    console.log('Available candidates:', candidates.map(c => c?.name || 'unnamed'));
+
+    // Filter out invalid candidates
+    const validCandidates = candidates.filter(c => c && c.name && c.id);
+    if (validCandidates.length === 0) {
+      console.log('No valid candidates found');
+      return null;
+    }
 
     // Scoring system for candidate matching
-    const candidateScores = candidates.map(candidate => {
+    const candidateScores = validCandidates.map(candidate => {
       let score = 0;
-      const candidateName = candidate.name.toLowerCase();
+      const candidateName = (candidate.name || '').toLowerCase();
+      const candidateDept = (candidate.department || '').toLowerCase();
       const candidateWords = candidateName.split(' ').filter(word => word.length > 2);
       const responseWords = normalizedResponse.split(' ').filter(word => word.length > 2);
 
@@ -514,46 +524,26 @@ export const AIChat = () => {
         score += 100;
       }
 
-      // 2. Word-by-word matching (simplified without fuzzy tolerance)
+      // 2. Word-by-word matching
       candidateWords.forEach(candidateWord => {
         responseWords.forEach(responseWord => {
           if (candidateWord === responseWord) {
-            score += 50; // Exact word match
+            score += 50;
           } else if (candidateWord.includes(responseWord) || responseWord.includes(candidateWord)) {
-            score += 30; // Partial word match
+            score += 30;
           }
         });
       });
 
       // 3. Department matching
-      if (normalizedResponse.includes(candidate.department.toLowerCase())) {
+      if (candidateDept && normalizedResponse.includes(candidateDept)) {
         score += 20;
       }
 
-      // 4. Synonym and concept matching
-      const synonyms = {
-        'pochodne': ['derivative', 'różniczkowanie', 'tangent'],
-        'całki': ['integration', 'całkowanie', 'pole'],
-        'równania': ['equation', 'rozwiązywanie', 'solve'],
-        'funkcje': ['function', 'wykres', 'f(x)'],
-        'geometria': ['triangle', 'circle', 'area', 'volume']
-      };
-      Object.entries(synonyms).forEach(([concept, conceptSynonyms]) => {
-        if (candidateName.includes(concept)) {
-          conceptSynonyms.forEach(synonym => {
-            if (normalizedResponse.includes(synonym)) {
-              score += 15;
-            }
-          });
-        }
-      });
-      return {
-        candidate,
-        score
-      };
+      return { candidate, score };
     });
 
-    // Sort by score and log results
+    // Sort by score
     candidateScores.sort((a, b) => b.score - a.score);
     console.log('Candidate scores:', candidateScores.map(cs => ({
       name: cs.candidate.name,
@@ -564,21 +554,21 @@ export const AIChat = () => {
     const numberMatch = normalizedResponse.match(/^(\d+)[\s\.\)]*$/);
     if (numberMatch) {
       const selectedIndex = parseInt(numberMatch[1]) - 1;
-      if (selectedIndex >= 0 && selectedIndex < candidates.length) {
-        console.log(`User selected option ${numberMatch[1]} -> ${candidates[selectedIndex].name}`);
-        return candidates[selectedIndex].id;
+      if (selectedIndex >= 0 && selectedIndex < validCandidates.length) {
+        console.log(`User selected option ${numberMatch[1]} -> ${validCandidates[selectedIndex].name}`);
+        return validCandidates[selectedIndex].id;
       }
     }
 
     // Return highest scoring candidate if score is above threshold
-    if (candidateScores[0].score > 15) {
+    if (candidateScores.length > 0 && candidateScores[0].score > 15) {
       console.log(`Matched candidate: ${candidateScores[0].candidate.name} (score: ${candidateScores[0].score})`);
       return candidateScores[0].candidate.id;
     }
 
-    // Fallback: return first candidate if no good matches
+    // Fallback: return first valid candidate
     console.log('No good matches found, using first candidate as fallback');
-    return candidates.length > 0 ? candidates[0].id : null;
+    return validCandidates.length > 0 ? validCandidates[0].id : null;
   };
   const endSession = async () => {
     if (!sessionId || !user?.id) return;
