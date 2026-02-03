@@ -1,8 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { Resend } from "npm:resend@2.0.0";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+// Note: Resend integration disabled - emails will be logged instead
+// To re-enable, add RESEND_API_KEY to secrets and uncomment Resend import
+// import { Resend } from "npm:resend@4.0.0";
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
@@ -191,15 +192,35 @@ serve(async (req: Request) => {
       </html>
     `;
 
-    // Send the email
-    const emailResponse = await resend.emails.send({
-      from: "Mentavo AI Reports <onboarding@resend.dev>",
-      to: ["jakub.gierasimiuk@gmail.com"],
-      subject: `📊 Raport Dzienny Mentavo AI - ${reportDate}`,
-      html,
-    });
-
-    console.log("Email sent successfully:", emailResponse);
+    // Send the email using Resend API directly
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    let emailResponse = null;
+    
+    if (resendApiKey) {
+      const emailRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${resendApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: "Mentavo AI Reports <onboarding@resend.dev>",
+          to: ["jakub.gierasimiuk@gmail.com"],
+          subject: `📊 Raport Dzienny Mentavo AI - ${reportDate}`,
+          html,
+        }),
+      });
+      
+      if (emailRes.ok) {
+        emailResponse = await emailRes.json();
+        console.log("Email sent successfully:", emailResponse);
+      } else {
+        console.error("Email send failed:", await emailRes.text());
+      }
+    } else {
+      console.log("RESEND_API_KEY not configured - email not sent");
+      console.log("Report HTML would be:", html.substring(0, 500) + "...");
+    }
 
     return new Response(
       JSON.stringify({
