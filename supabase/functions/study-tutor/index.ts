@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1"
+import Anthropic from "npm:@anthropic-ai/sdk"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -601,51 +602,37 @@ async function handleTutor(req: Request): Promise<Response> {
 
     const prompt = await generatePrompt(skillName, difficulty, latex, expectedAnswer, misconceptionMap)
 
-    const openAiKey = Deno.env.get('OPENAI_API_KEY')
+    const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY')
 
-    if (!openAiKey) {
-      console.error('OpenAI API key is missing')
-      return new Response(JSON.stringify({ error: 'OpenAI API key is missing' }), {
+    if (!anthropicKey) {
+      console.error('Anthropic API key is missing')
+      return new Response(JSON.stringify({ error: 'Anthropic API key is missing' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    const url = 'https://api.openai.com/v1/chat/completions'
-    const init = {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${openAiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: 'You are a helpful math tutor. Follow the guidelines exactly as provided.' },
-          { role: 'user', content: prompt }
-        ],
+    const anthropic = new Anthropic({ apiKey: anthropicKey });
+
+    let response;
+    try {
+      response = await anthropic.messages.create({
+        model: 'claude-sonnet-4-5-20250929',
         max_tokens: 500,
-        temperature: 0.7,
-        top_p: 1,
-        frequency_penalty: 0,
-        presence_penalty: 0,
-        stop: ['Student:'],
-      }),
-    }
-
-    const response = await fetch(url, init)
-
-    if (!response.ok) {
-      console.error('OpenAI API error')
-      return new Response(JSON.stringify({ error: 'OpenAI API error' }), {
+        system: 'You are a helpful math tutor. Follow the guidelines exactly as provided.',
+        messages: [{ role: 'user', content: prompt }],
+      });
+    } catch (error) {
+      console.error('Anthropic API error:', error)
+      return new Response(JSON.stringify({ error: 'Anthropic API error' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    const json = await response.json()
-    const explanation = json.choices[0].message.content.trim()
+    const explanation = response.content[0].type === 'text'
+      ? response.content[0].text.trim()
+      : ''
 
     return new Response(JSON.stringify({ data: explanation }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -747,10 +734,10 @@ async function handlePhaseBasedLesson(req: Request): Promise<Response> {
       })
     }
 
-    const openAiKey = Deno.env.get('OPENAI_API_KEY')
-    if (!openAiKey) {
-      console.error('OpenAI API key is missing')
-      return new Response(JSON.stringify({ error: 'OpenAI API key is missing' }), {
+    const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY')
+    if (!anthropicKey) {
+      console.error('Anthropic API key is missing')
+      return new Response(JSON.stringify({ error: 'Anthropic API key is missing' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -866,41 +853,41 @@ Odpowiadaj po polsku i bądź zachęcający!`
     // Add current user message
     conversationMessages.push({ role: 'user', content: message })
 
-    // Call OpenAI with full conversation context
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
-        messages: conversationMessages,
-        max_completion_tokens: 2000,
-      }),
-    })
+    // Call Anthropic with full conversation context
+    const anthropic = new Anthropic({ apiKey: anthropicKey });
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('OpenAI API error:', response.status, errorText)
+    // Extract system prompt from messages (Anthropic requires it separately)
+    const systemMessage = conversationMessages.find(m => m.role === 'system');
+    const userAssistantMessages = conversationMessages.filter(m => m.role !== 'system');
+
+    let anthropicResponse;
+    try {
+      anthropicResponse = await anthropic.messages.create({
+        model: 'claude-sonnet-4-5-20250929',
+        max_tokens: 2000,
+        system: systemMessage?.content || '',
+        messages: userAssistantMessages,
+      });
+    } catch (error) {
+      console.error('Anthropic API error:', error)
       return new Response(JSON.stringify({ error: 'AI response failed' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    const aiData = await response.json()
-    console.log('OpenAI response:', JSON.stringify(aiData, null, 2))
-    
-    // Defensive parsing of OpenAI response
-    if (!aiData.choices || aiData.choices.length === 0) {
-      console.error('No choices in OpenAI response:', aiData)
-      return new Response(JSON.stringify({ error: 'No AI response generated' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-    
+    console.log('Anthropic response:', JSON.stringify(anthropicResponse, null, 2))
+
+    // Map Anthropic response to compatible format
+    const aiData = {
+      choices: [{ message: { content: anthropicResponse.content[0].type === 'text' ? anthropicResponse.content[0].text : '' } }],
+      usage: {
+        prompt_tokens: anthropicResponse.usage?.input_tokens || 0,
+        completion_tokens: anthropicResponse.usage?.output_tokens || 0,
+        total_tokens: (anthropicResponse.usage?.input_tokens || 0) + (anthropicResponse.usage?.output_tokens || 0)
+      }
+    };
+
     const aiMessage = aiData.choices[0]?.message?.content?.trim() || 'Przepraszam, nie mogę teraz odpowiedzieć. Spróbuj ponownie.'
 
     // **CRITICAL FIX 1: Save interaction to learning_interactions table**
@@ -1030,7 +1017,7 @@ Odpowiadaj po polsku i bądź zachęcający!`
           message,
           Date.now() - startTime,
           aiData.usage?.total_tokens,
-          'gpt-4o-mini'
+          'claude-sonnet-4-5'
         )
         console.log('✅ AI conversation logged successfully')
       } catch (error) {
@@ -1139,10 +1126,10 @@ async function handleChat(req: Request): Promise<Response> {
       })
     }
 
-    const openAiKey = Deno.env.get('OPENAI_API_KEY')
-    if (!openAiKey) {
-      console.error('OpenAI API key is missing')
-      return new Response(JSON.stringify({ error: 'OpenAI API key is missing' }), {
+    const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY')
+    if (!anthropicKey) {
+      console.error('Anthropic API key is missing')
+      return new Response(JSON.stringify({ error: 'Anthropic API key is missing' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -1400,46 +1387,46 @@ MAKSYMALNIE 150 słów + JEDNO pytanie na końcu. NIGDY więcej! Jeśli musisz w
     // Add current message
     conversationMessages.push({ role: 'user', content: message });
 
-    console.log('Sending to OpenAI with conversation length:', conversationMessages.length);
+    console.log('Sending to Anthropic with conversation length:', conversationMessages.length);
 
     // Create full prompt for logging
     const fullPrompt = conversationMessages.map(msg => `${msg.role.toUpperCase()}: ${msg.content}`).join('\n\n');
 
-    // Call OpenAI
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
-        messages: conversationMessages,
-        max_completion_tokens: 2000,
-      }),
-    })
+    // Call Anthropic
+    const anthropic = new Anthropic({ apiKey: anthropicKey });
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('OpenAI API error:', response.status, errorText)
+    // Extract system prompt from messages (Anthropic requires it separately)
+    const systemMessage = conversationMessages.find(m => m.role === 'system');
+    const userAssistantMessages = conversationMessages.filter(m => m.role !== 'system');
+
+    let anthropicResponse;
+    try {
+      anthropicResponse = await anthropic.messages.create({
+        model: 'claude-sonnet-4-5-20250929',
+        max_tokens: 2000,
+        system: systemMessage?.content || '',
+        messages: userAssistantMessages,
+      });
+    } catch (error) {
+      console.error('Anthropic API error:', error)
       return new Response(JSON.stringify({ error: 'AI response failed' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    const aiData = await response.json()
-    console.log('OpenAI response status:', response.status);
-    console.log('OpenAI response data:', JSON.stringify(aiData, null, 2));
-    
-    if (!aiData.choices || aiData.choices.length === 0) {
-      console.error('No choices in OpenAI response:', aiData)
-      return new Response(JSON.stringify({ error: 'No AI response generated' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-    
+    console.log('Anthropic response:', JSON.stringify(anthropicResponse, null, 2));
+
+    // Map Anthropic response to compatible format
+    const aiData = {
+      choices: [{ message: { content: anthropicResponse.content[0].type === 'text' ? anthropicResponse.content[0].text : '' } }],
+      usage: {
+        prompt_tokens: anthropicResponse.usage?.input_tokens || 0,
+        completion_tokens: anthropicResponse.usage?.output_tokens || 0,
+        total_tokens: (anthropicResponse.usage?.input_tokens || 0) + (anthropicResponse.usage?.output_tokens || 0)
+      }
+    };
+
     const aiMessage = aiData.choices[0]?.message?.content?.trim() || 'Przepraszam, nie mogę teraz odpowiedzieć. Spróbuj ponownie.'
     const processingTime = Date.now() - startTime;
     const tokensUsed = aiData.usage?.total_tokens || 0;
@@ -1472,14 +1459,14 @@ MAKSYMALNIE 150 słów + JEDNO pytanie na końcu. NIGDY więcej! Jeśli musisz w
       {
         skillId,
         messageHistoryLength: messageHistory?.length || 0,
-        model: 'gpt-4o-mini',
+        model: 'claude-sonnet-4-5',
         enrichedContext,
         contextDataSize: enrichedContextData ? enrichedContextData.systemPromptAddition.length : 0
       },
       message,
       processingTime,
       aiData.usage?.total_tokens || tokensUsed,
-      'gpt-4o-mini'
+      'claude-sonnet-4-5'
     );
 
     const finalResponse = { message: aiMessage };
