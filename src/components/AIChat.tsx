@@ -1,15 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
-import { MessageCircle, Send, Brain, Settings, Crown } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Send, Brain, Crown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import { TokenUsageProgress } from '@/components/TokenUsageProgress';
 import { UpgradePrompts } from '@/components/UpgradePrompts';
 import { ConversionPrompts } from '@/components/ConversionPrompts';
@@ -18,27 +15,15 @@ import { useMathSymbols } from '@/hooks/useMathSymbols';
 import MathSymbolPanel from '@/components/MathSymbolPanel';
 import { useLanguage } from '@/hooks/useLanguage';
 import { ExampleQuestions } from '@/components/chat/ExampleQuestions';
-import { DiagnosticChoices } from '@/components/chat/DiagnosticChoices';
 import { TipsPanel } from '@/components/chat/TipsPanel';
 import { MarkdownMath } from '@/components/MarkdownMath';
-interface DiagnosticChoice {
-  label: string;
-  value: string;
-  icon: string;
-  description?: string;
-}
 
 interface Message {
   id: string;
   content: string;
   role: 'user' | 'assistant';
   timestamp: Date;
-  quickReplies?: string[];
-  diagnosticOptions?: {
-    question: string;
-    choices: DiagnosticChoice[];
-  };
-  messageType?: 'welcome' | 'diagnostic' | 'standard' | 'coaching';
+  messageType?: 'welcome' | 'standard';
 }
 export const AIChat = () => {
   const navigate = useNavigate();
@@ -54,8 +39,7 @@ export const AIChat = () => {
       : 'Witaj z powrotem! O czym dziś porozmawiamy?',
     role: 'assistant',
     timestamp: new Date(),
-    messageType: isFirstTime ? 'welcome' : 'standard',
-    quickReplies: isFirstTime ? [] : undefined // Will be populated by ExampleQuestions component
+    messageType: isFirstTime ? 'welcome' : 'standard'
   }]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -68,17 +52,6 @@ export const AIChat = () => {
 
   const [enrichedContext, setEnrichedContext] = useState(false);
   const [hasShownTokenExhaustedMessage, setHasShownTokenExhaustedMessage] = useState(false);
-
-  // CLARIFICATION CONTEXT STATE
-  const [clarificationContext, setClarificationContext] = useState<{
-    isWaitingForResponse: boolean;
-    candidates: Array<{
-      id: string;
-      name: string;
-      department: string;
-    }>;
-    originalMessage: string;
-  } | null>(null);
   const {
     toast
   } = useToast();
@@ -325,76 +298,10 @@ export const AIChat = () => {
     setIsLoading(true);
     userMessageTime = Date.now();
     try {
-      let skill_id: string | null = null;
-      let skill_name: string | null = null;
+      // Use last known skill for context continuity (e.g., follow-up questions)
+      const skill_id = lastSkillId;
 
-      // Check if we're responding to clarification
-      if (clarificationContext?.isWaitingForResponse) {
-        skill_id = await processClarificationResponse(userInput);
-        skill_name = clarificationContext.candidates.find(c => c.id === skill_id)?.name || null;
-        setClarificationContext(null); // Clear context
-        console.log('Processed clarification response:', {
-          skill_id,
-          skill_name
-        });
-      } else {
-        // Step 1: Normal skill recognition
-        console.log('Calling skill-recognition for:', userInput);
-        const {
-          data: skillRecognition,
-          error: recognitionError
-        } = await supabase.functions.invoke('skill-recognition', {
-          body: {
-            message: userInput
-          }
-        });
-        if (recognitionError) {
-          console.error('Skill recognition error:', recognitionError);
-          throw new Error('Nie mogłem rozpoznać umiejętności z Twojego pytania.');
-        }
-        console.log('Skill recognition result:', skillRecognition);
-
-        // Handle two-stage recognition system
-        if (skillRecognition?.stage === 'clarification' && skillRecognition.clarificationQuestion) {
-          // AI needs clarification - show empathetic question from AI (not hardcoded list)
-          const clarificationMessage: Message = {
-            id: (Date.now() + 1).toString(),
-            content: skillRecognition.clarificationQuestion,
-            role: 'assistant',
-            timestamp: new Date()
-          };
-          setMessages(prev => [...prev, clarificationMessage]);
-
-          // Save clarification context for next message - only store skill info, no UI display
-          setClarificationContext({
-            isWaitingForResponse: true,
-            candidates: skillRecognition.candidatesWithIds || [],
-            originalMessage: userInput
-          });
-          setIsLoading(false);
-          return; // Wait for user's clarification response
-        } else {
-          // Direct match or no clarification needed - clear any previous context
-          setClarificationContext(null);
-        }
-        skill_id = skillRecognition?.skill_id;
-        skill_name = skillRecognition?.skill_name;
-      }
-
-      // Fallback to last known skill for continuity (e.g., short answers like "nie wiem")
-      if (!skill_id && lastSkillId) {
-        skill_id = lastSkillId;
-      }
-
-      // Persist last inferred skill
-      if (skill_id) {
-        setLastSkillId(skill_id);
-      }
-
-      console.log(`Rozpoznana umiejętność: ${skill_name} (${skill_id})`);
-
-      // Step 2: Start chat with recognized skill (using snake_case)
-      console.log('Calling study-tutor with endpoint /chat, skill_id:', skill_id);
+      console.log('Calling study-tutor directly with skill_id:', skill_id);
 
       // Prepare message history and context
       const messageHistory = getMessageHistory();
@@ -439,26 +346,13 @@ export const AIChat = () => {
       const aiResponseContent = chatData.message || chatData || 'Rozpocznijmy naukę tej umiejętności!';
       
       // Parse response - support both plain string and structured response
-      let assistantMessage: Message;
-      if (typeof chatData === 'object' && chatData.diagnosticOptions) {
-        // Structured response with diagnostic options
-        assistantMessage = {
-          id: (Date.now() + 1).toString(),
-          content: chatData.message,
-          role: 'assistant',
-          timestamp: new Date(),
-          diagnosticOptions: chatData.diagnosticOptions,
-          messageType: 'diagnostic'
-        };
-      } else {
-        // Plain text response
-        assistantMessage = {
-          id: (Date.now() + 1).toString(),
-          content: aiResponseContent,
-          role: 'assistant',
-          timestamp: new Date()
-        };
-      }
+      // Plain text response
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: aiResponseContent,
+        role: 'assistant',
+        timestamp: new Date()
+      };
       setMessages(prev => [...prev, assistantMessage]);
 
       // Check for success moments and trigger conversion prompts
@@ -492,84 +386,7 @@ export const AIChat = () => {
     }
   };
 
-  // Enhanced clarification response processing with advanced fuzzy matching
-  const processClarificationResponse = async (userResponse: string): Promise<string | null> => {
-    if (!clarificationContext?.candidates || clarificationContext.candidates.length === 0) {
-      console.log('No candidates available for clarification');
-      return null;
-    }
-    
-    const normalizedResponse = userResponse.toLowerCase().trim();
-    const { candidates } = clarificationContext;
-    console.log('Processing clarification response:', userResponse);
-    console.log('Available candidates:', candidates.map(c => c?.name || 'unnamed'));
-
-    // Filter out invalid candidates
-    const validCandidates = candidates.filter(c => c && c.name && c.id);
-    if (validCandidates.length === 0) {
-      console.log('No valid candidates found');
-      return null;
-    }
-
-    // Scoring system for candidate matching
-    const candidateScores = validCandidates.map(candidate => {
-      let score = 0;
-      const candidateName = (candidate.name || '').toLowerCase();
-      const candidateDept = (candidate.department || '').toLowerCase();
-      const candidateWords = candidateName.split(' ').filter(word => word.length > 2);
-      const responseWords = normalizedResponse.split(' ').filter(word => word.length > 2);
-
-      // 1. Exact name match (highest priority)
-      if (normalizedResponse.includes(candidateName) || candidateName.includes(normalizedResponse)) {
-        score += 100;
-      }
-
-      // 2. Word-by-word matching
-      candidateWords.forEach(candidateWord => {
-        responseWords.forEach(responseWord => {
-          if (candidateWord === responseWord) {
-            score += 50;
-          } else if (candidateWord.includes(responseWord) || responseWord.includes(candidateWord)) {
-            score += 30;
-          }
-        });
-      });
-
-      // 3. Department matching
-      if (candidateDept && normalizedResponse.includes(candidateDept)) {
-        score += 20;
-      }
-
-      return { candidate, score };
-    });
-
-    // Sort by score
-    candidateScores.sort((a, b) => b.score - a.score);
-    console.log('Candidate scores:', candidateScores.map(cs => ({
-      name: cs.candidate.name,
-      score: cs.score
-    })));
-
-    // Try to match by number if user selected option by number
-    const numberMatch = normalizedResponse.match(/^(\d+)[\s\.\)]*$/);
-    if (numberMatch) {
-      const selectedIndex = parseInt(numberMatch[1]) - 1;
-      if (selectedIndex >= 0 && selectedIndex < validCandidates.length) {
-        console.log(`User selected option ${numberMatch[1]} -> ${validCandidates[selectedIndex].name}`);
-        return validCandidates[selectedIndex].id;
-      }
-    }
-
-    // Return highest scoring candidate if score is above threshold
-    if (candidateScores.length > 0 && candidateScores[0].score > 15) {
-      console.log(`Matched candidate: ${candidateScores[0].candidate.name} (score: ${candidateScores[0].score})`);
-      return candidateScores[0].candidate.id;
-    }
-
-    // Fallback: return first valid candidate
-    console.log('No good matches found, using first candidate as fallback');
-    return validCandidates.length > 0 ? validCandidates[0].id : null;
-  };
+  // processClarificationResponse function removed - no longer needed
   const endSession = async () => {
     if (!sessionId || !user?.id) return;
     try {
@@ -599,7 +416,7 @@ export const AIChat = () => {
       }]);
       setSessionId(null);
       setSequenceNumber(0);
-      setClarificationContext(null);
+      setLastSkillId(null);
 
       // Initialize new session
       await initializeSession();
@@ -693,19 +510,6 @@ export const AIChat = () => {
                              // Set input and let the form submit naturally on next render
                              setInput(question);
                            }} />
-                         )}
-                         
-                         {/* Diagnostic Choices */}
-                         {message.diagnosticOptions && message.role === 'assistant' && (
-                           <DiagnosticChoices
-                             question={message.diagnosticOptions.question}
-                             choices={message.diagnosticOptions.choices}
-                             onSelect={(value) => {
-                               const choiceText = message.diagnosticOptions!.choices.find(c => c.value === value)?.label || value;
-                               setInput(choiceText);
-                               setTimeout(() => sendMessage(), 100);
-                             }}
-                           />
                          )}
                        </div>
                     </div>
