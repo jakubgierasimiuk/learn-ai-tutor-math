@@ -103,9 +103,12 @@ export const AIChat = () => {
   const [bottomPadding, setBottomPadding] = useState<number>(120);
   const [contextualSymbols, setContextualSymbols] = useState<string[]>([]);
   const [showSuccessPrompt, setShowSuccessPrompt] = useState(false);
+  // Check if paywall should show (memoize result to avoid infinite loop)
+  const shouldShowPaywall = shouldShowSoftPaywall();
+  
   // Add one-time message when tokens are exhausted
   useEffect(() => {
-    if (shouldShowSoftPaywall() && !hasShownTokenExhaustedMessage && messages.length > 1) {
+    if (shouldShowPaywall && !hasShownTokenExhaustedMessage && messages.length > 1) {
       const exhaustedMessage: Message = {
         id: `exhausted-${Date.now()}`,
         content: 'Twój darmowy okres zakończył się! 🎓 Aby kontynuować naukę z Mentavo AI, ulepsz swój plan. Dzięki Premium będziesz mieć nieograniczony dostęp do wszystkich funkcji i 24/7 wsparcie w nauce matematyki.',
@@ -116,7 +119,7 @@ export const AIChat = () => {
       setMessages(prev => [...prev, exhaustedMessage]);
       setHasShownTokenExhaustedMessage(true);
     }
-  }, [shouldShowSoftPaywall, hasShownTokenExhaustedMessage, messages.length]);
+  }, [shouldShowPaywall, hasShownTokenExhaustedMessage, messages.length]);
 
   // Auto-scroll to bottom when messages change using invisible anchor
   useEffect(() => {
@@ -307,7 +310,7 @@ export const AIChat = () => {
     }
 
     // Block sending when tokens exhausted - no toast, just silent block
-    if (shouldShowSoftPaywall()) {
+    if (shouldShowPaywall) {
       return;
     }
     const userMessage: Message = {
@@ -353,7 +356,7 @@ export const AIChat = () => {
 
         // Handle two-stage recognition system
         if (skillRecognition?.stage === 'clarification' && skillRecognition.clarificationQuestion) {
-          // AI needs clarification - show empathetic question and save context
+          // AI needs clarification - show empathetic question from AI (not hardcoded list)
           const clarificationMessage: Message = {
             id: (Date.now() + 1).toString(),
             content: skillRecognition.clarificationQuestion,
@@ -362,7 +365,7 @@ export const AIChat = () => {
           };
           setMessages(prev => [...prev, clarificationMessage]);
 
-          // Save clarification context for next message
+          // Save clarification context for next message - only store skill info, no UI display
           setClarificationContext({
             isWaitingForResponse: true,
             candidates: skillRecognition.candidatesWithIds || [],
@@ -370,6 +373,9 @@ export const AIChat = () => {
           });
           setIsLoading(false);
           return; // Wait for user's clarification response
+        } else {
+          // Direct match or no clarification needed - clear any previous context
+          setClarificationContext(null);
         }
         skill_id = skillRecognition?.skill_id;
         skill_name = skillRecognition?.skill_name;
@@ -640,7 +646,8 @@ export const AIChat = () => {
     } else {
       setContextualSymbols([]);
     }
-  }, [input, getSymbolsForText]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input]); // Only depend on input, not the function
   const handleSkillSelection = (skillId: string) => {
     // Navigate to the selected skill lesson
     navigate(`/study/lesson/${skillId}`);
@@ -690,11 +697,11 @@ export const AIChat = () => {
                           <MarkdownMath content={message.content} />
                          
                          {/* Example Questions for welcome message */}
-                         {message.messageType === 'welcome' && message.role === 'assistant' && (
+                         {message.messageType === 'welcome' && message.role === 'assistant' && index === 0 && messages.length === 1 && (
                            <ExampleQuestions onSelect={(question) => {
-                             setInput(question);
                              localStorage.setItem('mentavo_welcome_completed', 'true');
-                             setTimeout(() => sendMessage(), 100);
+                             // Set input and let the form submit naturally on next render
+                             setInput(question);
                            }} />
                          )}
                          
@@ -733,24 +740,9 @@ export const AIChat = () => {
           </div>
         </div>
 
-        {/* Clarification Options */}
-        {clarificationContext && clarificationContext.candidates && <div className="mb-4 bg-accent/30 border border-accent/50 rounded-xl p-4">
-            <p className="text-sm font-medium mb-3 text-accent-foreground">
-              Sprecyzuj, o której umiejętności chodzi:
-            </p>
-            <div className="grid gap-2">
-              {clarificationContext.candidates.map((skill: any, index: number) => <button key={index} onClick={() => handleSkillSelection(skill.id)} className="text-left p-3 bg-background hover:bg-accent/50 rounded-lg border border-border/50 transition-all duration-200 hover:border-accent/50">
-                  <span className="font-medium text-sm">{skill.name}</span>
-                  {skill.description && <span className="block text-muted-foreground text-xs mt-1">
-                      {skill.description}
-                    </span>}
-                </button>)}
-            </div>
-          </div>}
-
         {/* Fixed Input Area or Lock Banner */}
         <div ref={inputContainerRef} className="fixed md:relative bottom-0 left-0 right-0 bg-background border-t md:border-t-0 p-3 md:p-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:pb-4 z-10">
-          {shouldShowSoftPaywall() ? (
+          {shouldShowPaywall ? (
             // Show lock banner when tokens exhausted
             <Card className="border-orange-200 bg-gradient-to-r from-orange-50 to-red-50 mb-4">
               <CardContent className="p-4">
