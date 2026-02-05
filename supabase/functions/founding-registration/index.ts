@@ -15,6 +15,59 @@ interface FoundingRegistrationRequest {
   deviceInfo?: Record<string, any>;
 }
 
+// Rate limiting helper - check if IP/email has exceeded registration attempts
+async function checkRateLimit(
+  supabase: ReturnType<typeof createClient>,
+  clientIP: string,
+  email: string
+): Promise<{ allowed: boolean; reason?: string }> {
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  
+  // Check IP-based rate limit: max 3 registrations per IP per hour
+  if (clientIP && clientIP !== 'unknown') {
+    const { count: ipCount } = await supabase
+      .from('founding_members')
+      .select('*', { count: 'exact', head: true })
+      .eq('registration_ip', clientIP)
+      .gte('created_at', oneHourAgo);
+    
+    if (ipCount && ipCount >= 3) {
+      return { allowed: false, reason: 'Too many registration attempts from this IP. Please try again later.' };
+    }
+  }
+  
+  // Check email domain rate limit: max 5 registrations per domain per day
+  const emailDomain = email.split('@')[1]?.toLowerCase();
+  if (emailDomain && !['gmail.com', 'outlook.com', 'hotmail.com', 'yahoo.com', 'icloud.com', 'wp.pl', 'onet.pl', 'o2.pl', 'interia.pl'].includes(emailDomain)) {
+    const { data: domainRegistrations } = await supabase
+      .from('founding_members')
+      .select('email')
+      .gte('created_at', oneDayAgo);
+    
+    const domainCount = (domainRegistrations || []).filter(r => 
+      r.email.toLowerCase().endsWith('@' + emailDomain)
+    ).length;
+    
+    if (domainCount >= 5) {
+      return { allowed: false, reason: 'Too many registrations from this email domain. Please use a different email.' };
+    }
+  }
+  
+  // Check if email already exists in founding_members
+  const { data: existingMember } = await supabase
+    .from('founding_members')
+    .select('id')
+    .eq('email', email.toLowerCase())
+    .single();
+  
+  if (existingMember) {
+    return { allowed: false, reason: 'This email is already registered in the program.' };
+  }
+  
+  return { allowed: true };
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -69,6 +122,30 @@ Deno.serve(async (req) => {
 
     if (req.method === 'POST') {
       const body: FoundingRegistrationRequest = await req.json();
+      
+      // Get client IP for rate limiting
+      let clientIP = req.headers.get('x-forwarded-for') || 
+                     req.headers.get('x-real-ip') || 
+                     'unknown';
+      if (clientIP && clientIP.includes(',')) {
+        clientIP = clientIP.split(',')[0].trim();
+      }
+      if (clientIP !== 'unknown' && !clientIP.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/)) {
+        clientIP = 'unknown';
+      }
+      
+      // Rate limiting check
+      const emailToCheck = userEmail || body.email;
+      if (emailToCheck) {
+        const rateCheck = await checkRateLimit(supabase, clientIP, emailToCheck);
+        if (!rateCheck.allowed) {
+          console.log(`Rate limit blocked: IP=${clientIP}, email=${emailToCheck}, reason=${rateCheck.reason}`);
+          return new Response(
+            JSON.stringify({ error: rateCheck.reason, code: 'RATE_LIMITED' }),
+            { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
       
       // Check virtual spots left using new function
       const { data: spotsLeft, error: spotsError } = await supabase
@@ -167,21 +244,7 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Get client IP - extract first IP if multiple are present (proxy chain)
-      let clientIP = req.headers.get('x-forwarded-for') || 
-                     req.headers.get('x-real-ip') || 
-                     'unknown';
-      
-      // x-forwarded-for can contain multiple IPs separated by comma (proxy chain)
-      // Take only the first one (client's real IP)
-      if (clientIP && clientIP.includes(',')) {
-        clientIP = clientIP.split(',')[0].trim();
-      }
-      
-      // Validate IP format for inet column
-      if (clientIP !== 'unknown' && !clientIP.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/)) {
-        clientIP = 'unknown';
-      }
+      // clientIP is already extracted above for rate limiting
 
       // Register founding member
       const foundingMemberData: any = {
