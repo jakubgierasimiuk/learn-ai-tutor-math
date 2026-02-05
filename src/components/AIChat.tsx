@@ -245,16 +245,28 @@ export const AIChat = () => {
     }
   };
   const getMessageHistory = () => {
-    // Get last 8 messages (excluding initial greeting)
+    // Get messages excluding initial greeting
     const conversationMessages = messages.slice(1);
-    const last8Messages = conversationMessages.slice(-8);
-    return last8Messages.map(msg => ({
-      user: msg.role === 'user' ? msg.content : undefined,
-      assistant: msg.role === 'assistant' ? msg.content : undefined,
-      sequence: 0,
-      // Will be handled in backend
-      tokens_estimate: Math.ceil(msg.content.length / 4) // Rough estimate
-    }));
+
+    // Build pairs of {user, assistant} as expected by backend
+    const pairs: Array<{user: string; assistant: string}> = [];
+
+    for (let i = 0; i < conversationMessages.length - 1; i++) {
+      const current = conversationMessages[i];
+      const next = conversationMessages[i + 1];
+
+      // Find user->assistant pairs
+      if (current.role === 'user' && next.role === 'assistant') {
+        pairs.push({
+          user: current.content,
+          assistant: next.content
+        });
+        i++; // Skip the assistant message since we already processed it
+      }
+    }
+
+    // Return last 8 pairs (16 messages worth of context)
+    return pairs.slice(-8);
   };
   let userMessageTime = Date.now();
   const sendMessage = async () => {
