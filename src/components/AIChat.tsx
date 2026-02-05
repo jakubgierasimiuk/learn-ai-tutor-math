@@ -265,8 +265,24 @@ export const AIChat = () => {
       }
     }
 
-    // Return last 8 pairs (16 messages worth of context)
-    return pairs.slice(-8);
+    // SMART CONTEXT STRATEGY:
+    // Keep first 3 pairs (original problem setup) + last 12 pairs (recent context)
+    // This ensures original task data (names, numbers, problem) is NEVER lost
+    // while maintaining recent conversation flow
+    // Total: up to 15 pairs (30 messages) for rich context
+    const MAX_TOTAL_PAIRS = 15;
+    const FIRST_PAIRS_COUNT = 3;   // Original problem setup
+    const RECENT_PAIRS_COUNT = 12; // Recent context
+
+    if (pairs.length <= MAX_TOTAL_PAIRS) {
+      return pairs; // Return all if conversation is short enough
+    }
+
+    // For longer conversations: preserve beginning + recent
+    const firstPairs = pairs.slice(0, FIRST_PAIRS_COUNT);
+    const recentPairs = pairs.slice(-RECENT_PAIRS_COUNT);
+
+    return [...firstPairs, ...recentPairs];
   };
   let userMessageTime = Date.now();
   const sendMessage = async () => {
