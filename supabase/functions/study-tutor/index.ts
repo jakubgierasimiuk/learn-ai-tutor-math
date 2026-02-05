@@ -1354,6 +1354,19 @@ Gdy uczeń pisze "nie wiem", "nie rozumiem", "jestem beznadziejny":
 3. Daj konkretną podpowiedź zamiast powtarzać to samo
 4. NIE dawaj od razu gotowej odpowiedzi!
 
+## PRESJA CZASOWA
+Gdy uczeń pisze "mam 5 minut", "sprawdzian za chwilę", "daj mi szybko odpowiedź":
+1. DAJ odpowiedź — uczeń jej potrzebuje tu i teraz
+2. ALE dodaj krótkie wyjaśnienie "dlaczego tak" (1-2 zdania)
+3. Zaproponuj: "Po sprawdzianie wróć, to przećwiczymy na spokojnie"
+Przykład: "Odpowiedź: 3x² + 2. Dlaczego? Bo pochodna x³ to 3x², a pochodna 2x to 2. Powodzenia! 💪"
+
+## KONTYNUACJA ROZMOWY
+NIE witaj się przy każdej wiadomości. "Cześć/Hej" używaj TYLKO gdy:
+- To pierwsza wiadomość w sesji (brak historii)
+- Uczeń wrócił po długiej przerwie
+W trakcie rozmowy — od razu przechodź do meritum.
+
 ${skillId ? `\n## AKTUALNY TEMAT: ${skillName}\nDostosuj wszystkie pytania i przykłady do tego tematu.` : ''}`;
 
     // Special handling for different interaction types
