@@ -4,6 +4,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
   DollarSign,
   Clock,
   Users,
@@ -16,6 +22,8 @@ import {
   Crown,
   Star,
   Zap,
+  MessageCircle,
+  Brain,
 } from "lucide-react";
 import mentavoLogo from "@/assets/mentavo-logo-full.png";
 import { saveReferralCode } from "@/lib/referralStorage";
@@ -167,12 +175,12 @@ const NewLandingPage = () => {
               )}
               
               <h1 className="font-poppins font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-neutral leading-tight">
-                AI Tutor Matematyczny
+                Matematyka w liceum nie musi być trudna
               </h1>
-              
+
               <p className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed">
-                Spersonalizowana nauka matematyki z AI, dostępna 24/7. 
-                Osiągnij lepsze wyniki szybciej i taniej niż z tradycyjnymi korepetycjami.
+                Twój osobisty AI tutor, który nie daje gotowych odpowiedzi — pomaga Ci zrozumieć.
+                Metodą sokratejską prowadzi Cię krok po kroku do rozwiązania. Dostępny 24/7 za 49,99 zł/mies.
               </p>
 
               {/* Loading skeleton for CTA */}
@@ -250,6 +258,83 @@ const NewLandingPage = () => {
 
              <div className="relative hidden lg:block h-[500px] overflow-hidden">
               <ThreeDShapes />
+            </div>
+          </div>
+        </section>
+
+        {/* How It Works - Chat Demo Section */}
+        <section className="py-12 sm:py-16 md:py-20 bg-support-light">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-8 sm:mb-12">
+              <h2 className="font-poppins font-bold text-2xl sm:text-3xl md:text-4xl text-neutral mb-3 sm:mb-4">
+                Zobacz jak uczy Mentavo
+              </h2>
+              <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
+                Metoda sokratejska — nie dajemy gotowych odpowiedzi, prowadzimy Cię pytaniami do rozwiązania
+              </p>
+            </div>
+
+            <div className="max-w-2xl mx-auto">
+              <Card className="bg-white shadow-elevated overflow-hidden">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="space-y-4">
+                    {/* AI Message */}
+                    <div className="flex gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center flex-shrink-0">
+                        <Bot className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%]">
+                        <p className="text-sm sm:text-base">Cześć! Jak mogę Ci dzisiaj pomóc? 🎯</p>
+                      </div>
+                    </div>
+
+                    {/* User Message */}
+                    <div className="flex gap-3 justify-end">
+                      <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-3 max-w-[85%]">
+                        <p className="text-sm sm:text-base">Jak rozwiązać x² - 5x + 6 = 0?</p>
+                      </div>
+                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                        <MessageCircle className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                    </div>
+
+                    {/* AI Response - Socratic */}
+                    <div className="flex gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center flex-shrink-0">
+                        <Bot className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%]">
+                        <p className="text-sm sm:text-base">Świetne pytanie! To równanie kwadratowe. Zanim podpowiem rozwiązanie — <strong>czy potrafisz wskazać współczynniki a, b i c?</strong></p>
+                      </div>
+                    </div>
+
+                    {/* User Response */}
+                    <div className="flex gap-3 justify-end">
+                      <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-3 max-w-[85%]">
+                        <p className="text-sm sm:text-base">a=1, b=-5, c=6</p>
+                      </div>
+                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                        <MessageCircle className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                    </div>
+
+                    {/* AI Final */}
+                    <div className="flex gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center flex-shrink-0">
+                        <Bot className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%]">
+                        <p className="text-sm sm:text-base">Dokładnie! 🎯 Teraz oblicz deltę używając wzoru Δ = b² - 4ac. Co otrzymujesz?</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <p className="text-center text-sm text-muted-foreground mt-6">
+                <Brain className="w-4 h-4 inline mr-1" />
+                Mentavo prowadzi Cię krok po kroku pytaniami — tak jak najlepszy korepetytor
+              </p>
             </div>
           </div>
         </section>
@@ -567,6 +652,72 @@ const NewLandingPage = () => {
           </div>
         </section>
 
+        {/* FAQ Section */}
+        <section className="py-12 sm:py-16 md:py-20 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-8 sm:mb-12">
+              <h2 className="font-poppins font-bold text-2xl sm:text-3xl md:text-4xl text-neutral mb-3 sm:mb-4">
+                Najczęściej zadawane pytania
+              </h2>
+            </div>
+
+            <div className="max-w-3xl mx-auto">
+              <Accordion type="single" collapsible className="space-y-4">
+                <AccordionItem value="item-1" className="bg-support-light rounded-lg border-none px-4 sm:px-6">
+                  <AccordionTrigger className="text-left font-medium text-sm sm:text-base hover:no-underline">
+                    Czy po trialu automatycznie pobieracie opłatę?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-sm sm:text-base pb-4">
+                    Nie. Po 7 dniach konto przechodzi na darmowy plan z ograniczeniami. NIE pobieramy automatycznie żadnych opłat.
+                    Aby kontynuować Premium, aktywujesz subskrypcję ręcznie w ustawieniach konta.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-2" className="bg-support-light rounded-lg border-none px-4 sm:px-6">
+                  <AccordionTrigger className="text-left font-medium text-sm sm:text-base hover:no-underline">
+                    Czy mogę korzystać na telefonie?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-sm sm:text-base pb-4">
+                    Tak! Mentavo działa w przeglądarce na telefonie, tablecie i komputerze.
+                    Nie musisz instalować żadnej aplikacji — wystarczy otworzyć mentavo.pl.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-3" className="bg-support-light rounded-lg border-none px-4 sm:px-6">
+                  <AccordionTrigger className="text-left font-medium text-sm sm:text-base hover:no-underline">
+                    Czym Mentavo różni się od ChatGPT?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-sm sm:text-base pb-4">
+                    Mentavo to specjalizowany tutor matematyki zgodny z polską podstawą programową.
+                    W przeciwieństwie do ChatGPT, nie daje gotowych odpowiedzi — prowadzi Cię pytaniami do samodzielnego rozwiązania (metoda sokratejska).
+                    Dzięki temu naprawdę zrozumiesz materiał.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-4" className="bg-support-light rounded-lg border-none px-4 sm:px-6">
+                  <AccordionTrigger className="text-left font-medium text-sm sm:text-base hover:no-underline">
+                    Mogę anulować kiedy chcę?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-sm sm:text-base pb-4">
+                    Tak, jednym kliknięciem w ustawieniach konta. Zero zobowiązań, zero ukrytych opłat.
+                    Po anulowaniu masz dostęp do końca opłaconego okresu.
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="item-5" className="bg-support-light rounded-lg border-none px-4 sm:px-6">
+                  <AccordionTrigger className="text-left font-medium text-sm sm:text-base hover:no-underline">
+                    Dla kogo jest Mentavo?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-sm sm:text-base pb-4">
+                    Dla uczniów liceum (klasy 1-4). Niezależnie czy potrzebujesz pomocy z podstawami
+                    czy przygotowujesz się do matury rozszerzonej — Mentavo dostosowuje się do Twojego poziomu.
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
+          </div>
+        </section>
+
         {/* Footer */}
         <footer className="bg-[#1E3A5F] py-8 sm:py-12">
           <div className="container mx-auto px-4">
@@ -574,22 +725,25 @@ const NewLandingPage = () => {
               <div className="flex items-center gap-2">
                 <img src={mentavoLogo} alt="Mentavo AI" className="h-10 sm:h-14 invert" />
               </div>
-              
+
               <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-white/80 text-xs sm:text-sm">
+                <a href="/pricing" className="hover:text-white transition-colors">
+                  Cennik
+                </a>
                 <a href="/privacy-policy" className="hover:text-white transition-colors">
                   Polityka Prywatności
                 </a>
                 <a href="/terms-of-service" className="hover:text-white transition-colors">
                   Regulamin
                 </a>
-                <a href="mailto:kontakt@mentavo.ai" className="hover:text-white transition-colors">
+                <a href="mailto:kontakt@mentavo.pl" className="hover:text-white transition-colors">
                   Kontakt
                 </a>
               </div>
             </div>
 
             <div className="mt-6 sm:mt-8 text-center text-white/60 text-xs sm:text-sm">
-              © 2025 Mentavo AI. Wszystkie prawa zastrzeżone.
+              © 2026 Mentavo AI. Wszystkie prawa zastrzeżone.
             </div>
           </div>
         </footer>
