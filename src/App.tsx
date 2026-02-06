@@ -33,6 +33,7 @@ import SessionsPage from "./pages/SessionsPage";
 import AccountPage from "./pages/AccountPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
+import PricingPage from "./pages/PricingPage";
 import { OnboardingWelcome } from "@/components/onboarding/OnboardingWelcome";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 import { AITutorial } from "@/components/onboarding/AITutorial";
@@ -121,6 +122,7 @@ function RouteSeo() {
     '/study': { title: 'Panel nauki – mentavo.ai', description: 'Twoje umiejętności i ścieżka nauki.' },
     '/ai-logs': { title: 'Logi AI – Rejestr konwersacji', description: 'Szczegółowe logi wszystkich interakcji z AI.' },
     '/founding': { title: 'Dołącz do Founding 100 – Mentavo AI', description: 'Dołącz do pierwszych 100 użytkowników Mentavo AI i otrzymaj darmowy miesiąc Premium.' },
+    '/pricing': { title: 'Cennik – Mentavo AI', description: 'Sprawdź cennik Mentavo AI. 7 dni za darmo, potem 49,99 zł/mies. Nieograniczony dostęp do AI tutora matematyki.' },
   };
   if (path === '/' || path.startsWith('/postepy')) return null;
   const match = Object.entries(map).find(([k]) => path === k || path.startsWith(k + '/'))?.[1];
@@ -307,6 +309,7 @@ const App = () => (
             {/* Legal pages - accessible to everyone */}
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+            <Route path="/pricing" element={<PricingPage />} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
