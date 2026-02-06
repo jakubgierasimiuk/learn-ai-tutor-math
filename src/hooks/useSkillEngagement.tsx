@@ -127,7 +127,7 @@ export const useAllSkillsEngagement = () => {
             const allInteractions = interactions?.filter(i => sessionIds.includes(i.session_id)) || [];
             const interactionCount = allInteractions.length;
             
-            const totalTimeMinutes = sessions.reduce((total, session) => {
+            const totalTimeMinutes = skillSessions.reduce((total, session) => {
               if (session.completed_at && session.started_at) {
                 const duration = new Date(session.completed_at).getTime() - new Date(session.started_at).getTime();
                 return total + (duration / (1000 * 60));
