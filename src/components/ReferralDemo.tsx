@@ -182,7 +182,7 @@ export const ReferralDemo = () => {
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium">2. Znajomy się rejestruje</p>
-                <p className="text-xs text-muted-foreground">Otrzymuje 7 dni + 4000 tokenów</p>
+                <p className="text-xs text-muted-foreground">Otrzymuje tydzień Premium darmowo</p>
               </div>
               <Badge variant="secondary">Bonusy start</Badge>
             </div>
@@ -195,7 +195,7 @@ export const ReferralDemo = () => {
                 <p className="text-sm font-medium">3. Znajomy aktywuje konto</p>
                 <p className="text-xs text-muted-foreground">Weryfikacja telefonu + 20 min nauki</p>
               </div>
-              <Badge variant="outline">Ty: 3 dni lub 4000 tokenów</Badge>
+              <Badge variant="outline">Ty: +3 dni Premium</Badge>
             </div>
 
             <div className="flex items-center gap-3 p-3 bg-background rounded-lg border">

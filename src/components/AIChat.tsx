@@ -34,8 +34,8 @@ export const AIChat = () => {
   
   const [messages, setMessages] = useState<Message[]>([{
     id: '1',
-    content: isFirstTime 
-      ? '👋 Cześć! Jestem Twoim AI nauczycielem matematyki.\n\nMożesz zapytać mnie o cokolwiek - od podstaw do matury.\nNie ma głupich pytań, tylko nieodkryte odpowiedzi! 💡'
+    content: isFirstTime
+      ? '👋 Cześć! Jestem Twoim AI tutorem matematyki.\n\nUczę metodą sokratejską — zamiast dawać gotowe odpowiedzi, zadam Ci pytania naprowadzające, żebyś sam/sama doszedł/doszła do rozwiązania. Dzięki temu naprawdę zrozumiesz materiał! 🧠\n\nNapisz pytanie lub wybierz temat poniżej:'
       : 'Witaj z powrotem! O czym dziś porozmawiamy?',
     role: 'assistant',
     timestamp: new Date(),

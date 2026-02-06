@@ -125,7 +125,7 @@ export default function ReferralPage() {
             </div>
           </div>
           <div className="text-sm text-muted-foreground">
-            Udostępnij ten link znajomym. Otrzymują 7 dni darmowo + 4000 tokenów, a Ty nagrody za każde skuteczne polecenie!
+            Udostępnij ten link znajomym. Otrzymują tydzień Premium darmowo, a Ty nagrody za każde skuteczne polecenie!
           </div>
         </CardContent>
       </Card>
@@ -179,7 +179,7 @@ export default function ReferralPage() {
                     <div className="text-center">
                       <h3 className="font-semibold">Nagroda convertible</h3>
                       <p className="text-sm text-muted-foreground">
-                        {reward.meta?.days_amount || 3} dni lub {reward.meta?.tokens_amount || 4000} tokenów
+                        +{reward.meta?.days_amount || 3} dni Premium
                       </p>
                     </div>
                     <Button size="sm" className="w-full">
