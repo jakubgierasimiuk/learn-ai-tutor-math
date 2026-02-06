@@ -384,6 +384,13 @@ function SkillCard({
     }
   };
 
+  // Generate a helpful description based on skill name and class level
+  const getSkillDescription = () => {
+    const classLevel = skill.class_level_text || `Klasa ${skill.class_level}`;
+    const levelText = skill.level === 'extended' ? 'poziom rozszerzony' : 'poziom podstawowy';
+    return `Nauczysz się: ${skill.name}. ${classLevel}, ${levelText}.`;
+  };
+
   const handleAction = () => {
     if (!engagementLevel || engagementLevel.level === 'nierozpoczeta') {
       onStartLesson(skill.id);
@@ -429,6 +436,7 @@ function SkillCard({
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1">
             <CardTitle className="text-base leading-tight">{skill.name}</CardTitle>
+            <p className="text-xs text-muted-foreground">{getSkillDescription()}</p>
           </div>
           <div className="flex items-center gap-2">
             {getDepartmentIcon(skill.department)}
