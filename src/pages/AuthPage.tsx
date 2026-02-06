@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { SocialLoginButtons } from "@/components/SocialLoginButtons";
 import { ArrowLeft, CheckCircle, Users, Zap, Gift } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PRODUCTION_DOMAIN } from "@/lib/constants";
 import { saveReferralCode } from "@/lib/referralStorage";
 
@@ -58,11 +58,15 @@ export default function AuthPage() {
   const [recoveryMode, setRecoveryMode] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showEmailSignup, setShowEmailSignup] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
+  const [activeTab, setActiveTab] = useState<"register" | "login">("register");
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+
+  // Determine trial days based on plan param
+  const plan = searchParams.get('plan');
+  const trialDays = plan === 'founding' ? 30 : 7;
 
   // Save referral code from URL if present (for cases where user lands directly on /auth with ref)
   useEffect(() => {
@@ -326,7 +330,7 @@ export default function AuthPage() {
             <div className="text-center mb-12">
               <div className="inline-flex items-center bg-white/30 backdrop-blur-sm rounded-full px-6 py-3 mb-8 text-lg font-bold">
                 <Gift className="w-5 h-5 mr-3" />
-                <span>7 DNI PREMIUM GRATIS</span>
+                <span>{trialDays} DNI PREMIUM GRATIS</span>
               </div>
               <h1 className="text-4xl font-bold mb-6">
                 Ucz się matematyki<br />z AI tutorem
@@ -359,72 +363,93 @@ export default function AuthPage() {
               </div>
               <div>
                 <CardTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                  Załóż DARMOWE konto
+                  {activeTab === "register" ? "Załóż DARMOWE konto" : "Witaj ponownie!"}
                 </CardTitle>
                 <CardDescription className="text-base mt-2">
-                  <span className="inline-flex items-center bg-success/10 text-success px-3 py-1 rounded-full text-sm font-medium mb-2">
-                    <Gift className="w-3 h-3 mr-1" />
-                    7 dni Premium GRATIS
-                  </span>
-                  <br />
-                  Zacznij naukę już dziś, bez żadnych zobowiązań
+                  {activeTab === "register" ? (
+                    <>
+                      <span className="inline-flex items-center bg-success/10 text-success px-3 py-1 rounded-full text-sm font-medium mb-2">
+                        <Gift className="w-3 h-3 mr-1" />
+                        {trialDays} dni Premium GRATIS
+                      </span>
+                      <br />
+                      Zacznij naukę już dziś, bez żadnych zobowiązań
+                    </>
+                  ) : (
+                    "Zaloguj się na swoje konto"
+                  )}
                 </CardDescription>
               </div>
             </CardHeader>
-            
+
             <CardContent className="space-y-6">
-              {/* Social Login Buttons */}
-              <SocialLoginButtons loading={loading} setLoading={setLoading} />
-              
-              {/* Divider */}
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-muted" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">lub</span>
-                </div>
-              </div>
+              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "register" | "login")} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-6">
+                  <TabsTrigger value="register">Nowe konto</TabsTrigger>
+                  <TabsTrigger value="login">Logowanie</TabsTrigger>
+                </TabsList>
 
-              {/* Email Signup Form - Always Visible */}
-              <form onSubmit={(e) => { e.preventDefault(); handleSignUp(); }} className="space-y-4">
-                <div className="space-y-3">
-                  <Input
-                    type="email"
-                    placeholder="Twój adres email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="h-12 text-base"
-                    required
-                  />
-                  <Input
-                    type="password"
-                    placeholder="Utwórz hasło (min. 8 znaków)"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="h-12 text-base"
-                    required
-                  />
-                </div>
-                <Button 
-                  type="submit"
-                  className="w-full h-12 text-base font-medium button-glow"
-                  disabled={loading}
-                >
-                  {loading ? "Tworzenie konta..." : "🚀 Rozpocznij darmowy trial"}
-                </Button>
-              </form>
+                {/* Register Tab */}
+                <TabsContent value="register" className="space-y-6">
+                  {/* Social Login Buttons */}
+                  <SocialLoginButtons loading={loading} setLoading={setLoading} />
 
-              {/* Login Toggle */}
-              <Collapsible open={showLogin} onOpenChange={setShowLogin}>
-                <div className="text-center">
-                  <CollapsibleTrigger asChild>
-                    <Button variant="link" className="text-sm text-muted-foreground">
-                      Masz już konto? Zaloguj się
+                  {/* Divider */}
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-muted" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-background px-2 text-muted-foreground">lub przez email</span>
+                    </div>
+                  </div>
+
+                  {/* Email Signup Form */}
+                  <form onSubmit={(e) => { e.preventDefault(); handleSignUp(); }} className="space-y-4">
+                    <div className="space-y-3">
+                      <Input
+                        type="email"
+                        placeholder="Twój adres email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="h-12 text-base"
+                        required
+                      />
+                      <Input
+                        type="password"
+                        placeholder="Utwórz hasło (min. 8 znaków)"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="h-12 text-base"
+                        required
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full h-12 text-base font-medium button-glow"
+                      disabled={loading}
+                    >
+                      {loading ? "Tworzenie konta..." : "Rozpocznij darmowy trial"}
                     </Button>
-                  </CollapsibleTrigger>
-                </div>
-                <CollapsibleContent className="space-y-4 mt-4">
+                  </form>
+                </TabsContent>
+
+                {/* Login Tab */}
+                <TabsContent value="login" className="space-y-6">
+                  {/* Social Login Buttons */}
+                  <SocialLoginButtons loading={loading} setLoading={setLoading} />
+
+                  {/* Divider */}
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-muted" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-background px-2 text-muted-foreground">lub przez email</span>
+                    </div>
+                  </div>
+
+                  {/* Email Login Form */}
                   <form onSubmit={(e) => { e.preventDefault(); handleSignIn(); }} className="space-y-4">
                     <div className="space-y-3">
                       <Input
@@ -444,25 +469,25 @@ export default function AuthPage() {
                         required
                       />
                     </div>
-                    <Button 
+                    <Button
                       type="submit"
                       className="w-full h-12 text-base font-medium"
                       disabled={loading}
-                      variant="secondary"
                     >
                       {loading ? "Logowanie..." : "Zaloguj się"}
                     </Button>
-                    <Button 
-                      onClick={handleForgotPassword} 
-                      variant="link" 
-                      className="w-full text-sm" 
+                    <Button
+                      type="button"
+                      onClick={handleForgotPassword}
+                      variant="link"
+                      className="w-full text-sm"
                       disabled={loading}
                     >
                       Zapomniałeś hasła?
                     </Button>
                   </form>
-                </CollapsibleContent>
-              </Collapsible>
+                </TabsContent>
+              </Tabs>
 
               {/* Trust signals */}
               <div className="text-center text-xs text-muted-foreground space-y-2 pt-4 border-t">
@@ -472,7 +497,9 @@ export default function AuthPage() {
                   <span>⚡ Szybkie</span>
                 </div>
                 <p>
-                  Rejestrując się, akceptujesz nasze warunki użytkowania.
+                  {activeTab === "register"
+                    ? "Rejestrując się, akceptujesz nasze warunki użytkowania."
+                    : "Twoje dane są bezpieczne."}
                   <br />
                   Anuluj w dowolnym momencie - bez zobowiązań.
                 </p>
