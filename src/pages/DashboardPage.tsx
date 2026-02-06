@@ -1,11 +1,53 @@
+import { useEffect, useState } from "react";
 import { Dashboard } from "@/components/Dashboard";
 import { AdminPanel } from "@/components/AdminPanel";
 import { Seo } from "@/components/Seo";
 import { useRoles } from "@/hooks/useRoles";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const DashboardPage = () => {
   const { isAdmin } = useRoles();
+  const { user } = useAuth();
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
+
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      if (!user) {
+        setCheckingOnboarding(false);
+        return;
+      }
+
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('onboarding_completed')
+          .eq('user_id', user.id)
+          .single();
+
+        if (data && !data.onboarding_completed) {
+          // Redirect to onboarding if not completed
+          window.location.href = '/onboarding/welcome';
+          return;
+        }
+      } catch (error) {
+        console.error('Error checking onboarding status:', error);
+      }
+
+      setCheckingOnboarding(false);
+    };
+
+    checkOnboarding();
+  }, [user]);
+
+  if (checkingOnboarding) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <>
