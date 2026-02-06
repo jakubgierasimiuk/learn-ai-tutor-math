@@ -46,7 +46,7 @@ export const Navigation = () => {
               <div className="hidden md:flex items-center gap-8">
                 <Link to="/study" className={`flex items-center gap-2 transition-smooth ${isActive('/study') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
                   <Brain className="w-4 h-4" />
-                  Study & Learn
+                  Lekcje
                 </Link>
                 <Link to="/referral" className={`flex items-center gap-2 transition-smooth ${isActive('/referral') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
                   <Gift className="w-4 h-4" />
@@ -55,22 +55,22 @@ export const Navigation = () => {
                 {isAdmin && <>
                     <Link to="/dashboard" className={`flex items-center gap-2 transition-smooth ${isActive('/dashboard') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
                       <Crown className="w-4 h-4" />
-                      Dashboard Zarządczy
+                      Panel Admina
                     </Link>
                     <Link to="/ai-logs" className={`flex items-center gap-2 transition-smooth ${isActive('/ai-logs') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
                       <Database className="w-4 h-4" />
-                      AI Logs
+                      Logi AI
+                    </Link>
+                    <Link to="/sessions" className={`flex items-center gap-2 transition-smooth ${isActive('/sessions') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
+                      <Clock className="w-4 h-4" />
+                      Sesje
                     </Link>
                   </>}
-                <Link to="/sessions" className={`flex items-center gap-2 transition-smooth ${isActive('/sessions') ? 'text-primary font-medium' : 'text-foreground hover:text-primary'}`}>
-                  <Clock className="w-4 h-4" />
-                  Sesje
-                </Link>
                 <Button asChild size="sm" className="shadow-primary" onClick={() => logEvent('cta_click', {
               source: 'nav'
             })}>
                   <Link to="/chat">
-                    <span className="inline-flex items-center"><MessageCircle className="w-4 h-4 mr-2" />Korepetycje z AI</span>
+                    <span className="inline-flex items-center"><MessageCircle className="w-4 h-4 mr-2" />Czat z AI</span>
                   </Link>
                 </Button>
               </div>
@@ -132,11 +132,11 @@ export const Navigation = () => {
                 <div className="flex flex-col gap-4">
                   <Link to="/study" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/study') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
                     <Brain className="w-4 h-4" />
-                    Study & Learn
+                    Lekcje
                   </Link>
                   <Link to="/chat" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/chat') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
                     <MessageCircle className="w-4 h-4" />
-                    Mentavo AI
+                    Czat z AI
                   </Link>
                   <Link to="/referral" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/referral') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
                     <Gift className="w-4 h-4" />
@@ -145,17 +145,17 @@ export const Navigation = () => {
                   {isAdmin && <>
                       <Link to="/dashboard" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/dashboard') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
                         <Crown className="w-4 h-4" />
-                        Dashboard Zarządczy
+                        Panel Admina
                       </Link>
                       <Link to="/ai-logs" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/ai-logs') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
                         <Database className="w-4 h-4" />
-                        AI Logs
+                        Logi AI
+                      </Link>
+                      <Link to="/sessions" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/sessions') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
+                        <Clock className="w-4 h-4" />
+                        Sesje
                       </Link>
                     </>}
-                  <Link to="/sessions" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/sessions') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
-                    <Clock className="w-4 h-4" />
-                    Sesje
-                  </Link>
                 </div>
                 <div className="flex flex-col gap-2 pt-4 border-t border-border">
                   <Button variant="ghost" className="w-full flex items-center gap-2 text-muted-foreground hover:text-orange-500" onClick={() => {
