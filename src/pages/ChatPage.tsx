@@ -121,7 +121,7 @@ const ChatPage = () => {
                   setMenuOpen(false);
                   logEvent('bug_report_opened', { source: 'chat_menu' });
                 }}
-                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors w-full text-left text-muted-foreground hover:text-orange-500"
+                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted transition-colors w-full text-left text-muted-foreground hover:text-primary"
               >
                 <Bug className="w-4 h-4" />
                 Zgłoś problem

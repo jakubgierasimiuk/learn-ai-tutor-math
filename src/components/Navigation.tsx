@@ -82,7 +82,7 @@ export const Navigation = () => {
               logEvent('bug_report_opened', {
                 source: 'desktop_nav'
               });
-            }} className="flex items-center gap-2 text-muted-foreground hover:text-orange-500" title="Zgłoś problem">
+            }} className="flex items-center gap-2 text-muted-foreground hover:text-primary" title="Zgłoś problem">
                   <Bug className="w-4 h-4" />
                   Zgłoś problem
                 </Button>
@@ -158,7 +158,7 @@ export const Navigation = () => {
                     </>}
                 </div>
                 <div className="flex flex-col gap-2 pt-4 border-t border-border">
-                  <Button variant="ghost" className="w-full flex items-center gap-2 text-muted-foreground hover:text-orange-500" onClick={() => {
+                  <Button variant="ghost" className="w-full flex items-center gap-2 text-muted-foreground hover:text-primary" onClick={() => {
               setIsBugReportOpen(true);
               setIsOpen(false);
               logEvent('bug_report_opened', {
