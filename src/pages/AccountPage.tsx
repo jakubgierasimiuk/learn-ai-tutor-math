@@ -8,7 +8,18 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { User, Shield, CreditCard, Calendar, Lock, CheckCircle, Crown, Zap, ArrowRight } from "lucide-react";
+import { User, Shield, CreditCard, Calendar, Lock, CheckCircle, Crown, Zap, ArrowRight, Trash2, AlertTriangle } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { SMSActivationSection } from "@/components/SMSActivationSection";
 import { logEvent } from "@/lib/logger";
@@ -24,6 +35,8 @@ const AccountPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [profile, setProfile] = useState<any>(null);
   const [foundingInfo, setFoundingInfo] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteConfirmEmail, setDeleteConfirmEmail] = useState("");
 
   // Fetch profile and founding member info
   useEffect(() => {
@@ -149,6 +162,63 @@ const AccountPage = () => {
       });
     } finally {
       setIsUpgrading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmEmail !== user?.email) {
+      toast({
+        title: "Błąd",
+        description: "Wpisany email nie zgadza się z Twoim kontem",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsDeleting(true);
+    logEvent('account_delete_initiated', { user_id: user?.id });
+
+    try {
+      // Call the delete-account edge function
+      const { data, error } = await supabase.functions.invoke('delete-account', {
+        body: { confirmEmail: deleteConfirmEmail }
+      });
+
+      if (error) {
+        console.error('Delete account error:', error);
+        toast({
+          title: "Błąd",
+          description: "Nie udało się usunąć konta. Spróbuj ponownie lub skontaktuj się z nami.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data?.success) {
+        toast({
+          title: "Konto usunięte",
+          description: "Twoje konto zostało pomyślnie usunięte. Żegnamy!",
+        });
+        // Sign out and redirect to home
+        await supabase.auth.signOut();
+        window.location.href = '/';
+      } else {
+        toast({
+          title: "Błąd",
+          description: data?.error || "Wystąpił problem podczas usuwania konta",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Delete account error:', error);
+      toast({
+        title: "Błąd",
+        description: "Wystąpił nieoczekiwany błąd podczas usuwania konta",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeleteConfirmEmail("");
     }
   };
 
@@ -472,6 +542,91 @@ const AccountPage = () => {
                     </>
                   )}
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Danger Zone - Delete Account */}
+          <Card className="lg:col-span-2 border-destructive/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-destructive">
+                <AlertTriangle className="w-5 h-5" />
+                Strefa niebezpieczna
+              </CardTitle>
+              <CardDescription>
+                Nieodwracalne działania dotyczące Twojego konta
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-destructive/5 rounded-lg border border-destructive/20">
+                <div>
+                  <h4 className="font-medium text-destructive">Usuń konto</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Trwale usuń swoje konto i wszystkie powiązane dane. Ta akcja jest nieodwracalna.
+                  </p>
+                </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm">
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Usuń konto
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                        <AlertTriangle className="w-5 h-5" />
+                        Czy na pewno chcesz usunąć konto?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription className="space-y-3">
+                        <p>
+                          Ta akcja jest <strong>nieodwracalna</strong>. Zostaną usunięte:
+                        </p>
+                        <ul className="list-disc list-inside text-sm space-y-1">
+                          <li>Wszystkie Twoje dane osobowe</li>
+                          <li>Historia rozmów z AI</li>
+                          <li>Postępy w nauce</li>
+                          <li>Subskrypcja (bez zwrotu środków)</li>
+                        </ul>
+                        <div className="pt-3">
+                          <Label htmlFor="confirm-email" className="text-sm font-medium">
+                            Wpisz swój email aby potwierdzić: <span className="font-mono text-xs">{user?.email}</span>
+                          </Label>
+                          <Input
+                            id="confirm-email"
+                            type="email"
+                            value={deleteConfirmEmail}
+                            onChange={(e) => setDeleteConfirmEmail(e.target.value)}
+                            placeholder="Wpisz swój email"
+                            className="mt-2"
+                          />
+                        </div>
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel onClick={() => setDeleteConfirmEmail("")}>
+                        Anuluj
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeleteAccount}
+                        disabled={isDeleting || deleteConfirmEmail !== user?.email}
+                        className="bg-destructive hover:bg-destructive/90"
+                      >
+                        {isDeleting ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Usuwanie...
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Tak, usuń moje konto
+                          </>
+                        )}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </CardContent>
           </Card>
