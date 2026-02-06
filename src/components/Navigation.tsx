@@ -129,36 +129,45 @@ export const Navigation = () => {
           {/* Mobile Navigation */}
         {isOpen && <div className="md:hidden py-4 border-t border-border animate-fadeIn">
             {user ? <>
-                <div className="flex flex-col gap-4">
-                  <Link to="/study" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/study') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
-                    <Brain className="w-4 h-4" />
-                    Lekcje
-                  </Link>
+                {/* NAUKA Section */}
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 mb-1">Nauka</span>
                   <Link to="/chat" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/chat') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
                     <MessageCircle className="w-4 h-4" />
                     Czat z AI
                   </Link>
+                  <Link to="/study" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/study') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
+                    <Brain className="w-4 h-4" />
+                    Lekcje
+                  </Link>
+                </div>
+
+                {/* SPOŁECZNOŚĆ Section */}
+                <div className="flex flex-col gap-1 mt-4">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 mb-1">Społeczność</span>
                   <Link to="/referral" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/referral') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
                     <Gift className="w-4 h-4" />
                     Poleć znajomym
                   </Link>
-                  {isAdmin && <>
-                      <Link to="/dashboard" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/dashboard') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
-                        <Crown className="w-4 h-4" />
-                        Panel Admina
-                      </Link>
-                      <Link to="/ai-logs" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/ai-logs') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
-                        <Database className="w-4 h-4" />
-                        Logi AI
-                      </Link>
-                      <Link to="/sessions" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/sessions') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
-                        <Clock className="w-4 h-4" />
-                        Sesje
-                      </Link>
-                    </>}
                 </div>
-                <div className="flex flex-col gap-2 pt-4 border-t border-border">
-                  <Button variant="ghost" className="w-full flex items-center gap-2 text-muted-foreground hover:text-primary" onClick={() => {
+
+                {/* KONTO Section */}
+                <div className="flex flex-col gap-1 mt-4">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 mb-1">Konto</span>
+                  <Button asChild variant="ghost" className="w-full justify-start flex items-center gap-2" onClick={() => setIsOpen(false)}>
+                    <Link to="/account">
+                      <Settings className="w-4 h-4" />
+                      Ustawienia konta
+                    </Link>
+                  </Button>
+                  <span className="text-sm text-muted-foreground px-2 py-1">
+                    {user?.email}
+                  </span>
+                </div>
+
+                {/* Separator + Actions */}
+                <div className="flex flex-col gap-2 pt-4 mt-4 border-t border-border">
+                  <Button variant="ghost" className="w-full justify-start flex items-center gap-2 text-muted-foreground hover:text-primary" onClick={() => {
               setIsBugReportOpen(true);
               setIsOpen(false);
               logEvent('bug_report_opened', {
@@ -168,20 +177,28 @@ export const Navigation = () => {
                     <Bug className="w-4 h-4" />
                     Zgłoś problem
                   </Button>
-                  <span className="text-sm text-muted-foreground px-2">
-                    {user?.email}
-                  </span>
-                  <Button asChild variant="ghost" className="w-full flex items-center gap-2" onClick={() => setIsOpen(false)}>
-                    <Link to="/account">
-                      <Settings className="w-4 h-4" />
-                      Konto
-                    </Link>
-                  </Button>
                   <Button variant="outline" onClick={signOut} className="w-full flex items-center gap-2">
                     <LogOut className="w-4 h-4" />
                     Wyloguj
                   </Button>
                 </div>
+
+                {/* ADMIN Section - only for admins */}
+                {isAdmin && <div className="flex flex-col gap-1 mt-4 pt-4 border-t border-border">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 mb-1">Admin</span>
+                    <Link to="/dashboard" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/dashboard') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
+                      <Crown className="w-4 h-4" />
+                      Panel Admina
+                    </Link>
+                    <Link to="/ai-logs" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/ai-logs') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
+                      <Database className="w-4 h-4" />
+                      Logi AI
+                    </Link>
+                    <Link to="/sessions" className={`flex items-center gap-2 p-2 rounded-lg transition-smooth ${isActive('/sessions') ? 'bg-muted text-primary font-medium' : 'hover:bg-muted'}`} onClick={() => setIsOpen(false)}>
+                      <Clock className="w-4 h-4" />
+                      Sesje
+                    </Link>
+                  </div>}
               </> : <div className="flex flex-col gap-4">
                 {/* Mobile Founding 100 Button for non-logged users */}
                 <Button asChild className="gradient-hero text-primary-foreground shadow-primary w-full hover:opacity-95" size="sm">
