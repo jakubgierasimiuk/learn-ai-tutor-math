@@ -14,7 +14,6 @@ import { useTokenUsage } from '@/hooks/useTokenUsage';
 import { useMathSymbols } from '@/hooks/useMathSymbols';
 import MathSymbolPanel from '@/components/MathSymbolPanel';
 import { useLanguage } from '@/hooks/useLanguage';
-import { ExampleQuestions } from '@/components/chat/ExampleQuestions';
 import { TipsPanel } from '@/components/chat/TipsPanel';
 import { MarkdownMath } from '@/components/MarkdownMath';
 
@@ -35,8 +34,8 @@ export const AIChat = () => {
   const [messages, setMessages] = useState<Message[]>([{
     id: '1',
     content: isFirstTime
-      ? '👋 Cześć! Jestem Twoim AI tutorem matematyki.\n\nUczę metodą sokratejską — zamiast dawać gotowe odpowiedzi, zadam Ci pytania naprowadzające, żebyś sam/sama doszedł/doszła do rozwiązania. Dzięki temu naprawdę zrozumiesz materiał! 🧠\n\nNapisz pytanie lub wybierz temat poniżej:'
-      : 'Witaj z powrotem! O czym dziś porozmawiamy?',
+      ? '👋 Cześć! Jestem Twoim AI tutorem matematyki.\n\nNie dam Ci gotowej odpowiedzi — poprowadzę Cię pytaniami do rozwiązania, żebyś naprawdę zrozumiał/a materiał. 🧠\n\nCzego chcesz się dziś nauczyć lub co chcesz przećwiczyć?'
+      : 'Witaj z powrotem! Czego chcesz się dziś nauczyć?',
     role: 'assistant',
     timestamp: new Date(),
     messageType: isFirstTime ? 'welcome' : 'standard'
@@ -530,15 +529,6 @@ export const AIChat = () => {
                     <div className={`${message.role === 'user' ? 'max-w-[90%] md:max-w-[85%] text-right' : 'w-full md:max-w-[85%] text-left'}`}>
                          <div className={`${message.role === 'user' ? 'inline-block ml-auto bg-primary text-primary-foreground' : 'block w-full bg-muted/50 border border-border/50'} px-3 md:px-4 py-2 md:py-3 rounded-2xl`}>
                           <MarkdownMath content={message.content} />
-                         
-                         {/* Example Questions for welcome message */}
-                         {message.messageType === 'welcome' && message.role === 'assistant' && index === 0 && messages.length === 1 && (
-                           <ExampleQuestions onSelect={(question) => {
-                             localStorage.setItem('mentavo_welcome_completed', 'true');
-                             // Set input and let the form submit naturally on next render
-                             setInput(question);
-                           }} />
-                         )}
                        </div>
                     </div>
                   </div>
