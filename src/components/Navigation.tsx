@@ -82,7 +82,7 @@ export const Navigation = () => {
               logEvent('bug_report_opened', {
                 source: 'desktop_nav'
               });
-            }} className="flex items-center gap-2 text-muted-foreground hover:text-primary" title="Zgłoś problem">
+            }} className="flex items-center gap-2 text-muted-foreground hover:text-muted-foreground" title="Zgłoś problem">
                   <Bug className="w-4 h-4" />
                   Zgłoś problem
                 </Button>
@@ -110,7 +110,7 @@ export const Navigation = () => {
                 </Link>
                 <Link to="/auth">
                   <Button className="bg-primary hover:bg-primary/90 shadow-primary hover-lift" onClick={() => handleCtaClick('header_signup')}>
-                    Odblokuj nieograniczoną naukę
+                    30 dni gratis
                   </Button>
                 </Link>
               </div>
@@ -222,7 +222,7 @@ export const Navigation = () => {
             handleCtaClick('mobile_signup');
           }}>
                   <Link to="/auth">
-                    Odblokuj nieograniczoną naukę
+                    30 dni gratis
                   </Link>
                 </Button>
               </div>}

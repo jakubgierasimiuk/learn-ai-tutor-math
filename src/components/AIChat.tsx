@@ -486,7 +486,7 @@ export const AIChat = () => {
     // Navigate to the selected skill lesson
     navigate(`/study/lesson/${skillId}`);
   };
-  return <div className="min-h-screen bg-background flex flex-col relative">
+  return <div className="min-h-screen bg-white flex flex-col relative">
       {/* Tips Panel - floating in top right */}
       <div className="fixed top-4 right-4 z-20">
         <TipsPanel />
@@ -527,7 +527,7 @@ export const AIChat = () => {
                   
                   <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`${message.role === 'user' ? 'max-w-[90%] md:max-w-[85%] text-right' : 'w-full md:max-w-[85%] text-left'}`}>
-                         <div className={`${message.role === 'user' ? 'inline-block ml-auto bg-primary text-primary-foreground' : 'block w-full bg-muted/50 border border-border/50'} px-3 md:px-4 py-2 md:py-3 rounded-2xl`}>
+                         <div className={`${message.role === 'user' ? 'inline-block ml-auto bg-primary text-primary-foreground' : 'block w-full bg-[#F1F5F9]'} px-3 md:px-4 py-2 md:py-3 rounded-2xl`}>
                           <MarkdownMath content={message.content} />
                        </div>
                     </div>
@@ -537,7 +537,7 @@ export const AIChat = () => {
             
             {isLoading && <div className="flex justify-start">
                 <div className="w-full md:max-w-[85%]">
-                  <div className="block w-full bg-muted/50 border border-border/50 px-4 py-3 rounded-2xl">
+                  <div className="block w-full bg-[#F1F5F9] px-4 py-3 rounded-2xl">
                     <div className="flex space-x-1">
                       <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-pulse"></div>
                       <div className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-pulse delay-75"></div>
@@ -556,18 +556,18 @@ export const AIChat = () => {
         <div ref={inputContainerRef} className="fixed md:relative bottom-0 left-0 right-0 bg-background border-t md:border-t-0 p-3 md:p-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:pb-4 z-10">
           {shouldShowPaywall ? (
             // Show lock banner when tokens exhausted
-            <Card className="border-orange-200 bg-gradient-to-r from-orange-50 to-red-50 mb-4">
+            <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 mb-4">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                      <Brain className="w-4 h-4 text-orange-600" />
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <Brain className="w-4 h-4 text-blue-600" />
                     </div>
                     <div>
-                      <p className="font-medium text-orange-800">
+                      <p className="font-medium text-blue-800">
                         Okres darmowy zakończony
                       </p>
-                      <p className="text-sm text-orange-600">
+                      <p className="text-sm text-blue-600">
                         Ulepsz plan, aby kontynuować rozmowę z AI
                       </p>
                     </div>

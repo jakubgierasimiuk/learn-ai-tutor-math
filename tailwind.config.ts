@@ -85,7 +85,10 @@ export default {
     			},
     			neutral: 'hsl(var(--foreground))',
     			'support-light': 'hsl(var(--muted))',
-    			'support-gray': 'hsl(var(--muted-foreground))'
+    			'support-gray': 'hsl(var(--muted-foreground))',
+    			'blue-accent': '#3B82F6',
+    			'blue-hover': '#2563EB',
+    			'blue-light': '#DBEAFE'
     		},
     		borderRadius: {
     			lg: 'var(--radius)',
@@ -102,7 +105,7 @@ export default {
     				'sans-serif'
     			],
     			sans: [
-    				'Roboto',
+    				'Inter',
     				'ui-sans-serif',
     				'system-ui',
     				'-apple-system',

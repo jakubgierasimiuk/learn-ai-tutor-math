@@ -217,11 +217,11 @@ export const Dashboard = () => {
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>;
   }
-  return <div className="min-h-screen bg-background p-2 md:p-6">
+  return <div className="min-h-screen bg-[#F1F5F9] p-2 md:p-6">
       <div className="container mx-auto max-w-full md:max-w-6xl space-y-4 md:space-y-6">
         {/* Header */}
-        <div className="space-y-2">
-          <h1 className="text-4xl font-bold gradient-text">Dashboard</h1>
+        <div className="text-center py-8 px-6 bg-gradient-to-b from-blue-50 to-transparent rounded-2xl mb-4">
+          <h1 className="text-3xl font-bold font-poppins text-[#1E293B]">Witaj z powrotem!</h1>
           <p className="text-muted-foreground">Przegląd Twojego postępu w nauce</p>
         </div>
 
@@ -313,7 +313,7 @@ export const Dashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-primary">{stats?.total_points || 0}</div>
+              <div className="text-2xl font-bold font-poppins text-primary">{stats?.total_points || 0}</div>
               <p className="text-xs text-muted-foreground">Łącznie zdobyte</p>
             </CardContent>
           </Card>
@@ -326,7 +326,7 @@ export const Dashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-primary">{stats?.lessons_completed || 0}</div>
+              <div className="text-2xl font-bold font-poppins text-primary">{stats?.lessons_completed || 0}</div>
               <p className="text-xs text-muted-foreground">Opanowane umiejętności</p>
             </CardContent>
           </Card>
@@ -339,7 +339,7 @@ export const Dashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-primary">{stats?.current_streak || 0}</div>
+              <div className="text-2xl font-bold font-poppins text-primary">{stats?.current_streak || 0}</div>
               <p className="text-xs text-muted-foreground">Dni z rzędu</p>
             </CardContent>
           </Card>
@@ -352,7 +352,7 @@ export const Dashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-primary">{stats?.average_score || 0}%</div>
+              <div className="text-2xl font-bold font-poppins text-primary">{stats?.average_score || 0}%</div>
               <p className="text-xs text-muted-foreground">Wynik z lekcji</p>
             </CardContent>
           </Card>

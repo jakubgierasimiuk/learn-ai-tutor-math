@@ -27,7 +27,7 @@ const ChatPage = () => {
       />
 
       {/* Chat Header */}
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+      <div className="sticky top-0 z-50 bg-gradient-to-b from-blue-50 to-white border-b border-[#E2E8F0]">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-14">
             {/* Left - Back Button */}
@@ -43,7 +43,9 @@ const ChatPage = () => {
 
             {/* Center - Logo */}
             <Link to="/app" className="flex items-center gap-2">
-              <img src={mentavoLogoIcon} alt="Mentavo AI" className="w-8 h-8" />
+              <div className="w-8 h-8 bg-gradient-to-br from-[#2DD4BF] to-[#7C3AED] rounded-lg flex items-center justify-center p-1">
+                <img src={mentavoLogoIcon} alt="Mentavo AI" className="w-full h-full" />
+              </div>
               <span className="font-semibold text-lg">Mentavo AI</span>
             </Link>
 
@@ -176,7 +178,7 @@ const ChatPage = () => {
       </div>
 
       {/* Chat Content */}
-      <div className="min-h-[calc(100vh-3.5rem)] bg-background p-0 md:p-4">
+      <div className="min-h-[calc(100vh-3.5rem)] bg-white p-0 md:p-4">
         <div className="w-full md:container md:mx-auto py-2 md:py-4">
           <AIChat />
         </div>

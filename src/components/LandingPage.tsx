@@ -18,7 +18,6 @@ import {
   Zap,
 } from "lucide-react";
 import mentavoLogo from "@/assets/mentavo-logo-full.png";
-import shapes3d from "@/assets/mentavo-3d-shapes.svg";
 import { saveReferralCode } from "@/lib/referralStorage";
 import { logEvent } from "@/lib/logger";
 import { supabase } from "@/integrations/supabase/client";
@@ -123,7 +122,7 @@ export function LandingPage() {
                 {hasFoundingSpots ? (
                   <Button 
                     onClick={handleJoinFounding}
-                    className="bg-gradient-to-r from-primary to-secondary text-white"
+                    className="bg-[#3B82F6] hover:bg-[#2563EB] text-white"
                   >
                     <Flame className="w-4 h-4 mr-2" />
                     30 dni gratis
@@ -145,7 +144,7 @@ export function LandingPage() {
           <div className="space-y-8">
             {/* Founding Badge - only show when spots available */}
             {hasFoundingSpots && !isLoadingSpots && (
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 text-primary text-sm font-semibold animate-pulse">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FEF3C7] text-[#D97706] text-sm font-semibold animate-pulse">
                 <Flame className="w-4 h-4 text-destructive" />
                 Pozostało tylko {spotsLeft}/100 miejsc w programie Founding!
               </div>
@@ -173,7 +172,7 @@ export function LandingPage() {
                 <Button 
                   size="lg" 
                   onClick={handleJoinFounding}
-                  className="w-full sm:w-auto bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold text-lg h-16 px-10 shadow-lg hover:shadow-xl transition-all"
+                  className="w-full sm:w-auto bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold text-lg h-16 px-10 shadow-lg hover:shadow-xl transition-all"
                 >
                   <Crown className="w-5 h-5 mr-2" />
                   Dołącz do Founding 100 – 30 dni gratis
@@ -199,7 +198,7 @@ export function LandingPage() {
                 <Button 
                   size="lg" 
                   onClick={handleStartTrial}
-                  className="bg-neutral hover:bg-neutral/90 text-white font-semibold text-lg h-14 px-8"
+                  className="bg-[#3B82F6] hover:bg-[#2563EB] text-white font-semibold text-lg h-14 px-8"
                 >
                   Bezpłatny dostęp przez 7 dni
                 </Button>
@@ -227,11 +226,25 @@ export function LandingPage() {
           </div>
 
           <div className="relative hidden lg:block">
-            <img 
-              src={shapes3d} 
-              alt="3D Geometric Shapes" 
-              className="w-full h-auto animate-float"
-            />
+            <div className="w-full max-w-[420px] mx-auto bg-gradient-to-br from-blue-50 to-purple-50 rounded-3xl p-8 shadow-lg">
+              <div className="flex flex-col gap-3">
+                <div className="self-start bg-white border border-[#E2E8F0] rounded-xl px-4 py-3 text-sm text-[#1E293B] max-w-[85%]">
+                  Cześć! Jak mogę Ci dzisiaj pomóc? 💡
+                </div>
+                <div className="self-end bg-[#3B82F6] text-white rounded-xl px-4 py-3 text-sm max-w-[85%]">
+                  Jak rozwiązać x² - 5x + 6 = 0?
+                </div>
+                <div className="self-start bg-white border border-[#E2E8F0] rounded-xl px-4 py-3 text-sm text-[#1E293B] max-w-[85%]">
+                  Świetne pytanie! To równanie kwadratowe. Zanim podpowiem — <strong>czy potrafisz wskazać współczynniki a, b i c?</strong>
+                </div>
+                <div className="self-end bg-[#3B82F6] text-white rounded-xl px-4 py-3 text-sm max-w-[85%]">
+                  a=1, b=-5, c=6
+                </div>
+                <div className="self-start bg-white border border-[#E2E8F0] rounded-xl px-4 py-3 text-sm text-[#1E293B] max-w-[85%]">
+                  Dokładnie! 🎯 Teraz oblicz deltę używając wzoru Δ = b² - 4ac. Co otrzymujesz?
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -251,7 +264,7 @@ export function LandingPage() {
 
             <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               {/* Founding Card - Highlighted */}
-              <Card className="relative overflow-hidden border-2 border-primary bg-white shadow-lg hover:shadow-xl transition-all group">
+              <Card className="relative overflow-hidden border-2 border-[#3B82F6] bg-white shadow-lg hover:shadow-xl transition-all group">
                 {/* Badge */}
                 <div className="absolute top-4 right-4">
                   <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-xs font-bold">
@@ -304,7 +317,7 @@ export function LandingPage() {
 
                   <Button 
                     onClick={handleJoinFounding}
-                    className="w-full h-14 text-lg font-bold bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white"
+                    className="w-full h-14 text-lg font-bold bg-[#3B82F6] hover:bg-[#2563EB] text-white"
                   >
                     Zostań Founding Member
                   </Button>
@@ -381,7 +394,7 @@ export function LandingPage() {
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
               <CardContent className="p-8 text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 rounded-full bg-[#DBEAFE] flex items-center justify-center mx-auto">
                   <DollarSign className="w-8 h-8 text-primary" />
                 </div>
                 <h3 className="font-poppins font-semibold text-xl text-neutral">
@@ -395,7 +408,7 @@ export function LandingPage() {
 
             <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
               <CardContent className="p-8 text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 rounded-full bg-[#DBEAFE] flex items-center justify-center mx-auto">
                   <Clock className="w-8 h-8 text-primary" />
                 </div>
                 <h3 className="font-poppins font-semibold text-xl text-neutral">
@@ -409,7 +422,7 @@ export function LandingPage() {
 
             <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
               <CardContent className="p-8 text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 rounded-full bg-[#DBEAFE] flex items-center justify-center mx-auto">
                   <Users className="w-8 h-8 text-primary" />
                 </div>
                 <h3 className="font-poppins font-semibold text-xl text-neutral">
@@ -439,8 +452,8 @@ export function LandingPage() {
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
               <CardContent className="p-8 text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mx-auto">
-                  <Bot className="w-8 h-8 text-secondary" />
+                <div className="w-16 h-16 rounded-full bg-[#DBEAFE] flex items-center justify-center mx-auto">
+                  <Bot className="w-8 h-8 text-[#3B82F6]" />
                 </div>
                 <h3 className="font-poppins font-semibold text-xl text-neutral">
                   24/7 Dostępność
@@ -453,8 +466,8 @@ export function LandingPage() {
 
             <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
               <CardContent className="p-8 text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mx-auto">
-                  <TrendingUp className="w-8 h-8 text-secondary" />
+                <div className="w-16 h-16 rounded-full bg-[#DBEAFE] flex items-center justify-center mx-auto">
+                  <TrendingUp className="w-8 h-8 text-[#3B82F6]" />
                 </div>
                 <h3 className="font-poppins font-semibold text-xl text-neutral">
                   Przystępna cena
@@ -467,8 +480,8 @@ export function LandingPage() {
 
             <Card className="bg-white border-none shadow-card hover:shadow-elevated transition-all">
               <CardContent className="p-8 text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mx-auto">
-                  <BookOpen className="w-8 h-8 text-secondary" />
+                <div className="w-16 h-16 rounded-full bg-[#DBEAFE] flex items-center justify-center mx-auto">
+                  <BookOpen className="w-8 h-8 text-[#3B82F6]" />
                 </div>
                 <h3 className="font-poppins font-semibold text-xl text-neutral">
                   Interaktywne uczenie
@@ -483,7 +496,7 @@ export function LandingPage() {
       </section>
 
       {/* CTA Section - Dynamic based on founding spots */}
-      <section className="bg-gradient-to-br from-primary via-primary to-secondary py-20">
+      <section className="bg-gradient-to-br from-[#2DD4BF] to-[#7C3AED] py-20">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto space-y-8">
             {hasFoundingSpots ? (
@@ -568,7 +581,7 @@ export function LandingPage() {
           </div>
 
           <div className="mt-8 text-center text-white/60 text-sm">
-            © 2025 Mentavo AI. Wszystkie prawa zastrzeżone.
+            © 2026 Mentavo AI. Wszystkie prawa zastrzeżone.
           </div>
         </div>
       </footer>

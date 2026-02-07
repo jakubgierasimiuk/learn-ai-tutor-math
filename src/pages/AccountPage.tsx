@@ -231,7 +231,7 @@ const AccountPage = () => {
       case 'expired':
         return { name: 'Wygasł', color: 'bg-red-100 text-red-800' };
       case 'test':
-        return { name: 'Testowy', color: 'bg-orange-100 text-orange-800' };
+        return { name: 'Testowy', color: 'bg-amber-100 text-amber-800' };
       case 'paid':
         return { name: 'Płatny', color: 'bg-blue-100 text-blue-800' };
       case 'super':
@@ -263,7 +263,7 @@ const AccountPage = () => {
     <div className="min-h-screen bg-gradient-subtle">
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-4xl">
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Zarządzanie kontem</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold font-poppins text-foreground mb-2">Zarządzanie kontem</h1>
           <p className="text-base sm:text-lg text-muted-foreground">
             Zarządzaj swoim kontem, subskrypcją i ustawieniami bezpieczeństwa
           </p>

@@ -358,11 +358,11 @@ export default function AuthPage() {
         <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12">
           <Card className="w-full max-w-md glass-card animate-fade-in">
             <CardHeader className="text-center space-y-4">
-              <div className="mx-auto w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-r from-[#2DD4BF] to-[#7C3AED] rounded-full flex items-center justify-center">
                 <span className="text-2xl">🎓</span>
               </div>
               <div>
-                <CardTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                <CardTitle className="text-2xl font-bold font-poppins text-[#1E293B]">
                   {activeTab === "register" ? "Załóż DARMOWE konto" : "Witaj ponownie!"}
                 </CardTitle>
                 <CardDescription className="text-base mt-2">
