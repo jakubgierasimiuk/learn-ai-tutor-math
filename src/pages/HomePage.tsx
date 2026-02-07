@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { Seo } from "@/components/Seo";
 import { ProgressMiniBar } from "@/components/ProgressMiniBar";
 import { Hero } from "@/components/Hero";
@@ -104,8 +104,7 @@ const HomePage = () => {
 
   // Redirect to onboarding if not completed
   if (!loading && user && profile && !profile.onboarding_completed) {
-    window.location.href = '/onboarding/welcome';
-    return null;
+    return <Navigate to="/onboarding/checklist" replace />;
   }
 
   // Show loading while checking profile

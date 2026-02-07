@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Dashboard } from "@/components/Dashboard";
 import { AdminPanel } from "@/components/AdminPanel";
 import { Seo } from "@/components/Seo";
@@ -10,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const DashboardPage = () => {
   const { isAdmin } = useRoles();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
 
   useEffect(() => {
@@ -27,8 +29,7 @@ const DashboardPage = () => {
           .single();
 
         if (data && !data.onboarding_completed) {
-          // Redirect to onboarding if not completed
-          window.location.href = '/onboarding/welcome';
+          navigate('/onboarding/checklist', { replace: true });
           return;
         }
       } catch (error) {
@@ -39,7 +40,7 @@ const DashboardPage = () => {
     };
 
     checkOnboarding();
-  }, [user]);
+  }, [user, navigate]);
 
   if (checkingOnboarding) {
     return (

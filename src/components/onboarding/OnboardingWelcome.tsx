@@ -101,12 +101,19 @@ export function OnboardingWelcome() {
             <ChevronLeft size={16} />
             <span>Wstecz</span>
           </Button>
-          
+
           <Button onClick={handleNext} className="flex items-center space-x-2">
             <span>{isLast ? 'Zaczynamy!' : 'Dalej'}</span>
             {!isLast && <ChevronRight size={16} />}
           </Button>
         </div>
+
+        <button
+          onClick={() => navigate('/onboarding/checklist')}
+          className="mt-6 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Pomiń wprowadzenie →
+        </button>
       </Card>
     </div>
   );

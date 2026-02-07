@@ -71,6 +71,7 @@ export function PhaseBasedLesson({
   const { quickSymbols, getSymbolsForText } = useMathSymbols(skillId);
   const { shouldShowSoftPaywall } = useTokenUsage();
   const chatScrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     loadSkillData();
   }, [skillId]);
@@ -86,11 +87,8 @@ export function PhaseBasedLesson({
 
   // Auto-scroll to bottom when new messages are added
   useEffect(() => {
-    if (chatScrollRef.current && chatHistory.length > 0) {
-      const scrollElement = chatScrollRef.current;
-      scrollElement.scrollTop = scrollElement.scrollHeight;
-    }
-  }, [chatHistory]);
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatHistory, isLoading]);
 
   // Auto-close session on page unload
   useEffect(() => {
@@ -476,9 +474,7 @@ export function PhaseBasedLesson({
 
       // Scroll to bottom after adding hint
       setTimeout(() => {
-        if (chatScrollRef.current) {
-          chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
-        }
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
     } catch (error) {
       console.error('Error getting hint:', error);
@@ -594,7 +590,7 @@ export function PhaseBasedLesson({
         
         
         {/* Messages Container */}
-        <div ref={chatScrollRef} className="flex-1 overflow-y-auto scroll-smooth pb-4">
+        <div ref={chatScrollRef} className="flex-1 overflow-y-auto scroll-smooth pb-[200px] md:pb-6">
           {chatHistory.length === 0 ? <div className="flex items-center justify-center h-64">
               <div className="text-center">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
@@ -673,11 +669,12 @@ export function PhaseBasedLesson({
                     </div>
                   </div>
                 </div>}
+              <div ref={messagesEndRef} />
             </div>}
         </div>
 
         {/* Fixed Input Area */}
-        <div className="sticky bottom-0 bg-background/80 backdrop-blur-sm pt-4">
+        <div className="fixed md:sticky bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm pt-3 px-4 md:px-0 pb-[calc(0.5rem+env(safe-area-inset-bottom))] md:pb-0 z-10">
           <div className="mb-3">
             <MathSymbolPanel quickSymbols={contextualSymbols.length > 0 ? contextualSymbols : quickSymbols} onSymbolSelect={handleSymbolSelect} />
           </div>
