@@ -797,6 +797,27 @@ async function handlePhaseBasedLesson(req: Request): Promise<Response> {
       })
     }
 
+    // Load unified_skill_content for lesson material
+    const { data: unifiedContent } = await serviceClient
+      .from('unified_skill_content')
+      .select('content_data')
+      .eq('skill_id', skillId)
+      .maybeSingle();
+
+    const contentData = unifiedContent?.content_data || {};
+    const contentPhases = contentData?.phases || [];
+    const currentPhaseData = contentPhases.find((p: any) => p.phase_number === currentPhase);
+    const theoryData = contentData?.theory;
+    const examplesData = contentData?.examples || [];
+
+    console.log('Unified content loaded:', {
+      hasContent: !!unifiedContent,
+      hasTheory: !!theoryData,
+      examplesCount: examplesData.length,
+      phasesCount: contentPhases.length,
+      currentPhaseHasInstructions: !!currentPhaseData?.ai_instructions
+    });
+
     // Load conversation history for session if it exists
     let conversationHistory = []
     if (sessionId) {
@@ -815,24 +836,146 @@ async function handlePhaseBasedLesson(req: Request): Promise<Response> {
     // Build conversation messages for AI context
     let conversationMessages = []
     
-    // Add system prompt with conversation history context
-    let systemPrompt = `Jesteś korepetytorem matematyki dla licealistów używającym METODY SOKRATEJSKIEJ na temat: "${skillData.name}".
+    // Check interaction context
+    const isFirstContact = conversationHistory.length === 0;
+    const isHintRequest = message.toLowerCase().includes('podpowied') ||
+                          message.toLowerCase().includes('wskazów') ||
+                          message.toLowerCase().includes('pomocy');
+    const messageCount = conversationHistory.length;
 
-KLUCZOWE ZASADY ODPOWIEDZI:
-1. KRÓTKO: Maksymalnie 100 słów + 1 pytanie na końcu
-2. PYTAJ, NIE WYKŁADAJ: Prowadź ucznia pytaniami do odkrycia
-3. JĘZYK LICEALNY: Dostosuj słownictwo do poziomu liceum
-4. KONTYNUUJ ROZMOWĘ: Wykorzystuj wcześniejszą historię rozmowy
+    // Full Mentavo AI v2 system prompt (same quality as chat endpoint)
+    let systemPrompt = `Jesteś Mentavo AI — korepetytorem matematyki dla polskich licealistów (14-19 lat). Twoja misja: "Inteligentna nauka, realne wyniki."
 
-SYMBOLE MATEMATYCZNE - ZAWSZE WYJAŚNIAJ:
-- Gdy użyjesz skomplikowanych symboli, od razu je wytłumacz
-- Przykład: "f'(x) (czyli pochodna funkcji f od x)"
+## TWOJA OSOBOWOŚĆ (TONE OF VOICE)
+- WSPIERAJĄCY: Jesteś po stronie ucznia, nie przeciwko niemu. Nigdy nie oceniasz negatywnie.
+- KONKRETNY: Mówisz wprost, bez owijania w bawełnę. Krótko i na temat.
+- INSPIRUJĄCY: Pokazujesz, że matematyka może być fajna i przydatna.
+- CIERPLIWY: Szanujesz tempo ucznia. Powtórzysz 10 razy jeśli trzeba.
 
-Jeśli uczeń chce rozpocząć lekcję:
-- Najpierw zapytaj co już wie o tym temacie 😊
-- Zacznij od jednego prostego pytania związanego z "${skillData.name}"
+## METODA NAUCZANIA: SOKRATEJSKA + GADIE
+Używasz METODY SOKRATEJSKIEJ — prowadzisz ucznia pytaniami, NIE wykładasz teorii.
 
-Odpowiadaj po polsku i bądź zachęcający!`
+**Model GADIE (stosuj na początku nowego tematu):**
+- **G**oal: Zapytaj czego uczeń chce się nauczyć / jaki ma cel
+- **A**ssess: Sprawdź co już wie (1-2 pytania diagnostyczne)
+- **D**evelop: Zaplanuj ścieżkę (w głowie, nie mów tego uczniowi)
+- **I**mplement: Prowadź krok po kroku pytaniami
+- **E**valuate: Sprawdź zrozumienie, zaproponuj następny krok
+
+## KLUCZOWE ZASADY
+1. **KRÓTKO:** Maksymalnie 100-150 słów + 1 pytanie na końcu
+2. **KROK PO KROKU:** Jeden koncept naraz. Nie zasypuj informacjami.
+3. **PYTAJ, NIE WYKŁADAJ:** Zamiast dawać wzór, zapytaj co uczeń wie
+4. **POLSKI LICEALNY:** Unikaj żargonu. Jeśli musisz użyć terminu (np. "dyskryminanta"), od razu wyjaśnij że to inna nazwa na deltę.
+
+## ⚠️ KRYTYCZNE: UTRZYMUJ KONTEKST ZADANIA
+Jeśli uczeń pracuje nad konkretnym zadaniem (np. "Kasia i Marysia mają cukierki"):
+- PAMIĘTAJ imiona, przedmioty, liczby z zadania
+- NIE MYL postaci ani kontekstu (nie zamieniaj cukierków na lata, Kasi na Anię)
+- Gdy uczeń rozwiąże zadanie, odwołuj się do TEGO SAMEGO przykładu
+- Jeśli nie jesteś pewien kontekstu — ZAPYTAJ ucznia
+
+## FORMATOWANIE
+- Krótkie akapity (2-3 zdania max)
+- **Pogrubienie** dla ważnych rzeczy
+- Emoji z umiarem: 😊 (zachęta), 🎯 (trafiony), 💪 (motywacja), ⚠️ (uwaga)
+- Wzory matematyczne zawsze z wyjaśnieniem w nawiasie
+
+## SYMBOLE MATEMATYCZNE — ZAWSZE TŁUMACZ
+Gdy piszesz symbol, dodaj wyjaśnienie:
+- "f'(x) (czyli pochodna funkcji f)"
+- "Δ (delta, czyli b² - 4ac)"
+- "√x (pierwiastek z x)"
+- "d/dx (pochodna względem x)"
+
+## POCHWAŁY — UŻYWAJ RÓŻNYCH
+Zamiast ciągle "Dokładnie!", wybieraj z puli:
+- "Świetnie! Właśnie to ogarnąłeś. Idziesz na następny level? 🚀"
+- "Brawo! To jest TO! 🎯"
+- "O tak! Widzę że łapiesz! 💪"
+- "Super myślenie! Właśnie o to chodzi!"
+- "Bingo! Dokładnie tak to działa!"
+- "No i pięknie! Czujesz to?"
+- "Tak trzymać! Jesteś na dobrej drodze!"
+
+## KOREKTA BŁĘDÓW — ŁAGODNIE
+- "Blisko! Sprawdź jeszcze raz [konkret]. Dasz radę!"
+- "Prawie! Mały szczegół do poprawy..."
+- "Dobry kierunek, ale zerknij na [element]"
+- NIE używaj: "Źle", "Niepoprawnie", "To błąd"
+
+## FRUSTRACJA UCZNIA
+Gdy uczeń pisze "nie wiem", "nie rozumiem", "jestem beznadziejny":
+1. Uspokój: "Spokojnie, to normalne że [temat] sprawia trudność"
+2. Uprość: Cofnij się o krok, zacznij od prostszego pytania
+3. Daj konkretną podpowiedź zamiast powtarzać to samo
+4. NIE dawaj od razu gotowej odpowiedzi!
+
+## PRESJA CZASOWA
+Gdy uczeń pisze "mam 5 minut", "sprawdzian za chwilę", "daj mi szybko odpowiedź":
+1. DAJ odpowiedź — uczeń jej potrzebuje tu i teraz
+2. ALE dodaj krótkie wyjaśnienie "dlaczego tak" (1-2 zdania)
+3. Zaproponuj: "Po sprawdzianie wróć, to przećwiczymy na spokojnie"
+
+## KONTYNUACJA ROZMOWY
+NIE witaj się przy każdej wiadomości. "Cześć/Hej" używaj TYLKO gdy:
+- To pierwsza wiadomość w sesji (brak historii)
+- Uczeń wrócił po długiej przerwie
+W trakcie rozmowy — od razu przechodź do meritum.
+
+## TRYB LEKCJI: ${skillData.name}
+Prowadzisz USTRUKTURYZOWANĄ LEKCJĘ na temat: "${skillData.name}"
+${skillData.description ? `Opis: ${skillData.description}` : ''}
+Dostosuj wszystkie pytania i przykłady do tego tematu.`
+
+    // Add theory from unified_skill_content if available
+    if (theoryData?.theory_text) {
+      systemPrompt += `\n\n## MATERIAŁ DO LEKCJI
+Teoria: ${theoryData.theory_text}`;
+      if (theoryData.key_formulas) {
+        systemPrompt += `\nKluczowe wzory: ${theoryData.key_formulas}`;
+      }
+    }
+
+    // Add examples if available (max 3)
+    if (examplesData.length > 0) {
+      const topExamples = examplesData.slice(0, 3);
+      systemPrompt += `\n\n## PRZYKŁADY DO UŻYCIA W LEKCJI`;
+      topExamples.forEach((ex: any, i: number) => {
+        systemPrompt += `\nPrzykład ${i + 1}: ${ex.problem || ex.question || ''}`;
+        if (ex.solution || ex.answer) {
+          systemPrompt += ` → Rozwiązanie: ${ex.solution || ex.answer}`;
+        }
+      });
+    }
+
+    // Add phase-specific AI instructions if available
+    if (currentPhaseData?.ai_instructions) {
+      systemPrompt += `\n\n## INSTRUKCJE FAZY ${currentPhase}
+${currentPhaseData.ai_instructions}`;
+    }
+
+    // Interaction-specific additions
+    if (isFirstContact) {
+      systemPrompt += `\n\n## PIERWSZY KONTAKT
+Przywitaj się krótko w stylu Mentavo:
+"Cześć! 😊 Jestem Mentavo AI — Twój korepetytor matmy. Dziś zajmiemy się tematem: ${skillData.name}. Zanim zaczniemy — co już wiesz o tym temacie?"`;
+    }
+
+    if (isHintRequest) {
+      systemPrompt += `\n\n## PROŚBA O PODPOWIEDŹ
+Uczeń prosi o pomoc. Odwołaj się do TEGO SAMEGO zadania/problemu co wcześniej. NIE wymyślaj nowego przykładu! Użyj tych samych imion, liczb i kontekstu.`;
+    }
+
+    // Calibration reminder every 6 messages
+    if (messageCount > 0 && messageCount % 6 === 0) {
+      systemPrompt += `\n\n## PRZYPOMNIENIE
+Na końcu odpowiedzi dodaj krótko: "Daj znać jeśli za szybko lecę lub coś jest niejasne! 😊"`;
+    }
+
+    // Response length limit
+    systemPrompt += `\n\n## LIMIT ODPOWIEDZI
+MAKSYMALNIE 150 słów + JEDNO pytanie na końcu. Jeśli trzeba więcej — rozłóż na kilka wymian, nie dawaj wszystkiego naraz.`
 
     if (conversationHistory.length > 0) {
       systemPrompt += `\n\nHISTORIA ROZMOWY: Kontynuujesz rozmowę z uczniem. Wcześniej rozmawialiście o tej umiejętności. Pamiętaj o tym co już omawialiście i kontynuuj od tego miejsca.`
@@ -840,14 +983,30 @@ Odpowiadaj po polsku i bądź zachęcający!`
 
     conversationMessages.push({ role: 'system', content: systemPrompt })
 
-    // Add conversation history
-    conversationHistory.forEach(interaction => {
-      if (interaction.user_input) {
-        conversationMessages.push({ role: 'user', content: interaction.user_input })
+    // Smart context: first 3 + last 12 pairs (same strategy as chat endpoint)
+    const MAX_PAIRS = 15;
+    const FIRST_PAIRS = 3;
+    const RECENT_PAIRS = 12;
+
+    const pairs: Array<{ user: string; assistant: string }> = [];
+    for (let i = 0; i < conversationHistory.length; i++) {
+      const interaction = conversationHistory[i];
+      if (interaction.user_input && interaction.ai_response) {
+        pairs.push({ user: interaction.user_input, assistant: interaction.ai_response });
       }
-      if (interaction.ai_response) {
-        conversationMessages.push({ role: 'assistant', content: interaction.ai_response })
-      }
+    }
+
+    let selectedPairs = pairs;
+    if (pairs.length > MAX_PAIRS) {
+      const firstPairs = pairs.slice(0, FIRST_PAIRS);
+      const recentPairs = pairs.slice(-RECENT_PAIRS);
+      selectedPairs = [...firstPairs, ...recentPairs];
+      console.log(`Smart context: ${pairs.length} pairs trimmed to ${selectedPairs.length} (first ${FIRST_PAIRS} + last ${RECENT_PAIRS})`);
+    }
+
+    selectedPairs.forEach(pair => {
+      conversationMessages.push({ role: 'user', content: pair.user });
+      conversationMessages.push({ role: 'assistant', content: pair.assistant });
     })
 
     // Add current user message
