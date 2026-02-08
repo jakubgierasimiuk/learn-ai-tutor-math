@@ -87,7 +87,7 @@ export function FoundingLandingPage() {
           "name": "Founding 100 Program - Mentavo AI",
           "description": "Ekskluzywny program dla pierwszych 100 użytkowników Mentavo AI. Bezpłatny miesiąc Premium, wpływ na rozwój i status Founding Member.",
           "url": "https://mentavo.pl/founding",
-          "validThrough": "2025-12-31",
+          "validThrough": "2026-12-31",
           "category": "Education",
           "eligibleRegion": {
             "@type": "Country",
@@ -479,7 +479,7 @@ export function FoundingLandingPage() {
                   },
                   {
                     question: "Czy moje dane będą bezpieczne?",
-                    answer: "Absolutnie tak. Jesteśmy w pełni zgodni z RODO i stosujemy najwyższe standardy bezpieczeństwa. Twoje dane są szyfrowane i nigdy nie są udostępniane osobom trzecim. Dodatkowo, jesteś polską firmą podlegającą polskiemu prawu."
+                    answer: "Absolutnie tak. Jesteśmy w pełni zgodni z RODO i stosujemy najwyższe standardy bezpieczeństwa. Twoje dane są szyfrowane i nigdy nie są udostępniane osobom trzecim. Dodatkowo, jesteśmy polską firmą podlegającą polskiemu prawu."
                   },
                   {
                     question: "Co się stanie po wypełnieniu 100 miejsc?",
@@ -573,7 +573,7 @@ export function FoundingLandingPage() {
               <span className="text-lg font-semibold">Mentavo AI</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2024 Mentavo AI. Wszystkie prawa zastrzeżone.
+              © 2026 Mentavo AI. Wszystkie prawa zastrzeżone.
             </p>
           </div>
         </footer>

@@ -75,14 +75,14 @@ export const TrialCountdown: React.FC<TrialCountdownProps> = ({
               {timeLeft.days}d {timeLeft.hours}h
             </Badge>
           </div>
-          <span className="text-sm text-muted-foreground">trial left</span>
+          <span className="text-sm text-muted-foreground">do końca trialu</span>
         </div>
         <Button 
           size="sm" 
           onClick={onUpgrade}
           className="h-8 text-xs"
         >
-          Upgrade <ArrowRight className="w-3 h-3 ml-1" />
+          Ulepsz <ArrowRight className="w-3 h-3 ml-1" />
         </Button>
       </div>
     );
@@ -95,7 +95,7 @@ export const TrialCountdown: React.FC<TrialCountdownProps> = ({
           <div className="flex items-center space-x-2">
             <Gift className="w-5 h-5 text-primary" />
             <Badge variant="secondary" className="text-xs font-medium">
-              TRIAL PREMIUM
+              OKRES PRÓBNY
             </Badge>
           </div>
           <Badge 
@@ -141,9 +141,9 @@ export const TrialCountdown: React.FC<TrialCountdownProps> = ({
             Po trial otrzymasz:
           </h4>
           <ul className="text-xs space-y-1 text-muted-foreground ml-6">
-            <li>• 1,000 tokenów miesięcznie</li>
+            <li>• 25 000 tokenów</li>
             <li>• Podstawowe funkcje AI</li>
-            <li>• Bez dostępu premium</li>
+            <li>• Bez dostępu Premium</li>
           </ul>
         </div>
 
@@ -158,7 +158,7 @@ export const TrialCountdown: React.FC<TrialCountdownProps> = ({
         </Button>
 
         <p className="text-xs text-center text-muted-foreground">
-          Upgrade teraz i zachowaj wszystkie funkcje premium
+          Ulepsz teraz i zachowaj wszystkie funkcje Premium
         </p>
       </CardContent>
     </Card>

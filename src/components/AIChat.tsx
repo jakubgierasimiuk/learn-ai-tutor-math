@@ -607,7 +607,7 @@ export const AIChat = () => {
                   placeholder={t.chatPlaceholder} 
                   value={input} 
                   onChange={e => setInput(e.target.value)} 
-                  onKeyPress={handleKeyPress} 
+                  onKeyDown={handleKeyPress} 
                   disabled={isLoading} 
                   className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60 text-base" 
                 />

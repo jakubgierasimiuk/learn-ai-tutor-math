@@ -284,7 +284,7 @@ export const Dashboard = () => {
                 <Button variant="outline" className="w-full h-16 md:h-auto md:p-4 flex flex-row md:flex-col gap-2 md:gap-2 items-center justify-start md:justify-center px-3 md:px-4">
                   <BookOpen className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0" />
                   <div className="text-left md:text-center">
-                    <div className="font-medium text-sm md:text-base">Study&Learn</div>
+                    <div className="font-medium text-sm md:text-base">Lekcje</div>
                     <div className="text-xs opacity-80">wybierz nową lekcję</div>
                   </div>
                 </Button>

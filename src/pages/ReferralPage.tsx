@@ -24,7 +24,7 @@ import {
 
 const tierInfo: Record<TierType, { label: string; icon: any; color: string }> = {
   beginner: { label: "Początkujący", icon: Target, color: "bg-gray-500" },
-  advocate: { label: "Adwokat", icon: Users, color: "bg-blue-500" },
+  advocate: { label: "Rzecznik", icon: Users, color: "bg-blue-500" },
   promoter: { label: "Promotor", icon: Trophy, color: "bg-green-500" },
   ambassador: { label: "Ambasador", icon: Award, color: "bg-purple-500" },
   legend: { label: "Legenda", icon: Crown, color: "bg-yellow-500" }
@@ -175,7 +175,7 @@ export default function ReferralPage() {
                 <CardContent className="p-4">
                   <div className="space-y-3">
                     <div className="text-center">
-                      <h3 className="font-semibold">Nagroda convertible</h3>
+                      <h3 className="font-semibold">Nagroda do wyboru</h3>
                       <p className="text-sm text-muted-foreground">
                         +{reward.meta?.days_amount || 3} dni Premium
                       </p>

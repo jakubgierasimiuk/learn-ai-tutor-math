@@ -59,8 +59,8 @@ const PricingPage = () => {
     } catch (error) {
       console.error('Checkout error:', error);
       toast({
-        title: "Bład",
-        description: "Nie udalo sie otworzyc platnosci. Sprobuj ponownie.",
+        title: "Błąd",
+        description: "Nie udało się otworzyć płatności. Spróbuj ponownie.",
         variant: "destructive",
       });
     } finally {
@@ -69,39 +69,39 @@ const PricingPage = () => {
   };
 
   const features = [
-    { name: "AI Tutor dostepny 24/7", free: true, paid: true, icon: MessageCircle },
-    { name: "Spersonalizowane wyjasnienia", free: true, paid: true, icon: Brain },
-    { name: "Sledzenie postepu", free: true, paid: true, icon: BarChart3 },
+    { name: "AI Tutor dostępny 24/7", free: true, paid: true, icon: MessageCircle },
+    { name: "Spersonalizowane wyjaśnienia", free: true, paid: true, icon: Brain },
+    { name: "Śledzenie postępu", free: true, paid: true, icon: BarChart3 },
     { name: "Podstawa programowa liceum", free: true, paid: true, icon: Check },
-    { name: "Limit tokenow", free: "25 000", paid: "Bez limitu", icon: Zap },
+    { name: "Limit tokenów", free: "25 000", paid: "Bez limitu", icon: Zap },
     { name: "Priorytetowe wsparcie", free: false, paid: true, icon: Shield },
     { name: "Zaawansowana analityka", free: false, paid: true, icon: Sparkles },
   ];
 
   const faqs = [
     {
-      question: "Czy moge wyprobowac za darmo?",
-      answer: "Tak! Oferujemy 7-dniowy darmowy okres probny z pelnym dostepem do wszystkich funkcji. Nie wymagamy karty kredytowej do rejestracji."
+      question: "Czy mogę wypróbować za darmo?",
+      answer: "Tak! Oferujemy 7-dniowy darmowy okres próbny z pełnym dostępem do wszystkich funkcji. Nie wymagamy karty kredytowej do rejestracji."
     },
     {
-      question: "Co sie stanie po zakonczeniu trialu?",
-      answer: "Po zakonczeniu 7-dniowego trialu Twoje konto przejdzie na plan darmowy z ograniczeniem 25 000 tokenow. Mozesz kontynuowac nauke, ale z ograniczeniami. W kazdej chwili mozesz wykupic subskrypcje."
+      question: "Co się stanie po zakończeniu trialu?",
+      answer: "Po zakończeniu 7-dniowego trialu Twoje konto przejdzie na plan darmowy z ograniczeniem 25 000 tokenów. Możesz kontynuować naukę, ale z ograniczeniami. W każdej chwili możesz wykupić subskrypcję."
     },
     {
-      question: "Czy moge anulowac subskrypcje?",
-      answer: "Tak, mozesz anulowac subskrypcje w dowolnym momencie. Dostep do funkcji Premium pozostanie aktywny do konca oplaconego okresu rozliczeniowego."
+      question: "Czy mogę anulować subskrypcję?",
+      answer: "Tak, możesz anulować subskrypcję w dowolnym momencie. Dostęp do funkcji Premium pozostanie aktywny do końca opłaconego okresu rozliczeniowego."
     },
     {
-      question: "Jakie metody platnosci akceptujecie?",
-      answer: "Akceptujemy karty kredytowe i debetowe (Visa, Mastercard, American Express) oraz BLIK. Platnosci sa obslugiwane przez Stripe - bezpiecznego dostawce platnosci."
+      question: "Jakie metody płatności akceptujecie?",
+      answer: "Akceptujemy karty kredytowe i debetowe (Visa, Mastercard, American Express) oraz BLIK. Płatności są obsługiwane przez Stripe — bezpiecznego dostawcę płatności."
     },
     {
-      question: "Czy dane mojego dziecka sa bezpieczne?",
-      answer: "Absolutnie tak. Jestesmy w pelni zgodni z RODO. Dane sa szyfrowane i nigdy nie sa udostepniane osobom trzecim. Jako polska firma podlegamy polskiemu prawu."
+      question: "Czy dane mojego dziecka są bezpieczne?",
+      answer: "Absolutnie tak. Jesteśmy w pełni zgodni z RODO. Dane są szyfrowane i nigdy nie są udostępniane osobom trzecim. Jako polska firma podlegamy polskiemu prawu."
     },
     {
-      question: "Ile kosztuja tradycyjne korepetycje?",
-      answer: "Srednia cena korepetycji z matematyki to 100-150 PLN/h. Przy 4-6 godzinach miesiecznie to 400-900 PLN. Mentavo AI za 49,99 PLN/mies daje nieograniczony dostep 24/7."
+      question: "Ile kosztują tradycyjne korepetycje?",
+      answer: "Średnia cena korepetycji z matematyki to 100–150 PLN/h. Przy 4–6 godzinach miesięcznie to 400–900 PLN. Mentavo AI za 49,99 PLN/mies. daje nieograniczony dostęp 24/7."
     },
   ];
 
@@ -110,8 +110,8 @@ const PricingPage = () => {
   return (
     <>
       <Seo
-        title="Cennik - Mentavo AI | Tutor matematyki"
-        description="Sprawdz cennik Mentavo AI. 7 dni za darmo, potem tylko 49,99 zl miesiecznie. Nieograniczony dostep do AI tutora matematyki 24/7."
+        title="Cennik — Mentavo AI | Tutor matematyki"
+        description="Sprawdź cennik Mentavo AI. 7 dni za darmo, potem tylko 49,99 zł miesięcznie. Nieograniczony dostęp do AI tutora matematyki 24/7."
         canonical="https://mentavo.pl/pricing"
       />
 
@@ -121,7 +121,7 @@ const PricingPage = () => {
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
               <ArrowLeft className="w-4 h-4" />
-              Strona glowna
+              Strona główna
             </Link>
             <Link to="/" className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
@@ -130,12 +130,12 @@ const PricingPage = () => {
               <span className="font-semibold">Mentavo AI</span>
             </Link>
             {user ? (
-              <Link to="/app">
+              <Link to="/dashboard">
                 <Button variant="outline" size="sm">Panel ucznia</Button>
               </Link>
             ) : (
               <Link to="/auth">
-                <Button variant="outline" size="sm">Zaloguj sie</Button>
+                <Button variant="outline" size="sm">Zaloguj się</Button>
               </Link>
             )}
           </div>
@@ -152,7 +152,7 @@ const PricingPage = () => {
               Prosty i przejrzysty cennik
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Jeden plan, pelny dostep. Zacznij za darmo i przekonaj sie, jak Mentavo AI moze pomoc w nauce matematyki.
+              Jeden plan, pełny dostęp. Zacznij za darmo i przekonaj się, jak Mentavo AI może pomóc w nauce matematyki.
             </p>
           </div>
         </section>
@@ -168,31 +168,31 @@ const PricingPage = () => {
                     <Clock className="w-5 h-5 text-muted-foreground" />
                     Darmowy trial
                   </CardTitle>
-                  <CardDescription>Wyprobuj bez zobowiazan</CardDescription>
+                  <CardDescription>Wypróbuj bez zobowiązań</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-bold">0 zl</span>
+                      <span className="text-4xl font-bold">0 zł</span>
                       <span className="text-muted-foreground">/ 7 dni</span>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Pelny dostep przez tydzien
+                      Pełny dostęp przez tydzień
                     </p>
                   </div>
 
                   <ul className="space-y-3">
                     <li className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-green-500" />
-                      <span>Pelny dostep do AI Tutora</span>
+                      <span>Pełny dostęp do AI Tutora</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-green-500" />
-                      <span>25 000 tokenow</span>
+                      <span>25 000 tokenów</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-green-500" />
-                      <span>Wszystkie materialy</span>
+                      <span>Wszystkie materiały</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-green-500" />
@@ -206,7 +206,7 @@ const PricingPage = () => {
                     className="w-full"
                     disabled={!!user}
                   >
-                    {user ? "Masz juz konto" : "Rozpocznij trial"}
+                    {user ? "Masz już konto" : "Rozpocznij trial"}
                   </Button>
                 </CardContent>
               </Card>
@@ -224,13 +224,13 @@ const PricingPage = () => {
                     <Zap className="w-5 h-5 text-primary" />
                     Premium
                   </CardTitle>
-                  <CardDescription>Pelny dostep bez ograniczen</CardDescription>
+                  <CardDescription>Pełny dostęp bez ograniczeń</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-bold">49,99 zl</span>
-                      <span className="text-muted-foreground">/ miesiac</span>
+                      <span className="text-4xl font-bold">49,99 zł</span>
+                      <span className="text-muted-foreground">/ miesiąc</span>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
                       Anuluj w dowolnym momencie
@@ -262,7 +262,7 @@ const PricingPage = () => {
                     disabled={isLoading || isPaidUser}
                   >
                     {isPaidUser ? (
-                      "Masz juz Premium"
+                      "Masz już Premium"
                     ) : isLoading ? (
                       "Przekierowywanie..."
                     ) : user ? (
@@ -280,7 +280,7 @@ const PricingPage = () => {
         {/* Comparison Section */}
         <section className="py-16 bg-muted/30">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-8">Porownanie planow</h2>
+            <h2 className="text-3xl font-bold text-center mb-8">Porównanie planów</h2>
 
             <div className="max-w-3xl mx-auto">
               <div className="bg-background rounded-xl border overflow-hidden">
@@ -337,7 +337,7 @@ const PricingPage = () => {
                 Korepetycje vs Mentavo AI
               </h2>
               <p className="text-muted-foreground mb-8">
-                Zobacz, ile mozesz zaoszczedzic z Mentavo AI
+                Zobacz, ile możesz zaoszczędzić z Mentavo AI
               </p>
 
               <div className="grid md:grid-cols-2 gap-6">
@@ -347,15 +347,15 @@ const PricingPage = () => {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="flex justify-between">
-                      <span>Cena za godzine</span>
-                      <span className="font-semibold">100-150 PLN</span>
+                      <span>Cena za godzinę</span>
+                      <span className="font-semibold">100–150 PLN</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Godziny miesiecznie (4-6h)</span>
-                      <span className="font-semibold">400-900 PLN</span>
+                      <span>Godziny miesięcznie (4–6h)</span>
+                      <span className="font-semibold">400–900 PLN</span>
                     </div>
                     <div className="flex justify-between text-destructive">
-                      <span>Dostepnosc</span>
+                      <span>Dostępność</span>
                       <span className="font-semibold">Ograniczona</span>
                     </div>
                   </CardContent>
@@ -367,15 +367,15 @@ const PricingPage = () => {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="flex justify-between">
-                      <span>Cena miesieczna</span>
+                      <span>Cena miesięczna</span>
                       <span className="font-semibold text-primary">49,99 PLN</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Oszczednosc miesiecznie</span>
-                      <span className="font-semibold text-green-600">350-850 PLN</span>
+                      <span>Oszczędność miesięcznie</span>
+                      <span className="font-semibold text-green-600">350–850 PLN</span>
                     </div>
                     <div className="flex justify-between text-green-600">
-                      <span>Dostepnosc</span>
+                      <span>Dostępność</span>
                       <span className="font-semibold">24/7</span>
                     </div>
                   </CardContent>
@@ -389,7 +389,7 @@ const PricingPage = () => {
         <section className="py-16 bg-muted/30">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-center mb-8">
-              Czesto zadawane pytania
+              Często zadawane pytania
             </h2>
 
             <div className="max-w-2xl mx-auto">
@@ -417,10 +417,10 @@ const PricingPage = () => {
         <section className="py-16">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold mb-4">
-              Gotowy, aby zaczac?
+              Gotowy, aby zacząć?
             </h2>
             <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-              Dolacz do tysiecy uczniow, ktorzy juz poprawiaja swoje wyniki z matematyki dzieki Mentavo AI.
+              Dołącz do uczniów, którzy już poprawiają swoje wyniki z matematyki dzięki Mentavo AI.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {user ? (
@@ -430,7 +430,7 @@ const PricingPage = () => {
                   className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90"
                   disabled={isLoading || isPaidUser}
                 >
-                  {isPaidUser ? "Masz juz Premium" : "Kup Premium - 49,99 PLN/mies"}
+                  {isPaidUser ? "Masz już Premium" : "Kup Premium — 49,99 PLN/mies."}
                 </Button>
               ) : (
                 <>
@@ -448,7 +448,7 @@ const PricingPage = () => {
               )}
             </div>
             <p className="text-sm text-muted-foreground mt-4">
-              Bez zobowiazan - anuluj kiedy chcesz
+              Bez zobowiązań — anuluj kiedy chcesz
             </p>
           </div>
         </section>
@@ -464,13 +464,13 @@ const PricingPage = () => {
             </div>
             <div className="flex justify-center gap-4 mb-4">
               <Link to="/privacy-policy" className="hover:text-foreground transition-colors">
-                Polityka prywatnosci
+                Polityka prywatności
               </Link>
               <Link to="/terms-of-service" className="hover:text-foreground transition-colors">
                 Regulamin
               </Link>
             </div>
-            <p>© 2024 Mentavo AI. Wszystkie prawa zastrzezone.</p>
+            <p>© 2026 Mentavo AI. Wszystkie prawa zastrzeżone.</p>
           </div>
         </footer>
       </div>

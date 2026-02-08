@@ -410,6 +410,7 @@ export default function AuthPage() {
                       <Input
                         type="email"
                         placeholder="Twój adres email"
+                        aria-label="Adres email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="h-12 text-base"
@@ -418,6 +419,7 @@ export default function AuthPage() {
                       <Input
                         type="password"
                         placeholder="Utwórz hasło (min. 8 znaków)"
+                        aria-label="Hasło"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="h-12 text-base"
@@ -455,6 +457,7 @@ export default function AuthPage() {
                       <Input
                         type="email"
                         placeholder="Twój adres email"
+                        aria-label="Adres email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="h-12 text-base"
@@ -463,6 +466,7 @@ export default function AuthPage() {
                       <Input
                         type="password"
                         placeholder="Hasło"
+                        aria-label="Hasło"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="h-12 text-base"

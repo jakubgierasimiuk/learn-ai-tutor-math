@@ -219,7 +219,7 @@ export default function StudyDashboard() {
       />
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Study & Learn</h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Lekcje</h1>
         <p className="text-muted-foreground">
           Interaktywny tutor matematyki - ucz się w swoim tempie z metodą sokratejską
         </p>
@@ -452,7 +452,7 @@ function SkillCard({
                     <Play className="h-4 w-4 mr-2" />
                     Wznów lekcję
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onResumeLesson(skill.id, skill.name)}>
+                  <DropdownMenuItem onClick={() => onStartLesson(skill.id)}>
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Zacznij od nowa
                   </DropdownMenuItem>

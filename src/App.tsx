@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useReferralV2 } from "@/hooks/useReferralV2";
 import { Navigation } from "@/components/Navigation";
-import HomePage from './pages/HomePage';
+// HomePage removed — dead code, never routed
 import AuthPage from './pages/AuthPage';
 import DashboardPage from './pages/DashboardPage';
 import SubscriptionSuccessPage from './pages/SubscriptionSuccessPage';
@@ -19,14 +19,14 @@ import SmartRecommendations from "./pages/SmartRecommendations";
 import SocialPage from "./pages/SocialPage";
 import GamificationPage from "./pages/GamificationPage";
 import NotFound from "./pages/NotFound";
-import UXTestPage from "./pages/UXTestPage";
+// UXTestPage removed — dev-only tool was accessible to all users
 import ReferralPage from "./pages/ReferralPage";
 import StudyDashboard from "./pages/StudyDashboard";
 import StudyLesson from "./pages/StudyLesson";
 import MaterialsPage from "./pages/MaterialsPage";
-import UXAuditPage from "./pages/UXAuditPage";
+// UXAuditPage removed — dev-only tool was accessible to all users
 import ProgressPage from "./pages/ProgressPage";
-import { RealLearningPage } from "./pages/RealLearningPage";
+// RealLearningPage removed — dead code, route was already commented out
 import BatchImportPage from "./pages/BatchImportPage";
 import AILogsPage from "./pages/AILogsPage";
 import SessionsPage from "./pages/SessionsPage";
@@ -169,9 +169,9 @@ const App = () => (
             <LoggingBootstrap />
             <RouteSeo />
             <ReferralBootstrap />
-            <CurriculumSeeder />
             <Routes>
             <Route path="/" element={<NewLandingPage />} />
+            {/* /app redirects to /dashboard (legacy alias) */}
             <Route path="/app" element={
               <AuthenticatedLayout>
                 <DashboardPage />
@@ -250,16 +250,7 @@ const App = () => (
                 <ReferralPage />
               </AuthenticatedLayout>
             } />
-            <Route path="/ux-test" element={
-              <AuthenticatedLayout>
-                <UXTestPage />
-              </AuthenticatedLayout>
-            } />
-            <Route path="/ux-audit" element={
-              <AuthenticatedLayout>
-                <UXAuditPage />
-              </AuthenticatedLayout>
-            } />
+            {/* /ux-test and /ux-audit removed — dev-only tools, were accessible to all users */}
             <Route path="/postepy" element={
               <AuthenticatedLayout>
                 <ProgressPage />
