@@ -306,15 +306,29 @@ export const useReferralV2 = () => {
     if (!user) {
       throw new Error('User not authenticated');
     }
-    
-    if (!referralCode) {
-      throw new Error('No referral code found - user was not referred');
+
+    // Look up the referral code that was used to refer THIS user (not user's own code)
+    const { data: myReferral, error: lookupError } = await supabase
+      .from('referrals')
+      .select('referral_code')
+      .eq('referred_user_id', user.id)
+      .maybeSingle();
+
+    if (lookupError) {
+      console.error('[Referral] Error looking up referral:', lookupError);
+      throw lookupError;
     }
-    
+
+    if (!myReferral?.referral_code) {
+      // User was not referred by anyone — this is normal, not an error
+      console.log('[Referral] User was not referred by anyone, skipping conversion');
+      return { success: true, message: 'User was not referred' };
+    }
+
     try {
-      const result = await processReferralMutation.mutateAsync({ 
-        referralCode, 
-        action: 'complete_conversion' 
+      const result = await processReferralMutation.mutateAsync({
+        referralCode: myReferral.referral_code,
+        action: 'complete_conversion'
       });
       return result;
     } catch (error) {

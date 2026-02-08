@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.56.0'
+import Stripe from 'https://esm.sh/stripe@14.21.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -55,6 +56,36 @@ Deno.serve(async (req) => {
     }
 
     console.log(`User ${user.id} (${user.email}) requested account deletion`)
+
+    // Cancel Stripe subscription before deleting account
+    const stripeKey = Deno.env.get('STRIPE_SECRET_KEY')
+    if (stripeKey && user.email) {
+      try {
+        const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' })
+        const customers = await stripe.customers.list({ email: user.email, limit: 1 })
+
+        if (customers.data.length > 0) {
+          const customer = customers.data[0]
+          const subscriptions = await stripe.subscriptions.list({
+            customer: customer.id,
+            status: 'active',
+          })
+
+          for (const sub of subscriptions.data) {
+            await stripe.subscriptions.cancel(sub.id)
+            console.log(`Cancelled Stripe subscription ${sub.id} for user ${user.id}`)
+          }
+
+          console.log(`Stripe cleanup done for user ${user.id}: ${subscriptions.data.length} subscription(s) cancelled`)
+        } else {
+          console.log(`No Stripe customer found for user ${user.id}`)
+        }
+      } catch (stripeError) {
+        console.error(`Stripe cancellation error for user ${user.id}:`, stripeError)
+        // Continue with account deletion even if Stripe fails
+        // Better to delete the account and manually handle Stripe than to block deletion
+      }
+    }
 
     // Create admin client for deletion operations
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {

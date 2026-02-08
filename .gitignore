@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Claude Code project docs (may contain tokens/secrets)
+CLAUDE.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

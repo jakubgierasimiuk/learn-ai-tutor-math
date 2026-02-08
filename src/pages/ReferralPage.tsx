@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ReferralDemo } from "@/components/ReferralDemo";
 import { RealTimeCounters } from "@/components/viral/RealTimeCounters";
 import { SMSActivationSection } from "@/components/SMSActivationSection";
 import { TierType } from "@/types";
@@ -159,8 +158,7 @@ export default function ReferralPage() {
         </CardContent>
       </Card>
 
-      {/* Demo Section */}
-      <ReferralDemo />
+      {/* ReferralDemo removed — was modifying real database, visible to all users */}
 
       {/* Rewards Section */}
       <Card>
