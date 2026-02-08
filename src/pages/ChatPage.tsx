@@ -3,7 +3,7 @@ import { Seo } from '@/components/Seo';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useRoles } from '@/hooks/useRoles';
@@ -18,6 +18,19 @@ const ChatPage = () => {
   const [isBugReportOpen, setIsBugReportOpen] = useState(false);
   const { user, signOut } = useAuth();
   const { isAdmin } = useRoles();
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close menu on click outside
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [menuOpen]);
 
   return (
     <>
@@ -34,7 +47,7 @@ const ChatPage = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate('/dashboard')}
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -42,7 +55,7 @@ const ChatPage = () => {
             </Button>
 
             {/* Center - Logo */}
-            <Link to="/app" className="flex items-center gap-2">
+            <Link to="/dashboard" className="flex items-center gap-2">
               <div className="w-8 h-8 bg-gradient-to-br from-[#2DD4BF] to-[#7C3AED] rounded-lg flex items-center justify-center p-1">
                 <img src={mentavoLogoIcon} alt="Mentavo AI" className="w-full h-full" />
               </div>
@@ -63,7 +76,7 @@ const ChatPage = () => {
 
         {/* Dropdown Menu */}
         {menuOpen && (
-          <div className="absolute right-0 top-full w-64 bg-background border border-border rounded-lg shadow-lg m-2 p-2 animate-in fade-in slide-in-from-top-2">
+          <div ref={menuRef} className="absolute right-0 top-full w-64 bg-background border border-border rounded-lg shadow-lg m-2 p-2 animate-in fade-in slide-in-from-top-2">
             <div className="space-y-1">
               {/* NAUKA */}
               <div className="px-2 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wide">

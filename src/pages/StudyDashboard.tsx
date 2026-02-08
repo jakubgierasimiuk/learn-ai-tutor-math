@@ -34,10 +34,7 @@ export default function StudyDashboard() {
   const { data: skillsWithProgress, isLoading } = useQuery({
     queryKey: ['study-dashboard', user?.id],
     queryFn: async () => {
-      console.log('Fetching skills for user:', user?.id);
-      
       if (!user?.id) {
-        console.log('No user ID available');
         return [];
       }
 
@@ -51,7 +48,6 @@ export default function StudyDashboard() {
         .order('department', { ascending: true })
         .order('class_level_text', { ascending: true });
 
-      console.log('Skills fetched:', skills);
       if (skillsError) {
         console.error('Skills error:', skillsError);
         throw skillsError;
@@ -63,7 +59,6 @@ export default function StudyDashboard() {
         .select('*')
         .eq('user_id', user.id);
 
-      console.log('Progress data fetched:', progressData);
       if (progressError) {
         console.error('Progress error:', progressError);
         throw progressError;
@@ -75,7 +70,6 @@ export default function StudyDashboard() {
         progress: progressData.find(p => p.skill_id === skill.id) || null
       }));
       
-      console.log('Final skills with progress:', result);
       return result;
     },
     enabled: !!user?.id,
@@ -83,11 +77,9 @@ export default function StudyDashboard() {
 
   // Calculate department statistics
   const departmentStats: DepartmentProgress[] = React.useMemo(() => {
-    console.log('Calculating department stats for:', skillsWithProgress);
     if (!skillsWithProgress) return [];
 
     const departments = [...new Set(skillsWithProgress.map(s => s.department))];
-    console.log('Found departments:', departments);
     
     const stats = departments.map(dept => {
       const deptSkills = skillsWithProgress.filter(s => s.department === dept);
@@ -103,7 +95,6 @@ export default function StudyDashboard() {
       };
     });
     
-    console.log('Department stats calculated:', stats);
     return stats;
   }, [skillsWithProgress]);
 

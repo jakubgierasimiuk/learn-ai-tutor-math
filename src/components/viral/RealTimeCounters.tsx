@@ -214,7 +214,11 @@ export const RealTimeCounters: React.FC<RealTimeCountersProps> = ({
             <Progress value={nextRewardProgress} className="h-2" />
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
               <span>{stats?.successful_referrals || 0} poleceń</span>
-              <span>Następny cel: 2 polecenia</span>
+              <span>Następny cel: {
+                (stats?.successful_referrals || 0) >= 10 ? 20 :
+                (stats?.successful_referrals || 0) >= 5 ? 10 :
+                (stats?.successful_referrals || 0) >= 2 ? 5 : 2
+              } poleceń</span>
             </div>
           </CardContent>
         </Card>

@@ -23,7 +23,6 @@ export const saveReferralCode = (code: string): void => {
   
   try {
     localStorage.setItem(REFERRAL_CODE_KEY, JSON.stringify(data));
-    console.log('[Referral] Saved referral code to localStorage:', code);
   } catch (error) {
     console.error('[Referral] Failed to save referral code:', error);
   }
@@ -42,12 +41,10 @@ export const getReferralCode = (): string | null => {
     
     // Check if expired (7 days)
     if (now - data.timestamp > REFERRAL_CODE_TTL) {
-      console.log('[Referral] Code expired, clearing');
-      clearReferralCode();
+        clearReferralCode();
       return null;
     }
     
-    console.log('[Referral] Retrieved referral code from localStorage:', data.code);
     return data.code;
   } catch (error) {
     console.error('[Referral] Failed to retrieve referral code:', error);
@@ -61,7 +58,6 @@ export const getReferralCode = (): string | null => {
 export const clearReferralCode = (): void => {
   try {
     localStorage.removeItem(REFERRAL_CODE_KEY);
-    console.log('[Referral] Cleared referral code from localStorage');
   } catch (error) {
     console.error('[Referral] Failed to clear referral code:', error);
   }

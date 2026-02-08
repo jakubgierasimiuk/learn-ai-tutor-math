@@ -54,7 +54,8 @@ export default function SubscriptionSuccessPage() {
     };
 
     processReferralConversion();
-  }, [user, completeConversion]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   // Countdown and redirect
   useEffect(() => {

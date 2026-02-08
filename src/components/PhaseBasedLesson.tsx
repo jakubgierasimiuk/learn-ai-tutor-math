@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { AlertCircle, CheckCircle, Clock, HelpCircle, Lightbulb, Send, Bot, User, Crown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { PhaseProgress } from "./PhaseProgress";
 import { useMathSymbols } from "@/hooks/useMathSymbols";
 import MathSymbolPanel from "@/components/MathSymbolPanel";
 import { useTokenUsage } from "@/hooks/useTokenUsage";
@@ -151,13 +150,14 @@ export function PhaseBasedLesson({
       } = await supabase.auth.getUser();
       if (userError || !userData.user) throw new Error('User not authenticated');
 
-      // Check for existing active session - find last active session for user (regardless of skill)
+      // Check for existing active session for THIS skill
       const {
         data: existingSessions,
         error: sessionError
       } = await supabase.from('study_sessions')
         .select('*')
         .eq('user_id', userData.user.id)
+        .eq('skill_id', skillId)
         .eq('status', 'in_progress')
         .order('started_at', { ascending: false })
         .limit(1);

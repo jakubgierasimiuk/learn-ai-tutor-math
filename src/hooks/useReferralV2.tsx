@@ -43,11 +43,9 @@ interface RewardV2 {
 }
 
 export const useReferralV2 = () => {
-  console.log('[Referral] 🎬 Hook execution started');
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [referralCode, setReferralCode] = useState<string>('');
-  console.log('[Referral] 🎬 Hook state initialized, user:', user?.email || 'anonymous');
 
   // Fetch user's referral stats
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -137,7 +135,6 @@ export const useReferralV2 = () => {
   // Process referral from URL
   const processReferralMutation = useMutation({
     mutationFn: async ({ referralCode, action }: { referralCode: string; action: string }) => {
-      console.log('[Referral] 🚀 Invoking process-referral-v2 with:', { referralCode, action });
       const { data, error } = await supabase.functions.invoke('process-referral-v2', {
         body: { referralCode, action }
       });
@@ -145,16 +142,13 @@ export const useReferralV2 = () => {
         console.error('[Referral] ❌ Edge function error:', error);
         throw error;
       }
-      console.log('[Referral] ✅ Edge function success:', data);
       return data as { success?: boolean };
     },
     retry: 3,
     retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
     onSuccess: (data, variables) => {
-      console.log('[Referral] 🎉 Mutation success, invalidating queries');
       // Clear stored code ONLY after confirmed register success
       if (variables?.action === 'register' && data?.success) {
-        console.log('[Referral] 🧹 Clearing referral code after confirmed success');
         clearReferralCode();
       }
       queryClient.invalidateQueries({ queryKey: ['referral-stats-v2'] });
@@ -207,34 +201,21 @@ export const useReferralV2 = () => {
     fetchReferralCode();
   }, [user]);
 
-  // Save referral code from URL to localStorage (even if not logged in yet)
+  // Save referral code from URL to localStorage and process it
+  // Single useEffect handles both URL detection and post-auth processing
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const refCode = urlParams.get('ref');
-    
+
     // Also check URL hash for ref code
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const hashRefCode = hashParams.get('ref');
-    
-    const codeToProcess = refCode || hashRefCode;
-    
-    console.log('[Referral] 🔍 URL Check - user:', user?.email || 'none', 'refCode:', codeToProcess, 'localStorage:', getReferralCode());
-    
-    if (codeToProcess) {
-      console.log('[Referral] 📥 Found ref code in URL:', codeToProcess);
-      saveReferralCode(codeToProcess);
-      console.log('[Referral] 💾 Saved to localStorage, value:', getReferralCode());
 
-      // If user is already logged in, process immediately with retry
-      if (user) {
-        console.log('[Referral] 👤 User is logged in, processing immediately with short delay');
-        setTimeout(() => {
-          processReferralMutation.mutate({ referralCode: codeToProcess, action: 'register' });
-        }, 500);
-      } else {
-        console.log('[Referral] 🔒 User not logged in, will process after auth');
-      }
-      
+    const codeFromUrl = refCode || hashRefCode;
+
+    if (codeFromUrl) {
+      saveReferralCode(codeFromUrl);
+
       // Clean up URL (but keep code in localStorage for post-auth processing)
       const url = new URL(window.location.href);
       url.searchParams.delete('ref');
@@ -243,48 +224,33 @@ export const useReferralV2 = () => {
       }
       window.history.replaceState({}, '', url.toString());
     }
-  }, [user]);
 
-  // Process referral after user registers/logs in
-  useEffect(() => {
-    console.log('[Referral] 🔐 Auth Check - user:', user?.email || 'none');
-    
-    if (!user) {
-      console.log('[Referral] ❌ No user, skipping');
-      return;
-    }
-    
+    // Process referral code (from URL or stored) if user is logged in
+    if (!user) return;
+
     const storedRefCode = getReferralCode();
-    console.log('[Referral] 📦 localStorage check:', storedRefCode);
-    
-    if (storedRefCode) {
-      console.log('[Referral] 🎯 Processing stored code:', storedRefCode);
-      
-      // Check if user already has a referral record to avoid duplicate processing
-      supabase
-        .from('referrals')
-        .select('id')
-        .eq('referred_user_id', user.id)
-        .maybeSingle()
-        .then(({ data, error }) => {
-          if (data) {
-            console.log('[Referral] ✅ User already has referral, clearing localStorage');
-            clearReferralCode();
-            return;
-          }
-          
-          // Add delay to ensure auth is fully set up
-          setTimeout(() => {
-            console.log('[Referral] ⏱️ Delayed processing - calling edge function');
-            processReferralMutation.mutate({ 
-              referralCode: storedRefCode, 
-              action: 'register' 
-            });
-          }, 1000); // 1 second delay to ensure auth token is ready
-        });
-    } else {
-      console.log('[Referral] ℹ️ No stored code found');
-    }
+    if (!storedRefCode) return;
+
+    // Check if user already has a referral record to avoid duplicate processing
+    supabase
+      .from('referrals')
+      .select('id')
+      .eq('referred_user_id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          clearReferralCode();
+          return;
+        }
+
+        // Delay to ensure auth token is ready
+        setTimeout(() => {
+          processReferralMutation.mutate({
+            referralCode: storedRefCode,
+            action: 'register'
+          });
+        }, 1000);
+      });
   }, [user]);
 
   // Check activation status
@@ -366,7 +332,7 @@ export const useReferralV2 = () => {
       try {
         await navigator.share({
           title: 'Dołącz do nauki ze mną!',
-          text: 'Rozpocznij naukę matematyki z mentavo.ai i otrzymaj 7 dni za darmo!',
+          text: 'Rozpocznij naukę matematyki z mentavo.pl i otrzymaj 7 dni za darmo!',
           url: url,
         });
         return true;

@@ -308,7 +308,7 @@ const AccountPage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Crown className="h-5 w-5 text-primary" />
-                  Founding Member Benefits
+                  Korzyści Founding Member
                 </CardTitle>
                 <CardDescription>
                   Jesteś częścią ekskluzywnej grupy 100 założycieli

@@ -232,7 +232,7 @@ export const UpgradePrompts = ({ context = 'chat', compact = false }: UpgradePro
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground mb-4">
-                  Dołącz do 500+ uczniów, którzy już wybrali Premium! W tym tygodniu 23 uczniów wybrało Premium.
+                  Odblokuj pełny potencjał nauki z Mentavo AI Premium.
                 </p>
               </div>
               <div className="text-center ml-4">

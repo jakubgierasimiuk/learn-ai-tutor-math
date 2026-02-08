@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,7 +42,6 @@ const NewLandingPage = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const refCode = urlParams.get("ref");
     if (refCode) {
-      console.log("[NewLandingPage] Detected referral code, saving:", refCode);
       saveReferralCode(refCode);
     }
   }, []);
@@ -727,15 +726,15 @@ const NewLandingPage = () => {
               </div>
 
               <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-white/80 text-xs sm:text-sm">
-                <a href="/pricing" className="hover:text-white transition-colors">
+                <Link to="/pricing" className="hover:text-white transition-colors">
                   Cennik
-                </a>
-                <a href="/privacy-policy" className="hover:text-white transition-colors">
+                </Link>
+                <Link to="/privacy-policy" className="hover:text-white transition-colors">
                   Polityka Prywatności
-                </a>
-                <a href="/terms-of-service" className="hover:text-white transition-colors">
+                </Link>
+                <Link to="/terms-of-service" className="hover:text-white transition-colors">
                   Regulamin
-                </a>
+                </Link>
                 <a href="mailto:kontakt@mentavo.pl" className="hover:text-white transition-colors">
                   Kontakt
                 </a>
